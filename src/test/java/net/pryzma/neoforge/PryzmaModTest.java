@@ -1347,7 +1347,7 @@ class PryzmaModTest {
     }
 
     @Test
-    void guiPerformanceSettingsHasNineOptionsAndNoDynamicUpdates() throws Exception {
+    void guiPerformanceSettingsHasTenOptionsWithFastPaintingsAndNoDynamicUpdates() throws Exception {
         byte[] bytes = readRequiredResource("/srg/net/pryzma/gui/GuiPerformanceSettingsPryzma.class");
         org.objectweb.asm.ClassReader cr = new org.objectweb.asm.ClassReader(bytes);
         org.objectweb.asm.tree.ClassNode cn = new org.objectweb.asm.tree.ClassNode();
@@ -1362,15 +1362,16 @@ class PryzmaModTest {
         }
         assertNotNull(initMethod, "GuiPerformanceSettingsPryzma.init missing");
 
-        boolean hasArraySize9 = false;
+        boolean hasArraySize10 = false;
         boolean hasDynamicUpdates = false;
         boolean hasLazyLoading = false;
         boolean hasPrioritizeUpdates = false;
+        boolean hasFastPaintings = false;
 
         for (org.objectweb.asm.tree.AbstractInsnNode insn : initMethod.instructions.toArray()) {
             if (insn.getOpcode() == org.objectweb.asm.Opcodes.BIPUSH
-                    && ((org.objectweb.asm.tree.IntInsnNode) insn).operand == 9) {
-                hasArraySize9 = true;
+                    && ((org.objectweb.asm.tree.IntInsnNode) insn).operand == 10) {
+                hasArraySize10 = true;
             }
             if (insn instanceof org.objectweb.asm.tree.FieldInsnNode fn) {
                 if ("CHUNK_UPDATES_DYNAMIC".equals(fn.name)) {
@@ -1382,17 +1383,141 @@ class PryzmaModTest {
                 if ("PRIORITIZE_CHUNK_UPDATES".equals(fn.name)) {
                     hasPrioritizeUpdates = true;
                 }
+                if ("FAST_PAINTINGS".equals(fn.name)) {
+                    hasFastPaintings = true;
+                }
             }
         }
 
-        assertTrue(hasArraySize9, "Option array allocation size must be 9");
+        assertTrue(hasArraySize10, "Option array allocation size must be 10");
         assertFalse(hasDynamicUpdates, "CHUNK_UPDATES_DYNAMIC must not be present in GUI array");
         assertTrue(hasLazyLoading, "LAZY_CHUNK_LOADING must be retained in GUI array");
         assertTrue(hasPrioritizeUpdates, "PRIORITIZE_CHUNK_UPDATES must be retained in GUI array");
+        assertTrue(hasFastPaintings, "FAST_PAINTINGS must be present in GUI array");
 
         org.objectweb.asm.tree.analysis.Analyzer<org.objectweb.asm.tree.analysis.BasicValue> analyzer =
                 new org.objectweb.asm.tree.analysis.Analyzer<>(new org.objectweb.asm.tree.analysis.BasicVerifier());
         analyzer.analyze(cn.name, initMethod);
+    }
+
+    @Test
+    void fastPaintingsOptionAndConfigIntegrity() throws Exception {
+        byte[] optBytes = readRequiredResource("/srg/net/pryzma/config/Option.class");
+        String optLatin = new String(optBytes, java.nio.charset.StandardCharsets.ISO_8859_1);
+        assertTrue(optLatin.contains("FAST_PAINTINGS"), "Option.FAST_PAINTINGS field must be present");
+
+        byte[] optionsBytes = readRequiredResource("/srg/net/minecraft/client/Options.class");
+        String optionsLatin = new String(optionsBytes, java.nio.charset.StandardCharsets.ISO_8859_1);
+        assertTrue(optionsLatin.contains("prFastPaintings"), "Options.prFastPaintings field must be present");
+
+        byte[] configBytes = readRequiredResource("/srg/net/pryzma/Config.class");
+        String configLatin = new String(configBytes, java.nio.charset.StandardCharsets.ISO_8859_1);
+        assertTrue(configLatin.contains("isFastPaintings"), "Config.isFastPaintings method must be present");
+    }
+
+    @Test
+    void chunkUpdatesDynamicPurgedFromOptionsAndOptionAndConfigReturnsFalse() throws Exception {
+        byte[] optBytes = readRequiredResource("/srg/net/pryzma/config/Option.class");
+        var crOpt = new org.objectweb.asm.ClassReader(optBytes);
+        var optNode = new org.objectweb.asm.tree.ClassNode();
+        crOpt.accept(optNode, 0);
+        assertFalse(optNode.fields.stream().anyMatch(f -> "CHUNK_UPDATES_DYNAMIC".equals(f.name)),
+                "Option.CHUNK_UPDATES_DYNAMIC field must be purged");
+
+        byte[] optionsBytes = readRequiredResource("/srg/net/minecraft/client/Options.class");
+        var crOptions = new org.objectweb.asm.ClassReader(optionsBytes);
+        var optionsNode = new org.objectweb.asm.tree.ClassNode();
+        crOptions.accept(optionsNode, 0);
+        assertFalse(optionsNode.fields.stream().anyMatch(f -> "prChunkUpdatesDynamic".equals(f.name)),
+                "Options.prChunkUpdatesDynamic field must be purged");
+
+        for (var mn : optionsNode.methods) {
+            for (var insn : mn.instructions.toArray()) {
+                if (insn instanceof org.objectweb.asm.tree.FieldInsnNode fn) {
+                    assertFalse("prChunkUpdatesDynamic".equals(fn.name),
+                            "No method in Options may access prChunkUpdatesDynamic (" + mn.name + ")");
+                    assertFalse("CHUNK_UPDATES_DYNAMIC".equals(fn.name),
+                            "No method in Options may access CHUNK_UPDATES_DYNAMIC (" + mn.name + ")");
+                }
+            }
+        }
+
+        byte[] configBytes = readRequiredResource("/srg/net/pryzma/Config.class");
+        var crConfig = new org.objectweb.asm.ClassReader(configBytes);
+        var configNode = new org.objectweb.asm.tree.ClassNode();
+        crConfig.accept(configNode, 0);
+        var isDyn = configNode.methods.stream()
+                .filter(m -> "isDynamicUpdates".equals(m.name) && "()Z".equals(m.desc))
+                .findFirst().orElseThrow();
+        boolean returnsFalseConstant = false;
+        for (var insn : isDyn.instructions.toArray()) {
+            if (insn.getOpcode() == org.objectweb.asm.Opcodes.ICONST_0) {
+                returnsFalseConstant = true;
+            }
+            if (insn instanceof org.objectweb.asm.tree.FieldInsnNode fn) {
+                assertFalse("prChunkUpdatesDynamic".equals(fn.name),
+                        "Config.isDynamicUpdates must not access prChunkUpdatesDynamic");
+            }
+        }
+        assertTrue(returnsFalseConstant, "Config.isDynamicUpdates must return false constant");
+    }
+
+    @Test
+    void paintingRendererTransformerInjectsFastPaintingCheck() {
+        var node = new org.objectweb.asm.tree.ClassNode();
+        node.name = "net/minecraft/client/renderer/entity/PaintingRenderer";
+        node.superName = "net/minecraft/client/renderer/entity/EntityRenderer";
+        node.version = org.objectweb.asm.Opcodes.V21;
+
+        var m = new org.objectweb.asm.tree.MethodNode(
+                org.objectweb.asm.Opcodes.ACC_PRIVATE,
+                "renderPainting",
+                "(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/entity/decoration/Painting;IILnet/minecraft/client/renderer/texture/TextureAtlasSprite;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;)V",
+                null,
+                null
+        );
+        m.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.RETURN));
+        m.maxStack = 7;
+        m.maxLocals = 8;
+        node.methods.add(m);
+
+        assertTrue(PaintingRendererTransformer.inject(node));
+        assertFalse(PaintingRendererTransformer.inject(node));
+        assertVerifies(node);
+
+        boolean callsHelper = false;
+        for (var insn : m.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.MethodInsnNode minsn
+                    && "net/pryzma/util/FastPaintingHelper".equals(minsn.owner)
+                    && "renderPainting".equals(minsn.name)) {
+                callsHelper = true;
+                break;
+            }
+        }
+        assertTrue(callsHelper, "PaintingRenderer.renderPainting must call FastPaintingHelper.renderPainting");
+    }
+
+    @Test
+    void langFilesIntegrityAndFastPaintingsPresent() throws Exception {
+        java.nio.file.Path langDir = java.nio.file.Path.of("src/main/resources/assets/minecraft/optifine/lang");
+        assertTrue(java.nio.file.Files.isDirectory(langDir), "Lang directory must exist");
+
+        try (var stream = java.nio.file.Files.list(langDir)) {
+            List<java.nio.file.Path> langFiles = stream
+                    .filter(p -> p.getFileName().toString().endsWith(".lang"))
+                    .toList();
+            assertEquals(40, langFiles.size(), "All 40 OptiFine lang files must be present");
+
+            for (java.nio.file.Path p : langFiles) {
+                String content = java.nio.file.Files.readString(p, java.nio.charset.StandardCharsets.UTF_8);
+                assertTrue(content.contains("pr.options.FAST_PAINTINGS="),
+                        "Missing pr.options.FAST_PAINTINGS in " + p.getFileName());
+                assertTrue(content.contains("pr.options.FAST_PAINTINGS.tooltip.1="),
+                        "Missing tooltip.1 in " + p.getFileName());
+                assertTrue(content.contains("pr.options.FAST_PAINTINGS.tooltip.5="),
+                        "Missing tooltip.5 in " + p.getFileName());
+            }
+        }
     }
 
     @Test
