@@ -33,8 +33,6 @@ pr.message.af.shaders2=Отключите шейдеры, чтобы включ�
 pr.message.fr.shaders1=Быстрый рендер несовместим с шейдерами.
 pr.message.fr.shaders2=Отключите шейдеры, чтобы включить этот параметр.
 
-pr.message.an.shaders1=Анаглиф несовместим с шейдерами.
-pr.message.an.shaders2=Отключите шейдеры, чтобы включить этот параметр.
 
 pr.message.shaders.aa1=Сглаживание несовместимо с шейдерами.
 pr.message.shaders.aa2=Переключите «Качество» → «Сглаживание» на «Выкл» и перезапустите игру.
@@ -48,8 +46,6 @@ pr.message.shaders.fr2=Переключите «Производительнос
 pr.message.shaders.gf1=Шейдеры несовместимы с потрясающей графикой.
 pr.message.shaders.gf2=Используйте быструю или детальную графику.
 
-pr.message.shaders.an1=Шейдеры несовместимы с анаглифом.
-pr.message.shaders.an2=Переключите «Прочее» → «Анаглиф» на «Выкл».
 
 pr.message.shaders.nv1=Этим шейдерам требуется более новая версия Pryzma: %s
 pr.message.shaders.nv2=Вы действительно хотите их загрузить?
@@ -158,10 +154,6 @@ options.guiScale.tooltip.5=Нечётные значения несовмест�
 options.guiScale.tooltip.6=Производительность может повыситься при уменьшении
 options.guiScale.tooltip.7=значения параметра.
 
-options.vbo=Использовать VBO
-options.vbo.tooltip.1=Vertex Buffer Objects
-options.vbo.tooltip.2=Использует альтернативную модель рендеринга,
-options.vbo.tooltip.3=которая обычно быстрее стандартной на 5–10%%.
 
 options.gamma.tooltip.1=Яркость тёмных объектов
 options.gamma.tooltip.2=  §oТускло§r - стандартная яркость
@@ -170,10 +162,6 @@ options.gamma.tooltip.4=  Ярко - максимальная яркость
 options.gamma.tooltip.5=Не изменяет яркость полностью чёрных объектов.
 options.gamma.tooltip.6=
 
-options.anaglyph.tooltip.1=Анаглиф
-options.anaglyph.tooltip.2=Стереоизображение, использующее различные цвета
-options.anaglyph.tooltip.3=для каждого глаза.
-options.anaglyph.tooltip.4=Для просмотра требуются анаглифические очки.
 
 options.attackIndicator.tooltip.1=Позиция индикатора атаки
 options.attackIndicator.tooltip.2=  Прицел - под прицелом
@@ -225,17 +213,6 @@ pr.options.FOG_START.tooltip.2=  0.2 - начало тумана рядом с �
 pr.options.FOG_START.tooltip.3=  0.8 - начало тумана вдали от игрока
 pr.options.FOG_START.tooltip.4=Обычно не влияет на производительность.
 
-pr.options.CHUNK_LOADING=Загрузка чанков
-pr.options.CHUNK_LOADING.tooltip.1=Загрузка чанков
-pr.options.CHUNK_LOADING.tooltip.2=  §oПо умолчанию§r - нестабильный FPS при загрузке чанков
-pr.options.CHUNK_LOADING.tooltip.3=  Плавная - стабильный FPS
-pr.options.CHUNK_LOADING.tooltip.4=  Многоядерная - стабильный FPS, загрузка мира в 3 раза быстрее
-pr.options.CHUNK_LOADING.tooltip.5=Плавная и многоядерная загрузки убирают подвисания и лаги,
-pr.options.CHUNK_LOADING.tooltip.6=вызванные загрузкой чанков.
-pr.options.CHUNK_LOADING.tooltip.7=Многоядерная загрузка способна ускорить загрузку мира в 3 раза
-pr.options.CHUNK_LOADING.tooltip.8=и увеличить FPS, используя второе ядро процессора.
-pr.options.chunkLoading.smooth=Плавная
-pr.options.chunkLoading.multiCore=Многоядерная
 
 pr.options.shaders=Шейдеры...
 pr.options.shadersTitle=Шейдеры
@@ -398,10 +375,6 @@ pr.options.AF_LEVEL.tooltip.3= 2–16 - улучшенная детализац�
 pr.options.AF_LEVEL.tooltip.4=Восстанавливает детали в MIP-текстурах.
 pr.options.AF_LEVEL.tooltip.5=Может существенно понизить производительность.
 
-pr.options.CLEAR_WATER=Очищенная вода
-pr.options.CLEAR_WATER.tooltip.1=Очищенная вода
-pr.options.CLEAR_WATER.tooltip.2=  Вкл - чистая, прозрачная вода
-pr.options.CLEAR_WATER.tooltip.3=  §oВыкл§r - стандартная вода
 
 pr.options.RANDOM_ENTITIES=Случайные сущности
 pr.options.RANDOM_ENTITIES.tooltip.1=Случайные текстуры сущностей
@@ -564,14 +537,6 @@ pr.options.SHOW_CAPES.tooltip.1=Плащи Optifine
 pr.options.SHOW_CAPES.tooltip.2=  §oВкл§r - отображать плащи Optifine с приоритетом над стандартными (по умолчанию)
 pr.options.SHOW_CAPES.tooltip.3=  Выкл - не отображать плащи Optifine (стандартные плащи Mojang продолжат отображаться)
 
-pr.options.TRANSLUCENT_BLOCKS=Прозрачность
-pr.options.TRANSLUCENT_BLOCKS.tooltip.1=Прозрачность блоков
-pr.options.TRANSLUCENT_BLOCKS.tooltip.2=  §oПо умолчанию§r - согласно настройкам графики
-pr.options.TRANSLUCENT_BLOCKS.tooltip.3=  Детально - правильное смешивание (медленнее)
-pr.options.TRANSLUCENT_BLOCKS.tooltip.4=  Быстро - быстрое смешивание (быстрее)
-pr.options.TRANSLUCENT_BLOCKS.tooltip.5=Управляет смешиванием цветов прозрачных блоков
-pr.options.TRANSLUCENT_BLOCKS.tooltip.6=разного цвета (стекло, вода, лёд), размещённых друг
-pr.options.TRANSLUCENT_BLOCKS.tooltip.7=за другом с воздухом между ними.
 
 pr.options.HELD_ITEM_TOOLTIPS=Подсказка о предмете
 pr.options.HELD_ITEM_TOOLTIPS.tooltip.1=Всплывающая подсказка об удерживаемом предмете
@@ -586,11 +551,6 @@ pr.options.ADVANCED_TOOLTIPS.tooltip.4=Показывает дополнител
 pr.options.ADVANCED_TOOLTIPS.tooltip.5=и о параметрах шейдеров (ID, файл и т. д.).
 pr.options.ADVANCED_TOOLTIPS.tooltip.6=
 
-pr.options.DROPPED_ITEMS=Предметы
-pr.options.DROPPED_ITEMS.tooltip.1=Отображение предметов в мире
-pr.options.DROPPED_ITEMS.tooltip.2=  §oПо умолчанию§r - согласно настройкам графики
-pr.options.DROPPED_ITEMS.tooltip.3=  Быстро - двухмерные предметы (быстрее)
-pr.options.DROPPED_ITEMS.tooltip.4=  Детально - трёхмерные предметы (медленнее)
 
 options.entityShadows.tooltip.1=Тени сущностей
 options.entityShadows.tooltip.2=  Вкл - тени сущностей видны
@@ -672,12 +632,6 @@ pr.options.CHUNK_UPDATES.tooltip.4= 5 - максимальный бюджет п
 pr.options.CHUNK_UPDATES.tooltip.5=Управляет лимитом задач фоновых потоков сборки чанков.
 pr.options.CHUNK_UPDATES.tooltip.6=Высокие значения быстрее грузят мир, нагружая больше ядер ЦП.
 
-pr.options.CHUNK_UPDATES_DYNAMIC=Динамические чанки
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.1=Динамическое обновление чанков
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.2= §oВыкл§r - стандартное обновление чанков
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.3= Вкл - динамическое обновление чанков
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.4=Когда игрок стоит на месте, чанки обновляются чаще
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.5=для того, чтобы мир загрузился быстрее.
 
 pr.options.LAZY_CHUNK_LOADING=Ленивая загрузка чанков
 pr.options.LAZY_CHUNK_LOADING.tooltip.1=Ленивая загрузка чанков
@@ -779,14 +733,6 @@ options.fullscreen.resolution.tooltip.3=  ШxВ - выбранное разре�
 options.fullscreen.resolution.tooltip.4=Выбранное разрешение используется в полноэкранном
 options.fullscreen.resolution.tooltip.5=режиме (F11). Чем меньше значение, тем быстрее.
 
-pr.options.SHOW_FPS=Отображение FPS
-pr.options.SHOW_FPS.tooltip.1=Отображение компактной информации о рендере
-pr.options.SHOW_FPS.tooltip.2=  #/# fps - среднее/минимальное число FPS
-pr.options.SHOW_FPS.tooltip.3=  C: - отображаемые чанки
-pr.options.SHOW_FPS.tooltip.4=  E: - отображаемые сущности + блоки-сущности
-pr.options.SHOW_FPS.tooltip.5=  U: - обновление чанка
-pr.options.SHOW_FPS.tooltip.6=Отображает компактную информацию о рендере, когда
-pr.options.SHOW_FPS.tooltip.7=отключён экран отладки.
 
 pr.options.save.45s=45 секунд
 pr.options.save.90s=90 секунд
@@ -818,15 +764,6 @@ pr.options.SHOW_GL_ERRORS.tooltip.5=В отключённом состоянии
 pr.options.SHOW_GL_ERRORS.tooltip.6=записываться в журнал и могут значительно понизить
 pr.options.SHOW_GL_ERRORS.tooltip.7=частоту кадров.
 
-pr.options.TELEMETRY=Телеметрия
-pr.options.TELEMETRY.tooltip.1=Отправляет телеметрические данные в Mojang Studios
-pr.options.TELEMETRY.tooltip.2=  Вкл. - полная телеметрия (по умолчанию)
-pr.options.TELEMETRY.tooltip.3=  Анон. - анонимная телеметрия
-pr.options.TELEMETRY.tooltip.4=  Выкл. - телеметрия отключена
-pr.options.TELEMETRY.tooltip.5=Полная телеметрия отправляет UUID пользователя,
-pr.options.TELEMETRY.tooltip.6=позволяющий отслеживать пользователя с разных устройств.
-pr.options.TELEMETRY.tooltip.7=Анонимная телеметрия не отправляет ни данные пользователя,
-pr.options.TELEMETRY.tooltip.8=ни данные клиента игры.
 
 # Quick Info
 pr.options.QUICK_INFO=Краткая информация

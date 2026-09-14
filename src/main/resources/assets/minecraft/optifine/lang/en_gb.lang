@@ -1,6 +1,5 @@
 # British English overrides for Pryzma
 
-options.anaglyph.tooltip.2=Enables a stereoscopic 3D effect using different colours
 options.biomeBlendRadius.tooltip.1=Smooths the colour transition between biomes
 pr.options.AA_LEVEL.tooltip.5=sharp colour transitions.
 pr.options.AF_LEVEL=Anisotropic Filtering
@@ -64,10 +63,6 @@ pr.options.SWAMP_COLORS.tooltip.1=Swamp Colours
 pr.options.SWAMP_COLORS.tooltip.2=ON - use swamp colours (default), slower
 pr.options.SWAMP_COLORS.tooltip.3=OFF - do not use swamp colours, faster
 pr.options.SWAMP_COLORS.tooltip.4=The swamp colours affect grass, leaves, vines and water.
-pr.options.TRANSLUCENT_BLOCKS.tooltip.3=Fancy - correct colour blending (slower)
-pr.options.TRANSLUCENT_BLOCKS.tooltip.4=Fast - fast colour blending (faster)
-pr.options.TRANSLUCENT_BLOCKS.tooltip.5=Controls the colour blending of translucent blocks
-pr.options.TRANSLUCENT_BLOCKS.tooltip.6=with different colour (stained glass, water, ice)
 pr.options.shaders.OLD_HAND_LIGHT.tooltip.6=recognise light emitting items in the main hand
 pr.options.shaders.SHADOW_RES_MUL.tooltip.7=Lower values = inexact, coarser shadows.
 

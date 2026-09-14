@@ -27,8 +27,6 @@ pr.message.af.shaders2=Please disable Shaders to enable this option.
 pr.message.fr.shaders1=Fast Render is not compatible with Shaders.
 pr.message.fr.shaders2=Please disable Shaders to enable this option.
 
-pr.message.an.shaders1=3D Anaglyph is not compatible with Shaders.
-pr.message.an.shaders2=Please disable Shaders to enable this option.
 
 pr.message.shaders.aa1=Shaders are not compatible with Antialiasing.
 pr.message.shaders.aa2=Please set Quality -> Antialiasing to OFF and restart the game.
@@ -42,8 +40,6 @@ pr.message.shaders.fr2=Please set Performance -> Fast Render to OFF.
 pr.message.shaders.gf1=Shaders are not compatible with Fabulous Graphics.
 pr.message.shaders.gf2=Please set Graphics to Fast or Fancy.
 
-pr.message.shaders.an1=Shaders are not compatible with 3D Anaglyph.
-pr.message.shaders.an2=Please set Other -> 3D Anaglyph to OFF.
 
 pr.message.shaders.nv1=This shader pack requires a newer Pryzma version: %s
 pr.message.shaders.nv2=Are you sure you want to continue?
@@ -150,10 +146,6 @@ options.guiScale.tooltip.4=  4x to 10x - available on 4K displays
 options.guiScale.tooltip.5=Odd values (1x, 3x, 5x ...) are not compatible with Unicode.
 options.guiScale.tooltip.6=A smaller GUI may be faster.
 
-options.vbo=Use VBOs
-options.vbo.tooltip.1=Vertex Buffer Objects
-options.vbo.tooltip.2=Uses an alternative rendering model which is usually
-options.vbo.tooltip.3=faster (5-10%%) than the default rendering.
 
 options.gamma.tooltip.1=Changes the brightness of darker objects.
 options.gamma.tooltip.2=  Moody - standard brightness
@@ -162,10 +154,6 @@ options.gamma.tooltip.4=  Bright - maximum brightness for darker objects
 options.gamma.tooltip.5=This option does not change the brightness of 
 options.gamma.tooltip.6=fully black objects.
 
-options.anaglyph.tooltip.1=3D Anaglyph
-options.anaglyph.tooltip.2=Enables a stereoscopic 3D effect using different colors
-options.anaglyph.tooltip.3=for each eye.
-options.anaglyph.tooltip.4=Requires red-cyan glasses for proper viewing.
 
 options.attackIndicator.tooltip.1=Configures the position of the attack indicator
 options.attackIndicator.tooltip.2=  Crosshair - under the crosshair
@@ -217,17 +205,6 @@ pr.options.FOG_START.tooltip.2=  0.2 - the fog starts near the player
 pr.options.FOG_START.tooltip.3=  0.8 - the fog starts far from the player
 pr.options.FOG_START.tooltip.4=This option usually does not affect the performance.
 
-pr.options.CHUNK_LOADING=Chunk Loading
-pr.options.CHUNK_LOADING.tooltip.1=Chunk Loading
-pr.options.CHUNK_LOADING.tooltip.2=  Default - unstable FPS when loading chunks
-pr.options.CHUNK_LOADING.tooltip.3=  Smooth - stable FPS
-pr.options.CHUNK_LOADING.tooltip.4=  Multi-Core - stable FPS, 3x faster world loading
-pr.options.CHUNK_LOADING.tooltip.5=Smooth and Multi-Core remove the stuttering and 
-pr.options.CHUNK_LOADING.tooltip.6=freezes caused by chunk loading.
-pr.options.CHUNK_LOADING.tooltip.7=Multi-Core can speed up 3x the world loading and
-pr.options.CHUNK_LOADING.tooltip.8=increase FPS by using a second CPU core.
-pr.options.chunkLoading.smooth=Smooth
-pr.options.chunkLoading.multiCore=Multi-Core
 
 pr.options.shaders=Shaders...
 pr.options.shadersTitle=Shaders
@@ -390,10 +367,6 @@ pr.options.AF_LEVEL.tooltip.4=The Anisotropic Filtering restores details in
 pr.options.AF_LEVEL.tooltip.5=mipmapped textures.
 pr.options.AF_LEVEL.tooltip.6=When enabled it may substantially decrease the FPS.
 
-pr.options.CLEAR_WATER=Clear Water
-pr.options.CLEAR_WATER.tooltip.1=Clear Water
-pr.options.CLEAR_WATER.tooltip.2=  ON - clear, transparent water
-pr.options.CLEAR_WATER.tooltip.3=  OFF - default water
 
 pr.options.RANDOM_ENTITIES=Random Entities
 pr.options.RANDOM_ENTITIES.tooltip.1=Random Entities
@@ -557,14 +530,6 @@ pr.options.SHOW_CAPES.tooltip.1=Optifine Capes
 pr.options.SHOW_CAPES.tooltip.2=  ON - show Optifine capes (priority over vanilla capes)
 pr.options.SHOW_CAPES.tooltip.3=  OFF - do not show Optifine capes (vanilla capes still show)
 
-pr.options.TRANSLUCENT_BLOCKS=Translucent Blocks
-pr.options.TRANSLUCENT_BLOCKS.tooltip.1=Translucent Blocks
-pr.options.TRANSLUCENT_BLOCKS.tooltip.2=  Default - as set by setting Graphics
-pr.options.TRANSLUCENT_BLOCKS.tooltip.3=  Fancy - correct color blending (slower)
-pr.options.TRANSLUCENT_BLOCKS.tooltip.4=  Fast - fast color blending (faster)
-pr.options.TRANSLUCENT_BLOCKS.tooltip.5=Controls the color blending of translucent blocks
-pr.options.TRANSLUCENT_BLOCKS.tooltip.6=with different colors (stained glass, water, ice)
-pr.options.TRANSLUCENT_BLOCKS.tooltip.7=when placed behind each other with air between them.
 
 pr.options.HELD_ITEM_TOOLTIPS=Held Item Tooltips
 pr.options.HELD_ITEM_TOOLTIPS.tooltip.1=Held item tooltips
@@ -579,11 +544,6 @@ pr.options.ADVANCED_TOOLTIPS.tooltip.4=Advanced tooltips show extended informati
 pr.options.ADVANCED_TOOLTIPS.tooltip.5=items (id, durability) and for shader options
 pr.options.ADVANCED_TOOLTIPS.tooltip.6=(id, source, default value).
 
-pr.options.DROPPED_ITEMS=Dropped Items
-pr.options.DROPPED_ITEMS.tooltip.1=Dropped Items
-pr.options.DROPPED_ITEMS.tooltip.2=  Default - as set by setting Graphics
-pr.options.DROPPED_ITEMS.tooltip.3=  Fast - 2D dropped items (faster)
-pr.options.DROPPED_ITEMS.tooltip.4=  Fancy - 3D dropped items (slower)
 
 options.entityShadows.tooltip.1=Entity Shadows
 options.entityShadows.tooltip.2=  ON - show entity shadows
@@ -664,12 +624,6 @@ pr.options.CHUNK_UPDATES.tooltip.4= 5 - unlimited worker task budget (fastest lo
 pr.options.CHUNK_UPDATES.tooltip.5=Controls task throughput of background chunk worker threads.
 pr.options.CHUNK_UPDATES.tooltip.6=Higher values load terrain faster using more CPU cores.
 
-pr.options.CHUNK_UPDATES_DYNAMIC=Dynamic Updates
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.1=Dynamic chunk updates
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.2= OFF - standard chunk updates per frame (default)
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.3= ON - more updates while the player is standing still
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.4=Dynamic updates force more chunk updates while
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.5=the player is standing still to load the world faster.
 
 pr.options.LAZY_CHUNK_LOADING=Lazy Chunk Loading
 pr.options.LAZY_CHUNK_LOADING.tooltip.1=Lazy Chunk Loading
@@ -770,14 +724,6 @@ options.fullscreen.resolution.tooltip.3=  WxH - use custom screen resolution, ma
 options.fullscreen.resolution.tooltip.4=The selected resolution is used in fullscreen mode (F11).
 options.fullscreen.resolution.tooltip.5=Lower resolutions should generally be faster.
 
-pr.options.SHOW_FPS=Show FPS
-pr.options.SHOW_FPS.tooltip.1=Shows compact FPS and render information.
-pr.options.SHOW_FPS.tooltip.2=  Fps - average/minimum
-pr.options.SHOW_FPS.tooltip.3=  C: - chunk renderers
-pr.options.SHOW_FPS.tooltip.4=  E: - rendered entities + block entities
-pr.options.SHOW_FPS.tooltip.5=  U: - chunk updates
-pr.options.SHOW_FPS.tooltip.6=The compact FPS information is only shown when the
-pr.options.SHOW_FPS.tooltip.7=debug screen is not visible.
 
 pr.options.save.45s=45s
 pr.options.save.90s=90s
@@ -809,15 +755,6 @@ pr.options.SHOW_GL_ERRORS.tooltip.4=the errors can't be fixed.
 pr.options.SHOW_GL_ERRORS.tooltip.5=When disabled the errors are still logged in the 
 pr.options.SHOW_GL_ERRORS.tooltip.6=error log and they may still cause a significant FPS drop. 
 
-pr.options.TELEMETRY=Telemetry
-pr.options.TELEMETRY.tooltip.1=Send telemetry data to Mojang
-pr.options.TELEMETRY.tooltip.2=  ON - full telemetry (default)
-pr.options.TELEMETRY.tooltip.3=  Anonymous - anonymous telemetry
-pr.options.TELEMETRY.tooltip.4=  OFF - no telemetry
-pr.options.TELEMETRY.tooltip.5=The full telemetry sends user UUID which can be used
-pr.options.TELEMETRY.tooltip.6=to track the user across different devices.
-pr.options.TELEMETRY.tooltip.7=The anonymous telemetry doesn't send any user or client
-pr.options.TELEMETRY.tooltip.8=identifiable data.
 
 # Quick Info
 pr.options.QUICK_INFO=Quick Info
