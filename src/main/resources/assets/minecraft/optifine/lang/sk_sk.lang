@@ -20,8 +20,6 @@ pr.message.af.shaders1=Anizotropné filtrovanie nie je kompatibilné s tieňova�
 pr.message.af.shaders2=Vypni tieňovače pre odomknutie tejto možnosti.
 pr.message.fr.shaders1=Rýchle vykresľovanie nie je kompatibilné s tieňovačmi.
 pr.message.fr.shaders2=Vypni tieňovače pre odomknutie tejto možnosti.
-pr.message.an.shaders1=3D Anaglyf nie je kompatibilný s tieňovačmi.
-pr.message.an.shaders2=Vypni tieňovače pre odomknutie tejto možnosti.
 pr.message.shaders.aa1=Tieňovače nie sú kompatibilné s vyhladzovaním.
 pr.message.shaders.aa2=Vypni Kvalita -> Vyhladzovanie a reštartuj hru.
 pr.message.shaders.af1=Tieňovače nie sú kompatibilné s anizotropným filtrovaním.
@@ -30,8 +28,6 @@ pr.message.shaders.fr1=Tieňovače nie sú kompatibilné s rýchlym vykresľovan
 pr.message.shaders.fr2=Vypni Výkon -> Rýchle vykresľovanie a reštartuj hru.
 pr.message.shaders.gf1=Tieňovače nie sú kompatibilné s nádhernou grafikou.
 pr.message.shaders.gf2=Vypni nádhernú grafiku pre odomknutie tejto možnosti.
-pr.message.shaders.an1=Tieňovače nie sú kompatibilné s 3D anaglyfom.
-pr.message.shaders.an2=Vypni Iné -> 3D Anaglyf.
 pr.message.shaders.nv1=Tento balík tieňovačov vyžaduje novšiu verziu OptiFinu: %s
 pr.message.shaders.nv2=Si si istý že chceš pokračovať?
 pr.message.newVersion=Je dostupná nová verzia §eOptiFinu§f: §e%s§f
@@ -119,20 +115,12 @@ options.guiScale.tooltip.3=1, 2, 3...
 options.guiScale.tooltip.4=Najväčšia hodnota závisí od rozlíšenia hry.
 options.guiScale.tooltip.5=Menšie môže byť rýchlejšie.
 options.guiScale.tooltip.6=Nepárne hodnoty (1, 3, 5...) nie sú kompatibilné s Unicode.
-options.vbo=Používanie VBO
-options.vbo.tooltip.1=Objekt vrchnej medzipamäte
-options.vbo.tooltip.2=Ukladá niektoré dáta v pamäti grafiky namiesto RAM.
-options.vbo.tooltip.3=Väčšinou rýchlejšie (5-10%%) než okamžité vykresľovanie.
 options.gamma.tooltip.1=Mení jas tmavých objektov.
 options.gamma.tooltip.2=Tmavý, 1-99%, Jasný
 options.gamma.tooltip.3=Nevplýva na výkon.
 options.gamma.tooltip.4=Upravuje jas tmavších objektov, teda kontrast
 options.gamma.tooltip.5=medzi rozdielne osvetlenými objektmi.
 options.gamma.tooltip.6=Nemení jas úplne čiernych objektov.
-options.anaglyph.tooltip.1=3D Anaglyf
-options.anaglyph.tooltip.2=Zapne stereoskopický 3D efekt pomocou rôznych farieb
-options.anaglyph.tooltip.3=pre každé oko.
-options.anaglyph.tooltip.4=Vyžaduje červeno-tyrkysové 3D okuliare.
 options.attackIndicator.tooltip.1=Nastavuje pozíciu ukazovateľa útoku
 options.attackIndicator.tooltip.2=Vypnutý, Lišta, Zameriavač
 options.attackIndicator.tooltip.3=Lišta = vpravo od lišty
@@ -175,17 +163,6 @@ pr.options.FOG_START.tooltip.1=Pozícia hmly
 pr.options.FOG_START.tooltip.2=0.2-0.8 - Viac je ďalej
 pr.options.FOG_START.tooltip.3=Toto nastavenie bežne
 pr.options.FOG_START.tooltip.4=nemá vplyv na výkon.
-pr.options.CHUNK_LOADING=Načítavanie chunkov
-pr.options.CHUNK_LOADING.tooltip.1=Načítavanie chunkov
-pr.options.CHUNK_LOADING.tooltip.2=Normálne = nestále FPS pri načítavaní chunkov
-pr.options.CHUNK_LOADING.tooltip.3=Vyhladené = stabilné FPS
-pr.options.CHUNK_LOADING.tooltip.4=Viacjadrové = stabilné FPS, 3x rýchlejšie načítavanie sveta
-pr.options.CHUNK_LOADING.tooltip.5=Vyhladené a Viacjadrové odstraňujú trhavosť
-pr.options.CHUNK_LOADING.tooltip.6=a zamŕzanie spôsobené načítavaním chunkov.
-pr.options.CHUNK_LOADING.tooltip.7=Viacjadrové môže načítavanie sveta urýchliť až 3x
-pr.options.CHUNK_LOADING.tooltip.8=a zvýšiť FPS využitím ďalších jadier procesora.
-pr.options.chunkLoading.smooth=Vyhladené
-pr.options.chunkLoading.multiCore=Viacjadrové
 pr.options.shaders=Tieňovače...
 pr.options.shadersTitle=Tieňovače
 pr.options.shaders.packNone=Žiadny
@@ -316,10 +293,6 @@ pr.options.AF_LEVEL.tooltip.3=  2-16 - jemné detaily pod šikmým uhlom pohľad
 pr.options.AF_LEVEL.tooltip.4=Obnovuje ostrosť textúr sledovaných pod ostrými uhlami.
 pr.options.AF_LEVEL.tooltip.5=Vyžaduje zapnuté mipmapy (Úrovne mipmapovania > 0).
 pr.options.AF_LEVEL.tooltip.6=
-pr.options.CLEAR_WATER=Priezračná voda
-pr.options.CLEAR_WATER.tooltip.1=Priezračná voda
-pr.options.CLEAR_WATER.tooltip.2=Vypnuté, Zapnuté
-pr.options.CLEAR_WATER.tooltip.3=Umožní vo vode lepšie vidieť.
 pr.options.RANDOM_ENTITIES=Vlastné entity
 pr.options.RANDOM_ENTITIES.tooltip.1=Vlastné, náhodné entity
 pr.options.RANDOM_ENTITIES.tooltip.2=Vypnuté, Zapnuté
@@ -458,14 +431,6 @@ pr.options.SHOW_CAPES=Plášte
 pr.options.SHOW_CAPES.tooltip.1=Zobraziť plášte
 pr.options.SHOW_CAPES.tooltip.2=Vypnuté, Zapnuté
 pr.options.SHOW_CAPES.tooltip.3=Povoľuje zobrazovanie plášťov hráčov ak ho majú.
-pr.options.TRANSLUCENT_BLOCKS=Priesvitnosť
-pr.options.TRANSLUCENT_BLOCKS.tooltip.1=Priesvitnosť
-pr.options.TRANSLUCENT_BLOCKS.tooltip.2=Rýchla, Pekná
-pr.options.TRANSLUCENT_BLOCKS.tooltip.3=Normálna = podľa všeobecného nastavenia grafiky
-pr.options.TRANSLUCENT_BLOCKS.tooltip.4=Reguluje miešanie farieb priesvitných kociek
-pr.options.TRANSLUCENT_BLOCKS.tooltip.5=s rôznymi farbami (farebné sklo, voda, ľad)
-pr.options.TRANSLUCENT_BLOCKS.tooltip.6=keď sú položené za sebou s medzerou medzi nimi.
-pr.options.TRANSLUCENT_BLOCKS.tooltip.7=
 pr.options.HELD_ITEM_TOOLTIPS=Názvy predmetov v ruke
 pr.options.HELD_ITEM_TOOLTIPS.tooltip.1=Názvy predmetov v ruke nad lištou
 pr.options.HELD_ITEM_TOOLTIPS.tooltip.2=Vypnuté, Zapnuté
@@ -477,11 +442,6 @@ pr.options.ADVANCED_TOOLTIPS.tooltip.3=Pokročilé popisy zobrazujú rozšíren�
 pr.options.ADVANCED_TOOLTIPS.tooltip.4=predmetov (ID, trvanlivosť) a možností tieňovačov
 pr.options.ADVANCED_TOOLTIPS.tooltip.5=(ID, zdroj, štandardné hodnoty).
 pr.options.ADVANCED_TOOLTIPS.tooltip.6=
-pr.options.DROPPED_ITEMS=Odhodené predmety
-pr.options.DROPPED_ITEMS.tooltip.1=Odhodené predmety
-pr.options.DROPPED_ITEMS.tooltip.2=Rýchle = 2D predmety
-pr.options.DROPPED_ITEMS.tooltip.3=Pekné = 3D otáčavé predmety
-pr.options.DROPPED_ITEMS.tooltip.4=Normálne = podľa všeobecného nastavenia grafiky
 options.entityShadows.tooltip.1=Tiene entít
 options.entityShadows.tooltip.2=Vypnuté, Zapnuté
 options.entityShadows.tooltip.3=Zobrazuje textúru kruhu pod entitami.
@@ -549,12 +509,6 @@ pr.options.CHUNK_UPDATES.tooltip.3=  3 - vyvážený rozpočet pre viacvláknov�
 pr.options.CHUNK_UPDATES.tooltip.4=  5 - maximálny rozpočet (okamžité aktualizácie na pozadí)
 pr.options.CHUNK_UPDATES.tooltip.5=Riadi rozpočet úloh pre fond vlákien PryzmaChunkExecutor.
 pr.options.CHUNK_UPDATES.tooltip.6=V Pryzma aktualizácie bežia na vyhradených pracovných vláknach
-pr.options.CHUNK_UPDATES_DYNAMIC=Dynamické aktualizácie
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.1=Dynamické aktualizácie chunkov
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.2=Vypnuté, Zapnuté
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.3=Vypnuté je technicky rýchlejšie.
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.4=Vynucuje viac aktualizácií chunkov keď hráč stojí
-pr.options.CHUNK_UPDATES_DYNAMIC.tooltip.5=na mieste, čo zrýchľuje načítavanie sveta.
 pr.options.LAZY_CHUNK_LOADING=Pomalé načítavanie chunkov
 pr.options.LAZY_CHUNK_LOADING.tooltip.1=Pomalé načítavanie chunkov
 pr.options.LAZY_CHUNK_LOADING.tooltip.2=  VYP - okamžité spracovanie všetkých klientskych úloh
@@ -638,14 +592,6 @@ options.fullscreen.resolution.tooltip.2=Aktuálne = použitie rozlíšenia monit
 options.fullscreen.resolution.tooltip.3=Výška*Šírka = vlastné rozlíšenie
 options.fullscreen.resolution.tooltip.4=Menej je rýchlejšie.
 options.fullscreen.resolution.tooltip.5=Aktuálne je najväčšie možné.
-pr.options.SHOW_FPS=Zobraziť FPS
-pr.options.SHOW_FPS.tooltip.1=Zobrazí kompaktné informácie o FPS a vykresľovaní.
-pr.options.SHOW_FPS.tooltip.2=FPS = priemerné/najnišžie
-pr.options.SHOW_FPS.tooltip.3=C: = vykresľovače chunkov
-pr.options.SHOW_FPS.tooltip.4=E: = vykreslené entity + kocko-entity
-pr.options.SHOW_FPS.tooltip.5=U: = aktualizácie chunkov
-pr.options.SHOW_FPS.tooltip.6=Kompaktné informácie o FPS sú zobrazené len pri
-pr.options.SHOW_FPS.tooltip.7=vypnutej ladiacej obrazovke (F3).
 pr.options.save.45s=45sek
 pr.options.save.90s=90sek
 pr.options.save.3min=3min
@@ -672,15 +618,6 @@ pr.options.SHOW_GL_ERRORS.tooltip.3=Vypni len v prípade známeho problému, kde
 pr.options.SHOW_GL_ERRORS.tooltip.4=chyby nie je možné opraviť.
 pr.options.SHOW_GL_ERRORS.tooltip.5=Ak je vypnuté, chyby sa stále zapisujú do denníka chýb
 pr.options.SHOW_GL_ERRORS.tooltip.6=a stále môžu spôsobiť značné poklesy FPS.
-pr.options.TELEMETRY=Telemetria
-pr.options.TELEMETRY.tooltip.1=Odosielanie telemetrických dát Mojangu
-pr.options.TELEMETRY.tooltip.2=ZAP - plná telemetria (predvolené)
-pr.options.TELEMETRY.tooltip.3=Anonymné - anonymná telemetria
-pr.options.TELEMETRY.tooltip.4=VYP - žiadna telemetria
-pr.options.TELEMETRY.tooltip.5=Plná telemetria odosiela hráčove UUID, ktoré môže byť
-pr.options.TELEMETRY.tooltip.6=použité na sledovanie aktivity na rôznych zariadeniach.
-pr.options.TELEMETRY.tooltip.7=Anonymná telemetria neposiela žiadne používateľské, ani
-pr.options.TELEMETRY.tooltip.8=klientske dáta, pomocou ktorých je možné hráča identifikovať.
 pr.options.QUICK_INFO=Rýchle informácie
 pr.options.QUICK_INFO.tooltip.1=Rýchle informácie
 pr.options.QUICK_INFO.tooltip.2=
