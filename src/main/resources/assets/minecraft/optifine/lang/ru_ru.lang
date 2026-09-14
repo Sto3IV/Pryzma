@@ -298,12 +298,6 @@ pr.options.shaders.OLD_LIGHTING.tooltip.6=игрой к сторонам бло�
 pr.options.shaders.OLD_LIGHTING.tooltip.7=Шейдеры со встроенными тенями обычно гораздо лучше
 pr.options.shaders.OLD_LIGHTING.tooltip.8=показывают освещение, зависящее от положения солнца.
 
-pr.options.shaders.DOWNLOAD=Загрузить шейдеры
-pr.options.shaders.DOWNLOAD.tooltip.1=Загрузить шейдеры
-pr.options.shaders.DOWNLOAD.tooltip.2= 
-pr.options.shaders.DOWNLOAD.tooltip.3=Открывает страницу со списком шейдеров в браузере.
-pr.options.shaders.DOWNLOAD.tooltip.4=Поместите загруженные шейдеры в папку с шейдерами,
-pr.options.shaders.DOWNLOAD.tooltip.5=после чего они станут доступны для использования.
 
 pr.options.shaders.SHADER_PACK=Шейдеры
 
