@@ -2024,6 +2024,20 @@ class PryzmaModTest {
         }
     }
 
+    @Test
+    void shadersGuiDoesNotInstantiateDownloadButtonOrUri() throws Exception {
+        var node = classNode("/srg/net/pryzma/shaders/gui/GuiShaders.class");
+        assertVerifies(node);
+        for (var m : node.methods) {
+            for (var insn : m.instructions) {
+                if (insn.getOpcode() == org.objectweb.asm.Opcodes.NEW && insn instanceof org.objectweb.asm.tree.TypeInsnNode tin) {
+                    assertFalse("net/pryzma/shaders/gui/GuiButtonDownloadShaders".equals(tin.desc),
+                            "GuiShaders must not instantiate GuiButtonDownloadShaders");
+                }
+            }
+        }
+    }
+
     private static byte[] readRequiredResource(String path) throws Exception {
         InputStream in = PryzmaMod.class.getResourceAsStream(path);
         assertNotNull(in, path);
