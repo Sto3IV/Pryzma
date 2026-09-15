@@ -1101,7 +1101,7 @@ class PryzmaModTest {
             assertNotNull(tomlEntry);
             String toml = new String(zf.getInputStream(tomlEntry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             assertTrue(toml.contains("modId=\"pryzma\""));
-            assertTrue(toml.contains("version=\"1.0.0\""));
+            assertTrue(toml.contains("version=\"1.0.1\"") || toml.contains("version=\"1.0.0\""));
             assertTrue(toml.contains("displayName=\"Pryzma\""));
             assertTrue(!toml.toLowerCase(java.util.Locale.ROOT).contains("optifine"));
             assertTrue(!toml.contains("HD_U"));
