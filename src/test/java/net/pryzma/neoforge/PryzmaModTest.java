@@ -82,7 +82,8 @@ class PryzmaModTest {
         InputStream in = PryzmaMod.class.getResourceAsStream("/srg/net/pryzma/Config.class");
         assertNotNull(in);
         String latin = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.ISO_8859_1);
-        assertTrue(latin.contains("Pryzma_1.21.1_1.0.0"));
+        assertTrue(latin.contains("Pryzma_1.21.1_1.0.2"));
+        assertTrue(!latin.contains("Pryzma_1.21.1_1.0.0"));
         assertTrue(!latin.contains("HD_U"));
         assertTrue(!latin.contains("OptiFine"));
         assertTrue(!latin.contains("net/optifine"));
@@ -1101,7 +1102,7 @@ class PryzmaModTest {
             assertNotNull(tomlEntry);
             String toml = new String(zf.getInputStream(tomlEntry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             assertTrue(toml.contains("modId=\"pryzma\""));
-            assertTrue(toml.contains("version=\"1.0.1\"") || toml.contains("version=\"1.0.0\""));
+            assertTrue(toml.contains("version=\"1.0.2\""));
             assertTrue(toml.contains("displayName=\"Pryzma\""));
             assertTrue(!toml.toLowerCase(java.util.Locale.ROOT).contains("optifine"));
             assertTrue(!toml.contains("HD_U"));
@@ -2034,6 +2035,12 @@ class PryzmaModTest {
                     assertFalse("net/pryzma/shaders/gui/GuiButtonDownloadShaders".equals(tin.desc),
                             "GuiShaders must not instantiate GuiButtonDownloadShaders");
                 }
+            }
+        }
+        var init = node.methods.stream().filter(m -> "init".equals(m.name) && "()V".equals(m.desc)).findFirst().orElseThrow();
+        for (var insn : init.instructions) {
+            if (insn.getOpcode() == org.objectweb.asm.Opcodes.BIPUSH && insn instanceof org.objectweb.asm.tree.IntInsnNode bi && bi.operand == 22) {
+                assertFalse(true, "GuiShaders.init must not contain bipush 22 (folder button squeeze)");
             }
         }
     }
