@@ -91,7 +91,7 @@ Pryzma provides exhaustive, granular control over every aspect of the client gra
 
 1. Clone the repository:
 ```bash
-git clone <repository_url>
+git clone https://github.com/Sto3IV/Pryzma
 cd pryzma
 ```
 
