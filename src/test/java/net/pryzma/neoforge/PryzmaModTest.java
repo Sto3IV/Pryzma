@@ -82,7 +82,8 @@ class PryzmaModTest {
         InputStream in = PryzmaMod.class.getResourceAsStream("/srg/net/pryzma/Config.class");
         assertNotNull(in);
         String latin = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.ISO_8859_1);
-        assertTrue(latin.contains("Pryzma_1.21.1_1.0.2"));
+        assertTrue(latin.contains("Pryzma_1.21.1_1.0.3"));
+        assertTrue(!latin.contains("Pryzma_1.21.1_1.0.2"));
         assertTrue(!latin.contains("Pryzma_1.21.1_1.0.0"));
         assertTrue(!latin.contains("HD_U"));
         assertTrue(!latin.contains("OptiFine"));
@@ -1090,19 +1091,21 @@ class PryzmaModTest {
         assertNotNull(jar, "built mod jar");
         try (ZipFile zf = new ZipFile(jar.toFile())) {
             assertNotNull(zf.getEntry("srg/net/pryzma/util/PathPackScan.class"), jar.toString());
+            assertNotNull(zf.getEntry("srg/net/pryzma/config/Lang.class"), jar.toString());
             assertNotNull(
                     zf.getEntry("srg/net/minecraftforge/common/capabilities/CapabilityProvider.class"),
                     jar.toString());
             Path overlay = PryzmaTransformationService.extractGameOverlay(zf);
             assertTrue(Files.isRegularFile(overlay.resolve("net/pryzma/Config.class")));
             assertTrue(Files.isRegularFile(overlay.resolve("net/pryzma/util/PathPackScan.class")));
+            assertTrue(Files.isRegularFile(overlay.resolve("net/pryzma/config/Lang.class")));
             assertTrue(Files.isRegularFile(
                     overlay.resolve("net/minecraftforge/common/capabilities/CapabilityProvider.class")));
             var tomlEntry = zf.getEntry("META-INF/neoforge.mods.toml");
             assertNotNull(tomlEntry);
             String toml = new String(zf.getInputStream(tomlEntry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             assertTrue(toml.contains("modId=\"pryzma\""));
-            assertTrue(toml.contains("version=\"1.0.2\""));
+            assertTrue(toml.contains("version=\"1.0.3\""));
             assertTrue(toml.contains("displayName=\"Pryzma\""));
             assertTrue(!toml.toLowerCase(java.util.Locale.ROOT).contains("optifine"));
             assertTrue(!toml.contains("HD_U"));
@@ -1798,6 +1801,130 @@ class PryzmaModTest {
         crOptions.accept(cnOptions, 0);
         assertTrue(cnOptions.fields.stream().anyMatch(f -> "prFeedbackButtons".equals(f.name) && "Z".equals(f.desc)),
                 "Options must declare prFeedbackButtons field");
+    }
+
+    @Test
+    void configLangBridgeForwardsToPryzmaLangAndIsInOverlay() throws Exception {
+        byte[] bytes = readRequiredResource("/srg/net/pryzma/config/Lang.class");
+        var node = new org.objectweb.asm.tree.ClassNode();
+        new org.objectweb.asm.ClassReader(bytes).accept(node, 0);
+        assertEquals("net/pryzma/config/Lang", node.name);
+        assertEquals("java/lang/Object", node.superName);
+
+        java.util.Set<String> methods = new java.util.HashSet<>();
+        for (var m : node.methods) {
+            methods.add(m.name + m.desc);
+        }
+        assertTrue(methods.contains("get(Ljava/lang/String;)Ljava/lang/String;"));
+        assertTrue(methods.contains("get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"));
+        assertTrue(methods.contains("getComponent(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;"));
+        assertTrue(methods.contains("getOn()Ljava/lang/String;"));
+        assertTrue(methods.contains("getOff()Ljava/lang/String;"));
+        assertTrue(methods.contains("getFast()Ljava/lang/String;"));
+        assertTrue(methods.contains("getFancy()Ljava/lang/String;"));
+        assertTrue(methods.contains("getDefault()Ljava/lang/String;"));
+
+        for (var m : node.methods) {
+            if ("<init>".equals(m.name) || "<clinit>".equals(m.name)) {
+                continue;
+            }
+            boolean forwards = false;
+            for (var insn : m.instructions) {
+                if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
+                        && "net/pryzma/Lang".equals(call.owner)
+                        && call.name.equals(m.name)
+                        && call.desc.equals(m.desc)) {
+                    forwards = true;
+                }
+                if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
+                        && "net/pryzma/config/Lang".equals(call.owner)) {
+                    throw new AssertionError("bridge must not recurse: " + m.name + m.desc);
+                }
+            }
+            assertTrue(forwards, "bridge method must forward to net.pryzma.Lang: " + m.name + m.desc);
+        }
+        assertVerifies(node);
+    }
+
+    @Test
+    void optionsGetKeyBindingPryzmaUsesRealLangAndKeepsPatchedBranches() throws Exception {
+        var options = classNode("/srg/net/minecraft/client/Options.class");
+        var getKey = method(options, "getKeyBindingPryzma",
+                "(Lnet/minecraft/client/OptionInstance;)Ljava/lang/String;");
+        var setOpt = method(options, "setOptionValuePryzma",
+                "(Lnet/minecraft/client/OptionInstance;I)V");
+
+        boolean sawFastPaintings = false;
+        boolean sawFeedbackButtons = false;
+        boolean sawFastInSet = false;
+        boolean sawFeedbackInSet = false;
+        java.util.Set<String> langOwners = new java.util.LinkedHashSet<>();
+        for (var insn : getKey.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.FieldInsnNode fn
+                    && "net/pryzma/config/Option".equals(fn.owner)) {
+                if ("FAST_PAINTINGS".equals(fn.name)) {
+                    sawFastPaintings = true;
+                }
+                if ("FEEDBACK_BUTTONS".equals(fn.name)) {
+                    sawFeedbackButtons = true;
+                }
+            }
+            if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
+                    && ("net/pryzma/Lang".equals(call.owner) || "net/pryzma/config/Lang".equals(call.owner))) {
+                langOwners.add(call.owner + "." + call.name + call.desc);
+                assertEquals("net/pryzma/Lang", call.owner,
+                        "getKeyBindingPryzma must not invoke a missing Lang owner: " + call.owner + "." + call.name);
+            }
+        }
+        for (var insn : setOpt.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.FieldInsnNode fn
+                    && "net/pryzma/config/Option".equals(fn.owner)) {
+                if ("FAST_PAINTINGS".equals(fn.name)) {
+                    sawFastInSet = true;
+                }
+                if ("FEEDBACK_BUTTONS".equals(fn.name)) {
+                    sawFeedbackInSet = true;
+                }
+            }
+        }
+        assertTrue(sawFastPaintings, "getKeyBindingPryzma must still branch on FAST_PAINTINGS");
+        assertTrue(sawFeedbackButtons, "getKeyBindingPryzma must still branch on FEEDBACK_BUTTONS");
+        assertTrue(sawFastInSet, "setOptionValuePryzma must still branch on FAST_PAINTINGS");
+        assertTrue(sawFeedbackInSet, "setOptionValuePryzma must still branch on FEEDBACK_BUTTONS");
+        assertTrue(langOwners.contains("net/pryzma/Lang.getOn()Ljava/lang/String;"));
+        assertTrue(langOwners.contains("net/pryzma/Lang.getOff()Ljava/lang/String;"));
+        assertPayloadBytecodeVerifies("/srg/net/minecraft/client/Options.class");
+    }
+
+    @Test
+    void videoSettingsGuiLangOwnersResolve() throws Exception {
+        String[] screens = {
+                "/srg/net/pryzma/gui/GuiOtherSettingsPryzma.class",
+                "/srg/net/pryzma/gui/GuiPerformanceSettingsPryzma.class",
+                "/srg/net/pryzma/gui/GuiDetailSettingsPryzma.class",
+                "/srg/net/pryzma/gui/GuiQualitySettingsPryzma.class",
+                "/srg/net/pryzma/gui/GuiAnimationSettingsPryzma.class",
+                "/srg/net/pryzma/gui/GuiQuickInfoPryzma.class",
+                "/srg/net/pryzma/shaders/gui/GuiShaders.class",
+                "/srg/net/minecraft/client/gui/screens/options/VideoSettingsScreen.class",
+                "/srg/net/pryzma/gui/OptionFullscreenResolution.class",
+                "/srg/net/pryzma/config/IteratableOptionPryzma.class",
+                "/srg/net/pryzma/config/SliderPercentageOptionPryzma.class",
+                "/srg/net/minecraft/client/gui/components/CycleButton.class"
+        };
+        for (String resource : screens) {
+            var node = classNode(resource);
+            for (var m : node.methods) {
+                for (var insn : m.instructions) {
+                    if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
+                            && "net/pryzma/config/Lang".equals(call.owner)) {
+                        throw new AssertionError(resource + " " + m.name + " still invokes net.pryzma.config.Lang."
+                                + call.name);
+                    }
+                }
+            }
+            assertVerifies(node);
+        }
     }
 
     @Test
