@@ -168,4 +168,20 @@ public final class PathPackScan {
         String lower = path.toLowerCase(Locale.ROOT);
         return lower.startsWith(OPTIFINE_PREFIX) || lower.startsWith(MCPATCHER_PREFIX);
     }
+
+    /**
+     * Returns alternate path aliases for resource loading (e.g. {@code optifine/...} -> {@code mcpatcher/...}).
+     */
+    public static String[] getAliases(String path) {
+        if (path == null) {
+            return new String[0];
+        }
+        if (path.startsWith(OPTIFINE_PREFIX)) {
+            return new String[] { path, MCPATCHER_PREFIX + path.substring(OPTIFINE_PREFIX.length()) };
+        }
+        if (path.startsWith(MCPATCHER_PREFIX)) {
+            return new String[] { path, OPTIFINE_PREFIX + path.substring(MCPATCHER_PREFIX.length()) };
+        }
+        return new String[] { path };
+    }
 }
