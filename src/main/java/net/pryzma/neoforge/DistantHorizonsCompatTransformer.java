@@ -35,7 +35,7 @@ import cpw.mods.modlauncher.api.TransformerVoteResult;
 /**
  * Isolated compatibility transformer for Distant Horizons (DH).
  *
- * <p>Enables full LOD rendering and shader coordination exclusively within Distant Horizons
+ * <p>Enables full LOD rendering and OptiFine coordination exclusively within Distant Horizons
  * without declaring a global {@code optifine} mod ID in {@code neoforge.mods.toml} (which would
  * cause mods like The Aether, Twilight Forest, and Create to crash or abort).
  *

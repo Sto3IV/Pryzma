@@ -94,15 +94,15 @@ public class ReflectorAdapter {
     }
 
     public static boolean isModLoadedBridge(net.neoforged.fml.ModList list, String modid) {
-        if ("optifine".equals(modid)) {
-            return list != null && list.isLoaded("pryzma");
+        if ("optifine".equals(modid) || "pryzma".equals(modid) || "prizma_beta".equals(modid)) {
+            return true;
         }
         return list != null && list.isLoaded(modid);
     }
 
     public static net.neoforged.neoforgespi.language.IModFileInfo getModFileByIdBridge(net.neoforged.fml.ModList list, String modid) {
-        if ("optifine".equals(modid)) {
-            return list != null ? list.getModFileById("pryzma") : null;
+        if ("optifine".equals(modid) || "pryzma".equals(modid) || "prizma_beta".equals(modid)) {
+            return list != null ? list.getModFileById("prizma_beta") : null;
         }
         return list != null ? list.getModFileById(modid) : null;
     }
