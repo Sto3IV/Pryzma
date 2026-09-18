@@ -47,11 +47,10 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 >
 > **Pryzma** provides all of these capabilities out of the box in **a single, unified, conflict-free JAR** powered by clean NeoForge ASM transformers.
 
-### Master Feature Comparison Table
+### 1. Shaders & Core Graphics Engine
 
-| Category / Feature | Vanilla 1.21.1 | Sodium & Friends (NeoForge 1.21.1 Ecosystem) | Pryzma (NeoForge 1.21.1) |
+| Feature | Vanilla 1.21.1 | Sodium & Friends (NeoForge 1.21.1 Ecosystem) | Pryzma (NeoForge 1.21.1) |
 | :--- | :---: | :--- | :---: |
-| **I. Shaders & Core Graphics Engine** | | | |
 | **Shaderpack Pipeline** (BSL, Complementary, SEUS) | ❌ No | ⚠️ Missing, requires `Iris` | ✅ **Yes (Native Integrated Pipeline)** |
 | **Modern Chunk Meshing Engine** | ⚠️ Basic Sync | ✅ Yes (`Sodium`) | ✅ **Yes (Integrated Multi-Threaded Mesher)** |
 | **Dynamic CPU Thread Scaling** (1–24+ cores) | ❌ Fixed Pool | ⚠️ Partial (`Sodium` internal pool; no render-to-tick pacing) | ✅ **Yes (Dynamic Auto-Scaled Worker Pool)** |
@@ -59,7 +58,11 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 | **Smart Leaf Face Culling** (Forest FPS Boost) | ⚠️ Fast/Fancy Only | ⚠️ Missing, requires `Cull Leaves` | ✅ **Yes (Native Smart Leaves Optimization)** |
 | **Smooth World & Tick-to-Render Pacing** | ❌ No (Microstutters) | ⚠️ Missing, requires `Lithium` *(tick logic only; lacks frame pacing)* | ✅ **Yes (Native Smooth World & Smooth FPS)** |
 | **Fast Math / Trigonometric Lookups** | ❌ Standard Math | ⚠️ Partial (Internal helpers in `Sodium`/`Lithium`) | ✅ **Yes (Precomputed Lookup Cache)** |
-| **II. Resource Pack Format & CTM** | | | |
+
+### 2. Resource Pack Format & CTM
+
+| Feature | Vanilla 1.21.1 | Sodium & Friends (NeoForge 1.21.1 Ecosystem) | Pryzma (NeoForge 1.21.1) |
+| :--- | :---: | :--- | :---: |
 | **OptiFine Format Support** (`optifine/` folder) | ❌ No | ⚠️ Fragmented across 8+ different mods | ✅ **Yes (100% Native Drop-in)** |
 | **Legacy MCPatcher Support** (`mcpatcher/` folder) | ❌ No | ❌ **Unsupported** *(No mod supports legacy paths; requires manual renaming)* | ✅ **Yes (Full Runtime Aliasing & Deduplication)** |
 | **Connected Textures (CTM)** (Glass, Sandstone, Bookshelves) | ❌ No | ⚠️ Missing, requires `Continuity (NeoForge)`<br>*(or `Fusion`, requires converting textures to Fusion JSON format)* | ✅ **Yes (Native CTM + MCPatcher Aliasing)** |
@@ -67,18 +70,30 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 | **Custom Lightmaps** (`lightmap/world0.png`) | ❌ Hardcoded Curve | ⚠️ Missing, requires `Polytone`<br>*(static only; animated lightmaps unsupported / require Polytone format)* | ✅ **Yes (Native Dynamic & Animated Lightmaps)** |
 | **Custom Skies & Celestial Domes** (`sky/world0/*.properties`) | ❌ Single Sky Sphere | ⚠️ Missing, requires `NeoforgeSkyboxes`<br>*(requires converting to FSB JSON format; partial legacy support via FSB-Interop)* | ✅ **Yes (Native Multi-Layer Rotatable Skyboxes)** |
 | **Animated Textures & Custom GUIs** (`anim/*.properties`) | ⚠️ `.mcmeta` Only | ⚠️ Missing, requires `Animatica (NeoForge)` | ✅ **Yes (Native OptiFine anim & Custom GUIs)** |
-| **III. Entities & Equipment Customization** | | | |
+
+### 3. Entities & Equipment Customization
+
+| Feature | Vanilla 1.21.1 | Sodium & Friends (NeoForge 1.21.1 Ecosystem) | Pryzma (NeoForge 1.21.1) |
+| :--- | :---: | :--- | :---: |
 | **Custom Entity Models (CEM)** (`cem/*.jem`, `*.jpm`) | ❌ No | ⚠️ Missing, requires `EMF (Entity Model Features)` | ✅ **Yes (Native CEM Engine)** |
 | **Random & Biome Entity Textures** (Random Mobs) | ❌ No | ⚠️ Missing, requires `ETF (Entity Texture Features)` | ✅ **Yes (Native Random Mobs by Biome/Name/Height)** |
 | **Custom Item Textures (CIT)** (Anvil Renaming, NBT) | ❌ No | ⚠️ Missing, requires `CIT Resewn (NeoForge)` | ✅ **Yes (Native CIT with Full NBT Matching)** |
 | **Custom Player & Donor Capes** | ❌ Mojang Only | ⚠️ Missing, requires `Capes` *(by Caelum)* | ✅ **Yes (Native OptiFine Capes + In-Game GUI)** |
-| **IV. World Atmosphere & Visual Enhancements** | | | |
+
+### 4. World Atmosphere & Visual Enhancements
+
+| Feature | Vanilla 1.21.1 | Sodium & Friends (NeoForge 1.21.1 Ecosystem) | Pryzma (NeoForge 1.21.1) |
+| :--- | :---: | :--- | :---: |
 | **Better Grass** (Full-block grass sides & snowy grass) | ❌ No | ⚠️ Missing, requires `BetterGrassify`<br>*(or `Fusion` with external converted resource pack)* | ✅ **Yes (Native Toggle: Off / Fast / Fancy)** |
 | **Better Snow** (Snow under fences, flowers, stairs) | ❌ No | ⚠️ Missing, requires `Snow! Real Magic!` *(or `Better Snow`)* | ✅ **Yes (Native Integrated Better Snow)** |
 | **Dynamic Lights** (Held & dropped glowing items) | ❌ No | ⚠️ Missing, requires `LambDynamicLights (NeoForge)` *(or `Sodium Dynamic Lights`)* | ✅ **Yes (Native Dynamic Lights: Off / Fast / Fancy)** |
 | **Cinematic Smooth Zoom** | ⚠️ Spyglass Only | ⚠️ Missing, requires `Zoomify` *(or `Just Zoom`)* | ✅ **Yes (Native Smooth OptiFine 'C' Zoom)** |
 | **Clear Water & Custom Fog Distance** | ❌ Murky Default | ⚠️ Missing, requires `Sodium Extra` | ✅ **Yes (Native Clear Water & Fog Controls)** |
-| **V. Architecture & Ecosystem Footprint** | | | |
+
+### 5. Architecture & Ecosystem Footprint
+
+| Feature | Vanilla 1.21.1 | Sodium & Friends (NeoForge 1.21.1 Ecosystem) | Pryzma (NeoForge 1.21.1) |
+| :--- | :---: | :--- | :---: |
 | **Granular Video Settings** (Stars, Fog, Vignette, Clouds) | ❌ Minimal | ⚠️ Fragmented, requires `Sodium Extra` + `Reese's Sodium Options` | ✅ **Yes (High & Unified in Native Video Settings)** |
 | **Required Mod JARs Count** | **0** | **15–20+ separate individual JARs** | **1 Single Unified JAR** |
 | **Modloader Integration** | Baseline | Relies on dozens of brittle Mixins competing for bytecode hooks | **Surgical NeoForge ASM `ITransformer` Pipeline** |
