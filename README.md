@@ -43,9 +43,9 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 
 ## Feature Comparison Matrix
 
-> **Architectural Premise**: To recreate the full, beloved visual fidelity of classic and modern OptiFine resource packs on **NeoForge 1.21.1**, players who do not use **Pryzma** are forced to assemble a fragile "mod salad" of **15 to 20 separate individual mods**. Many of these alternatives do not natively parse OptiFine/MCPatcher formatting and require tedious conversion into proprietary JSON formats.
+> **Why Pryzma exists**: To recreate the full visual fidelity of classic and modern OptiFine resource packs on **NeoForge 1.21.1**, players without **Pryzma** are forced to assemble a fragile "mod salad" of 15 to 20 separate mods — many of which don't even support OptiFine formatting and force you to convert textures into proprietary JSON formats.
 >
-> **Pryzma** provides all of these capabilities out of the box in **a single, unified, conflict-free JAR** powered by clean NeoForge ASM transformers.
+> **Pryzma** delivers everything out of the box in **ONE. SINGLE. MOD.** Not 15+ different mods where you have to set up configs for each one and constantly deal with mixin conflicts. Just one single JAR powered by clean NeoForge ASM transformers.
 
 | Feature | Vanilla 1.21.1 | Sodium & Friends (NeoForge 1.21.1 Ecosystem) | Pryzma (NeoForge 1.21.1) |
 | :--- | :---: | :--- | :---: |
