@@ -48,10 +48,31 @@ public final class PryzmaChunkExecutor {
         return Math.clamp(Math.max(cores / 3, cores - 6), MIN_THREADS, MAX_THREADS);
     }
 
-    /** Returns current active pool size, or optimal count if not started yet. */
+    /** Returns configured target pool size, or optimal count if not started yet. */
     public static int getWorkerCount() {
         ThreadPoolExecutor current = executor;
-        return current != null ? current.getPoolSize() : getOptimalThreadCount();
+        return current != null ? current.getCorePoolSize() : getOptimalThreadCount();
+    }
+
+    /**
+     * Calculates the target worker thread count for a given Chunk Updates preset (1..5),
+     * ensuring strict monotonic scaling across all CPU topologies without exceeding safe limits.
+     */
+    public static int getThreadsForOption(int option) {
+        int cores = Runtime.getRuntime().availableProcessors();
+        int t1 = cores > 4 ? Math.max(1, Math.min(2, cores / 4)) : 1;
+        int t2 = Math.max(t1, Math.min(cores / 2, 4));
+        int t3 = Math.max(t2, getOptimalThreadCount());
+        int t4 = Math.max(t3, Math.min(cores - 1, Math.min(12, Math.max(cores / 2, t3 + (cores >= 8 ? 2 : 1)))));
+        int t5 = Math.max(t4, Math.min(cores - 1, 16));
+        return switch (option) {
+            case 1 -> t1;
+            case 2 -> t2;
+            case 3 -> t3;
+            case 4 -> t4;
+            case 5 -> t5;
+            default -> t3;
+        };
     }
 
     /**
@@ -59,17 +80,7 @@ public final class PryzmaChunkExecutor {
      * matching Sodium's chunkBuilderThreads paradigm without requiring restart.
      */
     public static synchronized void applyChunkUpdatesOption(int option) {
-        int cores = Runtime.getRuntime().availableProcessors();
-        int targetThreads;
-        switch (option) {
-            case 1 -> targetThreads = Math.max(1, Math.min(2, cores));
-            case 2 -> targetThreads = Math.max(2, Math.min(4, cores));
-            case 3 -> targetThreads = getOptimalThreadCount();
-            case 4 -> targetThreads = Math.max(2, Math.min(cores / 2, MAX_THREADS + 2));
-            case 5 -> targetThreads = Math.max(2, Math.min(cores - 2, MAX_THREADS + 6));
-            default -> targetThreads = getOptimalThreadCount();
-        }
-
+        int targetThreads = getThreadsForOption(option);
         ThreadPoolExecutor current = executor;
         if (current != null && !current.isShutdown()) {
             if (targetThreads > current.getMaximumPoolSize()) {

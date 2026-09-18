@@ -1907,6 +1907,16 @@ class PryzmaModTest {
                 }
             }
         }
+        boolean sawChunkUpdatesThreadCall = false;
+        for (var insn : getKey.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
+                    && "net/pryzma/util/PryzmaChunkExecutor".equals(call.owner)
+                    && "getThreadsForOption".equals(call.name)
+                    && "(I)I".equals(call.desc)) {
+                sawChunkUpdatesThreadCall = true;
+            }
+        }
+        assertTrue(sawChunkUpdatesThreadCall, "getKeyBindingPryzma must invoke PryzmaChunkExecutor.getThreadsForOption for CHUNK_UPDATES button text");
         assertTrue(sawFastPaintings, "getKeyBindingPryzma must still branch on FAST_PAINTINGS");
         assertTrue(sawFeedbackButtons, "getKeyBindingPryzma must still branch on FEEDBACK_BUTTONS");
         assertTrue(sawFastInSet, "setOptionValuePryzma must still branch on FAST_PAINTINGS");
@@ -1914,6 +1924,18 @@ class PryzmaModTest {
         assertTrue(langOwners.contains("net/pryzma/Lang.getOn()Ljava/lang/String;"));
         assertTrue(langOwners.contains("net/pryzma/Lang.getOff()Ljava/lang/String;"));
         assertPayloadBytecodeVerifies("/srg/net/minecraft/client/Options.class");
+    }
+
+    @Test
+    void chunkUpdatesThreadScalingIsMonotonic() {
+        for (int opt = 1; opt <= 5; opt++) {
+            int threads = net.pryzma.util.PryzmaChunkExecutor.getThreadsForOption(opt);
+            assertTrue(threads >= 1, "threads must be at least 1");
+            if (opt > 1) {
+                int prev = net.pryzma.util.PryzmaChunkExecutor.getThreadsForOption(opt - 1);
+                assertTrue(threads >= prev, "threads must scale monotonically: " + prev + " -> " + threads);
+            }
+        }
     }
 
     @Test

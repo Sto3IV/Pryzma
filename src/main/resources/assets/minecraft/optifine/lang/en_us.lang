@@ -612,11 +612,14 @@ pr.options.FAST_MATH.tooltip.6=May cause slight rotational jitter and small worl
 
 pr.options.CHUNK_UPDATES=Chunk Updates
 pr.options.CHUNK_UPDATES.tooltip.1=Chunk Updates
-pr.options.CHUNK_UPDATES.tooltip.2= 1 - lower worker task budget (higher FPS)
-pr.options.CHUNK_UPDATES.tooltip.3= 3 - balanced worker task budget
-pr.options.CHUNK_UPDATES.tooltip.4= 5 - unlimited worker task budget (fastest load)
-pr.options.CHUNK_UPDATES.tooltip.5=Controls task throughput of background chunk worker threads.
-pr.options.CHUNK_UPDATES.tooltip.6=Higher values load terrain faster using more CPU cores.
+pr.options.CHUNK_UPDATES.tooltip.2=The number is how many background threads build chunk meshes.
+pr.options.CHUNK_UPDATES.tooltip.3=  Minimal - fewest workers, more CPU headroom
+pr.options.CHUNK_UPDATES.tooltip.4=  Low - reduced worker count
+pr.options.CHUNK_UPDATES.tooltip.5=  Balanced (default; scales with your CPU)
+pr.options.CHUNK_UPDATES.tooltip.6=  High - more workers
+pr.options.CHUNK_UPDATES.tooltip.7=  Maximum - most workers, fastest terrain load
+pr.options.CHUNK_UPDATES.tooltip.8=Never stalls the render thread. Lower if shaders or mods
+pr.options.CHUNK_UPDATES.tooltip.9=saturate the CPU; raise for faster world loading.
 
 
 pr.options.LAZY_CHUNK_LOADING=Lazy Chunk Loading
