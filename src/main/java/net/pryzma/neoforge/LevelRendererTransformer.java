@@ -9,7 +9,6 @@ import java.util.Set;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
@@ -72,72 +71,7 @@ public class LevelRendererTransformer implements ITransformer<ClassNode> {
         if (dispatchRedirects > 0) {
             LOGGER.info("Redirected {} dispatchRenderStageS calls in LevelRenderer to {}", dispatchRedirects, DISPATCH_TARGET);
         }
-
-        for (MethodNode m : node.methods) {
-            if ("setLevel".equals(m.name) && "(Lnet/minecraft/client/multiplayer/ClientLevel;)V".equals(m.desc)) {
-                if (alreadyCalls(m, "net/pryzma/lod/render/LodWorldRenderer", "reset")) {
-                    continue;
-                }
-                InsnList hook = new InsnList();
-                hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "net/pryzma/lod/render/LodWorldRenderer", "reset", "()V", false));
-                m.instructions.insert(hook);
-                changed = true;
-                LOGGER.info("Injected LodWorldRenderer.reset into LevelRenderer.setLevel");
-            }
-        }
-
-        boolean lodRender = injectLodRender(node);
-
-        return changed || lodRender;
-    }
-
-    public static boolean injectLodRender(ClassNode node) {
-        boolean changed = false;
-        String targetMethod = "renderSectionLayer";
-        String targetDesc = "(Lnet/minecraft/client/renderer/RenderType;DDDLorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V";
-        String lodRenderer = "net/pryzma/lod/render/LodWorldRenderer";
-
-        for (MethodNode m : node.methods) {
-            if (targetMethod.equals(m.name) && targetDesc.equals(m.desc)) {
-                if (alreadyCalls(m, lodRenderer, "renderSectionLayer")) {
-                    continue;
-                }
-                for (AbstractInsnNode insn : m.instructions.toArray()) {
-                    if (insn instanceof MethodInsnNode mi
-                            && "clear".equals(mi.name)
-                            && "net/minecraft/client/renderer/ShaderInstance".equals(mi.owner)) {
-                        AbstractInsnNode target = mi.getPrevious();
-                        if (target != null) {
-                            InsnList hook = new InsnList();
-                            hook.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 0));
-                            hook.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 1));
-                            hook.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.DLOAD, 2));
-                            hook.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.DLOAD, 4));
-                            hook.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.DLOAD, 6));
-                            hook.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 8));
-                            hook.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 9));
-                            hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, lodRenderer, "renderSectionLayer",
-                                    "(Lnet/minecraft/client/renderer/LevelRenderer;Lnet/minecraft/client/renderer/RenderType;DDDLorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V", false));
-                            m.instructions.insertBefore(target, hook);
-                            m.maxStack = Math.max(m.maxStack, 10);
-                            changed = true;
-                            LOGGER.info("Injected LodWorldRenderer.renderSectionLayer into LevelRenderer.renderSectionLayer");
-                            break;
-                        }
-                    }
-                }
-            }
-        }
         return changed;
-    }
-
-    private static boolean alreadyCalls(MethodNode method, String owner, String name) {
-        for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-            if (insn instanceof MethodInsnNode call && owner.equals(call.owner) && name.equals(call.name)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static boolean isDispatchRenderStageS(AbstractInsnNode insn) {

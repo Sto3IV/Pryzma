@@ -165,43 +165,10 @@ public class ClientLevelTransformer implements ITransformer<ClassNode> {
         return true;
     }
 
-    public static boolean injectLodIntake(ClassNode node) {
-        boolean changed = false;
-        String intakeOwner = "net/pryzma/lod/intake/LodIntake";
-        String onChunkLoadedDesc = "(Lnet/minecraft/world/level/ChunkPos;)V";
-        for (MethodNode m : node.methods) {
-            if ("onChunkLoaded".equals(m.name) && onChunkLoadedDesc.equals(m.desc)) {
-                if (alreadyCalls(m, intakeOwner, "onChunkLoaded")) {
-                    continue;
-                }
-                InsnList hook = new InsnList();
-                hook.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                hook.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, intakeOwner, "onChunkLoaded",
-                        "(Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/world/level/ChunkPos;)V", false));
-                m.instructions.insert(hook);
-                m.maxStack = Math.max(m.maxStack, 2);
-                changed = true;
-                LOGGER.info("Injected LodIntake.onChunkLoaded into ClientLevel.onChunkLoaded");
-            }
-        }
-        return changed;
-    }
-
-    private static boolean alreadyCalls(MethodNode method, String owner, String name) {
-        for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-            if (insn instanceof MethodInsnNode call && owner.equals(call.owner) && name.equals(call.name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public static boolean inject(ClassNode node) {
         boolean d = injectDayTime(node);
         boolean m = injectModelData(node);
-        boolean lod = injectLodIntake(node);
-        return d || m || lod;
+        return d || m;
     }
 
     @Override
