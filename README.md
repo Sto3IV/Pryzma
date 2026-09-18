@@ -47,8 +47,6 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 >
 > **Pryzma** provides all of these capabilities out of the box in **a single, unified, conflict-free JAR** powered by clean NeoForge ASM transformers.
 
-### 1. Shaders & Core Graphics Engine
-
 | Feature | Vanilla 1.21.1 | Sodium & Friends (NeoForge 1.21.1 Ecosystem) | Pryzma (NeoForge 1.21.1) |
 | :--- | :---: | :--- | :---: |
 | **Shaderpack Pipeline** (BSL, Complementary, SEUS) | ❌ No | ⚠️ Missing, requires `Iris` | ✅ **Yes (Native Integrated Pipeline)** |
