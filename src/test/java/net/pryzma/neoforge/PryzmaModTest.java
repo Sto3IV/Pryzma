@@ -82,7 +82,9 @@ class PryzmaModTest {
         InputStream in = PryzmaMod.class.getResourceAsStream("/srg/net/pryzma/Config.class");
         assertNotNull(in);
         String latin = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.ISO_8859_1);
-        assertTrue(latin.contains("Pryzma_1.21.1_1.0.3"));
+        assertTrue(latin.contains("Pryzma_1.21.1_1.0.5"));
+        assertTrue(!latin.contains("Pryzma_1.21.1_1.0.4"));
+        assertTrue(!latin.contains("Pryzma_1.21.1_1.0.3"));
         assertTrue(!latin.contains("Pryzma_1.21.1_1.0.2"));
         assertTrue(!latin.contains("Pryzma_1.21.1_1.0.0"));
         assertTrue(!latin.contains("HD_U"));
@@ -96,6 +98,18 @@ class PryzmaModTest {
         assertTrue(en.contains("pr.options.shaders="));
         assertTrue(!en.contains("\nof.options."));
         assertTrue(!en.contains("pryzma.options."));
+    }
+
+    @Test
+    void videoSettingsScreenWatermarkMatchesVersion105() throws Exception {
+        InputStream in = PryzmaMod.class.getResourceAsStream("/srg/net/minecraft/client/gui/screens/options/VideoSettingsScreen.class");
+        assertNotNull(in);
+        String latin = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.ISO_8859_1);
+        assertTrue(latin.contains("Pryzma 1.0.5"), "VideoSettingsScreen must render watermark Pryzma 1.0.5");
+        assertFalse(latin.contains("Pryzma 1.0.4"), "Must not contain stale version 1.0.4");
+        assertFalse(latin.contains("Pryzma 1.0.3"), "Must not contain stale version 1.0.3");
+        assertFalse(latin.contains("Pryzma 1.0.2"), "Must not contain stale version 1.0.2");
+        assertFalse(latin.contains("Pryzma 1.0.0"), "Must not contain stale version 1.0.0");
     }
 
     @Test
@@ -1105,7 +1119,7 @@ class PryzmaModTest {
             assertNotNull(tomlEntry);
             String toml = new String(zf.getInputStream(tomlEntry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             assertTrue(toml.contains("modId=\"pryzma\""));
-            assertTrue(toml.contains("version=\"1.0.3\""));
+            assertTrue(toml.contains("version=\"1.0.5\""));
             assertTrue(toml.contains("displayName=\"Pryzma\""));
             assertTrue(!toml.toLowerCase(java.util.Locale.ROOT).contains("optifine"));
             assertTrue(!toml.contains("HD_U"));
@@ -1123,7 +1137,7 @@ class PryzmaModTest {
         for (org.objectweb.asm.tree.MethodNode method : node.methods) {
             try {
                 analyzer.analyze(node.name, method);
-            } catch (org.objectweb.asm.tree.analysis.AnalyzerException e) {
+            } catch (Exception e) {
                 throw new AssertionError(resource + " " + method.name + method.desc, e);
             }
         }
@@ -1145,9 +1159,14 @@ class PryzmaModTest {
         byte[] stubBytes = PryzmaCandidateLocator.buildStubJarBytes();
         assertNotNull(stubBytes);
         assertTrue(stubBytes.length > 0);
+    }
 
+    @Test
+    void decoyStubJarContainsIsolatedLowcodeMetadata() throws Exception {
+        byte[] stubBytes = PryzmaCandidateLocator.buildStubJarBytes();
+        assertNotNull(stubBytes);
         try (java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(stubBytes))) {
-            ZipEntry entry;
+            java.util.zip.ZipEntry entry;
             boolean foundManifest = false;
             boolean foundToml = false;
             boolean hasClassFiles = false;
@@ -1162,6 +1181,7 @@ class PryzmaModTest {
                     String tomlText = new String(zis.readAllBytes(), StandardCharsets.UTF_8);
                     assertTrue(tomlText.contains("modLoader=\"lowcodefml\""), "stub toml must use lowcodefml");
                     assertTrue(tomlText.contains("modId=\"prizma_beta\""), "stub toml must declare modId=prizma_beta");
+                    assertTrue(tomlText.contains("version=\"1.0.5\""), "stub toml must declare version=1.0.5");
                     assertTrue(tomlText.contains("displayName=\"Pryzma\""), "stub toml must declare displayName=Pryzma");
                     assertTrue(tomlText.contains("authors=\"Sto3IV and Ranni\""), "stub toml must declare authors=Sto3IV and Ranni");
                     assertFalse(tomlText.toLowerCase().contains("sp614x"), "stub toml must not contain sp614x");
@@ -1979,48 +1999,6 @@ class PryzmaModTest {
     }
 
     @Test
-    void distantHorizonsModCheckerPatchedForIsolatedPryzmaCompat() {
-        var node = new org.objectweb.asm.tree.ClassNode();
-        node.name = "com/seibel/distanthorizons/neoforge/wrappers/modAccessor/ModChecker";
-        node.superName = "java/lang/Object";
-        node.version = org.objectweb.asm.Opcodes.V21;
-
-        var m1 = new org.objectweb.asm.tree.MethodNode(
-                org.objectweb.asm.Opcodes.ACC_PUBLIC, "isModLoaded", "(Ljava/lang/String;)Z", null, null);
-        m1.instructions.add(new org.objectweb.asm.tree.MethodInsnNode(
-                org.objectweb.asm.Opcodes.INVOKESTATIC, "net/neoforged/fml/ModList", "get", "()Lnet/neoforged/fml/ModList;", false));
-        m1.instructions.add(new org.objectweb.asm.tree.VarInsnNode(org.objectweb.asm.Opcodes.ALOAD, 1));
-        m1.instructions.add(new org.objectweb.asm.tree.MethodInsnNode(
-                org.objectweb.asm.Opcodes.INVOKEVIRTUAL, "net/neoforged/fml/ModList", "isLoaded", "(Ljava/lang/String;)Z", false));
-        m1.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.IRETURN));
-        m1.maxStack = 4;
-        m1.maxLocals = 4;
-        node.methods.add(m1);
-
-        var m2 = new org.objectweb.asm.tree.MethodNode(
-                org.objectweb.asm.Opcodes.ACC_PUBLIC, "modLocation", "(Ljava/lang/String;)Ljava/io/File;", null, null);
-        m2.instructions.add(new org.objectweb.asm.tree.MethodInsnNode(
-                org.objectweb.asm.Opcodes.INVOKESTATIC, "net/neoforged/fml/ModList", "get", "()Lnet/neoforged/fml/ModList;", false));
-        m2.instructions.add(new org.objectweb.asm.tree.VarInsnNode(org.objectweb.asm.Opcodes.ALOAD, 1));
-        m2.instructions.add(new org.objectweb.asm.tree.MethodInsnNode(
-                org.objectweb.asm.Opcodes.INVOKEVIRTUAL, "net/neoforged/fml/ModList", "getModFileById", "(Ljava/lang/String;)Lnet/neoforged/neoforgespi/language/IModFileInfo;", false));
-        m2.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.ACONST_NULL));
-        m2.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.ARETURN));
-        m2.maxStack = 4;
-        m2.maxLocals = 4;
-        node.methods.add(m2);
-
-        assertTrue(DistantHorizonsCompatTransformer.inject(node));
-        assertFalse(DistantHorizonsCompatTransformer.inject(node));
-        assertVerifies(node);
-
-        assertTrue(invokes(node, "net/pryzma/reflect/ReflectorAdapter", "isModLoadedBridge", "(Lnet/neoforged/fml/ModList;Ljava/lang/String;)Z"));
-        assertTrue(invokes(node, "net/pryzma/reflect/ReflectorAdapter", "getModFileByIdBridge", "(Lnet/neoforged/fml/ModList;Ljava/lang/String;)Lnet/neoforged/neoforgespi/language/IModFileInfo;"));
-        assertFalse(invokes(node, "net/neoforged/fml/ModList", "isLoaded", "(Ljava/lang/String;)Z"));
-        assertFalse(invokes(node, "net/neoforged/fml/ModList", "getModFileById", "(Ljava/lang/String;)Lnet/neoforged/neoforgespi/language/IModFileInfo;"));
-    }
-
-    @Test
     void levelRendererRedirectsDispatchRenderStageSToReflectorAdapter() throws Exception {
         var node = classNode("/srg/net/minecraft/client/renderer/LevelRenderer.class");
         assertTrue(LevelRendererTransformer.inject(node));
@@ -2073,83 +2051,6 @@ class PryzmaModTest {
         }
         assertTrue(methodCallsAdapter);
         assertFalse(methodCallsReflector);
-    }
-
-    @Test
-    void distantHorizonsNeoforgeMainRedirectsOptifineGateToPryzma() {
-        var node = new org.objectweb.asm.tree.ClassNode();
-        node.name = "com/seibel/distanthorizons/neoforge/NeoforgeMain";
-        node.superName = "java/lang/Object";
-        node.version = org.objectweb.asm.Opcodes.V21;
-
-        var m = new org.objectweb.asm.tree.MethodNode(org.objectweb.asm.Opcodes.ACC_PROTECTED, "initializeModCompat", "()V", null, null);
-        var gate = new org.objectweb.asm.tree.LdcInsnNode("optifine");
-        m.instructions.add(new org.objectweb.asm.tree.VarInsnNode(org.objectweb.asm.Opcodes.ALOAD, 0));
-        m.instructions.add(gate);
-        m.instructions.add(new org.objectweb.asm.tree.LdcInsnNode(org.objectweb.asm.Type.getType(DistantHorizonsCompatTransformer.OPTIFINE_ACCESSOR_DESC)));
-        m.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.ACONST_NULL));
-        m.instructions.add(new org.objectweb.asm.tree.MethodInsnNode(org.objectweb.asm.Opcodes.INVOKEVIRTUAL, node.name, "tryCreateModCompatAccessor", "(Ljava/lang/String;Ljava/lang/Class;Ljava/util/function/Supplier;)V", false));
-        m.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.RETURN));
-        m.maxStack = 4;
-        m.maxLocals = 1;
-        node.methods.add(m);
-
-        assertTrue(DistantHorizonsCompatTransformer.inject(node));
-        assertFalse(DistantHorizonsCompatTransformer.inject(node));
-        assertVerifies(node);
-        assertEquals("pryzma", gate.cst);
-    }
-
-    @Test
-    void distantHorizonsAbstractOptifineAccessorRemapsShaderAndFogNames() {
-        var node = new org.objectweb.asm.tree.ClassNode();
-        node.name = "com/seibel/distanthorizons/core/wrapperInterfaces/modAccessor/AbstractOptifineAccessor";
-        node.superName = "java/lang/Object";
-        node.version = org.objectweb.asm.Opcodes.V21;
-
-        var m = new org.objectweb.asm.tree.MethodNode(org.objectweb.asm.Opcodes.ACC_PUBLIC, "getIsShaderActive", "()Z", null, null);
-        var shaders = new org.objectweb.asm.tree.LdcInsnNode("net.optifine.shaders.Shaders");
-        var fog = new org.objectweb.asm.tree.LdcInsnNode("ofFogType");
-        m.instructions.add(shaders);
-        m.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.POP));
-        m.instructions.add(fog);
-        m.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.POP));
-        m.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.ICONST_1));
-        m.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.IRETURN));
-        m.maxStack = 2;
-        m.maxLocals = 1;
-        node.methods.add(m);
-
-        assertTrue(DistantHorizonsCompatTransformer.inject(node));
-        assertFalse(DistantHorizonsCompatTransformer.inject(node));
-        assertVerifies(node);
-        assertEquals("net.pryzma.shaders.Shaders", shaders.cst);
-        assertEquals("prFogType", fog.cst);
-    }
-
-    @Test
-    void distantHorizonsClientApiGuardsLodPassesAgainstShadowPass() {
-        var node = new org.objectweb.asm.tree.ClassNode();
-        node.name = "com/seibel/distanthorizons/core/api/internal/ClientApi";
-        node.superName = "java/lang/Object";
-        node.version = org.objectweb.asm.Opcodes.V21;
-
-        for (String pass : DistantHorizonsCompatTransformer.LOD_PASSES) {
-            var m = new org.objectweb.asm.tree.MethodNode(org.objectweb.asm.Opcodes.ACC_PUBLIC, pass, "()V", null, null);
-            m.instructions.add(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.RETURN));
-            m.maxStack = 1;
-            m.maxLocals = 1;
-            node.methods.add(m);
-        }
-
-        assertTrue(DistantHorizonsCompatTransformer.inject(node));
-        assertFalse(DistantHorizonsCompatTransformer.inject(node));
-        assertVerifies(node);
-
-        for (var m : node.methods) {
-            assertTrue(m.instructions.getFirst() instanceof org.objectweb.asm.tree.FieldInsnNode f
-                    && "net/pryzma/shaders/Shaders".equals(f.owner) && "isShadowPass".equals(f.name));
-        }
     }
 
     @Test

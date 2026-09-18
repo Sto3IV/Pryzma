@@ -1,7 +1,7 @@
 package net.optifine.shaders;
 
 /**
- * Legacy OptiFine shader interface stub for external mods (e.g. Distant Horizons)
+ * Legacy OptiFine shader interface stub for external mods
  * querying shader state via reflection without triggering global mod ID blacklists.
  * Delegates directly to {@link net.pryzma.shaders.Shaders}.
  */
