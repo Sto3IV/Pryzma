@@ -15,7 +15,7 @@ Pryzma contains a fully integrated, native GLSL shader engine embedded directly 
 * **Advanced Render Stages:** Native execution of deferred composite passes, shadow mapping, depth texture extraction, custom uniform buffers, and post-processing filters.
 * **In-Game Shader Configuration:** Dedicated in-game GUI for tweaking individual shaderpack properties, profiles, color grades, and rendering passes with real-time reload.
 
-### 2. Complete Resource Pack & Texture Fidelity (OptiFine & MCPatcher)
+### 2. Complete Resource Pack & Texture Fidelity (OptiFine & and old MCPatcher format)
 Pryzma restores and guarantees 100% compatibility with both modern OptiFine resource packs and classic legacy MCPatcher formats:
 * **Connected Textures (CTM):** Full support for standard 47-tile CTM, horizontal, vertical, top, repeat, fixed, compact, and overlay modes.
 * **Legacy MCPatcher Aliasing:** Automatic fallback and aliasing for classic `assets/minecraft/mcpatcher/` layouts alongside modern `assets/minecraft/optifine/` directories.
@@ -62,15 +62,15 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 | **Custom Colors & Colormaps** (`color.properties`, `colormap/`) | ❌ Fixed Colormaps | ⚠️ Missing, requires `Polytone`<br>*(partial color.properties support; advanced features require Polytone format)* | ✅ **Yes (Native OptiFine/MCPatcher Colormaps)** |
 | **Custom Lightmaps** (`lightmap/world0.png`) | ❌ Hardcoded Curve | ⚠️ Missing, requires `Polytone`<br>*(static only; animated lightmaps unsupported / require Polytone format)* | ✅ **Yes (Native Dynamic & Animated Lightmaps)** |
 | **Custom Skies & Celestial Domes** (`sky/world0/*.properties`) | ❌ Single Sky Sphere | ⚠️ Missing, requires `NeoforgeSkyboxes`<br>*(requires converting to FSB JSON format; partial legacy support via FSB-Interop)* | ✅ **Yes (Native Multi-Layer Rotatable Skyboxes)** |
-| **Animated Textures & Custom GUIs** (`anim/*.properties`) | ⚠️ `.mcmeta` Only | ⚠️ Missing, requires `Animatica (NeoForge)` | ✅ **Yes (Native OptiFine anim & Custom GUIs)** |
+| **Animated Textures & Custom GUIs** (`anim/*.properties`) | ⚠️ `.mcmeta` Only | ⚠️ Missing, requires `Animatica (NeoForge)` | ✅ **Yes (Full support of OptiFine anim & Custom GUIs)** |
 | **Custom Entity Models (CEM)** (`cem/*.jem`, `*.jpm`) | ❌ No | ⚠️ Missing, requires `EMF (Entity Model Features)` | ✅ **Yes (Native CEM Engine)** |
 | **Random & Biome Entity Textures** (Random Mobs) | ❌ No | ⚠️ Missing, requires `ETF (Entity Texture Features)` | ✅ **Yes (Native Random Mobs by Biome/Name/Height)** |
 | **Custom Item Textures (CIT)** (Anvil Renaming, NBT) | ❌ No | ⚠️ Missing, requires `CIT Resewn (NeoForge)` | ✅ **Yes (Native CIT with Full NBT Matching)** |
-| **Custom Player & Donor Capes** | ❌ Mojang Only | ⚠️ Missing, requires `Capes` *(by Caelum)* | ✅ **Yes (Native OptiFine Capes + In-Game GUI)** |
+| **Custom Player & Donor Capes** | ❌ Mojang Only | ⚠️ Missing, requires `Capes` *(by Caelum)* | ✅ **Yes (Native and full OptiFine Capes support)** |
 | **Better Grass** (Full-block grass sides & snowy grass) | ❌ No | ⚠️ Missing, requires `BetterGrassify`<br>*(or `Fusion` with external converted resource pack)* | ✅ **Yes (Native Toggle: Off / Fast / Fancy)** |
 | **Better Snow** (Snow under fences, flowers, stairs) | ❌ No | ⚠️ Missing, requires `Snow! Real Magic!` *(or `Better Snow`)* | ✅ **Yes (Native Integrated Better Snow)** |
 | **Dynamic Lights** (Held & dropped glowing items) | ❌ No | ⚠️ Missing, requires `LambDynamicLights (NeoForge)` *(or `Sodium Dynamic Lights`)* | ✅ **Yes (Native Dynamic Lights: Off / Fast / Fancy)** |
-| **Cinematic Smooth Zoom** | ⚠️ Spyglass Only | ⚠️ Missing, requires `Zoomify` *(or `Just Zoom`)* | ✅ **Yes (Native Smooth OptiFine 'C' Zoom)** |
+| **Cinematic Smooth Zoom** | ⚠️ Spyglass Only | ⚠️ Missing, requires `Zoomify` *(or `Just Zoom`)* | ✅ **Yes ('C' key by default can be changed in settings)** |
 | **Clear Water & Custom Fog Distance** | ❌ Murky Default | ⚠️ Missing, requires `Sodium Extra` | ✅ **Yes (Native Clear Water & Fog Controls)** |
 | **Granular Video Settings** (Stars, Fog, Vignette, Clouds) | ❌ Minimal | ⚠️ Fragmented, requires `Sodium Extra` + `Reese's Sodium Options` | ✅ **Yes (High & Unified in Native Video Settings)** |
 | **Required Mod JARs Count** | **0** | **15–20+ separate individual JARs** | **ONE. SINGLE. JAR.** |
