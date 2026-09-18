@@ -43,14 +43,94 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 
 ## Feature Comparison Matrix
 
-| Feature | Vanilla | Legacy Patchers | Sodium / Iris | Pryzma |
-| :--- | :---: | :---: | :---: | :---: |
-| **Native Shaders (No Extra Mods)** | No | Yes (Outdated) | Requires Iris | **Yes (Built-in)** |
-| **OptiFine CTM / CIT / CEM** | No | Yes | Requires Extra Mods | **Yes (Native)** |
-| **Legacy MCPatcher Packs** | No | Partial | No | **Yes (Full Aliasing)** |
-| **Dedicated 10-Thread Chunk Meshing** | No | No | Yes | **Yes (Integrated)** |
-| **NeoForge 1.21.1 Native Engine** | Yes | No | Partial | **Yes (Engineered)** |
-| **Granular In-Game Graphic Controls** | Minimal | High | Fragmented | **High & Unified** |
+> **Architectural Premise**: To recreate the full, beloved visual fidelity of classic and modern OptiFine resource packs on **NeoForge 1.21.1**, players who do not use **Pryzma** are forced to assemble a fragile "mod salad" of **15 to 20 separate individual mods**. Many of these alternatives do not natively parse OptiFine/MCPatcher formatting and require tedious conversion into proprietary JSON formats.
+>
+> **Pryzma** provides all of these capabilities out of the box in **a single, unified, conflict-free JAR** powered by clean NeoForge ASM transformers.
+
+### Master Feature Comparison Table
+
+| Category / Feature | Vanilla 1.21.1 | Sodium & Friends (NeoForge 1.21.1 Ecosystem) | Pryzma (NeoForge 1.21.1) |
+| :--- | :---: | :--- | :---: |
+| **I. Shaders & Core Graphics Engine** | | | |
+| **Shaderpack Pipeline** (BSL, Complementary, SEUS) | ❌ No | ⚠️ Missing, requires `Iris` | ✅ **Yes (Native Integrated Pipeline)** |
+| **Modern Chunk Meshing Engine** | ⚠️ Basic Sync | ✅ Yes (`Sodium`) | ✅ **Yes (Integrated Multi-Threaded Mesher)** |
+| **Dynamic CPU Thread Scaling** (1–24+ cores) | ❌ Fixed Pool | ⚠️ Partial (`Sodium` internal pool; no render-to-tick pacing) | ✅ **Yes (Dynamic Auto-Scaled Worker Pool)** |
+| **Entity Occlusion Culling** (Behind opaque blocks) | ❌ Frustum Only | ⚠️ Missing, requires `Entity Culling` | ✅ **Yes (Frustum + Smooth World Culling)** |
+| **Smart Leaf Face Culling** (Forest FPS Boost) | ⚠️ Fast/Fancy Only | ⚠️ Missing, requires `Cull Leaves` | ✅ **Yes (Native Smart Leaves Optimization)** |
+| **Smooth World & Tick-to-Render Pacing** | ❌ No (Microstutters) | ⚠️ Missing, requires `Lithium` *(tick logic only; lacks frame pacing)* | ✅ **Yes (Native Smooth World & Smooth FPS)** |
+| **Fast Math / Trigonometric Lookups** | ❌ Standard Math | ⚠️ Partial (Internal helpers in `Sodium`/`Lithium`) | ✅ **Yes (Precomputed Lookup Cache)** |
+| **II. Resource Pack Format & CTM** | | | |
+| **OptiFine Format Support** (`optifine/` folder) | ❌ No | ⚠️ Fragmented across 8+ different mods | ✅ **Yes (100% Native Drop-in)** |
+| **Legacy MCPatcher Support** (`mcpatcher/` folder) | ❌ No | ❌ **Unsupported** *(No mod supports legacy paths; requires manual renaming)* | ✅ **Yes (Full Runtime Aliasing & Deduplication)** |
+| **Connected Textures (CTM)** (Glass, Sandstone, Bookshelves) | ❌ No | ⚠️ Missing, requires `Continuity (NeoForge)`<br>*(or `Fusion`, requires converting textures to Fusion JSON format)* | ✅ **Yes (Native CTM + MCPatcher Aliasing)** |
+| **Custom Colors & Colormaps** (`color.properties`, `colormap/`) | ❌ Fixed Colormaps | ⚠️ Missing, requires `Polytone`<br>*(partial color.properties support; advanced features require Polytone format)* | ✅ **Yes (Native OptiFine/MCPatcher Colormaps)** |
+| **Custom Lightmaps** (`lightmap/world0.png`) | ❌ Hardcoded Curve | ⚠️ Missing, requires `Polytone`<br>*(static only; animated lightmaps unsupported / require Polytone format)* | ✅ **Yes (Native Dynamic & Animated Lightmaps)** |
+| **Custom Skies & Celestial Domes** (`sky/world0/*.properties`) | ❌ Single Sky Sphere | ⚠️ Missing, requires `NeoforgeSkyboxes`<br>*(requires converting to FSB JSON format; partial legacy support via FSB-Interop)* | ✅ **Yes (Native Multi-Layer Rotatable Skyboxes)** |
+| **Animated Textures & Custom GUIs** (`anim/*.properties`) | ⚠️ `.mcmeta` Only | ⚠️ Missing, requires `Animatica (NeoForge)` | ✅ **Yes (Native OptiFine anim & Custom GUIs)** |
+| **III. Entities & Equipment Customization** | | | |
+| **Custom Entity Models (CEM)** (`cem/*.jem`, `*.jpm`) | ❌ No | ⚠️ Missing, requires `EMF (Entity Model Features)` | ✅ **Yes (Native CEM Engine)** |
+| **Random & Biome Entity Textures** (Random Mobs) | ❌ No | ⚠️ Missing, requires `ETF (Entity Texture Features)` | ✅ **Yes (Native Random Mobs by Biome/Name/Height)** |
+| **Custom Item Textures (CIT)** (Anvil Renaming, NBT) | ❌ No | ⚠️ Missing, requires `CIT Resewn (NeoForge)` | ✅ **Yes (Native CIT with Full NBT Matching)** |
+| **Custom Player & Donor Capes** | ❌ Mojang Only | ⚠️ Missing, requires `Capes` *(by Caelum)* | ✅ **Yes (Native OptiFine Capes + In-Game GUI)** |
+| **IV. World Atmosphere & Visual Enhancements** | | | |
+| **Better Grass** (Full-block grass sides & snowy grass) | ❌ No | ⚠️ Missing, requires `BetterGrassify`<br>*(or `Fusion` with external converted resource pack)* | ✅ **Yes (Native Toggle: Off / Fast / Fancy)** |
+| **Better Snow** (Snow under fences, flowers, stairs) | ❌ No | ⚠️ Missing, requires `Snow! Real Magic!` *(or `Better Snow`)* | ✅ **Yes (Native Integrated Better Snow)** |
+| **Dynamic Lights** (Held & dropped glowing items) | ❌ No | ⚠️ Missing, requires `LambDynamicLights (NeoForge)` *(or `Sodium Dynamic Lights`)* | ✅ **Yes (Native Dynamic Lights: Off / Fast / Fancy)** |
+| **Cinematic Smooth Zoom** | ⚠️ Spyglass Only | ⚠️ Missing, requires `Zoomify` *(or `Just Zoom`)* | ✅ **Yes (Native Smooth OptiFine 'C' Zoom)** |
+| **Clear Water & Custom Fog Distance** | ❌ Murky Default | ⚠️ Missing, requires `Sodium Extra` | ✅ **Yes (Native Clear Water & Fog Controls)** |
+| **V. Architecture & Ecosystem Footprint** | | | |
+| **Granular Video Settings** (Stars, Fog, Vignette, Clouds) | ❌ Minimal | ⚠️ Fragmented, requires `Sodium Extra` + `Reese's Sodium Options` | ✅ **Yes (High & Unified in Native Video Settings)** |
+| **Required Mod JARs Count** | **0** | **15–20+ separate individual JARs** | **1 Single Unified JAR** |
+| **Modloader Integration** | Baseline | Relies on dozens of brittle Mixins competing for bytecode hooks | **Surgical NeoForge ASM `ITransformer` Pipeline** |
+
+### Deep Mod Analysis & De-duplication Rationale
+
+#### Why some mods cannot replace others (De-duplication Audit):
+1. **`Polytone` vs. `Fusion` vs. `BetterGrassify`**:
+   - **Polytone** (by MehVahdJukaar) is strictly a color, sound, and GUI modifier. It has **no** Connected Textures (CTM) implementation and **no** Better Grass.
+   - **Fusion** (by SuperMartijn642) is a modern model and connected texture library. It **does not** include a native Better Grass toggle; achieving Better Grass through Fusion requires an external resource pack converted into Fusion's proprietary JSON format.
+   - **BetterGrassify** is therefore strictly required in the Sodium ecosystem if the player wants an out-of-the-box in-game toggle without converting texture packs.
+
+2. **`Polytone` vs. `NeoforgeSkyboxes` (Custom Sky)**:
+   - Polytone can alter atmospheric sky and fog colors, but it **cannot** render celestial dome skyboxes (`sky/world0/*.properties`) with rotational axes and blend modes. For true OptiFine custom skies, `NeoforgeSkyboxes` (or `FabricSkyBoxes Interop`) is an independent requirement.
+
+3. **`Polytone` vs. `Animatica`**:
+   - Polytone supports custom animated textures, but strictly through its own JSON schema. For classic resource packs with `assets/minecraft/optifine/anim/*.properties`, `Animatica (NeoForge)` is mandatory.
+
+4. **`Fusion` vs. `Continuity (NeoForge)` (The CTM Dilemma)**:
+   - `Fusion` enforces a new JSON format (`assets/<namespace>/fusion/connected_textures/*.json`). Dropping a classic OptiFine pack into Fusion results in broken/unconnected textures.
+   - `Continuity (NeoForge)` supports the legacy `.properties` format, but is an unofficial port on NeoForge that frequently suffers from modloader timing issues.
+
+5. **`EMF` & `ETF`**:
+   - Completely independent and essential. No other mod in the list parses `.jem`/`.jpm` (CEM) or random entity textures.
+
+### The Mod Salad Problem (Sodium & Friends)
+
+To achieve what **Pryzma** accomplishes in a single download, a player on NeoForge 1.21.1 must download, configure, and maintain:
+
+1. `sodium` (Base chunk rendering)
+2. `iris` (Shaders)
+3. `lithium` (Game logic optimizations)
+4. `continuity` *or* `fusion` (Connected textures — with format conversion caveats)
+5. `polytone` (Custom colors & colormaps)
+6. `cit-resewn` (Custom item textures)
+7. `entity-model-features` (Custom entity models)
+8. `entity-texture-features` (Random mob skins)
+9. `animatica` (Custom animations)
+10. `bettergrassify` (Better grass)
+11. `neoforge-skyboxes` (Custom skies)
+12. `lambdynamiclights` *or* `sodium-dynamic-lights` (Dynamic lights)
+13. `zoomify` (Zoom)
+14. `entity-culling` (Entity culling)
+15. `cull-leaves` (Leaf face culling)
+16. `snow-real-magic` (Better snow)
+17. `capes` (OptiFine capes)
+18. `sodium-extra` (Missing video toggles)
+19. `reeses-sodium-options` (Fixing Sodium Extra's overflowing menu UI)
+
+**Total**: **19 mods**, 19 different update cycles, 19 different issue trackers, dozens of overlapping Mixins, and **still zero support for legacy MCPatcher folder structures**.
+
+**Pryzma delivers all 19 capabilities in 1 single JAR, engineered natively for NeoForge.**
 
 ---
 
