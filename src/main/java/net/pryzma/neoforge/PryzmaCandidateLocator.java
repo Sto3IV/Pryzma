@@ -28,7 +28,7 @@ import net.neoforged.neoforgespi.locating.ModFileDiscoveryAttributes;
  * Candidate locator implementing the decoy/camouflage strategy for in-game mod listing.
  *
  * <p>Why an isolated decoy modId is required:
- * The primary runtime jar (pryzma-1.0.3.jar) provides ITransformationService and is
+ * The primary runtime jar (pryzma-1.0.5.jar) provides ITransformationService and is
  * loaded early by ModLauncher into the PLUGIN ModuleLayer as module "pryzma".
  * In NeoForge, ModJarMetadata hardcodes the GAME-layer JPMS module name to match the first modId.
  * Registering with modId "pryzma" causes a fatal JPMS collision:
@@ -72,7 +72,7 @@ public class PryzmaCandidateLocator implements IModFileCandidateLocator {
 
         byte[] jarBytes = buildStubJarBytes();
         Path tempDir = Files.createTempDirectory("pryzma-ui-");
-        Path jarPath = tempDir.resolve("prizma-beta-1.0.3.jar");
+        Path jarPath = tempDir.resolve("prizma-beta-1.0.5.jar");
         Files.write(jarPath, jarBytes);
         jarPath.toFile().deleteOnExit();
         tempDir.toFile().deleteOnExit();
@@ -103,7 +103,7 @@ public class PryzmaCandidateLocator implements IModFileCandidateLocator {
                 "\n" +
                 "[[mods]]\n" +
                 "modId=\"prizma_beta\"\n" +
-                "version=\"1.0.3\"\n" +
+                "version=\"1.0.5\"\n" +
                 "displayName=\"Pryzma\"\n" +
                 "displayURL=\"\"\n" +
                 "authors=\"Sto3IV and Ranni\"\n" +

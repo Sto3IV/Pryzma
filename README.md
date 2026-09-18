@@ -36,7 +36,6 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 * **Worker Thread Priority:** Background chunk meshing threads operate at reduced thread priority (`NORM_PRIORITY - 2`) to ensure that main-thread input polling and frame presentation are never starved of CPU cycles.
 
 ### 4. Deep Mod & Ecosystem Compatibility
-* **Distant Horizons:** 100% compatible out of the box. Fully synchronizes with Distant Horizons LOD (Level of Detail) rendering passes, protects LOD passes during shadow rendering, and prevents buffer collisions.
 * **NeoForge Model Data & Pipelines:** Preserves full compatibility with NeoForge `IModelData`, ambient occlusion matrix evaluations, fluid rendering hooks, and custom block entity renderers.
 * **Modded Biomes & Dimensions:** Native color-blending and sky rendering support for modded world generation.
 
@@ -50,7 +49,6 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 | **OptiFine CTM / CIT / CEM** | No | Yes | Requires Extra Mods | **Yes (Native)** |
 | **Legacy MCPatcher Packs** | No | Partial | No | **Yes (Full Aliasing)** |
 | **Dedicated 10-Thread Chunk Meshing** | No | No | Yes | **Yes (Integrated)** |
-| **Distant Horizons Integration** | No | Unstable | Requires Patches | **Yes (Synchronized)** |
 | **NeoForge 1.21.1 Native Engine** | Yes | No | Partial | **Yes (Engineered)** |
 | **Granular In-Game Graphic Controls** | Minimal | High | Fragmented | **High & Unified** |
 
@@ -108,7 +106,7 @@ gradlew.bat build
 3. Locate the compiled artifact:
 The finalized NeoForge mod JAR file will be available under:
 ```
-build/libs/pryzma-1.21.1-1.0.0.jar
+build/libs/pryzma-1.0.5.jar
 ```
 
 ---
