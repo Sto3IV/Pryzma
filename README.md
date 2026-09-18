@@ -75,7 +75,7 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 | **Cinematic Smooth Zoom** | ⚠️ Spyglass Only | ⚠️ Missing, requires `Zoomify` *(or `Just Zoom`)* | ✅ **Yes (Native Smooth OptiFine 'C' Zoom)** |
 | **Clear Water & Custom Fog Distance** | ❌ Murky Default | ⚠️ Missing, requires `Sodium Extra` | ✅ **Yes (Native Clear Water & Fog Controls)** |
 | **Granular Video Settings** (Stars, Fog, Vignette, Clouds) | ❌ Minimal | ⚠️ Fragmented, requires `Sodium Extra` + `Reese's Sodium Options` | ✅ **Yes (High & Unified in Native Video Settings)** |
-| **Required Mod JARs Count** | **0** | **15–20+ separate individual JARs** | **1 Single Unified JAR** |
+| **Required Mod JARs Count** | **0** | **15–20+ separate individual JARs** | **ONE. SINGLE. JAR.** |
 | **Modloader Integration** | Baseline | Relies on dozens of brittle Mixins competing for bytecode hooks | **Surgical NeoForge ASM `ITransformer` Pipeline** |
 
 
