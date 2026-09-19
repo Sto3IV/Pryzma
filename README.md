@@ -31,7 +31,7 @@ Pryzma restores and guarantees 100% compatibility with both modern OptiFine reso
 ### 3. Dedicated Multithreaded Chunk Rendering Architecture
 Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft and historical patchers by incorporating a dedicated worker pool inspired by Sodium's parallel chunk builder:
 * **Dedicated Worker Isolation:** Chunk meshing is completely decoupled from the shared, contention-heavy vanilla `Util.backgroundExecutor()`.
-* **Dynamic Core Allocation:** Automatically analyzes host CPU topology and allocates an isolated thread pool of up to 10 worker threads (`Pryzma-Chunk-Worker-1` through `10`).
+* **Dynamic Core Allocation:** Automatically analyzes host CPU topology and allocates an isolated, dynamically scaling pool of worker threads (`Pryzma-Chunk-Worker`).
 * **Micro-Stutter Elimination:** Replaces blocking single-chunk frame delays and sleep-chokes with worker-budgeted dispatch capacity, maintaining rock-solid frame pacing even during high-speed flight and world loading.
 * **Worker Thread Priority:** Background chunk meshing threads operate at reduced thread priority (`NORM_PRIORITY - 2`) to ensure that main-thread input polling and frame presentation are never starved of CPU cycles.
 
@@ -101,6 +101,16 @@ Pryzma provides exhaustive, granular control over every aspect of the client gra
 * **Sky & Fog Control:** Independent toggles for Sun, Moon, Stars, Fog, and Clouds (Fast, Fancy, Off).
 * **Individual Particle Control:** Granular switches for Water, Lava, Fire, Smoke, Explosion, and Portal animations.
 * **Held Item Tooltips & Dynamic FOV:** Toggles for camera adjustments and HUD elements.
+
+---
+
+## VERY IMPORTANT: change your java garbage collector to ZGC
+
+To enable this, ensure your launcher is set to use **Java 21** (or newer). In your launcher's JVM Arguments, add this exact line: `-XX:+UseZGC -XX:+ZGenerational -XX:+AlwaysPreTouch`. Because ZGC works alongside the game, it needs comfortable breathing room. We strongly recommend allocating between **6 GB and 8 GB of RAM** (or up to 10 GB if you have 32 GB total). However, *never* allocate all of your system's memory—always leave at least 3 to 4 GB free for Windows and your graphics driver to prevent system crashes.
+
+Minecraft runs on Java, which constantly creates and deletes temporary memory objects while you play. Standard "Garbage Collectors" periodically freeze the entire game to clean up this memory, causing those notorious micro-stutters and sudden FPS drops. **ZGC (Z Garbage Collector)** is a next-generation solution that cleans up memory in the background without pausing the game, keeping your frametimes perfectly flat and eliminating lag spikes.
+
+This is fundamentally critical for **Pryzma**. Unlike vanilla Minecraft, Pryzma's engine uses a dynamically scaling pool of dedicated CPU threads to aggressively compile chunks, shaders, and connected textures in parallel. This massive multi-threaded architecture generates an extreme amount of temporary memory objects. If you use standard garbage collectors, your game will violently stutter as it tries to halt all worker threads at once to clean up. ZGC processes this heavy memory traffic effortlessly on the fly, unlocking Pryzma's true performance and guaranteeing a stutter-free experience even during high-speed flight.
 
 ---
 
