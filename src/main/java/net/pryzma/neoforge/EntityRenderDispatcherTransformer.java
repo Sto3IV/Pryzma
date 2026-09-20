@@ -28,19 +28,33 @@ import cpw.mods.modlauncher.api.TargetType;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 
 /**
- * Dispatches {@code EntityRenderersEvent.AddLayers} in {@code EntityRenderDispatcher.onResourceManagerReload}.
- *
- * <p>OptiFine's pre-compiled {@code EntityRenderDispatcher} attempted to call legacy Forge
- * {@code ForgeEventFactoryClient.onGatherLayers}, which does not exist in NeoForge 21.1.
- * NeoForge instead dispatches {@code ModLoader.postEvent(new EntityRenderersEvent.AddLayers(...))}.
- * Without this event, modded render layers (such as Epic Fight's {@code FirstPersonRenderer})
- * never initialize, causing immediate {@link NullPointerException} during rendering.
+ * Two GAME-layer patches on {@code EntityRenderDispatcher}:
+ * <ul>
+ *   <li>{@code onResourceManagerReload} — dispatch {@code EntityRenderersEvent.AddLayers} in place of
+ *       the missing Forge {@code ForgeEventFactoryClient.onGatherLayers}.</li>
+ *   <li>{@code render} HEAD — {@code EpicFightOutline.onRenderEntity(entity)} so Epic Fight's
+ *       target outline recolor does not depend on Mixin LVT capture inside {@code renderLevel}.</li>
+ * </ul>
+ * Each site is skipped independently if already present; {@link #inject} is a no-op on a second call.
  */
 public class EntityRenderDispatcherTransformer implements ITransformer<ClassNode> {
     private static final Logger LOGGER = LoggerFactory.getLogger("Pryzma");
     public static final String TARGET = "net.minecraft.client.renderer.entity.EntityRenderDispatcher";
 
+    static final String RENDER_DESC =
+            "(Lnet/minecraft/world/entity/Entity;DDDFFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V";
+    static final String OUTLINE_OWNER = "net/pryzma/compat/EpicFightOutline";
+    static final String OUTLINE_NAME = "onRenderEntity";
+    static final String OUTLINE_DESC = "(Lnet/minecraft/world/entity/Entity;)V";
+
     public static boolean inject(ClassNode node) {
+        boolean changed = false;
+        changed |= injectAddLayers(node);
+        changed |= injectOutlineHighlight(node);
+        return changed;
+    }
+
+    static boolean injectAddLayers(ClassNode node) {
         for (MethodNode m : node.methods) {
             if ("onResourceManagerReload".equals(m.name)
                     && "(Lnet/minecraft/server/packs/resources/ResourceManager;)V".equals(m.desc)) {
@@ -48,7 +62,7 @@ public class EntityRenderDispatcherTransformer implements ITransformer<ClassNode
                 for (AbstractInsnNode insn : m.instructions.toArray()) {
                     if (insn instanceof TypeInsnNode tin
                             && "net/neoforged/neoforge/client/event/EntityRenderersEvent$AddLayers".equals(tin.desc)) {
-                        return false; // Already present
+                        return false;
                     }
                 }
 
@@ -126,10 +140,42 @@ public class EntityRenderDispatcherTransformer implements ITransformer<ClassNode
         return false;
     }
 
+    static boolean injectOutlineHighlight(ClassNode node) {
+        for (MethodNode m : node.methods) {
+            if (!"render".equals(m.name) || !RENDER_DESC.equals(m.desc)) {
+                continue;
+            }
+            if (hasOutlineCall(m)) {
+                return false;
+            }
+            InsnList list = new InsnList();
+            list.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            list.add(new MethodInsnNode(
+                    Opcodes.INVOKESTATIC, OUTLINE_OWNER, OUTLINE_NAME, OUTLINE_DESC, false));
+            m.instructions.insert(list);
+            m.maxStack = Math.max(m.maxStack, 1);
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean hasOutlineCall(MethodNode m) {
+        for (AbstractInsnNode insn : m.instructions) {
+            if (insn instanceof MethodInsnNode min
+                    && min.getOpcode() == Opcodes.INVOKESTATIC
+                    && OUTLINE_OWNER.equals(min.owner)
+                    && OUTLINE_NAME.equals(min.name)
+                    && OUTLINE_DESC.equals(min.desc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public ClassNode transform(ClassNode input, ITransformerVotingContext context) {
         if (inject(input)) {
-            LOGGER.info("EntityRenderDispatcherTransformer: injected EntityRenderersEvent.AddLayers dispatch");
+            LOGGER.info("EntityRenderDispatcherTransformer: injected AddLayers and/or EpicFight outline hook");
         }
         return input;
     }

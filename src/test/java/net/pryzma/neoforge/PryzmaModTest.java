@@ -1110,6 +1110,8 @@ class PryzmaModTest {
         try (ZipFile zf = new ZipFile(jar.toFile())) {
             assertNotNull(zf.getEntry("srg/net/pryzma/util/PathPackScan.class"), jar.toString());
             assertNotNull(zf.getEntry("srg/net/pryzma/config/Lang.class"), jar.toString());
+            assertNotNull(zf.getEntry("srg/net/pryzma/compat/EpicFightOutline.class"), jar.toString());
+            assertNotNull(zf.getEntry("srg/net/pryzma/compat/EpicFightShaderBridge.class"), jar.toString());
             assertNotNull(
                     zf.getEntry("srg/net/minecraftforge/common/capabilities/CapabilityProvider.class"),
                     jar.toString());
@@ -1117,6 +1119,8 @@ class PryzmaModTest {
             assertTrue(Files.isRegularFile(overlay.resolve("net/pryzma/Config.class")));
             assertTrue(Files.isRegularFile(overlay.resolve("net/pryzma/util/PathPackScan.class")));
             assertTrue(Files.isRegularFile(overlay.resolve("net/pryzma/config/Lang.class")));
+            assertTrue(Files.isRegularFile(overlay.resolve("net/pryzma/compat/EpicFightOutline.class")));
+            assertTrue(Files.isRegularFile(overlay.resolve("net/pryzma/compat/EpicFightShaderBridge.class")));
             assertTrue(Files.isRegularFile(
                     overlay.resolve("net/minecraftforge/common/capabilities/CapabilityProvider.class")));
             var tomlEntry = zf.getEntry("META-INF/neoforge.mods.toml");
@@ -2456,6 +2460,57 @@ class PryzmaModTest {
         return n;
     }
 
+    private static void setBridgeHandle(String name, java.lang.invoke.MethodHandle handle) throws Exception {
+        var f = net.pryzma.compat.EpicFightShaderBridge.class.getDeclaredField(name);
+        f.setAccessible(true);
+        f.set(null, handle);
+    }
+
+    private static void invokeRestore(Object saved) throws Exception {
+        var m = net.pryzma.compat.EpicFightShaderBridge.class.getDeclaredMethod("restoreProgram", Object.class);
+        m.setAccessible(true);
+        m.invoke(null, saved);
+    }
+
+    private static Object invokeSentinel(Object saved, Object programNone) throws Exception {
+        var m = net.pryzma.compat.EpicFightShaderBridge.class.getDeclaredMethod(
+                "sentinelProgram", Object.class, Object.class);
+        m.setAccessible(true);
+        return m.invoke(null, saved, programNone);
+    }
+
+    private static void assertRestoreProgramNeverPushesNull(byte[] bytes) {
+        var node = new org.objectweb.asm.tree.ClassNode();
+        new org.objectweb.asm.ClassReader(bytes).accept(node, 0);
+        var restore = method(node, "restoreProgram", "(Ljava/lang/Object;)V");
+        for (var insn : restore.instructions) {
+            if (insn.getOpcode() == org.objectweb.asm.Opcodes.ACONST_NULL) {
+                throw new AssertionError("restoreProgram must not push null (would NPE updateAlphaBlend)");
+            }
+        }
+    }
+
+    private static void assertNoHardEpicFightRefs(byte[] bytes) {
+        var node = new org.objectweb.asm.tree.ClassNode();
+        new org.objectweb.asm.ClassReader(bytes).accept(node, 0);
+        for (var m : node.methods) {
+            for (var insn : m.instructions) {
+                if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
+                        && call.owner.startsWith("yesman/epicfight")) {
+                    throw new AssertionError("hard Epic Fight invoke: " + call.owner + "." + call.name);
+                }
+                if (insn instanceof org.objectweb.asm.tree.FieldInsnNode field
+                        && field.owner.startsWith("yesman/epicfight")) {
+                    throw new AssertionError("hard Epic Fight field: " + field.owner + "." + field.name);
+                }
+                if (insn instanceof org.objectweb.asm.tree.TypeInsnNode type
+                        && type.desc.startsWith("yesman/epicfight")) {
+                    throw new AssertionError("hard Epic Fight type: " + type.desc);
+                }
+            }
+        }
+    }
+
     private static byte[] readRequiredResource(String path) throws Exception {
         InputStream in = PryzmaMod.class.getResourceAsStream(path);
         assertNotNull(in, path);
@@ -2535,6 +2590,169 @@ class PryzmaModTest {
         var transformer = new MixinHardeningTransformer();
         var targets = transformer.targets();
         assertTrue(targets.stream().anyMatch(t -> "yesman.epicfight.mixin.client.MixinLevelRenderer".equals(t.className())));
+    }
+
+    @Test
+    void entityRenderDispatcherTransformerInjectsEpicFightOutline() throws Exception {
+        InputStream in = PryzmaMod.class.getResourceAsStream(
+                "/srg/net/minecraft/client/renderer/entity/EntityRenderDispatcher.class");
+        assertNotNull(in, "EntityRenderDispatcher.class missing from resources");
+        org.objectweb.asm.ClassReader cr = new org.objectweb.asm.ClassReader(in);
+        org.objectweb.asm.tree.ClassNode node = new org.objectweb.asm.tree.ClassNode();
+        cr.accept(node, 0);
+
+        assertTrue(EntityRenderDispatcherTransformer.inject(node), "First injection must succeed");
+
+        var render = method(node, "render", EntityRenderDispatcherTransformer.RENDER_DESC);
+        java.util.ArrayList<org.objectweb.asm.tree.AbstractInsnNode> real = new java.util.ArrayList<>();
+        for (var insn : render.instructions) {
+            if (insn.getOpcode() >= 0) {
+                real.add(insn);
+            }
+        }
+        assertTrue(real.size() >= 2, "render must have at least the injected pair");
+        assertEquals(org.objectweb.asm.Opcodes.ALOAD, real.get(0).getOpcode());
+        assertEquals(1, ((org.objectweb.asm.tree.VarInsnNode) real.get(0)).var);
+        assertEquals(org.objectweb.asm.Opcodes.INVOKESTATIC, real.get(1).getOpcode());
+        var inv = (org.objectweb.asm.tree.MethodInsnNode) real.get(1);
+        assertEquals(EntityRenderDispatcherTransformer.OUTLINE_OWNER, inv.owner);
+        assertEquals(EntityRenderDispatcherTransformer.OUTLINE_NAME, inv.name);
+        assertEquals(EntityRenderDispatcherTransformer.OUTLINE_DESC, inv.desc);
+
+        var analyzer = new org.objectweb.asm.tree.analysis.Analyzer<>(
+                new org.objectweb.asm.tree.analysis.BasicVerifier());
+        analyzer.analyze(node.name, render);
+
+        var reloadMethod = method(node, "onResourceManagerReload",
+                "(Lnet/minecraft/server/packs/resources/ResourceManager;)V");
+        boolean hasAddLayers = false;
+        boolean hasModLoaderPost = false;
+        for (var insn : reloadMethod.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.TypeInsnNode tin
+                    && "net/neoforged/neoforge/client/event/EntityRenderersEvent$AddLayers".equals(tin.desc)) {
+                hasAddLayers = true;
+            }
+            if (insn instanceof org.objectweb.asm.tree.MethodInsnNode min
+                    && "net/neoforged/fml/ModLoader".equals(min.owner)
+                    && "postEvent".equals(min.name)) {
+                hasModLoaderPost = true;
+            }
+        }
+        assertTrue(hasAddLayers, "EntityRenderersEvent.AddLayers must still be instantiated");
+        assertTrue(hasModLoaderPost, "ModLoader.postEvent must still be called");
+        analyzer.analyze(node.name, reloadMethod);
+
+        assertFalse(EntityRenderDispatcherTransformer.inject(node), "Second injection must be a no-op");
+    }
+
+    @Test
+    void epicFightOutlineOnRenderEntityNullIsNoOpWithoutEpicFight() throws Exception {
+        net.pryzma.compat.EpicFightOutline.onRenderEntity(null);
+        net.pryzma.compat.EpicFightOutline.onRenderEntity(null);
+
+        String src = Files.readString(Path.of("src/forgeStubs/java/net/pryzma/compat/EpicFightOutline.java"));
+        assertFalse(src.contains("import yesman.epicfight"), "must not import Epic Fight types");
+        byte[] bytes = classBytes(net.pryzma.compat.EpicFightOutline.class);
+        String latin = new String(bytes, java.nio.charset.StandardCharsets.ISO_8859_1);
+        assertTrue(latin.contains("yesman.epicfight.api.client.camera.EpicFightCameraAPI"));
+        assertTrue(latin.contains("shouldHighlightTarget"));
+        assertTrue(latin.contains("packedTargetOutlineColor"));
+        assertTrue(latin.contains("yesman.epicfight.config.ClientConfig"));
+        assertNoHardEpicFightRefs(bytes);
+    }
+
+    @Test
+    void epicFightShaderBridgeWrapHandRenderIsPassThroughWithoutEpicFight() throws Exception {
+        java.util.concurrent.atomic.AtomicBoolean ran = new java.util.concurrent.atomic.AtomicBoolean(false);
+        Object sentinel = new Object();
+        java.util.function.Supplier<Object> supplier = () -> {
+            ran.set(true);
+            return sentinel;
+        };
+        Object out = net.pryzma.compat.EpicFightShaderBridge.wrapHandRender(supplier);
+        assertSame(sentinel, out);
+        assertTrue(ran.get(), "supplier must run when Epic Fight is absent");
+
+        java.util.concurrent.atomic.AtomicBoolean ranCall = new java.util.concurrent.atomic.AtomicBoolean(false);
+        java.util.concurrent.Callable<Object> callable = () -> {
+            ranCall.set(true);
+            return sentinel;
+        };
+        Object callOut = net.pryzma.compat.EpicFightShaderBridge.wrapHandRender(callable);
+        assertSame(sentinel, callOut);
+        assertTrue(ranCall.get(), "callable must run when Epic Fight is absent");
+
+        String src = Files.readString(Path.of("src/forgeStubs/java/net/pryzma/compat/EpicFightShaderBridge.java"));
+        assertFalse(src.contains("import yesman.epicfight"), "must not import Epic Fight types");
+        byte[] bytes = classBytes(net.pryzma.compat.EpicFightShaderBridge.class);
+        String latin = new String(bytes, java.nio.charset.StandardCharsets.ISO_8859_1);
+        assertTrue(latin.contains("activateComputeShader"));
+        assertTrue(latin.contains("yesman.epicfight.config.ClientConfig"));
+        assertTrue(latin.contains("net.optifine.Config"));
+        assertTrue(latin.contains("useProgram"));
+        assertTrue(latin.contains("ProgramNone"), "restore must poke Shaders.ProgramNone, not null");
+        assertNoHardEpicFightRefs(bytes);
+        assertRestoreProgramNeverPushesNull(bytes);
+
+        var adapter = new org.objectweb.asm.tree.ClassNode();
+        new org.objectweb.asm.ClassReader(classBytes(net.pryzma.reflect.ReflectorAdapter.class)).accept(adapter, 0);
+        var invoke = method(adapter, "invoke",
+                "(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;");
+        boolean callsBridge = false;
+        for (var insn : invoke.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.MethodInsnNode mi
+                    && "net/pryzma/compat/EpicFightShaderBridge".equals(mi.owner)
+                    && "wrapHandRender".equals(mi.name)) {
+                callsBridge = true;
+            }
+        }
+        assertTrue(callsBridge, "ReflectorAdapter.invoke must call EpicFightShaderBridge.wrapHandRender");
+        assertTrue(ldcStrings(invoke).contains("renderSpecificFirstPersonHand"));
+    }
+
+    @Test
+    void epicFightShaderBridgeRestorePokesProgramNoneNeverNull() throws Exception {
+        Object saved = new Object();
+        Object programNone = new Object();
+        var active = new java.util.concurrent.atomic.AtomicReference<Object>(saved);
+        var used = new java.util.concurrent.atomic.AtomicReference<Object>();
+        var lookup = java.lang.invoke.MethodHandles.lookup();
+        var setRef = lookup.findVirtual(
+                java.util.concurrent.atomic.AtomicReference.class,
+                "set",
+                java.lang.invoke.MethodType.methodType(void.class, Object.class));
+
+        assertSame(programNone, invokeSentinel(saved, programNone));
+        assertNull(invokeSentinel(saved, null), "null ProgramNone means skip poke, not write null");
+        assertNull(invokeSentinel(programNone, programNone), "must not poke saved itself");
+
+        setBridgeHandle("getProgramNone", java.lang.invoke.MethodHandles.constant(Object.class, programNone));
+        setBridgeHandle("setActiveProgram", setRef.bindTo(active));
+        setBridgeHandle("useProgram", setRef.bindTo(used));
+        try {
+            invokeRestore(saved);
+            assertSame(programNone, active.get(), "restore must poke ProgramNone");
+            assertNotNull(active.get());
+            assertSame(saved, used.get(), "useProgram must still receive saved");
+
+            active.set(saved);
+            used.set(null);
+            setBridgeHandle("getProgramNone", java.lang.invoke.MethodHandles.constant(Object.class, saved));
+            invokeRestore(saved);
+            assertSame(saved, active.get(), "when sentinel is saved, skip poke; never write null");
+            assertSame(saved, used.get());
+
+            active.set("still-hand");
+            used.set(null);
+            setBridgeHandle("getProgramNone", null);
+            invokeRestore(saved);
+            assertEquals("still-hand", active.get(), "missing ProgramNone must not write null into activeProgram");
+            assertSame(saved, used.get());
+        } finally {
+            setBridgeHandle("getProgramNone", null);
+            setBridgeHandle("setActiveProgram", null);
+            setBridgeHandle("useProgram", null);
+        }
     }
 
     @Test

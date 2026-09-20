@@ -8,6 +8,7 @@ package net.pryzma.reflect;
 import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
 import java.util.function.ObjIntConsumer;
+import java.util.function.Supplier;
 
 import org.joml.Matrix4f;
 
@@ -21,6 +22,7 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.pryzma.compat.EpicFightShaderBridge;
 
 /**
  * Adapts legacy OptiFine reflection invocations to match modern NeoForge 21.1 method signatures,
@@ -205,13 +207,16 @@ public class ReflectorAdapter {
                 return targetMethod.invoke(target, adapted);
             }
         } else if ("renderSpecificFirstPersonHand".equals(name)) {
-            try {
-                return targetMethod.invoke(target, params);
-            } catch (Throwable t) {
-                // If a mod's custom first-person hand renderer throws (e.g. uninitialized state or NPE),
-                // safely fall back to false so vanilla/Pryzma hand rendering proceeds without crashing the client.
-                return Boolean.FALSE;
-            }
+            Supplier<Object> hand = () -> {
+                try {
+                    return targetMethod.invoke(target, params);
+                } catch (Throwable t) {
+                    // If a mod's custom first-person hand renderer throws (e.g. uninitialized state or NPE),
+                    // safely fall back to false so vanilla/Pryzma hand rendering proceeds without crashing the client.
+                    return Boolean.FALSE;
+                }
+            };
+            return EpicFightShaderBridge.wrapHandRender(hand);
         }
 
         return targetMethod.invoke(target, params);
