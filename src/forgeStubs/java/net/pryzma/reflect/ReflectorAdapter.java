@@ -204,6 +204,14 @@ public class ReflectorAdapter {
                 };
                 return targetMethod.invoke(target, adapted);
             }
+        } else if ("renderSpecificFirstPersonHand".equals(name)) {
+            try {
+                return targetMethod.invoke(target, params);
+            } catch (Throwable t) {
+                // If a mod's custom first-person hand renderer throws (e.g. uninitialized state or NPE),
+                // safely fall back to false so vanilla/Pryzma hand rendering proceeds without crashing the client.
+                return Boolean.FALSE;
+            }
         }
 
         return targetMethod.invoke(target, params);

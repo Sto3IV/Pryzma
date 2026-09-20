@@ -170,6 +170,8 @@ public class PryzmaTransformationService implements ITransformationService {
         list.add(new MobTransformer());
         list.add(new PauseScreenTransformer());
         list.add(new PaintingRendererTransformer());
+        list.add(new EntityRenderDispatcherTransformer());
+        list.add(new MixinHardeningTransformer());
         return list;
     }
 

@@ -6,9 +6,11 @@ package net.pryzma.neoforge;
  * Happy birthday to me.
  */
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -864,6 +866,8 @@ class PryzmaModTest {
         assertTrue(node.methods.stream().anyMatch(m -> "getModelData".equals(m.name)
                 && "(Lnet/minecraft/core/BlockPos;)Lnet/neoforged/neoforge/client/model/data/ModelData;".equals(m.desc)));
         assertTrue(node.methods.stream().anyMatch(m -> "setDayTimeFraction".equals(m.name) && "(F)V".equals(m.desc)));
+        assertTrue(invokes(node, "net/neoforged/bus/api/IEventBus", "post",
+                "(Lnet/neoforged/bus/api/Event;)Lnet/neoforged/bus/api/Event;"));
     }
 
     @Test
@@ -2095,6 +2099,363 @@ class PryzmaModTest {
         }
     }
 
+    // ---------------------------------------------------------------------
+    // Epic Fight mixin hardening
+    // ---------------------------------------------------------------------
+
+    /** Epic Fight's real handler descriptor, as read from epic-fight-21.17.3.1-mc1.21.1-neoforge.jar. */
+    private static final String EPICFIGHT_HANDLER_DESC =
+            "(Lnet/minecraft/client/DeltaTracker;ZLnet/minecraft/client/Camera;"
+            + "Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;"
+            + "Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;"
+            + "Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;"
+            + "Lnet/minecraft/world/TickRateManager;FLnet/minecraft/util/profiling/ProfilerFiller;"
+            + "Lnet/minecraft/world/phys/Vec3;DDDZLnet/minecraft/client/renderer/culling/Frustum;FZ"
+            + "Lorg/joml/Matrix4fStack;ZLcom/mojang/blaze3d/vertex/PoseStack;"
+            + "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Ljava/util/Iterator;"
+            + "Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;"
+            + "Lnet/minecraft/client/renderer/MultiBufferSource;"
+            + "Lnet/minecraft/client/renderer/OutlineBufferSource;I)V";
+
+    private static final String EPICFIGHT_TARGET_DESC =
+            "renderLevel(Lnet/minecraft/client/DeltaTracker;ZLnet/minecraft/client/Camera;"
+            + "Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;"
+            + "Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V";
+
+    /** Rebuilds {@code yesman.epicfight.mixin.client.MixinLevelRenderer} node-for-node from its class file. */
+    private static org.objectweb.asm.tree.ClassNode epicFightMixinSpecimen(String localCapture) {
+        var node = new org.objectweb.asm.tree.ClassNode();
+        node.name = "yesman/epicfight/mixin/client/MixinLevelRenderer";
+        node.superName = "java/lang/Object";
+
+        var handler = new org.objectweb.asm.tree.MethodNode(
+                org.objectweb.asm.Opcodes.ACC_PRIVATE, "epicfight$renderLevel", EPICFIGHT_HANDLER_DESC, null, null);
+
+        var at = new org.objectweb.asm.tree.AnnotationNode("Lorg/spongepowered/asm/mixin/injection/At;");
+        at.visit("value", "INVOKE");
+        at.visit("target", "Lnet/minecraft/client/renderer/OutlineBufferSource;setColor(IIII)V");
+        at.visitEnum("shift", "Lorg/spongepowered/asm/mixin/injection/At$Shift;", "AFTER");
+
+        var inject = new org.objectweb.asm.tree.AnnotationNode(MixinHardeningTransformer.INJECT);
+        inject.visit("at", new ArrayList<>(List.of(at)));
+        inject.visit("method", new ArrayList<>(List.of(EPICFIGHT_TARGET_DESC)));
+        inject.visitEnum("locals", MixinHardeningTransformer.LOCAL_CAPTURE, localCapture);
+
+        handler.visibleAnnotations = new ArrayList<>(List.of(inject));
+        node.methods.add(handler);
+        return node;
+    }
+
+    private static String[] localsEnum(org.objectweb.asm.tree.ClassNode node) {
+        var annotation = node.methods.get(0).visibleAnnotations.get(0);
+        for (int i = 0; i < annotation.values.size(); i += 2) {
+            if ("locals".equals(annotation.values.get(i))) {
+                return (String[]) annotation.values.get(i + 1);
+            }
+        }
+        return null;
+    }
+
+    @Test
+    void mixinHardeningRewritesCaptureFailhardOnEpicFightLevelRenderer() {
+        var node = epicFightMixinSpecimen("CAPTURE_FAILHARD");
+        assertArrayEquals(new String[] { MixinHardeningTransformer.LOCAL_CAPTURE, "CAPTURE_FAILHARD" },
+                localsEnum(node), "specimen must start out fatal");
+
+        assertEquals(1, MixinHardeningTransformer.inject(node));
+        assertArrayEquals(new String[] { MixinHardeningTransformer.LOCAL_CAPTURE, "CAPTURE_FAILSOFT" },
+                localsEnum(node), "CAPTURE_FAILHARD must be relaxed to CAPTURE_FAILSOFT");
+        assertEquals(MixinHardeningTransformer.RELAXED, localsEnum(node)[1]);
+
+        assertEquals(0, MixinHardeningTransformer.inject(node), "idempotent");
+
+        // nothing else about the injection may move: same target, same shift, same handler
+        var annotation = node.methods.get(0).visibleAnnotations.get(0);
+        assertEquals(MixinHardeningTransformer.INJECT, annotation.desc);
+        var at = (org.objectweb.asm.tree.AnnotationNode) ((List<?>) annotation.values.get(1)).get(0);
+        assertEquals("INVOKE", at.values.get(1));
+        assertEquals("Lnet/minecraft/client/renderer/OutlineBufferSource;setColor(IIII)V", at.values.get(3));
+        assertArrayEquals(new String[] { "Lorg/spongepowered/asm/mixin/injection/At$Shift;", "AFTER" },
+                (String[]) at.values.get(5));
+        assertEquals(List.of(EPICFIGHT_TARGET_DESC), annotation.values.get(3));
+        assertEquals(EPICFIGHT_HANDLER_DESC, node.methods.get(0).desc, "handler descriptor must not be touched");
+    }
+
+    @Test
+    void mixinHardeningRelaxesFailexceptionAndLeavesNonFatalModesAlone() {
+        var failException = epicFightMixinSpecimen("CAPTURE_FAILEXCEPTION");
+        assertEquals(1, MixinHardeningTransformer.inject(failException));
+        assertEquals("CAPTURE_FAILSOFT", localsEnum(failException)[1]);
+
+        for (String safe : List.of("CAPTURE_FAILSOFT", "PRINT", "NO_CAPTURE")) {
+            var node = epicFightMixinSpecimen(safe);
+            assertEquals(0, MixinHardeningTransformer.inject(node), safe + " must be left alone");
+            assertEquals(safe, localsEnum(node)[1]);
+        }
+
+        // an unrelated enum with the same constant name must not be rewritten
+        var foreign = epicFightMixinSpecimen("CAPTURE_FAILHARD");
+        var annotation = foreign.methods.get(0).visibleAnnotations.get(0);
+        for (int i = 0; i < annotation.values.size(); i += 2) {
+            if ("locals".equals(annotation.values.get(i))) {
+                annotation.values.set(i + 1, new String[] { "Lsome/other/Enum;", "CAPTURE_FAILHARD" });
+            }
+        }
+        assertEquals(0, MixinHardeningTransformer.inject(foreign));
+        assertEquals("CAPTURE_FAILHARD", localsEnum(foreign)[1]);
+    }
+
+    @Test
+    void mixinHardeningTargetsEpicFightAndIsRegistered() {
+        var transformer = new MixinHardeningTransformer();
+        assertSame(cpw.mods.modlauncher.api.TargetType.CLASS, transformer.getTargetType());
+        assertEquals(cpw.mods.modlauncher.api.TransformerVoteResult.YES, transformer.castVote(null));
+        assertTrue(transformer.targets().stream()
+                        .anyMatch(t -> "yesman.epicfight.mixin.client.MixinLevelRenderer".equals(t.className())),
+                "must target Epic Fight's MixinLevelRenderer");
+        assertEquals(MixinHardeningTransformer.FRAGILE_MIXINS.size(), transformer.targets().size());
+        assertTrue(MixinHardeningTransformer.FATAL.contains("CAPTURE_FAILHARD"));
+        assertTrue(MixinHardeningTransformer.FATAL.contains("CAPTURE_FAILEXCEPTION"));
+        assertFalse(MixinHardeningTransformer.FATAL.contains(MixinHardeningTransformer.RELAXED));
+
+        PryzmaTransformationService service = new PryzmaTransformationService();
+        assertTrue(service.transformers().stream().anyMatch(t -> t instanceof MixinHardeningTransformer),
+                "MixinHardeningTransformer must be registered in PryzmaTransformationService");
+    }
+
+    // ---------------------------------------------------------------------
+    // Missing NeoForge LevelRenderer public API
+    // ---------------------------------------------------------------------
+
+    @Test
+    void levelRendererRegainsIterateVisibleBlockEntities() throws Exception {
+        var node = classNode("/srg/net/minecraft/client/renderer/LevelRenderer.class");
+        assertFalse(declares(node, LevelRendererTransformer.ITERATE_BLOCK_ENTITIES,
+                LevelRendererTransformer.ITERATE_BLOCK_ENTITIES_DESC), "specimen already has the method");
+
+        assertTrue(LevelRendererTransformer.injectNeoForgeApi(node));
+        assertFalse(LevelRendererTransformer.injectNeoForgeApi(node), "idempotent");
+        assertVerifies(node);
+
+        var m = method(node, LevelRendererTransformer.ITERATE_BLOCK_ENTITIES,
+                LevelRendererTransformer.ITERATE_BLOCK_ENTITIES_DESC);
+        assertTrue((m.access & org.objectweb.asm.Opcodes.ACC_PUBLIC) != 0);
+        assertTrue((m.access & org.objectweb.asm.Opcodes.ACC_STATIC) == 0);
+        assertEquals(LevelRendererTransformer.ITERATE_BLOCK_ENTITIES_SIG, m.signature,
+                "generic signature must name BlockEntity so the NeoForge override checks out");
+
+        // walks the visible sections, then the global set, feeding the consumer both times
+        assertTrue(reads(m, LevelRendererTransformer.VISIBLE_SECTIONS));
+        assertTrue(reads(m, LevelRendererTransformer.GLOBAL_BLOCK_ENTITIES));
+        assertTrue(calls(m, LevelRendererTransformer.OBJECT_ARRAY_LIST, "iterator"));
+        assertTrue(calls(m, LevelRendererTransformer.RENDER_SECTION, "getCompiled"));
+        assertTrue(calls(m, LevelRendererTransformer.COMPILED_SECTION, "getRenderableBlockEntities"));
+        assertTrue(calls(m, "java/util/List", "forEach"));
+        assertTrue(calls(m, "java/util/Set", "forEach"));
+
+        // the global set is walked under its own monitor, released on both paths
+        assertEquals(1, opcodes(m, org.objectweb.asm.Opcodes.MONITORENTER));
+        assertEquals(2, opcodes(m, org.objectweb.asm.Opcodes.MONITOREXIT));
+        assertEquals(2, m.tryCatchBlocks.size());
+        for (var tcb : m.tryCatchBlocks) {
+            assertNull(tcb.type, "monitor guards must catch any throwable");
+        }
+
+        // the methods the body calls must really exist on the specimen's own types
+        var compiled = classNode(
+                "/srg/net/minecraft/client/renderer/chunk/SectionRenderDispatcher$CompiledSection.class");
+        assertTrue(declares(compiled, "getRenderableBlockEntities", "()Ljava/util/List;"));
+        var section = classNode(
+                "/srg/net/minecraft/client/renderer/chunk/SectionRenderDispatcher$RenderSection.class");
+        assertTrue(declares(section, "getCompiled",
+                "()L" + LevelRendererTransformer.COMPILED_SECTION + ";"));
+    }
+
+    @Test
+    void levelRendererRegainsRequestOutlineEffectAndRenderLevelHonoursIt() throws Exception {
+        var node = classNode("/srg/net/minecraft/client/renderer/LevelRenderer.class");
+        assertFalse(declares(node, LevelRendererTransformer.REQUEST_OUTLINE,
+                LevelRendererTransformer.REQUEST_OUTLINE_DESC), "specimen already has the method");
+        assertTrue(node.fields.stream().noneMatch(f -> LevelRendererTransformer.OUTLINE_REQUESTED.equals(f.name)));
+
+        assertTrue(LevelRendererTransformer.injectNeoForgeApi(node));
+        assertVerifies(node);
+
+        var field = node.fields.stream()
+                .filter(f -> LevelRendererTransformer.OUTLINE_REQUESTED.equals(f.name))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("Z", field.desc);
+        assertTrue((field.access & org.objectweb.asm.Opcodes.ACC_STATIC) == 0);
+
+        var setter = method(node, LevelRendererTransformer.REQUEST_OUTLINE,
+                LevelRendererTransformer.REQUEST_OUTLINE_DESC);
+        assertTrue((setter.access & org.objectweb.asm.Opcodes.ACC_PUBLIC) != 0);
+        assertEquals(1, opcodes(setter, org.objectweb.asm.Opcodes.ICONST_1));
+        assertTrue(writes(setter, LevelRendererTransformer.OUTLINE_REQUESTED));
+
+        // renderLevel must read the request, fold it into the outline flag, and clear it
+        var render = method(node, LevelRendererTransformer.RENDER_LEVEL, LevelRendererTransformer.RENDER_LEVEL_DESC);
+        assertTrue(reads(render, LevelRendererTransformer.OUTLINE_REQUESTED));
+        assertTrue(writes(render, LevelRendererTransformer.OUTLINE_REQUESTED));
+        assertTrue(calls(render, LevelRendererTransformer.OWNER, LevelRendererTransformer.SHOULD_SHOW_OUTLINES));
+
+        int istoreVar = -1;
+        boolean started = false;
+        boolean cleared = false;
+        for (var insn : render.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.FieldInsnNode f
+                    && LevelRendererTransformer.OUTLINE_REQUESTED.equals(f.name)) {
+                if (f.getOpcode() == org.objectweb.asm.Opcodes.GETFIELD) {
+                    started = true;
+                } else if (started) {
+                    cleared = true;
+                }
+            } else if (started && !cleared && insn instanceof org.objectweb.asm.tree.VarInsnNode v
+                    && v.getOpcode() == org.objectweb.asm.Opcodes.ISTORE) {
+                istoreVar = v.var;
+            }
+        }
+        assertTrue(cleared, "renderLevel must clear the request after consuming it");
+        assertTrue(istoreVar >= 0, "renderLevel must write the outline flag local");
+
+        // that local is exactly the one gating this.entityEffect.process(..)
+        assertEquals(istoreVar, entityOutlineFlagVar(render),
+                "the injected store must target the local the entity-outline branch reads");
+    }
+
+    @Test
+    void levelRendererChunkPoolAndNeoForgeApiPatchesCompose() throws Exception {
+        var node = classNode("/srg/net/minecraft/client/renderer/LevelRenderer.class");
+        assertTrue(LevelRendererTransformer.inject(node));
+        assertTrue(LevelRendererTransformer.injectNeoForgeApi(node));
+        assertFalse(LevelRendererTransformer.inject(node));
+        assertFalse(LevelRendererTransformer.injectNeoForgeApi(node));
+        assertVerifies(node);
+
+        assertTrue(declares(node, LevelRendererTransformer.ITERATE_BLOCK_ENTITIES,
+                LevelRendererTransformer.ITERATE_BLOCK_ENTITIES_DESC));
+        assertTrue(declares(node, LevelRendererTransformer.REQUEST_OUTLINE,
+                LevelRendererTransformer.REQUEST_OUTLINE_DESC));
+        assertTrue(invokes(node, LevelRendererTransformer.POOL, LevelRendererTransformer.GET_EXECUTOR,
+                LevelRendererTransformer.EXECUTOR_DESC));
+    }
+
+    /**
+     * {@code BasicVerifier} ignores reference types. ModLauncher writes every transformed class with
+     * {@code COMPUTE_FRAMES}, so the injected control flow has to survive real frame computation too.
+     */
+    @Test
+    void transformedLevelRendererComputesStackMapFrames() throws Exception {
+        var node = classNode("/srg/net/minecraft/client/renderer/LevelRenderer.class");
+        assertTrue(LevelRendererTransformer.inject(node));
+        assertTrue(LevelRendererTransformer.injectNeoForgeApi(node));
+
+        // mirrors cpw.mods.modlauncher.TransformerClassWriter: never classload to merge types
+        var writer = new org.objectweb.asm.ClassWriter(org.objectweb.asm.ClassWriter.COMPUTE_FRAMES) {
+            @Override
+            protected String getCommonSuperClass(String type1, String type2) {
+                return type1.equals(type2) ? type1 : "java/lang/Object";
+            }
+        };
+        node.accept(writer);
+        byte[] bytes = writer.toByteArray();
+        assertTrue(bytes.length > 0);
+
+        var reread = new org.objectweb.asm.tree.ClassNode();
+        new org.objectweb.asm.ClassReader(bytes).accept(reread, 0);
+        assertTrue(declares(reread, LevelRendererTransformer.ITERATE_BLOCK_ENTITIES,
+                LevelRendererTransformer.ITERATE_BLOCK_ENTITIES_DESC));
+        assertTrue(declares(reread, LevelRendererTransformer.REQUEST_OUTLINE,
+                LevelRendererTransformer.REQUEST_OUTLINE_DESC));
+        assertVerifies(reread);
+    }
+
+    @Test
+    void neoForgeApiIsNotFabricatedOnAForeignLevelRenderer() {
+        // no visibleSections / globalBlockEntities -> the iteration must not be invented
+        var node = new org.objectweb.asm.tree.ClassNode();
+        node.name = LevelRendererTransformer.OWNER;
+        assertFalse(LevelRendererTransformer.addIterateVisibleBlockEntities(node));
+        assertFalse(declares(node, LevelRendererTransformer.ITERATE_BLOCK_ENTITIES,
+                LevelRendererTransformer.ITERATE_BLOCK_ENTITIES_DESC));
+
+        // no renderLevel -> the setter still lands, but nothing is patched blind
+        assertTrue(LevelRendererTransformer.addRequestOutlineEffect(node));
+        assertFalse(LevelRendererTransformer.honorOutlineRequest(node));
+    }
+
+    /** Slot of the boolean local whose false branch skips {@code this.entityEffect.process(..)}. */
+    private static int entityOutlineFlagVar(org.objectweb.asm.tree.MethodNode m) {
+        for (var insn : m.instructions) {
+            if (!(insn instanceof org.objectweb.asm.tree.VarInsnNode load)
+                    || load.getOpcode() != org.objectweb.asm.Opcodes.ILOAD) {
+                continue;
+            }
+            var next = load.getNext();
+            while (next != null && next.getOpcode() < 0) {
+                next = next.getNext();
+            }
+            if (!(next instanceof org.objectweb.asm.tree.JumpInsnNode jump)
+                    || jump.getOpcode() != org.objectweb.asm.Opcodes.IFEQ) {
+                continue;
+            }
+            for (var p = jump.getNext(); p != null && p != jump.label; p = p.getNext()) {
+                if (p instanceof org.objectweb.asm.tree.FieldInsnNode f
+                        && f.getOpcode() == org.objectweb.asm.Opcodes.GETFIELD
+                        && LevelRendererTransformer.OWNER.equals(f.owner)
+                        && LevelRendererTransformer.ENTITY_EFFECT.equals(f.name)) {
+                    return load.var;
+                }
+            }
+        }
+        return -1;
+    }
+
+    private static boolean declares(org.objectweb.asm.tree.ClassNode node, String name, String desc) {
+        return node.methods.stream().anyMatch(m -> name.equals(m.name) && desc.equals(m.desc));
+    }
+
+    private static boolean calls(org.objectweb.asm.tree.MethodNode m, String owner, String name) {
+        for (var insn : m.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
+                    && owner.equals(call.owner) && name.equals(call.name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean reads(org.objectweb.asm.tree.MethodNode m, String field) {
+        for (var insn : m.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.FieldInsnNode f
+                    && f.getOpcode() == org.objectweb.asm.Opcodes.GETFIELD && field.equals(f.name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean writes(org.objectweb.asm.tree.MethodNode m, String field) {
+        for (var insn : m.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.FieldInsnNode f
+                    && f.getOpcode() == org.objectweb.asm.Opcodes.PUTFIELD && field.equals(f.name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static int opcodes(org.objectweb.asm.tree.MethodNode m, int opcode) {
+        int n = 0;
+        for (var insn : m.instructions) {
+            if (insn.getOpcode() == opcode) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     private static byte[] readRequiredResource(String path) throws Exception {
         InputStream in = PryzmaMod.class.getResourceAsStream(path);
         assertNotNull(in, path);
@@ -2132,4 +2493,90 @@ class PryzmaModTest {
         }
         return found;
     }
+
+    @Test
+    void mixinHardeningTransformerRelaxesFatalLocalCapturesToPrintAndZerosRequire() {
+        var node = new org.objectweb.asm.tree.ClassNode();
+        node.name = "yesman/epicfight/mixin/client/MixinLevelRenderer";
+        var m = new org.objectweb.asm.tree.MethodNode(
+                org.objectweb.asm.Opcodes.ACC_PRIVATE, "epicfight$renderLevel", "()V", null, null);
+        var ann = new org.objectweb.asm.tree.AnnotationNode("Lorg/spongepowered/asm/mixin/injection/Inject;");
+        ann.values = new ArrayList<>(List.of(
+                "method", List.of("renderLevel"),
+                "locals", new String[] { "Lorg/spongepowered/asm/mixin/injection/callback/LocalCapture;", "CAPTURE_FAILHARD" }
+        ));
+        m.visibleAnnotations = new ArrayList<>(List.of(ann));
+        node.methods.add(m);
+
+        assertEquals(1, MixinHardeningTransformer.inject(node));
+
+        String[] enumVal = null;
+        Integer requireVal = null;
+        Integer expectVal = null;
+        for (int i = 0; i < ann.values.size(); i += 2) {
+            if ("locals".equals(ann.values.get(i))) {
+                enumVal = (String[]) ann.values.get(i + 1);
+            } else if ("require".equals(ann.values.get(i))) {
+                requireVal = (Integer) ann.values.get(i + 1);
+            } else if ("expect".equals(ann.values.get(i))) {
+                expectVal = (Integer) ann.values.get(i + 1);
+            }
+        }
+        assertNotNull(enumVal);
+        assertEquals("CAPTURE_FAILSOFT", enumVal[1]);
+        assertEquals(Integer.valueOf(0), requireVal, "require must be zeroed to satisfy postInject check");
+        assertEquals(Integer.valueOf(0), expectVal, "expect must be zeroed to prevent debug assertion");
+
+        assertEquals(0, MixinHardeningTransformer.inject(node));
+    }
+
+    @Test
+    void mixinHardeningTargetsIncludeEpicFightLevelRenderer() {
+        var transformer = new MixinHardeningTransformer();
+        var targets = transformer.targets();
+        assertTrue(targets.stream().anyMatch(t -> "yesman.epicfight.mixin.client.MixinLevelRenderer".equals(t.className())));
+    }
+
+    @Test
+    void entityRenderDispatcherTransformerInjectsAddLayers() throws Exception {
+        InputStream in = PryzmaMod.class.getResourceAsStream("/srg/net/minecraft/client/renderer/entity/EntityRenderDispatcher.class");
+        assertNotNull(in, "EntityRenderDispatcher.class missing from resources");
+        org.objectweb.asm.ClassReader cr = new org.objectweb.asm.ClassReader(in);
+        org.objectweb.asm.tree.ClassNode node = new org.objectweb.asm.tree.ClassNode();
+        cr.accept(node, 0);
+
+        assertTrue(EntityRenderDispatcherTransformer.inject(node), "First injection must succeed");
+
+        var reloadMethod = node.methods.stream()
+                .filter(m -> "onResourceManagerReload".equals(m.name))
+                .findFirst()
+                .orElse(null);
+        assertNotNull(reloadMethod);
+
+        boolean hasAddLayers = false;
+        boolean hasModLoaderPost = false;
+        for (var insn : reloadMethod.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.TypeInsnNode tin
+                    && "net/neoforged/neoforge/client/event/EntityRenderersEvent$AddLayers".equals(tin.desc)) {
+                hasAddLayers = true;
+            }
+            if (insn instanceof org.objectweb.asm.tree.MethodInsnNode min
+                    && "net/neoforged/fml/ModLoader".equals(min.owner)
+                    && "postEvent".equals(min.name)) {
+                hasModLoaderPost = true;
+            }
+        }
+        assertTrue(hasAddLayers, "EntityRenderersEvent.AddLayers must be instantiated");
+        assertTrue(hasModLoaderPost, "ModLoader.postEvent must be called");
+
+        assertFalse(EntityRenderDispatcherTransformer.inject(node), "Second injection must be a no-op");
+    }
+
+    @Test
+    void transformationServiceIncludesEntityRenderDispatcherTransformer() {
+        var service = new PryzmaTransformationService();
+        var transformers = service.transformers();
+        assertTrue(transformers.stream().anyMatch(t -> t instanceof EntityRenderDispatcherTransformer));
+    }
 }
+

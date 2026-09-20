@@ -17,6 +17,7 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,10 +166,66 @@ public class ClientLevelTransformer implements ITransformer<ClassNode> {
         return true;
     }
 
+    public static boolean injectLevelLoadEvent(ClassNode node) {
+        boolean patched = false;
+        for (MethodNode m : node.methods) {
+            if ("<init>".equals(m.name)) {
+                boolean hasPost = false;
+                for (var insn = m.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                    if (insn instanceof MethodInsnNode min
+                            && "net/neoforged/bus/api/IEventBus".equals(min.owner)
+                            && "post".equals(min.name)) {
+                        hasPost = true;
+                        break;
+                    }
+                }
+                if (hasPost) {
+                    continue;
+                }
+
+                for (var insn = m.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                    if (insn.getOpcode() == Opcodes.RETURN) {
+                        InsnList eventList = new InsnList();
+                        eventList.add(new FieldInsnNode(
+                                Opcodes.GETSTATIC,
+                                "net/neoforged/neoforge/common/NeoForge",
+                                "EVENT_BUS",
+                                "Lnet/neoforged/bus/api/IEventBus;"));
+                        eventList.add(new TypeInsnNode(
+                                Opcodes.NEW,
+                                "net/neoforged/neoforge/event/level/LevelEvent$Load"));
+                        eventList.add(new InsnNode(Opcodes.DUP));
+                        eventList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                        eventList.add(new MethodInsnNode(
+                                Opcodes.INVOKESPECIAL,
+                                "net/neoforged/neoforge/event/level/LevelEvent$Load",
+                                "<init>",
+                                "(Lnet/minecraft/world/level/LevelAccessor;)V",
+                                false));
+                        eventList.add(new MethodInsnNode(
+                                Opcodes.INVOKEINTERFACE,
+                                "net/neoforged/bus/api/IEventBus",
+                                "post",
+                                "(Lnet/neoforged/bus/api/Event;)Lnet/neoforged/bus/api/Event;",
+                                true));
+                        eventList.add(new InsnNode(Opcodes.POP));
+
+                        m.instructions.insertBefore(insn, eventList);
+                        m.maxStack = Math.max(m.maxStack, 4);
+                        patched = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return patched;
+    }
+
     public static boolean inject(ClassNode node) {
         boolean d = injectDayTime(node);
         boolean m = injectModelData(node);
-        return d || m;
+        boolean e = injectLevelLoadEvent(node);
+        return d || m || e;
     }
 
     @Override
