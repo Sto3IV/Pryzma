@@ -84,7 +84,8 @@ class PryzmaModTest {
         InputStream in = PryzmaMod.class.getResourceAsStream("/srg/net/pryzma/Config.class");
         assertNotNull(in);
         String latin = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.ISO_8859_1);
-        assertTrue(latin.contains("Pryzma_1.21.1_1.0.5"));
+        assertTrue(latin.contains("Pryzma_1.21.1_1.0.6"));
+        assertTrue(!latin.contains("Pryzma_1.21.1_1.0.5"));
         assertTrue(!latin.contains("Pryzma_1.21.1_1.0.4"));
         assertTrue(!latin.contains("Pryzma_1.21.1_1.0.3"));
         assertTrue(!latin.contains("Pryzma_1.21.1_1.0.2"));
@@ -103,11 +104,12 @@ class PryzmaModTest {
     }
 
     @Test
-    void videoSettingsScreenWatermarkMatchesVersion105() throws Exception {
+    void videoSettingsScreenWatermarkMatchesVersion106() throws Exception {
         InputStream in = PryzmaMod.class.getResourceAsStream("/srg/net/minecraft/client/gui/screens/options/VideoSettingsScreen.class");
         assertNotNull(in);
         String latin = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.ISO_8859_1);
-        assertTrue(latin.contains("Pryzma 1.0.5"), "VideoSettingsScreen must render watermark Pryzma 1.0.5");
+        assertTrue(latin.contains("Pryzma 1.0.6"), "VideoSettingsScreen must render watermark Pryzma 1.0.6");
+        assertFalse(latin.contains("Pryzma 1.0.5"), "Must not contain stale version 1.0.5");
         assertFalse(latin.contains("Pryzma 1.0.4"), "Must not contain stale version 1.0.4");
         assertFalse(latin.contains("Pryzma 1.0.3"), "Must not contain stale version 1.0.3");
         assertFalse(latin.contains("Pryzma 1.0.2"), "Must not contain stale version 1.0.2");
@@ -1127,7 +1129,7 @@ class PryzmaModTest {
             assertNotNull(tomlEntry);
             String toml = new String(zf.getInputStream(tomlEntry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             assertTrue(toml.contains("modId=\"pryzma\""));
-            assertTrue(toml.contains("version=\"1.0.5\""));
+            assertTrue(toml.contains("version=\"1.0.6\""));
             assertTrue(toml.contains("displayName=\"Pryzma\""));
             assertTrue(!toml.toLowerCase(java.util.Locale.ROOT).contains("optifine"));
             assertTrue(!toml.contains("HD_U"));
@@ -1189,7 +1191,7 @@ class PryzmaModTest {
                     String tomlText = new String(zis.readAllBytes(), StandardCharsets.UTF_8);
                     assertTrue(tomlText.contains("modLoader=\"lowcodefml\""), "stub toml must use lowcodefml");
                     assertTrue(tomlText.contains("modId=\"prizma_beta\""), "stub toml must declare modId=prizma_beta");
-                    assertTrue(tomlText.contains("version=\"1.0.5\""), "stub toml must declare version=1.0.5");
+                    assertTrue(tomlText.contains("version=\"1.0.6\""), "stub toml must declare version=1.0.6");
                     assertTrue(tomlText.contains("displayName=\"Pryzma\""), "stub toml must declare displayName=Pryzma");
                     assertTrue(tomlText.contains("authors=\"Sto3IV and Ranni\""), "stub toml must declare authors=Sto3IV and Ranni");
                     assertFalse(tomlText.toLowerCase().contains("sp614x"), "stub toml must not contain sp614x");

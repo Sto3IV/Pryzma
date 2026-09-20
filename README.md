@@ -141,7 +141,7 @@ gradlew.bat build
 3. Locate the compiled artifact:
 The finalized NeoForge mod JAR file will be available under:
 ```
-build/libs/pryzma-1.0.5.jar
+build/libs/pryzma-1.0.6.jar
 ```
 
 ---
