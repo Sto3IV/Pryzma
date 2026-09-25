@@ -22,6 +22,9 @@ import net.pryzma.item.PrCitGlint;
 abstract class BufferSourceMixin {
     @Inject(method = "getBuffer", at = @At("HEAD"), cancellable = true)
     private void prTrackRenderType(RenderType type, CallbackInfoReturnable<VertexConsumer> cir) {
+        if (!PrCemRender.isRendering() && !PrCitGlint.isRendering()) {
+            return;
+        }
         if (PrCitGlint.bypassing()) {
             return;
         }

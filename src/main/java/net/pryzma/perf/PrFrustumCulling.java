@@ -20,8 +20,7 @@ public final class PrFrustumCulling {
     }
 
     public static boolean isFinite(AABB box) {
-        return Double.isFinite(box.minX) && Double.isFinite(box.minY) && Double.isFinite(box.minZ)
-                && Double.isFinite(box.maxX) && Double.isFinite(box.maxY) && Double.isFinite(box.maxZ);
+        return Double.isFinite(box.minX + box.maxX + box.minY + box.maxY + box.minZ + box.maxZ);
     }
 
     /** A {@code NaN} bound carries no position at all; such a box is treated as visible. */

@@ -33,19 +33,11 @@ abstract class LevelRendererLightMixin {
         PrDynamicLights.update((LevelRenderer) (Object) this, this.level);
     }
 
-    @Inject(method = "getLightColor(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;)I",
-            at = @At("RETURN"), cancellable = true)
-    private static void prDynamicLightBlock(BlockAndTintGetter level, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
-        if (PrDynamicLights.isEnabled()) {
-            cir.setReturnValue(PrDynamicLights.getCombinedLight(pos, cir.getReturnValue()));
-        }
-    }
-
     @Inject(method = "getLightColor(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;)I",
             at = @At("RETURN"), cancellable = true)
     private static void prDynamicLightBlockState(BlockAndTintGetter level, BlockState state, BlockPos pos,
             CallbackInfoReturnable<Integer> cir) {
-        if (PrDynamicLights.isEnabled()) {
+        if (PrDynamicLights.hasSources()) {
             cir.setReturnValue(PrDynamicLights.getCombinedLight(pos, cir.getReturnValue()));
         }
     }

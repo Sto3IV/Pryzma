@@ -137,6 +137,11 @@ public final class PrCitGlint {
         return bypass;
     }
 
+    /** Whether an item is currently being rendered with potential custom glint layers. */
+    public static boolean isRendering() {
+        return stack != null;
+    }
+
     /** The consumer answering a request for {@code type}, or {@code null} to let vanilla answer. */
     public static VertexConsumer redirect(MultiBufferSource.BufferSource source, RenderType type) {
         if (bypass || stack == null) {

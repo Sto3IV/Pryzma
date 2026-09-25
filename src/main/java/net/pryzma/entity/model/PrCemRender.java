@@ -41,6 +41,10 @@ public final class PrCemRender {
     public record Scope(MultiBufferSource buffers, RenderType firstType, RenderType lastType) {
     }
 
+    public static boolean isRendering() {
+        return buffers != null;
+    }
+
     public static Scope begin(MultiBufferSource source) {
         Scope saved = new Scope(buffers, firstType, lastType);
         buffers = source;

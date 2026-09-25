@@ -3,7 +3,6 @@ package net.pryzma.light;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -57,9 +56,9 @@ public final class PrDynamicLights {
         }
     }
 
-    private static final Object LOCK = new Object();
-    private static final Int2ObjectOpenHashMap<LightSource> SOURCES = new Int2ObjectOpenHashMap<>();
-    private static final List<LightSource> ACTIVE_SOURCES = new ArrayList<>();
+    private static final LightSource[] EMPTY_SOURCES = new LightSource[0];
+    private static volatile LightSource[] ACTIVE_ARRAY = EMPTY_SOURCES;
+    private static volatile boolean HAS_SOURCES = false;
     private static long lastUpdateMs = 0L;
 
     private PrDynamicLights() {}
@@ -67,6 +66,11 @@ public final class PrDynamicLights {
     /** Whether Dynamic Lights is enabled (1 = Fast, 2 = Fancy, 3 = OFF). */
     public static boolean isEnabled() {
         return PryzmaConfig.prDynamicLights != 3;
+    }
+
+    /** Whether dynamic lights has any currently active light sources in the scene. */
+    public static boolean hasSources() {
+        return HAS_SOURCES;
     }
 
     /** Whether Fancy mode is enabled (smooth per-frame interpolation vs stepped updates). */
@@ -154,27 +158,30 @@ public final class PrDynamicLights {
 
     /** Computes interpolated dynamic light level at specific 3D coordinates (0.0 to 15.0). */
     public static double getLightLevelAt(double x, double y, double z) {
-        if (!isEnabled()) {
+        if (!HAS_SOURCES) {
+            return 0.0;
+        }
+        LightSource[] sources = ACTIVE_ARRAY;
+        int len = sources.length;
+        if (len == 0) {
             return 0.0;
         }
         double maxLevel = 0.0;
-        synchronized (LOCK) {
-            for (int i = 0; i < ACTIVE_SOURCES.size(); i++) {
-                LightSource src = ACTIVE_SOURCES.get(i);
-                if (src.lightLevel <= 0) {
-                    continue;
-                }
-                double dx = x - src.x;
-                double dy = y - src.y;
-                double dz = z - src.z;
-                double distSq = dx * dx + dy * dy + dz * dz;
-                if (distSq < MAX_DIST_SQ) {
-                    double dist = Math.sqrt(distSq);
-                    double falloff = 1.0 - (dist / MAX_DIST);
-                    double level = falloff * src.lightLevel;
-                    if (level > maxLevel) {
-                        maxLevel = level;
-                    }
+        for (int i = 0; i < len; i++) {
+            LightSource src = sources[i];
+            if (src.lightLevel <= 0) {
+                continue;
+            }
+            double dx = x - src.x;
+            double dy = y - src.y;
+            double dz = z - src.z;
+            double distSq = dx * dx + dy * dy + dz * dz;
+            if (distSq < MAX_DIST_SQ) {
+                double dist = Math.sqrt(distSq);
+                double falloff = 1.0 - (dist / MAX_DIST);
+                double level = falloff * src.lightLevel;
+                if (level > maxLevel) {
+                    maxLevel = level;
                 }
             }
         }
@@ -247,32 +254,27 @@ public final class PrDynamicLights {
         }
         lastUpdateMs = now;
 
-        synchronized (LOCK) {
-            SOURCES.clear();
-            ACTIVE_SOURCES.clear();
-            for (Entity entity : level.entitiesForRendering()) {
-                int light = getLightLevel(entity);
-                if (light > 0) {
-                    LightSource src = new LightSource(entity.getId(), entity.getX(), entity.getY(), entity.getZ(), light);
-                    SOURCES.put(entity.getId(), src);
-                    ACTIVE_SOURCES.add(src);
-                }
+        List<LightSource> active = new ArrayList<>();
+        for (Entity entity : level.entitiesForRendering()) {
+            int light = getLightLevel(entity);
+            if (light > 0) {
+                LightSource src = new LightSource(entity.getId(), entity.getX(), entity.getY(), entity.getZ(), light);
+                active.add(src);
             }
         }
+        LightSource[] arr = active.toArray(EMPTY_SOURCES);
+        ACTIVE_ARRAY = arr;
+        HAS_SOURCES = arr.length > 0;
     }
 
     /** Clears all tracked light sources. */
     public static void clear() {
-        synchronized (LOCK) {
-            SOURCES.clear();
-            ACTIVE_SOURCES.clear();
-        }
+        ACTIVE_ARRAY = EMPTY_SOURCES;
+        HAS_SOURCES = false;
     }
 
     /** Returns count of currently active dynamic light sources. */
     public static int getSourceCount() {
-        synchronized (LOCK) {
-            return ACTIVE_SOURCES.size();
-        }
+        return ACTIVE_ARRAY.length;
     }
 }
