@@ -35,8 +35,16 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 * **Micro-Stutter Elimination:** Replaces blocking single-chunk frame delays and sleep-chokes with worker-budgeted dispatch capacity, maintaining rock-solid frame pacing even during high-speed flight and world loading.
 * **Worker Thread Priority:** Background chunk meshing threads operate at reduced thread priority (`NORM_PRIORITY - 2`) to ensure that main-thread input polling and frame presentation are never starved of CPU cycles.
 
-### 4. Deep Mod & Ecosystem Compatibility
+### 4. Native Dynamic Lights Engine
+Pryzma incorporates a zero-overhead, real-time dynamic lighting engine:
+* **Render-Time Injection:** Calculates analytical Euclidean falloff ($R = 7.5$) and injects lighting directly during rasterization of entities, tile entities, held items, and hand models.
+* **Zero Chunk Re-meshing:** Completely eliminates the micro-stutters and FPS drops of legacy light systems that constantly mark chunk sections dirty.
+* **Extensive Item & Entity Emission:** Torches, lanterns, campfires, lava buckets (15), blaze rods/powder (10), glowstone/prismarine (8), glowing berries (12), burning mobs, fireballs, magma cubes, and glowing squids.
+* **Shaderpack Integration:** Direct synchronization with shader uniforms `heldBlockLightValue` and `heldBlockLightValue2`.
+
+### 5. Deep Mod & Ecosystem Compatibility
 * **NeoForge Model Data & Pipelines:** Preserves full compatibility with NeoForge `IModelData`, ambient occlusion matrix evaluations, fluid rendering hooks, and custom block entity renderers.
+* **Zero ASM / Clean Mixin Architecture:** No classloader manipulation, binary shims, or bytecode overlays. 100% compliant with standard NeoForge runtime.
 * **Modded Biomes & Dimensions:** Native color-blending and sky rendering support for modded world generation.
 
 ---
@@ -45,7 +53,7 @@ Pryzma eliminates the legacy chunk-rendering bottlenecks of vanilla Minecraft an
 
 > **Why Pryzma exists**: To recreate the full visual fidelity of classic and modern OptiFine resource packs on **NeoForge 1.21.1**, players without **Pryzma** are forced to assemble a fragile "mod salad" of 15 to 20 separate mods — many of which don't even support OptiFine formatting and force you to convert textures into proprietary JSON formats.
 >
-> **Pryzma** delivers everything out of the box in **ONE. SINGLE. MOD.** Not 15+ different mods where you have to set up configs for each one and constantly deal with mixin conflicts. Just one single JAR powered by clean NeoForge ASM transformers.
+> **Pryzma** delivers everything out of the box in **ONE. SINGLE. MOD.** Not 15+ different mods where you have to set up configs for each one and constantly deal with mod conflicts. Just one single JAR powered by an elegant, high-precision Sponge Mixin monolithic architecture (Zero ASM / Zero Shims).
 
 | Feature | Vanilla 1.21.1 | Sodium & Friends (NeoForge 1.21.1 Ecosystem) | Pryzma (NeoForge 1.21.1) |
 | :--- | :---: | :--- | :---: |
@@ -141,18 +149,18 @@ gradlew.bat build
 3. Locate the compiled artifact:
 The finalized NeoForge mod JAR file will be available under:
 ```
-build/libs/pryzma-1.0.6.jar
+build/libs/pryzma-2.0.0.jar
 ```
 
 ---
 
 ## Verification & Automated Test Suite
 
-Pryzma includes a comprehensive test harness covering ASM transformations, bytecode patches, thread allocation formulas, and resource pack parsing.
+Pryzma includes a comprehensive test harness covering GLSL shader parsing and translation, dynamic lighting Euclidean falloff, CIT/CEM matchers, thread allocation formulas, and resource pack parsing.
 
 To run the full suite:
 ```bash
 ./gradlew test --rerun-tasks
 ```
 
-All bytecode injections, chunk worker schedulers, and NeoForge pipeline bridges are verified on every compilation run.
+All 126+ automated unit tests and integration verifications are validated on every compilation run.
