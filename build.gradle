@@ -1,6 +1,5 @@
 plugins {
     id 'java-library'
-    id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.146'
     id 'idea'
 }
@@ -12,29 +11,51 @@ tasks.named('wrapper', Wrapper).configure {
 version = mod_version
 group = mod_group_id
 
-sourceSets {
-    forgeStubs {
-        java.srcDir 'src/forgeStubs/java'
-    }
-}
-
-sourceSets.main.resources {
-    srcDir('src/generated/resources')
-    exclude("**/*.bbmodel")
-    exclude("src/generated/**/.cache")
-}
-
-repositories {
-}
-
 base {
     archivesName = mod_id
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
+// Pryzma 1.x shipped a ModLauncher ITransformationService that swapped whole vanilla
+// classes (srg/ payload, libs/pryzma-loader.jar). None of it is part of 2.0: the files
+// that still sit on disk are excluded here so they are neither compiled nor packaged.
+sourceSets {
+    main {
+        java {
+            exclude 'net/pryzma/neoforge/**'
+        }
+        resources {
+            srcDir 'src/generated/resources'
+            exclude '**/*.bbmodel', 'src/generated/**/.cache'
+            exclude 'srg/**', 'pryzma/**', 'files.txt', 'patch.cfg', 'patch2.cfg', 'META-INF/services/**'
+            // Moved next to its loader: net/pryzma/core/match/flattening_ids.txt.
+            exclude 'flattening_ids.txt'
+            // Superseded by assets/pryzma/lang/*.json and assets/pryzma/ctm_default/**.
+            exclude 'assets/minecraft/optifine/lang/**', 'assets/minecraft/optifine/ctm/**'
+        }
+    }
+    test {
+        java {
+            exclude 'net/pryzma/neoforge/**'
+        }
+    }
+    // Scripted in-game self-test (net.pryzma.dev). Loaded only by the runSelftest run,
+    // never packaged into the mod jar.
+    dev {
+        java.srcDir 'src/dev/java'
+    }
+}
+
+repositories {
+}
+
 neoForge {
     version = project.neo_version
+
+    // CEM parts extend ModelPart; entity textures read render type internals (see the file).
+    accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+    validateAccessTransformers = true
 
     parchment {
         mappingsVersion = project.parchment_mappings_version
@@ -44,82 +65,51 @@ neoForge {
     runs {
         client {
             client()
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
-        server {
-            server()
-            programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        gameTestServer {
-            type = "gameTestServer"
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        data {
-            data()
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        selftest {
+            client()
+            systemProperty 'pryzma.selftest', file('run/selftest.txt').absolutePath
+            programArguments.addAll '--width', '1280', '--height', '720'
         }
 
         configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
+            logLevel = org.slf4j.event.Level.INFO
+            // Injection counts are validated at load time; a mixin that silently finds no
+            // target is reported in the log instead of passing unnoticed.
+            systemProperty 'mixin.debug.countInjections', 'true'
+            systemProperty 'mixin.debug.verify', 'true'
+            systemProperty 'pryzma.audit', 'true'
         }
     }
 
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
+            sourceSet(sourceSets.dev)
         }
     }
-
 }
 
-sourceSets.forgeStubs.compileClasspath += sourceSets.main.compileClasspath
-sourceSets.forgeStubs.compileClasspath += files('src/main/resources/srg')
-sourceSets.test.compileClasspath += sourceSets.forgeStubs.output
-sourceSets.test.runtimeClasspath += sourceSets.forgeStubs.output
+sourceSets.dev.compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+sourceSets.dev.runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
 
-tasks.named('classes').configure {
-    dependsOn tasks.named('compileForgeStubsJava')
-}
-
-tasks.named('processResources', ProcessResources).configure {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    dependsOn tasks.named('compileForgeStubsJava')
-    from(sourceSets.forgeStubs.output.classesDirs) {
-        into 'srg'
-        include '**/*.class'
-    }
-}
-
-configurations {
-    runtimeClasspath.extendsFrom localRuntime
-}
-
-// Plain JUnit. Do not append main.runtimeClasspath: that pulls FML's
-// JUnitService and boots ModLauncher (module "main" collision).
+// Plain JUnit over the pure engine classes. main.compileClasspath gives the tests the
+// Minecraft/NeoForge types without booting FML.
 sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
 sourceSets.test.runtimeClasspath += sourceSets.main.compileClasspath
 
 dependencies {
-    // Specimen installer/transformer bytecode, for compiling the NeoForge adapter.
-    compileOnly files('libs/pryzma-loader.jar')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
-    testImplementation 'org.ow2.asm:asm-tree:9.7.1'
-    testImplementation 'org.ow2.asm:asm-analysis:9.7.1'
 }
 
 tasks.named('test', Test).configure {
-    dependsOn tasks.named('jar')
     useJUnitPlatform()
     maxHeapSize = '1g'
     testLogging {
-        events 'passed', 'skipped', 'failed'
-        showStandardStreams = true
+        events 'failed'
+        exceptionFormat = 'full'
     }
 }
 
@@ -144,21 +134,9 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
 sourceSets.main.resources.srcDir generateModMetadata
 neoForge.ideSyncTask generateModMetadata
 
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/repo"
-        }
-    }
-}
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.compilerArgs.addAll(['-Xlint:deprecation', '-Xlint:unchecked'])
 }
 
 idea {

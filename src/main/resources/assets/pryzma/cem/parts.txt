@@ -1,0 +1,279 @@
+# OptiFine CEM part names per model for Minecraft 1.21.1: <model> <optifine part>=<vanilla child> ...
+# Generated from Entity Model Features 3.3.6 (EMFModelMappings) for MC 12101; do not edit by hand.
+allay head=head body=body left_arm=left_arm right_arm=right_arm left_wing=left_wing right_wing=right_wing
+armor_stand head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg right=right_body_stick left=left_body_stick waist=shoulder_stick base=base_plate
+armor_stand_small head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg right=right_body_stick left=left_body_stick waist=shoulder_stick base=base_plate
+arrow body=root
+axolotl head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg right_gills=right_gills top_gills=top_gills left_gills=left_gills tail=tail
+axolotl_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg right_gills=right_gills top_gills=top_gills left_gills=left_gills tail=tail
+banner slate=flag stand=pole top=bar
+bat body=body head=head right_wing=right_wing left_wing=left_wing outer_right_wing=right_wing_tip outer_left_wing=left_wing_tip feet=feet
+bed_foot foot=main leg3=left_leg leg4=right_leg
+bed_head head=main leg1=left_leg leg2=right_leg
+bee body=bone torso=body right_wing=right_wing left_wing=left_wing front_legs=front_legs middle_legs=middle_legs back_legs=back_legs stinger=stinger left_antenna=left_antenna right_antenna=right_antenna
+bee_baby body=bone torso=body right_wing=right_wing left_wing=left_wing front_legs=front_legs middle_legs=middle_legs back_legs=back_legs stinger=stinger left_antenna=left_antenna right_antenna=right_antenna
+bell body=bell_body base=bell_base
+blaze head=head stick1=part0 stick2=part1 stick3=part2 stick4=part3 stick5=part4 stick6=part5 stick7=part6 stick8=part7 stick9=part8 stick10=part9 stick11=part10 stick12=part11
+boat bottom=bottom back=back front=front right=right left=left paddle_left=left_paddle paddle_right=right_paddle bottom_no_water=water_patch
+bogged head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+bogged_outer head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+book cover_left=right_lid cover_right=left_lid pages_left=right_pages pages_right=left_pages flipping_page_right=flip_page1 flipping_page_left=flip_page2 book_spine=seam
+boots head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+boots_baby head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+breeze body=body rods=rods head=head wind_body=wind_body wind_middle=wind_mid wind_bottom=wind_bottom wind_top=wind_top
+breeze_eyes body=body rods=rods head=head wind_body=wind_body wind_middle=wind_mid wind_bottom=wind_bottom wind_top=wind_top
+breeze_wind body=body rods=rods head=head wind_body=wind_body wind_middle=wind_mid wind_bottom=wind_bottom wind_top=wind_top
+breeze_wind_charge core=projectile wind=wind cube1=cube_r1 cube2=cube_r2 charge=wind_charge
+camel body=body hump=hump tail=tail head=head left_ear=left_ear right_ear=right_ear back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg
+camel_baby body=body tail=tail head=head left_ear=left_ear right_ear=right_ear back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg
+camel_baby_saddle body=body hump=hump tail=tail head=head left_ear=left_ear right_ear=right_ear back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle reins=reins bridle=bridle
+camel_husk body=body hump=hump tail=tail head=head left_ear=left_ear right_ear=right_ear back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg
+camel_husk_baby_saddle body=body hump=hump tail=tail head=head left_ear=left_ear right_ear=right_ear back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle reins=reins bridle=bridle
+camel_husk_saddle body=body hump=hump tail=tail head=head left_ear=left_ear right_ear=right_ear back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle reins=reins bridle=bridle
+camel_saddle body=body hump=hump tail=tail head=head left_ear=left_ear right_ear=right_ear back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle reins=reins bridle=bridle
+cat head=head body=body tail=tail1 tail2=tail2 back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg
+cat_baby head=head body=body tail=tail1 tail2=tail2 back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg
+cat_baby_collar head=head body=body tail=tail1 tail2=tail2 back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg
+cat_collar head=head body=body tail=tail1 tail2=tail2 back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg
+cave_spider head=head neck=body0 body=body1 leg1=right_hind_leg leg2=left_hind_leg leg3=right_middle_hind_leg leg4=left_middle_hind_leg leg5=right_middle_front_leg leg6=left_middle_front_leg leg7=right_front_leg leg8=left_front_leg
+chest lid=lid base=bottom knob=lock
+chest_boat bottom=bottom back=back front=front right=right left=left paddle_left=left_paddle paddle_right=right_paddle bottom_no_water=water_patch chest_base=chest_bottom chest_lid=chest_lid chest_knob=chest_lock
+chest_left lid=lid base=bottom knob=lock
+chest_minecart bottom=bottom back=back front=front right=right left=left
+chest_raft bottom=bottom paddle_left=left_paddle paddle_right=right_paddle chest_base=chest_bottom chest_lid=chest_lid chest_knob=chest_lock
+chest_right lid=lid base=bottom knob=lock
+chestplate head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+chestplate_baby head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+chicken head=head body=body right_leg=right_leg left_leg=left_leg right_wing=right_wing left_wing=left_wing bill=beak chin=red_thing
+chicken_baby body=body right_leg=right_leg left_leg=left_leg right_wing=right_wing left_wing=left_wing
+cod body=body head=head nose=nose tail=tail_fin fin_right=right_fin fin_left=left_fin fin_back=top_fin
+cold_chicken head=head body=body right_leg=right_leg left_leg=left_leg right_wing=right_wing left_wing=left_wing bill=beak chin=red_thing
+cold_chicken_baby body=body right_leg=right_leg left_leg=left_leg right_wing=right_wing left_wing=left_wing
+cold_cow head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+cold_cow_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+cold_pig head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+cold_pig_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+command_block_minecart bottom=bottom back=back front=front right=right left=left
+conduit_cage cage=shell
+conduit_eye eye=eye
+conduit_shell base=shell
+conduit_wind wind=wind
+copper_Golem body=body head=head right_arm=right_arm left_arm=left_arm right_leg=right_leg left_leg=left_leg
+cow head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+cow_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+creeper head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+creeper_charge head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+decorated_pot_base neck=neck top=top bottom=bottom
+decorated_pot_sides front=front back=back left=left right=right
+dolphin body=body tail=tail tail_fin=tail_fin head=head right_fin=right_fin left_fin=left_fin back_fin=back_fin
+dolphin_baby body=body tail=tail tail_fin=tail_fin head=head right_fin=right_fin left_fin=left_fin back_fin=back_fin
+donkey body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg right_chest=right_chest left_chest=left_chest
+donkey_baby body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg right_chest=right_chest left_chest=left_chest
+donkey_baby_saddle body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle mouth_saddle_wrap=mouth_saddle_wrap head_saddle=head_saddle right_saddle_line=right_saddle_line left_saddle_line=left_saddle_line right_saddle_mouth=right_saddle_mouth left_saddle_mouth=left_saddle_mouth
+donkey_saddle body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle mouth_saddle_wrap=mouth_saddle_wrap head_saddle=head_saddle right_saddle_line=right_saddle_line left_saddle_line=left_saddle_line right_saddle_mouth=right_saddle_mouth left_saddle_mouth=left_saddle_mouth
+double_chest_left lid_right=lid base_right=bottom knob_right=lock
+double_chest_right lid_left=lid base_left=bottom knob_left=lock
+dragon head=head jaw=jaw spine=neck body=body left_wing=left_wing left_wing_tip=left_wing_tip right_wing=right_wing right_wing_tip=right_wing_tip front_left_leg=left_front_leg front_left_shin=left_front_leg_tip front_left_foot=left_front_foot back_left_leg=left_hind_leg back_left_shin=left_hind_leg_tip back_left_foot=left_hind_foot front_right_leg=right_front_leg front_right_shin=right_front_leg_tip front_right_foot=right_front_foot back_right_leg=right_hind_leg back_right_shin=right_hind_leg_tip back_right_foot=right_hind_foot
+dragon_fireball fireball=fireball
+drowned head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+drowned_baby head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+drowned_baby_outer head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+drowned_outer head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+elder_guardian tail1=tail0 tail2=tail1 tail3=tail2 body=head eye=eye spine1=spike0 spine2=spike1 spine3=spike2 spine4=spike3 spine5=spike4 spine6=spike5 spine7=spike6 spine8=spike7 spine9=spike8 spine10=spike9 spine11=spike10 spine12=spike11
+end_crystal cube=cube glass=glass base=base
+ender_chest lid=lid base=bottom knob=lock
+ender_double_chest_left lid_right=lid base_right=bottom knob_right=lock
+ender_double_chest_right lid_left=lid base_left=bottom knob_left=lock
+enderman head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+endermite body1=segment0 body2=segment1 body3=segment2 body4=segment3
+evoker head=head headwear=hat body=body nose=nose arms=arms left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+evoker_fangs base=base upper_jaw=upper_jaw lower_jaw=lower_jaw
+fox head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg tail=tail
+fox_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg tail=tail
+frog head=head body=body left_leg=left_leg right_leg=right_leg croaking_body=croaking_body left_arm=left_arm right_arm=right_arm tongue=tongue eyes=eyes
+furnace_minecart bottom=bottom back=back front=front right=right left=left
+ghast body=body tentacle1=tentacle0 tentacle2=tentacle1 tentacle3=tentacle2 tentacle4=tentacle3 tentacle5=tentacle4 tentacle6=tentacle5 tentacle7=tentacle6 tentacle8=tentacle7 tentacle9=tentacle8
+giant head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+glow_squid body=body tentacle1=tentacle0 tentacle2=tentacle1 tentacle3=tentacle2 tentacle4=tentacle3 tentacle5=tentacle4 tentacle6=tentacle5 tentacle7=tentacle6 tentacle8=tentacle7
+glow_squid_baby body=body tentacle1=tentacle0 tentacle2=tentacle1 tentacle3=tentacle2 tentacle4=tentacle3 tentacle5=tentacle4 tentacle6=tentacle5 tentacle7=tentacle6 tentacle8=tentacle7
+goat head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg left_horn=left_horn right_horn=right_horn nose=nose
+goat_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg left_horn=left_horn right_horn=right_horn nose=nose
+guardian tail1=tail0 tail2=tail1 tail3=tail2 body=head eye=eye spine1=spike0 spine2=spike1 spine3=spike2 spine4=spike3 spine5=spike4 spine6=spike5 spine7=spike6 spine8=spike7 spine9=spike8 spine10=spike9 spine11=spike10 spine12=spike11
+hanging_sign board=board plank=plank chains=normalChains chain_left1=chainL1 chain_left2=chainL2 chain_right1=chainR1 chain_right2=chainR2 chains_v=vChains
+happy_ghast body=body tentacle1=tentacle0 tentacle2=tentacle1 tentacle3=tentacle2 tentacle4=tentacle3 tentacle5=tentacle4 tentacle6=tentacle5 tentacle7=tentacle6 tentacle8=tentacle7 tentacle9=tentacle8
+happy_ghast_baby body=body inner_body=inner_body tentacle1=tentacle0 tentacle2=tentacle1 tentacle3=tentacle2 tentacle4=tentacle3 tentacle5=tentacle4 tentacle6=tentacle5 tentacle7=tentacle6 tentacle8=tentacle7 tentacle9=tentacle8
+happy_ghast_baby_harness body=harness goggles=goggles
+happy_ghast_baby_ropes body=body inner_body=inner_body tentacle1=tentacle0 tentacle2=tentacle1 tentacle3=tentacle2 tentacle4=tentacle3 tentacle5=tentacle4 tentacle6=tentacle5 tentacle7=tentacle6 tentacle8=tentacle7 tentacle9=tentacle8
+happy_ghast_harness body=harness goggles=goggles
+happy_ghast_ropes body=body tentacle1=tentacle0 tentacle2=tentacle1 tentacle3=tentacle2 tentacle4=tentacle3 tentacle5=tentacle4 tentacle6=tentacle5 tentacle7=tentacle6 tentacle8=tentacle7 tentacle9=tentacle8
+head_creeper head=head
+head_dragon head=head jaw=jaw
+head_piglin head=head left_ear=left_ear right_ear=right_ear
+head_player head=head
+head_skeleton head=head
+head_wither_skeleton head=head
+head_zombie head=head
+helmet head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+helmet_baby head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+hoglin head=head body=body back_right_leg=right_hind_leg back_left_leg=left_hind_leg front_right_leg=right_front_leg front_left_leg=left_front_leg mane=mane left_ear=left_ear right_ear=right_ear
+hoglin_baby head=head body=body back_right_leg=right_hind_leg back_left_leg=left_hind_leg front_right_leg=right_front_leg front_left_leg=left_front_leg left_ear=left_ear right_ear=right_ear
+hopper_minecart bottom=bottom back=back front=front right=right left=left
+horse body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+horse_armor body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+horse_baby body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+horse_baby_armor body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+horse_baby_saddle body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle mouth_saddle_wrap=mouth_saddle_wrap head_saddle=head_saddle right_saddle_line=right_saddle_line left_saddle_line=left_saddle_line right_saddle_mouth=right_saddle_mouth left_saddle_mouth=left_saddle_mouth
+horse_saddle body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle mouth_saddle_wrap=mouth_saddle_wrap head_saddle=head_saddle right_saddle_line=right_saddle_line left_saddle_line=left_saddle_line right_saddle_mouth=right_saddle_mouth left_saddle_mouth=left_saddle_mouth
+husk head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+husk_baby head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+illusioner head=head headwear=hat body=body nose=nose arms=arms left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+inner_armor head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+iron_golem head=head body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+lead_knot knot=knot
+leggings head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+leggings_baby head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+llama head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg chest_left=left_chest chest_right=right_chest
+llama_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg chest_left=left_chest chest_right=right_chest
+llama_baby_decor head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg chest_left=left_chest chest_right=right_chest
+llama_decor head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg chest_left=left_chest chest_right=right_chest
+llama_spit body=main
+magma_cube core=inside_cube segment1=cube0 segment2=cube1 segment3=cube2 segment4=cube3 segment5=cube4 segment6=cube5 segment7=cube6 segment8=cube7
+minecart bottom=bottom back=back front=front right=right left=left
+mooshroom head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+mooshroom_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+mule body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg right_chest=right_chest left_chest=left_chest
+mule_baby body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg right_chest=right_chest left_chest=left_chest
+mule_baby_saddle body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle mouth_saddle_wrap=mouth_saddle_wrap head_saddle=head_saddle right_saddle_line=right_saddle_line left_saddle_line=left_saddle_line right_saddle_mouth=right_saddle_mouth left_saddle_mouth=left_saddle_mouth
+mule_saddle body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle mouth_saddle_wrap=mouth_saddle_wrap head_saddle=head_saddle right_saddle_line=right_saddle_line left_saddle_line=left_saddle_line right_saddle_mouth=right_saddle_mouth left_saddle_mouth=left_saddle_mouth
+nautilus body=body shell=shell upper_mouth=upper_mouth inner_mouth=inner_mouth lower_mouth=lower_mouth
+nautilus_baby body=body shell=shell upper_mouth=upper_mouth inner_mouth=inner_mouth lower_mouth=lower_mouth
+nautilus_saddle shell=shell
+ocelot head=head body=body tail=tail1 tail2=tail2 back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg
+ocelot_baby head=head body=body tail=tail1 tail2=tail2 back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg
+outer_armor head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+panda head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+panda_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+parrot head=head body=body tail=tail left_wing=left_wing right_wing=right_wing left_leg=left_leg right_leg=right_leg
+phantom body=body head=head tail=tail_base tail2=tail_tip left_wing=left_wing_base right_wing=right_wing_base left_wing_tip=left_wing_tip right_wing_tip=right_wing_tip
+pig head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+pig_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+pig_baby_saddle head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+pig_saddle head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+piglin head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg ear=ear right_leg=right_leg left_ear=left_ear right_ear=right_ear left_sleeve=left_sleeve right_sleeve=right_sleeve left_pants=left_pants right_pants=right_pants jacket=jacket cloak=cloak
+piglin_baby head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg ear=ear right_leg=right_leg left_ear=left_ear right_ear=right_ear
+piglin_brute head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg ear=ear right_leg=right_leg left_ear=left_ear right_ear=right_ear left_sleeve=left_sleeve right_sleeve=right_sleeve left_pants=left_pants right_pants=right_pants jacket=jacket cloak=cloak
+pillager head=head headwear=hat body=body nose=nose arms=arms left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+player head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg ear=ear left_sleeve=left_sleeve right_sleeve=right_sleeve left_pants=left_pants right_pants=right_pants jacket=jacket cloak=cloak
+player_cape cloak=cloak
+player_slim head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg ear=ear left_sleeve=left_sleeve right_sleeve=right_sleeve left_pants=left_pants right_pants=right_pants jacket=jacket cloak=cloak
+polar_bear head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+polar_bear_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+puffer_fish_big body=body fin_right=right_blue_fin fin_left=left_blue_fin spikes_front_top=top_front_fin spikes_middle_top=top_middle_fin spikes_back_top=top_back_fin spikes_front_right=right_front_fin spikes_front_left=left_front_fin spikes_front_bottom=bottom_front_fin spikes_middle_bottom=bottom_middle_fin spikes_back_bottom=bottom_back_fin spikes_back_right=right_back_fin spikes_back_left=left_back_fin
+puffer_fish_medium body=body fin_right=right_blue_fin fin_left=left_blue_fin spikes_front_top=top_front_fin spikes_back_top=top_back_fin spikes_front_right=right_front_fin spikes_front_left=left_front_fin spikes_front_bottom=bottom_front_fin spikes_back_bottom=bottom_back_fin spikes_back_right=right_back_fin spikes_back_left=left_back_fin
+puffer_fish_small body=body fin_right=right_fin fin_left=left_fin eye_right=right_eye eye_left=left_eye tail=back_fin
+rabbit body=body left_foot=left_hind_foot right_foot=right_hind_foot left_thigh=left_haunch right_thigh=right_haunch left_arm=left_front_leg right_arm=right_front_leg head=head right_ear=right_ear left_ear=left_ear tail=tail nose=nose
+rabbit_baby body=body left_foot=left_hind_foot right_foot=right_hind_foot left_thigh=left_haunch right_thigh=right_haunch left_arm=left_front_leg right_arm=right_front_leg head=head right_ear=right_ear left_ear=left_ear tail=tail nose=nose
+raft bottom=bottom paddle_left=left_paddle paddle_right=right_paddle
+ravager head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg jaw=mouth neck=neck
+salmon body_front=body_front body_back=body_back head=head fin_back_1=top_front_fin fin_back_2=top_back_fin tail=back_fin fin_right=right_fin fin_left=left_fin
+salmon_large body_front=body_front body_back=body_back head=head fin_back_1=top_front_fin fin_back_2=top_back_fin tail=back_fin fin_right=right_fin fin_left=left_fin
+salmon_small body_front=body_front body_back=body_back head=head fin_back_1=top_front_fin fin_back_2=top_back_fin tail=back_fin fin_right=right_fin fin_left=left_fin
+sheep head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+sheep_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+sheep_baby_wool head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+sheep_baby_wool_undercoat head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+sheep_wool head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+sheep_wool_undercoat head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+shield plate=plate handle=handle
+shulker lid=lid base=base head=head
+shulker_box lid=lid base=base
+shulker_bullet bullet=main
+sign board=root stick=stick
+silverfish body1=segment0 body2=segment1 body3=segment2 body4=segment3 body5=segment4 body6=segment5 body7=segment6 wing1=layer0 wing2=layer1 wing3=layer2
+skeleton head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+skeleton_horse body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+skeleton_horse_armor body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+skeleton_horse_baby body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+skeleton_horse_baby_armor body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+skeleton_horse_baby_saddle body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle mouth_saddle_wrap=mouth_saddle_wrap head_saddle=head_saddle right_saddle_line=right_saddle_line left_saddle_line=left_saddle_line right_saddle_mouth=right_saddle_mouth left_saddle_mouth=left_saddle_mouth
+skeleton_horse_saddle body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle mouth_saddle_wrap=mouth_saddle_wrap head_saddle=head_saddle right_saddle_line=right_saddle_line left_saddle_line=left_saddle_line right_saddle_mouth=right_saddle_mouth left_saddle_mouth=left_saddle_mouth
+slime body=cube left_eye=left_eye right_eye=right_eye mouth=mouth
+slime_outer body=cube
+sniffer bone=bone body=body front_right_leg=right_front_leg middle_right_leg=right_mid_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg middle_left_leg=left_mid_leg back_left_leg=left_hind_leg head=head left_ear=left_ear right_ear=right_ear nose=nose lower_beak=lower_beak
+sniffer_baby bone=bone body=body front_right_leg=right_front_leg middle_right_leg=right_mid_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg middle_left_leg=left_mid_leg back_left_leg=left_hind_leg head=head left_ear=left_ear right_ear=right_ear nose=nose lower_beak=lower_beak
+snow_golem body=upper_body body_bottom=lower_body head=head left_hand=left_arm right_hand=right_arm
+spawner_minecart bottom=bottom back=back front=front right=right left=left
+spectral_arrow body=root
+spider head=head neck=body0 body=body1 leg1=right_hind_leg leg2=left_hind_leg leg3=right_middle_hind_leg leg4=left_middle_hind_leg leg5=right_middle_front_leg leg6=left_middle_front_leg leg7=right_front_leg leg8=left_front_leg
+spin_attack box1=box0 box2=box1
+squid body=body tentacle1=tentacle0 tentacle2=tentacle1 tentacle3=tentacle2 tentacle4=tentacle3 tentacle5=tentacle4 tentacle6=tentacle5 tentacle7=tentacle6 tentacle8=tentacle7
+squid_baby body=body tentacle1=tentacle0 tentacle2=tentacle1 tentacle3=tentacle2 tentacle4=tentacle3 tentacle5=tentacle4 tentacle6=tentacle5 tentacle7=tentacle6 tentacle8=tentacle7
+stray head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+stray_outer head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+strider body=body right_leg=right_leg left_leg=left_leg hair_right_top=right_top_bristle hair_right_middle=right_middle_bristle hair_right_bottom=right_bottom_bristle hair_left_top=left_top_bristle hair_left_middle=left_middle_bristle hair_left_bottom=left_bottom_bristle
+strider_saddle body=body right_leg=right_leg left_leg=left_leg hair_right_top=right_top_bristle hair_right_middle=right_middle_bristle hair_right_bottom=right_bottom_bristle hair_left_top=left_top_bristle hair_left_middle=left_middle_bristle hair_left_bottom=left_bottom_bristle
+tadpole body=body tail=tail
+tnt_minecart bottom=bottom back=back front=front right=right left=left
+trader_llama head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg chest_left=left_chest chest_right=right_chest
+trader_llama_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg chest_left=left_chest chest_right=right_chest
+trader_llama_baby_decor head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg chest_left=left_chest chest_right=right_chest
+trader_llama_decor head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg chest_left=left_chest chest_right=right_chest
+trapped_chest lid=lid base=bottom knob=lock
+trapped_chest_left lid=lid base=bottom knob=lock
+trapped_chest_right lid=lid base=bottom knob=lock
+trapped_double_chest_left lid_right=lid base_right=bottom knob_right=lock
+trapped_double_chest_right lid_left=lid base_left=bottom knob_left=lock
+trident body=pole base=base left_spike=left_spike middle_spike=middle_spike right_spike=right_spike
+tropical_fish_a body=body tail=tail fin_right=right_fin fin_left=left_fin fin_top=top_fin
+tropical_fish_b body=body tail=tail fin_right=right_fin fin_left=left_fin fin_top=top_fin fin_bottom=bottom_fin
+tropical_fish_pattern_a body=body tail=tail fin_right=right_fin fin_left=left_fin fin_top=top_fin
+tropical_fish_pattern_b body=body tail=tail fin_right=right_fin fin_left=left_fin fin_top=top_fin fin_bottom=bottom_fin
+turtle head=head body=body body2=egg_belly leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+turtle_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+vex head=head body=body left_arm=left_arm right_arm=right_arm left_wing=left_wing right_wing=right_wing
+villager head=head headwear=hat headwear2=hat_rim bodywear=jacket body=body arms=arms right_leg=right_leg left_leg=left_leg nose=nose
+villager_baby head=head headwear=hat headwear2=hat_rim bodywear=bb_main body=body arms=arms right_leg=right_leg left_leg=left_leg nose=nose
+vindicator head=head headwear=hat body=body nose=nose arms=arms left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+wall_sign board=root
+wandering_trader head=head headwear=hat headwear2=hat_rim bodywear=jacket body=body arms=arms right_leg=right_leg left_leg=left_leg nose=nose
+warden body=bone torso=body head=head left_leg=left_leg right_leg=right_leg left_arm=left_arm right_arm=right_arm left_tendril=left_tendril right_tendril=right_tendril left_ribcage=left_ribcage right_ribcage=right_ribcage
+warden_bioluminescent body=bone torso=body head=head left_leg=left_leg right_leg=right_leg left_arm=left_arm right_arm=right_arm left_tendril=left_tendril right_tendril=right_tendril left_ribcage=left_ribcage right_ribcage=right_ribcage
+warden_heart body=bone torso=body head=head left_leg=left_leg right_leg=right_leg left_arm=left_arm right_arm=right_arm left_tendril=left_tendril right_tendril=right_tendril left_ribcage=left_ribcage right_ribcage=right_ribcage
+warden_pulsating_spots body=bone torso=body head=head left_leg=left_leg right_leg=right_leg left_arm=left_arm right_arm=right_arm left_tendril=left_tendril right_tendril=right_tendril left_ribcage=left_ribcage right_ribcage=right_ribcage
+warden_tendrils body=bone torso=body head=head left_leg=left_leg right_leg=right_leg left_arm=left_arm right_arm=right_arm left_tendril=left_tendril right_tendril=right_tendril left_ribcage=left_ribcage right_ribcage=right_ribcage
+warm_chicken head=head body=body right_leg=right_leg left_leg=left_leg right_wing=right_wing left_wing=left_wing bill=beak chin=red_thing
+warm_chicken_baby body=body right_leg=right_leg left_leg=left_leg right_wing=right_wing left_wing=left_wing
+warm_cow head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+warm_cow_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+warm_pig head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+warm_pig_baby head=head body=body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+wind_charge core=projectile wind=wind cube1=cube_r1 cube2=cube_r2 charge=wind_charge
+witch head=head headwear=hat headwear2=hat_rim bodywear=jacket body=body arms=arms right_leg=right_leg left_leg=left_leg nose=nose mole=mole
+wither body1=shoulders body2=ribcage body3=tail head1=center_head head2=right_head head3=left_head
+wither_armor body1=shoulders body2=ribcage body3=tail head1=center_head head2=right_head head3=left_head
+wither_skeleton head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+wither_skull head=head
+wolf body=body head=head tail=tail mane=upper_body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+wolf_armor body=body head=head tail=tail mane=upper_body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+wolf_baby body=body head=head tail=tail mane=upper_body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+wolf_baby_armor body=body head=head tail=tail mane=upper_body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+wolf_baby_collar body=body head=head tail=tail mane=upper_body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+wolf_collar body=body head=head tail=tail mane=upper_body leg1=right_hind_leg leg2=left_hind_leg leg3=right_front_leg leg4=left_front_leg
+zoglin head=head body=body back_right_leg=right_hind_leg back_left_leg=left_hind_leg front_right_leg=right_front_leg front_left_leg=left_front_leg mane=mane left_ear=left_ear right_ear=right_ear
+zoglin_baby head=head body=body back_right_leg=right_hind_leg back_left_leg=left_hind_leg front_right_leg=right_front_leg front_left_leg=left_front_leg left_ear=left_ear right_ear=right_ear
+zombie head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+zombie_baby head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+zombie_horse body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+zombie_horse_armor body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+zombie_horse_baby body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+zombie_horse_baby_armor body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg headpiece=head_saddle saddle=saddle noseband=mouth_saddle_wrap right_rein=right_saddle_line left_rein=left_saddle_line right_bit=right_saddle_mouth left_bit=left_saddle_mouth child_back_left_leg=left_hind_baby_leg child_back_right_leg=right_hind_baby_leg child_front_left_leg=left_front_baby_leg child_front_right_leg=right_front_baby_leg
+zombie_horse_baby_saddle body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle mouth_saddle_wrap=mouth_saddle_wrap head_saddle=head_saddle right_saddle_line=right_saddle_line left_saddle_line=left_saddle_line right_saddle_mouth=right_saddle_mouth left_saddle_mouth=left_saddle_mouth
+zombie_horse_saddle body=body head=head tail=tail mane=mane mouth=upper_mouth left_ear=left_ear right_ear=right_ear neck=head_parts back_left_leg=left_hind_leg back_right_leg=right_hind_leg front_left_leg=left_front_leg front_right_leg=right_front_leg saddle=saddle mouth_saddle_wrap=mouth_saddle_wrap head_saddle=head_saddle right_saddle_line=right_saddle_line left_saddle_line=left_saddle_line right_saddle_mouth=right_saddle_mouth left_saddle_mouth=left_saddle_mouth
+zombie_nautilus body=body shell=shell upper_mouth=upper_mouth inner_mouth=inner_mouth lower_mouth=lower_mouth
+zombie_nautilus_coral body=body shell=shell upper_mouth=upper_mouth inner_mouth=inner_mouth lower_mouth=lower_mouth coral=root
+zombie_nautilus_saddle shell=shell
+zombie_pigman head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+zombie_villager head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+zombie_villager_baby head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg right_leg=right_leg
+zombified_piglin head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg ear=ear right_leg=right_leg left_ear=left_ear right_ear=right_ear left_sleeve=left_sleeve right_sleeve=right_sleeve left_pants=left_pants right_pants=right_pants jacket=jacket cloak=cloak
+zombified_piglin_baby head=head headwear=hat body=body left_arm=left_arm right_arm=right_arm left_leg=left_leg ear=ear right_leg=right_leg left_ear=left_ear right_ear=right_ear

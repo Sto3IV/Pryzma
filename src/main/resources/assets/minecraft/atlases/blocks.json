@@ -1,0 +1,10 @@
+{
+  "sources": [
+    {
+      "type": "pryzma:ctm"
+    },
+    {
+      "type": "pryzma:cit"
+    }
+  ]
+}
