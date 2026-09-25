@@ -35,9 +35,11 @@ abstract class ItemRendererMixin {
     private void prCitRender(ItemStack stack, ItemDisplayContext context, boolean leftHand, PoseStack pose,
             MultiBufferSource buffers, int light, int overlay, BakedModel model, Operation<Void> original) {
         PrCit.Scope scope = PrCit.beginItem(stack, context);
+        net.pryzma.shader.PrShaders.setRenderedItem(net.pryzma.shader.PrShaders.idMap().getItemId(stack));
         try {
             original.call(stack, context, leftHand, pose, buffers, light, overlay, model);
         } finally {
+            net.pryzma.shader.PrShaders.setRenderedItem(-1);
             PrCit.end(scope);
         }
     }

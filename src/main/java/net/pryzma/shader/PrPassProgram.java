@@ -49,7 +49,8 @@ final class PrPassProgram implements AutoCloseable {
     private PrPassProgram(String name, int program, int[] drawBuffers, List<String> samplers, PrUniforms uniforms,
             PrBlend blend) {
         this.name = name;
-        this.stage = name.startsWith("prepare") ? "prepare" : name.startsWith("deferred") ? "deferred" : "composite";
+        this.stage = name.startsWith("prepare") ? "prepare" : name.startsWith("deferred") ? "deferred"
+                : name.startsWith("shadowcomp") ? "shadowcomp" : "composite";
         this.blend = blend;
         this.program = program;
         this.drawBuffers = drawBuffers;

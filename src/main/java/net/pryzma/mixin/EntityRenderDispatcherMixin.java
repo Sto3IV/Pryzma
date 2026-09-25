@@ -47,6 +47,7 @@ abstract class EntityRenderDispatcherMixin {
         PrEntityTextures.Scope textures = PrEntityTextures.begin(entity);
         PrCemContext.Scope cem = PrCemContext.begin(entity, renderer, partialTick);
         PrCemRender.Scope cemRender = PrCemRender.begin(buffers);
+        net.pryzma.shader.PrShaders.setRenderedEntity(net.pryzma.shader.PrShaders.idMap().getEntityId(entity));
         try {
             ResourceLocation modelTexture = PrCemModels.modelTexture(entity);
             if (modelTexture != null) {
@@ -62,6 +63,7 @@ abstract class EntityRenderDispatcherMixin {
                 original.call(renderer, entity, yaw, partialTick, pose, emissive, LightTexture.FULL_BRIGHT);
             }
         } finally {
+            net.pryzma.shader.PrShaders.setRenderedEntity(-1);
             PrCemRender.end(cemRender);
             PrCemContext.end(cem);
             PrEntityTextures.end(textures);

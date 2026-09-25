@@ -115,6 +115,10 @@ final class PrUniforms {
     float alphaTestRef;
     int atlasWidth = 1024;
     int atlasHeight = 1024;
+    int currentEntityId = -1;
+    int currentBlockEntityId = -1;
+    int currentRenderedItemId = -1;
+    int currentRenderType = 0;
     private long lastFrameNanos;
     private boolean firstFrame = true;
 
@@ -126,6 +130,13 @@ final class PrUniforms {
         mat("gbufferProjectionInverse", gbufferProjectionInverse);
         mat("gbufferPreviousModelView", gbufferPreviousModelView);
         mat("gbufferPreviousProjection", gbufferPreviousProjection);
+        // Iris matrix aliases
+        mat("previousModelViewMatrix", gbufferPreviousModelView);
+        mat("previousProjectionMatrix", gbufferPreviousProjection);
+        mat("modelViewMatrix", gbufferModelView);
+        mat("projectionMatrix", gbufferProjection);
+        mat("modelViewMatrixInverse", gbufferModelViewInverse);
+        mat("projectionMatrixInverse", gbufferProjectionInverse);
         mat("shadowModelView", shadowModelView);
         mat("shadowModelViewInverse", shadowModelViewInverse);
         mat("shadowProjection", shadowProjection);
@@ -177,9 +188,13 @@ final class PrUniforms {
         f("centerDepthSmooth", () -> centerDepthSmooth);
         f("playerMood", () -> playerMood);
         i("renderStage", () -> renderStage);
+        i("iris_currentPass", () -> renderStage);
         i("bossBattle", () -> 0);
-        i("entityId", () -> -1);
-        i("blockEntityId", () -> -1);
+        i("entityId", () -> currentEntityId);
+        i("blockEntityId", () -> currentBlockEntityId);
+        i("currentRenderedItemId", () -> currentRenderedItemId >= 0 ? currentRenderedItemId : heldItemId);
+        i("currentRenderedEntityId", () -> currentEntityId);
+        i("currentRenderedBlockEntityId", () -> currentBlockEntityId);
         i("instanceId", () -> 0);
         f("alphaTestRef", () -> alphaTestRef);
         f("pr_AlphaTestRef", () -> alphaTestRef);
@@ -189,6 +204,8 @@ final class PrUniforms {
         values.put("entityColor", loc -> GL20.glUniform4f(loc, 0, 0, 0, 0));
         values.put("spriteBounds", loc -> GL20.glUniform4f(loc, 0, 0, 1, 1));
         values.put("blendFunc", loc -> GL20.glUniform4i(loc, 770, 771, 1, 771));
+        values.put("pr_CurrentEntity", loc -> GL20.glUniform4f(loc, (float) currentEntityId, (float) currentRenderType, 0.0f, 1.0f));
+        values.put("mc_Entity", loc -> GL20.glUniform4f(loc, (float) currentEntityId, (float) currentRenderType, 0.0f, 1.0f));
         expressions.put("is_alive", (PrExpr.B) () -> player() != null && player().isAlive());
         expressions.put("is_burning", (PrExpr.B) () -> player() != null && player().isOnFire());
         expressions.put("is_child", (PrExpr.B) () -> player() != null && player().isBaby());
@@ -539,6 +556,8 @@ final class PrUniforms {
             ItemStack off = player.getOffhandItem();
             heldBlockLightValue = lightOf(main);
             heldBlockLightValue2 = lightOf(off);
+            heldItemId = PrShaders.idMap().getItemId(main);
+            heldItemId2 = PrShaders.idMap().getItemId(off);
         }
         firstFrame = false;
         for (Runnable update : customUpdates) {
@@ -600,6 +619,22 @@ final class PrUniforms {
     /** Normal matrix of a model-view matrix: the inverse transpose of its rotation part. */
     static Matrix3f normalMatrix(Matrix4f modelView, Matrix3f out) {
         return out.set(modelView).invert().transpose();
+    }
+
+    public void setEntity(int id) {
+        this.currentEntityId = id;
+    }
+
+    public void setBlockEntity(int id) {
+        this.currentBlockEntityId = id;
+    }
+
+    public void setRenderType(int renderType) {
+        this.currentRenderType = renderType;
+    }
+
+    public void setRenderedItem(int id) {
+        this.currentRenderedItemId = id;
     }
 
     void close() {

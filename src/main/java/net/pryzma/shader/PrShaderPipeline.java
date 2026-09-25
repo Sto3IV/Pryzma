@@ -73,6 +73,7 @@ public final class PrShaderPipeline implements AutoCloseable {
     private final List<PrPassProgram> prepare = new ArrayList<>();
     private final List<PrPassProgram> deferred = new ArrayList<>();
     private final List<PrPassProgram> composite = new ArrayList<>();
+    private final List<PrPassProgram> shadowcomp = new ArrayList<>();
     private PrPassProgram finalPass;
     private final String header;
     private final int generation;
@@ -197,6 +198,9 @@ public final class PrShaderPipeline implements AutoCloseable {
     }
 
     private void compilePasses() {
+        for (String name : PrShaderPrograms.passNames("shadowcomp")) {
+            pass(name, shadowcomp);
+        }
         for (String name : PrShaderPrograms.passNames("prepare")) {
             pass(name, prepare);
         }
@@ -516,10 +520,10 @@ public final class PrShaderPipeline implements AutoCloseable {
                 return shadow != null ? shadow.depth1 : shadowDepth;
             }
             case "shadowcolor", "shadowcolor0" -> {
-                return shadow != null ? shadow.color0 : shadowColor;
+                return shadow != null ? shadow.read(0) : shadowColor;
             }
             case "shadowcolor1" -> {
-                return shadow != null ? shadow.color1 : shadowColor;
+                return shadow != null ? shadow.read(1) : shadowColor;
             }
             default -> {
                 int buffer = bufferIndex(name);
@@ -538,7 +542,7 @@ public final class PrShaderPipeline implements AutoCloseable {
         uniforms.beginFrame(camera, modelView, projection, partialTick, main.width, main.height);
         if (shadow != null) {
             inWorld = true;
-            renderShadows(levelRenderer, camera);
+            renderShadows(levelRenderer, camera, partialTick);
         }
         float[] fog = RenderSystem.getShaderFogColor();
         targets.beginFrame(new float[] {fog[0], fog[1], fog[2], 1.0F});
@@ -555,7 +559,7 @@ public final class PrShaderPipeline implements AutoCloseable {
      * The shadow pass: the terrain of the sections in view, drawn again from the light through
      * the pack's shadow programs; {@code shadowtex1} keeps the depth before translucent terrain.
      */
-    private void renderShadows(LevelRenderer levelRenderer, Camera camera) {
+    private void renderShadows(LevelRenderer levelRenderer, Camera camera, float partialTick) {
         LevelRendererShadowAccessor renderer = (LevelRendererShadowAccessor) levelRenderer;
         Vec3 cam = camera.getPosition();
         Matrix4f modelView = new Matrix4f(uniforms.shadowModelView);
@@ -568,9 +572,63 @@ public final class PrShaderPipeline implements AutoCloseable {
             renderer.prRenderSectionLayer(RenderType.cutout(), cam.x, cam.y, cam.z, modelView, projection);
             shadow.copyOpaqueDepth();
             renderer.prRenderSectionLayer(RenderType.translucent(), cam.x, cam.y, cam.z, modelView, projection);
+
+            // Dynamic entity shadows in shadow pass
+            renderShadowEntities(camera, modelView, projection, partialTick);
+
+            // Multi-pass shadow filtering (shadowcomp)
+            if (!shadowcomp.isEmpty()) {
+                runShadowCompPasses();
+            }
         } finally {
             phase = Phase.NONE;
         }
+    }
+
+    private void renderShadowEntities(Camera camera, Matrix4f modelView, Matrix4f projection, float partialTick) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return;
+        }
+        Vec3 cam = camera.getPosition();
+        com.mojang.blaze3d.vertex.PoseStack poseStack = new com.mojang.blaze3d.vertex.PoseStack();
+        poseStack.mulPose(modelView);
+        net.minecraft.client.renderer.MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
+
+        for (net.minecraft.world.entity.Entity entity : mc.level.entitiesForRendering()) {
+            if (entity.isRemoved()) {
+                continue;
+            }
+            if (entity == mc.cameraEntity && mc.options.getCameraType().isFirstPerson()) {
+                continue;
+            }
+            double x = net.minecraft.util.Mth.lerp(partialTick, entity.xOld, entity.getX());
+            double y = net.minecraft.util.Mth.lerp(partialTick, entity.yOld, entity.getY());
+            double z = net.minecraft.util.Mth.lerp(partialTick, entity.zOld, entity.getZ());
+            float yaw = net.minecraft.util.Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
+
+            poseStack.pushPose();
+            poseStack.translate(x - cam.x, y - cam.y, z - cam.z);
+            mc.getEntityRenderDispatcher().render(entity, x - cam.x, y - cam.y, z - cam.z, yaw, partialTick, poseStack, bufferSource, 15728880);
+            poseStack.popPose();
+        }
+        bufferSource.endBatch();
+    }
+
+    private void runShadowCompPasses() {
+        passState();
+        for (PrPassProgram pass : shadowcomp) {
+            shadow.bindPass(pass.drawBuffers);
+            PrBlend.apply(pass.blend);
+            pass.draw(this);
+            PrBlend.apply(null);
+            for (int buffer : pass.drawBuffers) {
+                if (buffer == 0 || buffer == 1) {
+                    shadow.swap(buffer);
+                }
+            }
+        }
+        worldState();
     }
 
     /** Before translucent terrain: the depth without translucents, then the deferred passes. */
@@ -676,6 +734,7 @@ public final class PrShaderPipeline implements AutoCloseable {
             }
         }
         gbuffers.clear();
+        shadowcomp.forEach(PrPassProgram::close);
         prepare.forEach(PrPassProgram::close);
         deferred.forEach(PrPassProgram::close);
         composite.forEach(PrPassProgram::close);

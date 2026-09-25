@@ -26,6 +26,7 @@ abstract class BlockEntityRenderDispatcherMixin {
         PrEntityTextures.Scope textures = PrEntityTextures.begin(blockEntity);
         PrCemContext.Scope cem = PrCemContext.begin(blockEntity, partialTick);
         PrCemRender.Scope cemRender = PrCemRender.begin(buffers);
+        net.pryzma.shader.PrShaders.setRenderedBlockEntity(net.pryzma.shader.PrShaders.idMap().getBlockEntityId(blockEntity));
         try {
             int dynLight = net.pryzma.light.PrDynamicLights.getBlockEntityLight(blockEntity, light);
             original.call(renderer, blockEntity, partialTick, pose, buffers, dynLight, overlay);
@@ -36,6 +37,7 @@ abstract class BlockEntityRenderDispatcherMixin {
                 original.call(renderer, blockEntity, partialTick, pose, emissive, LightTexture.FULL_BRIGHT, overlay);
             }
         } finally {
+            net.pryzma.shader.PrShaders.setRenderedBlockEntity(-1);
             PrCemRender.end(cemRender);
             PrCemContext.end(cem);
             PrEntityTextures.end(textures);

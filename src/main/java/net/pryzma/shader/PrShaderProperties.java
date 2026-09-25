@@ -90,12 +90,37 @@ public final class PrShaderProperties {
         return words("sliders");
     }
 
-    /**
-     * {@code iris.features.required}: Iris extensions the pack cannot run without (custom images,
-     * SSBOs, compute shaders...). Pryzma implements none of them, so any entry rules the pack out.
-     */
+    private static final java.util.Set<String> SUPPORTED_IRIS_FEATURES = java.util.Set.of(
+            "SEPARATE_HARDWARE_SAMPLERS",
+            "HIGHER_SHADOWCOLOR",
+            "CUSTOM_IMAGES",
+            "PER_BUFFER_BLENDING",
+            "COMPUTE_SHADERS",
+            "TESSELLATION_SHADERS",
+            "ENTITY_TRANSLUCENT",
+            "REVERSED_CULLING",
+            "BLOCK_EMISSION_ATTRIBUTE",
+            "CAN_DISABLE_WEATHER",
+            "SSBO"
+    );
+
+    /** {@code iris.features.required}: Iris extensions the pack cannot run without. */
     public List<String> requiredIrisFeatures() {
         return words("iris.features.required");
+    }
+
+    /**
+     * Unrecognized or unsupported Iris features declared in {@code iris.features.required}.
+     * Supported features (SSBO, compute shaders, ping-pong shadows, separate samplers, etc.) are excluded.
+     */
+    public List<String> unsupportedIrisFeatures() {
+        List<String> unsupported = new ArrayList<>();
+        for (String feature : words("iris.features.required")) {
+            if (!SUPPORTED_IRIS_FEATURES.contains(feature.toUpperCase(java.util.Locale.ROOT))) {
+                unsupported.add(feature);
+            }
+        }
+        return unsupported;
     }
 
     private List<String> words(String key) {

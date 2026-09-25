@@ -36,6 +36,7 @@ public final class PrShaders {
     private static PrShaderPack pack;
     private static PrShaderOptions options = PrShaderOptions.empty();
     private static PrShaderProperties properties = PrShaderProperties.empty();
+    private static net.pryzma.shader.id.PrIdMap idMap = net.pryzma.shader.id.PrIdMap.empty();
     private static PrShaderPipeline pipeline;
     private static ResourceLocation pipelineDimension;
     private static boolean rebuild = true;
@@ -104,6 +105,10 @@ public final class PrShaders {
         return properties;
     }
 
+    public static net.pryzma.shader.id.PrIdMap idMap() {
+        return idMap != null ? idMap : net.pryzma.shader.id.PrIdMap.empty();
+    }
+
     /** Errors of the last load and compilation, newest last. */
     public static List<String> errors() {
         return List.copyOf(errors);
@@ -126,7 +131,7 @@ public final class PrShaders {
                     selected = OFF;
                 } else {
                     loadPack();
-                    List<String> required = properties.requiredIrisFeatures();
+                    List<String> required = properties.unsupportedIrisFeatures();
                     if (!required.isEmpty()) {
                         // As Iris does with features it lacks: the choice stays, the world renders without the pack.
                         String list = String.join(", ", required);
@@ -161,6 +166,7 @@ public final class PrShaders {
         options = PrShaderOptions.discover(pack, dirs, PrShaderPrograms.allNames(), message -> Pryzma.LOGGER.debug("Shaders: {}", message));
         options.load(readProperties(optionsFile()));
         properties = PrShaderProperties.load(pack, macros(), warn());
+        idMap = net.pryzma.shader.id.PrIdMap.load(pack, null, warn());
     }
 
     /** The standard macros are only known with a GL context; option macros are enough for shaders.properties. */
@@ -177,6 +183,7 @@ public final class PrShaders {
         }
         errors.clear();
         properties = PrShaderProperties.load(pack, macros(), warn());
+        idMap = net.pryzma.shader.id.PrIdMap.load(pack, null, warn());
         changed();
     }
 
@@ -213,6 +220,7 @@ public final class PrShaders {
         pack = null;
         options = PrShaderOptions.empty();
         properties = PrShaderProperties.empty();
+        idMap = net.pryzma.shader.id.PrIdMap.empty();
     }
 
     private static void closePipeline() {
@@ -321,6 +329,24 @@ public final class PrShaders {
     /** True when the gbuffers were bound in place of the game's main framebuffer. */
     public static boolean redirectMainTarget() {
         return rendering() && pipeline.redirectMainTarget();
+    }
+
+    public static void setRenderedEntity(int id) {
+        if (rendering()) {
+            pipeline.uniforms.setEntity(id);
+        }
+    }
+
+    public static void setRenderedBlockEntity(int id) {
+        if (rendering()) {
+            pipeline.uniforms.setBlockEntity(id);
+        }
+    }
+
+    public static void setRenderedItem(int id) {
+        if (rendering()) {
+            pipeline.uniforms.setRenderedItem(id);
+        }
     }
 
     // ------------------------------------------------------------------ files
