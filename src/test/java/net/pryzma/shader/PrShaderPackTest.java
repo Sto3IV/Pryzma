@@ -466,9 +466,9 @@ class PrShaderPackTest {
         assertEquals(1, props.columns("MORE"));
         assertEquals(2, props.columns(""));
         assertEquals(Map.of("LOW", "!SHADOWS"), props.profiles());
-        assertEquals(List.of(), props.requiredIrisFeatures());
+        assertEquals(List.of(), props.requiredFeatures());
         assertEquals(List.of("CUSTOM_IMAGES", "SSBO"), PrShaderProperties.parse("iris.features.required = CUSTOM_IMAGES  SSBO\n",
-                Map.of(), warnings::add).requiredIrisFeatures());
+                Map.of(), warnings::add).requiredFeatures());
         assertTrue(warnings.isEmpty(), warnings::toString);
     }
 

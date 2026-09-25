@@ -745,6 +745,12 @@
   "pr.options.FAST_PAINTINGS.tooltip.3": " ВКЛ - оптимизированный монолитный рендеринг (быстрее)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Ускоряет отрисовку всех картин (ванильных и из других модов),",
   "pr.options.FAST_PAINTINGS.tooltip.5": "объединяя полигоны в 6 граней с расчётом освещения за один проход.",
-  "pr.message.shaders.iris1": "Шейдеры обеспечивает Iris.",
-  "pr.message.shaders.iris2": "Установите Iris, чтобы загружать шейдерпаки."
+  "pr.shaders.title": "Шейдеры",
+  "pr.shaders.off": "ВЫКЛ (Ваниль Плюс)",
+  "pr.shaders.options": "Настройки шейдеров...",
+  "pr.shaders.reload": "Перезагрузить",
+  "pr.shaders.folder": "Папка с шейдерами",
+  "pr.shaders.status.off": "Шейдерпак не выбран: Pryzma рендерит мир напрямую.",
+  "pr.shaders.status.on": "Активен: %s",
+  "pr.shaders.status.errors": "Ошибок при загрузке: %s; см. лог."
 }

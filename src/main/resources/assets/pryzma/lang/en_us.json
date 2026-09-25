@@ -730,8 +730,6 @@
   "pr.options.FAST_PAINTINGS.tooltip.3": " ON - optimized single-mesh painting rendering (faster)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Accelerates rendering of all paintings (vanilla and modded)",
   "pr.options.FAST_PAINTINGS.tooltip.5": "by baking them into 6 consolidated faces with single-pass lighting.",
-  "pr.message.shaders.iris1": "Shaders are provided by Iris.",
-  "pr.message.shaders.iris2": "Install Iris to load shader packs.",
   "pr.shaders.title": "Shaders",
   "pr.shaders.off": "OFF (Vanilla Plus)",
   "pr.shaders.options": "Shader Options...",

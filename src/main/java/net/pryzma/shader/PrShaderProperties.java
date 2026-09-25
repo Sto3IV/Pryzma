@@ -90,7 +90,7 @@ public final class PrShaderProperties {
         return words("sliders");
     }
 
-    private static final java.util.Set<String> SUPPORTED_IRIS_FEATURES = java.util.Set.of(
+    private static final java.util.Set<String> SUPPORTED_EXTENDED_FEATURES = java.util.Set.of(
             "SEPARATE_HARDWARE_SAMPLERS",
             "HIGHER_SHADOWCOLOR",
             "CUSTOM_IMAGES",
@@ -104,19 +104,19 @@ public final class PrShaderProperties {
             "SSBO"
     );
 
-    /** {@code iris.features.required}: Iris extensions the pack cannot run without. */
-    public List<String> requiredIrisFeatures() {
+    /** {@code iris.features.required}: Extended shaderpack features required by the pack. */
+    public List<String> requiredFeatures() {
         return words("iris.features.required");
     }
 
     /**
-     * Unrecognized or unsupported Iris features declared in {@code iris.features.required}.
+     * Unrecognized or unsupported features declared in {@code iris.features.required}.
      * Supported features (SSBO, compute shaders, ping-pong shadows, separate samplers, etc.) are excluded.
      */
-    public List<String> unsupportedIrisFeatures() {
+    public List<String> unsupportedFeatures() {
         List<String> unsupported = new ArrayList<>();
         for (String feature : words("iris.features.required")) {
-            if (!SUPPORTED_IRIS_FEATURES.contains(feature.toUpperCase(java.util.Locale.ROOT))) {
+            if (!SUPPORTED_EXTENDED_FEATURES.contains(feature.toUpperCase(java.util.Locale.ROOT))) {
                 unsupported.add(feature);
             }
         }

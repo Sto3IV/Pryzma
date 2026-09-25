@@ -94,30 +94,30 @@ class PrIdMapTest {
     }
 
     @Test
-    void supportedIrisFeaturesAreAccepted() {
+    void supportedExtendedFeaturesAreAccepted() {
         List<String> warnings = new ArrayList<>();
         String propsText = """
                 iris.features.required = CUSTOM_IMAGES SSBO HIGHER_SHADOWCOLOR PER_BUFFER_BLENDING COMPUTE_SHADERS
                 """;
         PrShaderProperties props = PrShaderProperties.parse(propsText, Map.of(), warnings::add);
         // Raw list preserves pack declarations
-        assertEquals(5, props.requiredIrisFeatures().size());
-        assertTrue(props.requiredIrisFeatures().contains("CUSTOM_IMAGES"));
-        assertTrue(props.requiredIrisFeatures().contains("SSBO"));
+        assertEquals(5, props.requiredFeatures().size());
+        assertTrue(props.requiredFeatures().contains("CUSTOM_IMAGES"));
+        assertTrue(props.requiredFeatures().contains("SSBO"));
 
         // Unsupported list is empty because all 5 are natively supported in Pryzma
-        assertTrue(props.unsupportedIrisFeatures().isEmpty(), () -> "Expected empty unsupported features, but got: " + props.unsupportedIrisFeatures());
+        assertTrue(props.unsupportedFeatures().isEmpty(), () -> "Expected empty unsupported features, but got: " + props.unsupportedFeatures());
     }
 
     @Test
-    void unknownIrisFeatureIsReportedAsUnsupported() {
+    void unknownFeatureIsReportedAsUnsupported() {
         List<String> warnings = new ArrayList<>();
         String propsText = """
-                iris.features.required = SSBO UNKNOWN_FUTURE_IRIS_EXTENSION_XYZ
+                iris.features.required = SSBO UNKNOWN_FUTURE_SHADER_EXTENSION_XYZ
                 """;
         PrShaderProperties props = PrShaderProperties.parse(propsText, Map.of(), warnings::add);
-        List<String> unsupported = props.unsupportedIrisFeatures();
+        List<String> unsupported = props.unsupportedFeatures();
         assertEquals(1, unsupported.size());
-        assertEquals("UNKNOWN_FUTURE_IRIS_EXTENSION_XYZ", unsupported.getFirst());
+        assertEquals("UNKNOWN_FUTURE_SHADER_EXTENSION_XYZ", unsupported.getFirst());
     }
 }

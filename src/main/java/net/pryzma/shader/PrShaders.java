@@ -131,12 +131,11 @@ public final class PrShaders {
                     selected = OFF;
                 } else {
                     loadPack();
-                    List<String> required = properties.unsupportedIrisFeatures();
+                    List<String> required = properties.unsupportedFeatures();
                     if (!required.isEmpty()) {
-                        // As Iris does with features it lacks: the choice stays, the world renders without the pack.
                         String list = String.join(", ", required);
-                        Pryzma.LOGGER.warn("Shaders: {} needs Iris-only features: {}", name, list);
-                        errors.add("Needs Iris-only features: " + list);
+                        Pryzma.LOGGER.warn("Shaders: {} requires unsupported features: {}", name, list);
+                        errors.add("Requires unsupported features: " + list);
                         closePack();
                     }
                 }

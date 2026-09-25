@@ -130,7 +130,7 @@ final class PrUniforms {
         mat("gbufferProjectionInverse", gbufferProjectionInverse);
         mat("gbufferPreviousModelView", gbufferPreviousModelView);
         mat("gbufferPreviousProjection", gbufferPreviousProjection);
-        // Iris matrix aliases
+        // Extended matrix aliases (shaderpack compatibility)
         mat("previousModelViewMatrix", gbufferPreviousModelView);
         mat("previousProjectionMatrix", gbufferPreviousProjection);
         mat("modelViewMatrix", gbufferModelView);
@@ -174,7 +174,7 @@ final class PrUniforms {
         f("blindness", () -> blindness);
         f("darknessFactor", () -> darknessFactor);
         f("darknessLightFactor", () -> darknessFactor);
-        // Iris' End flash (1.21.9+); this version has none.
+        // End flash (1.21.9+ compatibility); this version has none.
         f("endFlashIntensity", () -> 0.0F);
         f("screenBrightness", () -> screenBrightness);
         f("eyeAltitude", () -> eyeAltitude);
