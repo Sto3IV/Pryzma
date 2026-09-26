@@ -13,11 +13,13 @@ import net.minecraft.client.renderer.SectionBufferBuilderPack;
 import net.minecraft.client.renderer.chunk.RenderChunkRegion;
 import net.minecraft.client.renderer.chunk.SectionCompiler;
 import net.minecraft.core.SectionPos;
+import net.pryzma.perf.PrDebugTracker;
 import net.pryzma.render.PrRenderRegionManager;
 
 /**
  * Render Regions: the finished meshes of the region layers are moved into region space on the
- * chunk worker, after every block, fluid and NeoForge additional renderer has written them.
+ * chunk worker, after every block, fluid and NeoForge additional renderer has written them. The
+ * finished build is also counted, the chunk updates of F3 and Quick Info.
  */
 @Mixin(SectionCompiler.class)
 abstract class SectionCompilerRegionMixin {
@@ -25,6 +27,7 @@ abstract class SectionCompilerRegionMixin {
             at = @At("RETURN"))
     private void prRegionSpace(SectionPos pos, RenderChunkRegion region, VertexSorting sorting, SectionBufferBuilderPack buffers,
             List<?> additionalRenderers, CallbackInfoReturnable<SectionCompiler.Results> cir) {
+        PrDebugTracker.onSectionCompiled();
         PrRenderRegionManager.toRegionSpace(pos, cir.getReturnValue().renderedLayers);
     }
 }

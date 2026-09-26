@@ -2,19 +2,17 @@ package net.pryzma.gui;
 
 import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL33;
 
 /**
- * Counters behind Quick Info that vanilla does not keep: the slowest frame of the last second,
- * section rebuilds per second, block entities drawn, heap allocation rate, native image memory
- * and GPU load from timer queries.
+ * Counters behind Quick Info that vanilla does not keep: block entities drawn, heap allocation
+ * rate, native image memory and GPU load from timer queries. Minimum FPS and chunk updates come
+ * from {@link net.pryzma.perf.PrDebugTracker}, shared with the F3 screen.
  */
 public final class PrQuickInfoStats {
-    public static final AtomicInteger SECTION_COMPILES = new AtomicInteger();
     public static final AtomicLong IMAGE_BYTES = new AtomicLong();
     public static int blockEntitiesRendered;
 
@@ -26,10 +24,6 @@ public final class PrQuickInfoStats {
     private static boolean started;
 
     private static long windowStart;
-    private static long lastFrameEnd;
-    private static long worstFrameNs;
-    private static int fpsMin;
-    private static int updatesPerSecond;
     private static long lastHeapUsed;
     private static long allocatedInWindow;
     private static double allocationMbPerSecond;
@@ -39,20 +33,12 @@ public final class PrQuickInfoStats {
     private PrQuickInfoStats() {
     }
 
-    /**
-     * Once per rendered frame, on the render thread, after the frame is drawn. Frame length is
-     * the time between presented frames, waits included, so the minimum is what the eye sees.
-     */
+    /** Once per rendered frame, on the render thread, after the frame is drawn. */
     public static void onFrameEnd() {
         long now = System.nanoTime();
         if (windowStart == 0L) {
             windowStart = now;
         }
-        // A gap over a second is Quick Info being switched back on, not a frame.
-        if (lastFrameEnd != 0L && now - lastFrameEnd < 1_000_000_000L) {
-            worstFrameNs = Math.max(worstFrameNs, now - lastFrameEnd);
-        }
-        lastFrameEnd = now;
         Runtime rt = Runtime.getRuntime();
         long used = rt.totalMemory() - rt.freeMemory();
         if (used > lastHeapUsed) {
@@ -63,13 +49,10 @@ public final class PrQuickInfoStats {
         long elapsed = now - windowStart;
         if (elapsed >= 1_000_000_000L) {
             double seconds = elapsed / 1e9;
-            fpsMin = worstFrameNs > 0 ? (int) (1_000_000_000L / worstFrameNs) : 0;
-            updatesPerSecond = (int) Math.round(SECTION_COMPILES.getAndSet(0) / seconds);
             double rate = allocatedInWindow / seconds / (1024.0 * 1024.0);
             allocationMbPerSecond = allocationMbPerSecond == 0.0 ? rate : (allocationMbPerSecond * 4.0 + rate) / 5.0;
             gpuLoad = Math.min(1.0, gpuNsInWindow / (double) elapsed);
             windowStart = now;
-            worstFrameNs = 0L;
             allocatedInWindow = 0L;
             gpuNsInWindow = 0L;
         }
@@ -112,14 +95,6 @@ public final class PrQuickInfoStats {
                 pending[i] = false;
             }
         }
-    }
-
-    public static int fpsMin() {
-        return fpsMin;
-    }
-
-    public static int updatesPerSecond() {
-        return updatesPerSecond;
     }
 
     public static double allocationMbPerSecond() {

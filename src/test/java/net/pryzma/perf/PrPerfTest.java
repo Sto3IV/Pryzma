@@ -4,13 +4,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.joml.Matrix4f;
 import org.junit.jupiter.api.Test;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
 
 class PrPerfTest {
+    /** The SectionRenderDispatcher constructor whose executor argument LevelRendererOptionsMixin replaces. */
+    private static final String HOOKED_DISPATCHER_INIT = "(Lnet/minecraft/client/multiplayer/ClientLevel;"
+            + "Lnet/minecraft/client/renderer/LevelRenderer;Ljava/util/concurrent/Executor;Lnet/minecraft/client/renderer/RenderBuffers;"
+            + "Lnet/minecraft/client/renderer/block/BlockRenderDispatcher;"
+            + "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;)V";
+
     /** Camera at the origin looking down -Z, 90 degree vertical field of view. */
     private static Frustum frustum() {
         Frustum f = new Frustum(new Matrix4f(), new Matrix4f().perspective((float) Math.toRadians(90.0), 16.0F / 9.0F, 0.05F, 512.0F));
@@ -62,6 +79,27 @@ class PrPerfTest {
             }
         }
         assertEquals(400 / PrSmoothWorld.INTERVAL, ran, "one AI step in INTERVAL beyond the radius");
+    }
+
+    /** LevelRendererOptionsMixin swaps the executor of every SectionRenderDispatcher LevelRenderer builds. */
+    @Test
+    void chunkWorkerHookCoversEveryDispatcherConstruction() throws IOException {
+        ClassNode levelRenderer = new ClassNode();
+        try (InputStream in = LevelRenderer.class.getResourceAsStream("LevelRenderer.class")) {
+            new ClassReader(in).accept(levelRenderer, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+        }
+        Set<String> constructing = new TreeSet<>();
+        for (MethodNode method : levelRenderer.methods) {
+            for (AbstractInsnNode insn : method.instructions) {
+                if (insn instanceof MethodInsnNode call && call.name.equals("<init>")
+                        && call.owner.equals("net/minecraft/client/renderer/chunk/SectionRenderDispatcher")) {
+                    assertEquals(HOOKED_DISPATCHER_INIT, call.desc, method.name);
+                    constructing.add(method.name);
+                }
+            }
+        }
+        assertTrue(constructing.contains("allChanged"), "no dispatcher built in allChanged");
+        assertTrue(Set.of("allChanged", "setLevel").containsAll(constructing), "unhooked dispatcher construction in " + constructing);
     }
 
     @Test

@@ -37,8 +37,8 @@ public final class PryzmaConfig {
     public static boolean prSmoothFps = false;
     public static boolean prSmoothWorld = isSingleProcessor();
     public static boolean prLazyChunkLoading = isSingleProcessor();
-    public static boolean prRenderRegions = false;
-    public static boolean prSmartAnimations = false;
+    public static boolean prRenderRegions = true;
+    public static boolean prSmartAnimations = true;
     public static double prAoLevel = 1.0;
     public static int prAaLevel = 0;
     public static int prAfLevel = 1;
@@ -423,7 +423,7 @@ public final class PryzmaConfig {
         return m;
     }
 
-    /** Pryzma 1.x "Reset Video Settings" values for the Pryzma-owned options. */
+    /** Pryzma 1.x "Reset Video Settings" values for the Pryzma-owned options; 2.0 turns Render Regions and Smart Animations on. */
     public static void resetToDefaults() {
         prHeldItemTooltips = true;
         prFastPaintings = false;
@@ -432,11 +432,11 @@ public final class PryzmaConfig {
         prFogStart = 0.8F;
         prMipmapType = 0;
         prOcclusionFancy = false;
-        prSmartAnimations = false;
+        prSmartAnimations = true;
         prSmoothFps = false;
         prSmoothWorld = isSingleProcessor();
         prLazyChunkLoading = false;
-        prRenderRegions = false;
+        prRenderRegions = true;
         prFastMath = false;
         prFastRender = false;
         prDynamicFov = true;

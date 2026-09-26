@@ -20,6 +20,7 @@ import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.pryzma.PryzmaConfig;
 import net.pryzma.mixin.LevelRendererStatsAccessor;
+import net.pryzma.perf.PrDebugTracker;
 
 /**
  * The Pryzma Quick Info HUD: frame rate, chunks, entities and position on the left, memory and
@@ -97,7 +98,7 @@ public final class PrQuickInfo {
         if (PryzmaConfig.prQuickInfoFps != PryzmaConfig.VALUE_OFF) {
             next(sb).append(mc.getFps());
             if (PryzmaConfig.prQuickInfoFps == PryzmaConfig.VALUE_FULL) {
-                sb.append('/').append(PrQuickInfoStats.fpsMin());
+                sb.append('/').append(PrDebugTracker.getFpsMin());
             }
             sb.append(" fps");
         }
@@ -116,7 +117,7 @@ public final class PrQuickInfo {
             next(sb).append(full ? "Particles: " : "P: ").append(mc.particleEngine.countParticles());
         }
         if (PryzmaConfig.prQuickInfoUpdates) {
-            next(sb).append(full ? "Updates: " : "U: ").append(PrQuickInfoStats.updatesPerSecond());
+            next(sb).append(full ? "Updates: " : "U: ").append(PrDebugTracker.getChunkUpdates());
         }
         if (PryzmaConfig.prQuickInfoGpu) {
             next(sb).append(full ? "GPU: " : "G: ").append(Mth.clamp((int) Math.round(PrQuickInfoStats.gpuLoad() * 100.0), 0, 100)).append('%');

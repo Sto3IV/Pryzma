@@ -30,6 +30,7 @@ import net.pryzma.item.PrCitModels;
 import net.pryzma.shader.PrShaders;
 import net.pryzma.item.PrCitSpriteSource;
 import net.pryzma.mixin.OptionsSubScreenAccessor;
+import net.pryzma.perf.PrDebugTracker;
 import net.pryzma.perf.PrServerPriority;
 import net.pryzma.render.PrRenderHooks;
 import net.pryzma.render.PrSmartLeaves;
@@ -65,6 +66,7 @@ public final class PryzmaClient {
         gameBus.addListener(RenderFrameEvent.Pre.class, PrQuickInfo::onFrameStart);
         gameBus.addListener(RenderFrameEvent.Post.class, PrQuickInfo::onFrameEnd);
         gameBus.addListener(RenderFrameEvent.Pre.class, event -> {
+            PrDebugTracker.tick();
             PrExprEnv.MinecraftEnv.onFrame();
             PrCemContext.onFrame();
         });

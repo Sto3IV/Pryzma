@@ -20,21 +20,6 @@ abstract class TextureAtlasSpriteMixin {
             return null;
         }
         PrAnimations.Kind kind = PrAnimations.kindOf((TextureAtlasSprite) (Object) this);
-        if (kind == PrAnimations.Kind.OTHER) {
-            return ticker;
-        }
-        return new TextureAtlasSprite.Ticker() {
-            @Override
-            public void tickAndUpload() {
-                if (kind.enabled()) {
-                    ticker.tickAndUpload();
-                }
-            }
-
-            @Override
-            public void close() {
-                ticker.close();
-            }
-        };
+        return kind == PrAnimations.Kind.OTHER ? ticker : new PrAnimations.SwitchedTicker(ticker, kind);
     }
 }

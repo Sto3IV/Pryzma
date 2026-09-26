@@ -73,8 +73,8 @@ abstract class LevelRendererOptionsMixin {
         return PrRenderHooks.isTreesFancy(fancy);
     }
 
-    /** Chunk Updates: section builds run on the Pryzma worker pool. */
-    @ModifyArg(method = "allChanged", at = @At(value = "INVOKE",
+    /** Chunk Updates: section builds run on the Pryzma worker pool, wherever the dispatcher is created. */
+    @ModifyArg(method = {"allChanged", "setLevel"}, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/renderer/chunk/SectionRenderDispatcher;<init>(Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/renderer/LevelRenderer;Ljava/util/concurrent/Executor;Lnet/minecraft/client/renderer/RenderBuffers;Lnet/minecraft/client/renderer/block/BlockRenderDispatcher;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;)V"),
             index = 2)
     private Executor prChunkWorkers(Executor vanilla) {

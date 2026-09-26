@@ -1,5 +1,6 @@
 package net.pryzma.render;
 
+import java.util.List;
 import java.util.Map;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -53,5 +54,31 @@ public final class PrAnimations {
         ResourceLocation name = sprite.contents().name();
         Kind kind = ResourceLocation.DEFAULT_NAMESPACE.equals(name.getNamespace()) ? NAMED.get(name.getPath()) : null;
         return kind != null ? kind : Kind.TERRAIN;
+    }
+
+    /** Animations that advance: all but the switched ones whose switch is off. */
+    public static int countRunning(List<TextureAtlasSprite.Ticker> tickers) {
+        int running = 0;
+        for (TextureAtlasSprite.Ticker ticker : tickers) {
+            if (!(ticker instanceof SwitchedTicker switched) || switched.kind().enabled()) {
+                running++;
+            }
+        }
+        return running;
+    }
+
+    /** A block atlas animation that holds its current frame while its switch is off. */
+    public record SwitchedTicker(TextureAtlasSprite.Ticker ticker, Kind kind) implements TextureAtlasSprite.Ticker {
+        @Override
+        public void tickAndUpload() {
+            if (kind.enabled()) {
+                ticker.tickAndUpload();
+            }
+        }
+
+        @Override
+        public void close() {
+            ticker.close();
+        }
     }
 }
