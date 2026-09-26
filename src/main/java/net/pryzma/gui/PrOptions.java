@@ -289,9 +289,21 @@ public final class PrOptions {
     public static final PrOption.Cycle CHUNK_UPDATES = cycle("pr.options.CHUNK_UPDATES",
             () -> Integer.toString(PrChunkWorkers.threadsFor(PryzmaConfig.prChunkUpdates)),
             dir -> {
-                PryzmaConfig.prChunkUpdates = PryzmaConfig.prChunkUpdates + 1 > 5 ? 1 : PryzmaConfig.prChunkUpdates + 1;
+                int next = PryzmaConfig.prChunkUpdates + dir;
+                if (next > 5) {
+                    next = 1;
+                }
+                if (next < 1) {
+                    next = 5;
+                }
+                PryzmaConfig.prChunkUpdates = next;
                 PrChunkWorkers.resize();
             });
+    /**
+     * @deprecated Off the Performance page: nothing reads {@link PryzmaConfig#prLazyChunkLoading}.
+     * Kept so references to the option and saved settings still resolve.
+     */
+    @Deprecated
     public static final PrOption.Cycle LAZY_CHUNK_LOADING = bool("pr.options.LAZY_CHUNK_LOADING",
             () -> PryzmaConfig.prLazyChunkLoading, v -> PryzmaConfig.prLazyChunkLoading = v);
     public static final PrOption.Cycle FAST_PAINTINGS = bool("pr.options.FAST_PAINTINGS",

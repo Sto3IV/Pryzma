@@ -16,33 +16,23 @@ import net.pryzma.PryzmaConfig;
  * daemon workers sit below normal priority so they never outrank the render thread.
  */
 public final class PrChunkWorkers {
+    /** Workers for Chunk Updates 1..5, laid out for a 24-thread CPU. */
+    private static final int[] TARGETS = {2, 6, 10, 16, 22};
     private static final int WORKER_PRIORITY = Thread.NORM_PRIORITY - 2;
     private static volatile ThreadPoolExecutor pool;
 
     private PrChunkWorkers() {
     }
 
-    /** A third of the cores, or all but six, whichever is larger, within 1..10. */
-    static int optimal() {
-        int cores = Runtime.getRuntime().availableProcessors();
-        return Math.clamp(Math.max(cores / 3, cores - 6), 1, 10);
-    }
-
-    /** Workers for Chunk Updates 1..5; strictly non-decreasing on every core count. */
+    /**
+     * Workers for Chunk Updates 1..5, out-of-range values clamped: the option's target, capped so
+     * two logical CPUs stay free for the render and server threads (one on four CPUs or fewer).
+     * Non-decreasing in the option on every core count.
+     */
     public static int threadsFor(int option) {
         int cores = Runtime.getRuntime().availableProcessors();
-        int t1 = cores > 4 ? Math.max(1, Math.min(2, cores / 4)) : 1;
-        int t2 = Math.max(t1, Math.min(cores / 2, 4));
-        int t3 = Math.max(t2, optimal());
-        int t4 = Math.max(t3, Math.min(cores - 1, Math.min(12, Math.max(cores / 2, t3 + (cores >= 8 ? 2 : 1)))));
-        int t5 = Math.max(t4, Math.min(cores - 1, 16));
-        return switch (option) {
-            case 1 -> t1;
-            case 2 -> t2;
-            case 4 -> t4;
-            case 5 -> t5;
-            default -> t3;
-        };
+        int maxWorkers = Math.max(1, cores > 4 ? cores - 2 : cores - 1);
+        return Math.min(TARGETS[Math.clamp(option, 1, TARGETS.length) - 1], maxWorkers);
     }
 
     public static Executor executor() {
