@@ -730,5 +730,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " ВИМК - стандартний багатосекційний рендеринг (типово)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " УВІМК - оптимізований монолітний рендеринг (швидше)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Прискорює відтворення всіх картин (ванільних та з інших модів),",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "об'єднуючи полігони у 6 граней з розрахунком освітлення за один прохід."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "об'єднуючи полігони у 6 граней з розрахунком освітлення за один прохід.",
+  "pr.options.REMOVE_REALMS": "Прибрати Realms",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Кнопка вимкнення Realms",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  УВІМК - приховати кнопку Realms (за замовчуванням)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  ВИМК - показувати кнопку Minecraft Realms у головному меню",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Видаляє кнопку Minecraft Realms та сповіщення",
+  "pr.options.REMOVE_REALMS.tooltip.5": "з головного меню."
 }

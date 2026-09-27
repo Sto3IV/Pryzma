@@ -768,5 +768,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " NO - renderizado estándar multicuadrícula (por defecto)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " SÍ - renderizado optimizado de malla única (más rápido)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Acelera el renderizado de todos los cuadros (vanilla y modificados)",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "uniéndolos en 6 caras consolidadas con iluminación de una sola pasada."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "uniéndolos en 6 caras consolidadas con iluminación de una sola pasada.",
+  "pr.options.REMOVE_REALMS": "Quitar Realms",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Botón para quitar Realms",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  SÍ - ocultar botón de Realms (por defecto)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  NO - mostrar botón de Minecraft Realms en el menú principal",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Elimina el botón de Minecraft Realms y las notificaciones",
+  "pr.options.REMOVE_REALMS.tooltip.5": "del menú principal."
 }

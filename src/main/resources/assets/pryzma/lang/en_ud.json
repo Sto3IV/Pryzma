@@ -729,5 +729,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " OFF - standard multi-quad painting rendering (default)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " ON - optimized single-mesh painting rendering (faster)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Accelerates rendering of all paintings (vanilla and modded)",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "by baking them into 6 consolidated faces with single-pass lighting."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "by baking them into 6 consolidated faces with single-pass lighting.",
+  "pr.options.REMOVE_REALMS": "Remove Realms",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Remove Realms Button",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  ON - hide Realms button and compact title menu (default)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  OFF - show Minecraft Realms button on main menu",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Removes the Minecraft Realms button and notifications from",
+  "pr.options.REMOVE_REALMS.tooltip.5": "the title screen."
 }

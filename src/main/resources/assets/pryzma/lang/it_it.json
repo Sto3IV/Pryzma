@@ -732,5 +732,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " NO - rendering standard multi-quad (predefinito)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " SÌ - rendering ottimizzato a maglia singola (più veloce)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Accelera il rendering di tutti i dipinti (vanilla e mod)",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "unendoli in 6 facce consolidate con illuminazione a passaggio singolo."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "unendoli in 6 facce consolidate con illuminazione a passaggio singolo.",
+  "pr.options.REMOVE_REALMS": "Rimuovi Realms",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Pulsante per rimuovere Realms",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  ON - nascondi il pulsante Realms (predefinito)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  OFF - mostra il pulsante Minecraft Realms nel menu principale",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Rimuove il pulsante Minecraft Realms e le notifiche",
+  "pr.options.REMOVE_REALMS.tooltip.5": "dal menu principale."
 }

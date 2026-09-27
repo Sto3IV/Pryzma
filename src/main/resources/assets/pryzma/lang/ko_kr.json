@@ -730,5 +730,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " 꺼짐 - 기본 다중 쿼드 렌더링 (기본값)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " 켜짐 - 최적화된 단일 메시 렌더링 (더 빠름)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "모든 그림(바닐라 및 모드 추가 그림)의 렌더링을 가속합니다.",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "6개의 통합 면으로 베이킹하고 단일 패스로 조명을 계산합니다。"
+  "pr.options.FAST_PAINTINGS.tooltip.5": "6개의 통합 면으로 베이킹하고 단일 패스로 조명을 계산합니다。",
+  "pr.options.REMOVE_REALMS": "Realms 제거",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Realms 제거 버튼",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  켜짐 - Realms 버튼 숨기기 (기본값)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  꺼짐 - 메인 메뉴에 Minecraft Realms 버튼 표시",
+  "pr.options.REMOVE_REALMS.tooltip.4": "타이틀 화면에서 Minecraft Realms 버튼과",
+  "pr.options.REMOVE_REALMS.tooltip.5": "알림을 제거합니다."
 }

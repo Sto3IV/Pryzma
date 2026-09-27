@@ -730,5 +730,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " 关闭 - 标准多区块画作渲染（默认）",
   "pr.options.FAST_PAINTINGS.tooltip.3": " 开启 - 优化单网格画作渲染（更快）",
   "pr.options.FAST_PAINTINGS.tooltip.4": "加速所有画作的渲染（包括原版与模组画作），",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "将其合并为6个独立面，并在单通道中完成光照采样计算。"
+  "pr.options.FAST_PAINTINGS.tooltip.5": "将其合并为6个独立面，并在单通道中完成光照采样计算。",
+  "pr.options.REMOVE_REALMS": "移除 Realms",
+  "pr.options.REMOVE_REALMS.tooltip.1": "移除 Realms 按钮",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  开启 - 隐藏 Realms 按钮（默认）",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  关闭 - 在主菜单显示 Minecraft Realms 按钮",
+  "pr.options.REMOVE_REALMS.tooltip.4": "从标题屏幕中移除 Minecraft Realms 按钮",
+  "pr.options.REMOVE_REALMS.tooltip.5": "和后台通知。"
 }

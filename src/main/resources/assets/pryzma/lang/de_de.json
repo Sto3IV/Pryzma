@@ -746,5 +746,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " AUS - Standard-Mehrquadranten-Rendering (Standard)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " AN - optimiertes Einzelgitter-Rendering (schneller)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Beschleunigt das Rendern aller Gemälde (Standard und Modded),",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "indem sie zu 6 konsolidierten Flächen mit Single-Pass-Beleuchtung zusammengefasst werden."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "indem sie zu 6 konsolidierten Flächen mit Single-Pass-Beleuchtung zusammengefasst werden.",
+  "pr.options.REMOVE_REALMS": "Realms entfernen",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Schaltfläche „Realms entfernen“",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  AN - Realms-Schaltfläche ausblenden (Standard)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  AUS - Minecraft Realms-Schaltfläche im Hauptmenü anzeigen",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Entfernt die Minecraft Realms-Schaltfläche und Benachrichtigungen",
+  "pr.options.REMOVE_REALMS.tooltip.5": "aus dem Hauptmenü."
 }

@@ -103,7 +103,7 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.WEATHER, PrOptions.TIME,
                         vanilla("options.fullscreen", o.fullscreen()), PrOptions.AUTOSAVE_TICKS,
                         PrOptions.SCREENSHOT_SIZE, PrOptions.SHOW_GL_ERRORS,
-                        PrOptions.FEEDBACK_BUTTONS, null);
+                        PrOptions.FEEDBACK_BUTTONS, PrOptions.REMOVE_REALMS);
                 addOption(vanilla("options.fullscreen.resolution", fullscreenResolution()), cellX(12), cellY(12), 310);
                 addRenderableWidget(new PrButton(210, width / 2 - 100, bottomY() - 44, 200,
                         Component.translatable("pr.options.other.reset"), b -> confirmReset()));

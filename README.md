@@ -15,12 +15,14 @@ It revives the rich heritage of classic and modern resource packs — connected 
 
 ---
 
-## ✦ What's New in v2.0.1
+## ✦ What's New in v2.0.2
 
+* **🚫 "Remove Realms" Option & Title Screen Compaction:**
+  Removes the commercial Minecraft Realms button and background notifications from the title screen. Intelligently promotes NeoForge's `Mods` button into the freed second row and restores the bottom navigation buttons (Language, Options, Quit, Accessibility) up by 22 px to native vanilla proportions. Completely blocks background `RealmsNotificationsScreen` initialization, stopping unwanted HTTP polling and offline "Couldn't connect to realms" log spam. Configurable in **Video Settings → Other → Remove Realms** (ON by default) with native translations across all 40 languages.
 * **🛡️ Zero-Allocation GUI Lightmap Isolation:**
   Resolved a subtle rendering anomaly where custom night lightmaps from OptiFine/MCPatcher resource packs saturated the (15, 15) texel sampled by `rendertype_text.vsh`, tinting button labels and menu text peach/orange. Pryzma now seamlessly substitutes a 16×16 pure white texture during the GUI phase (`Lighting.setupFor3DItems()` to `GuiGraphics.flush()`) with zero runtime allocations and automatic world-boundary state persistence.
-* **🌌 Built-in Iris 1.8.14 Shaderpack Engine:**
-  The full power of Iris 1.8.14 (shadowcomp passes, compute shaders, PBR textures, custom uniforms) ported directly into Pryzma (`net.pryzma.iris`). Decoupled from external loaders, optimized with counting-sort shadow culling, GL state caching (`GlBindingCache`), and 52-byte chunk vertex emission.
+* **🌌 Built-in Iris 1.8.14 Shaderpack Engine (Embedded Fork):**
+  The full power of Iris 1.8.14 (shadowcomp passes, compute shaders, PBR textures, custom uniforms) integrated directly as an optimized fork into Pryzma (`net.pryzma.iris`). Decoupled from external loaders, optimized with counting-sort shadow culling, GL state caching (`GlBindingCache`), and 52-byte chunk vertex emission.
 * **⚡ Multi-Draw Render Regions (`VboRegion`):**
   Chunks clustered into 8×8 regions rendered via native `glMultiDrawElements` / `glMultiDrawElementsBaseVertex`, cutting draw calls by orders of magnitude for buttery-smooth 1000+ FPS in idle scenes.
 * **🧵 Dynamic Worker Scaling:**
@@ -32,7 +34,7 @@ It revives the rich heritage of classic and modern resource packs — connected 
 
 ### 🌌 Shaders, Built In
 Drop your favorite shaderpacks (*Complementary, BSL, Nostalgia, Photon, AstraLex*) directly into `shaderpacks/`.
-* **The Iris pipeline, inside Pryzma:** a port of [Iris](https://github.com/IrisShaders/Iris) 1.8.14 (package `net.pryzma.iris`): shadow maps, `shadowcomp`, composite and deferred passes, compute shaders, custom images and uniforms, PBR textures.
+* **The Iris pipeline, inside Pryzma:** an optimized fork of [Iris](https://github.com/IrisShaders/Iris) 1.8.14 (package `net.pryzma.iris`): shadow maps, `shadowcomp`, composite and deferred passes, compute shaders, custom images and uniforms, PBR textures.
 * **No Sodium, no Oculus:** terrain renders on Pryzma's own chunk path, with block ids and light emission for the shader pack and render-region multi-draw in both the main and the shadow pass.
 * **Leaner than stock Iris on this path:** the shadow pass collects its sections directly, without rebuilding the occlusion graph every frame, and redundant framebuffer and program binds are skipped.
 * **In-Game Customization:** Iris' shader pack screen and option menus (**Video Settings → Shaders**, or `O`); `R` reloads, `K` toggles.
@@ -69,7 +71,7 @@ Why juggle dozens of conflicting mods with fragmented configs?
 
 | Feature | Vanilla 1.21.1 | The Fragmented Mod Salad (15+ Mods) | Pryzma (NeoForge 1.21.1) |
 | :--- | :---: | :--- | :---: |
-| **Shaderpack Pipeline** (BSL, Complementary, Nostalgia) | ❌ No | ⚠️ Requires `Iris` / `Oculus` | ✅ **Built-in (port of Iris)** |
+| **Shaderpack Pipeline** (BSL, Complementary, Nostalgia) | ❌ No | ⚠️ Requires `Iris` / `Oculus` | ✅ **Built-in (Optimized Fork of Iris)** |
 | **OptiFine Format** (`optifine/` folder) | ❌ No | ⚠️ Fragmented across 8+ separate mods | ✅ **100% Native Drop-in** |
 | **Legacy MCPatcher Format** (`mcpatcher/` folder) | ❌ No | ❌ **Unsupported** *(requires manual conversion)* | ✅ **Native Runtime Aliasing** |
 | **Connected Textures (CTM)** | ❌ No | ⚠️ Requires `Continuity` or `Fusion` | ✅ **Native Full-Suite CTM** |
@@ -81,6 +83,7 @@ Why juggle dozens of conflicting mods with fragmented configs?
 | **Better Grass & Better Snow** | ❌ No | ⚠️ Requires `BetterGrassify` + `Snow Real Magic` | ✅ **Native Integrated Toggles** |
 | **Cinematic Smooth Zoom** | ⚠️ Spyglass Only | ⚠️ Requires `Zoomify` or `Just Zoom` | ✅ **Native ('C' Key)** |
 | **Fast Paintings Optimization** | ❌ Multi-quad Lag | ⚠️ Requires `FastPaintings` | ✅ **Native Consolidated Meshes** |
+| **Remove Realms & Compact Menu** | ❌ Commercial Clutter | ⚠️ Requires separate tweak mod | ✅ **Native Toggle (Settings → Other)** |
 | **Multithreaded Chunk Meshing** | ⚠️ Basic Sync | ✅ `Sodium` | ✅ **Native Dedicated Worker Pool** |
 | **Number of JAR Files Required** | **0** | **15–20+ separate individual mods** | **ONE. SINGLE. JAR.** |
 | **Architecture & Compatibility** | Baseline | Complex web of competing mixins | **Clean Sponge Mixin Monolith** |
@@ -90,7 +93,7 @@ Why juggle dozens of conflicting mods with fragmented configs?
 ## ✦ Installation & Quick Start
 
 1. Install **[NeoForge](https://neoforged.net/)** for Minecraft **1.21.1**.
-2. Download the latest **`pryzma-2.0.1.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
+2. Download the latest **`pryzma-2.0.2.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
 3. Place your favorite shaderpacks into `.minecraft/shaderpacks/` and resource packs into `.minecraft/resourcepacks/`.
 4. Launch the game, open **Options → Video Settings**, and customize your visual experience to your heart's content.
 
@@ -128,7 +131,7 @@ To run the automated verification test suite:
 Pryzma is distributed under a composite open-source license (see [LICENSE](LICENSE)):
 
 * **Pryzma Core & Optimizations:** Licensed under the **MIT License**. Copyright (c) 2026 Sto3IV & Ranni.
-* **Shaderpack Pipeline (`net.pryzma.iris`):** Port of [Iris](https://github.com/IrisShaders/Iris) 1.8.14, licensed under the **GNU LGPL-3.0** (`META-INF/LICENSE-IRIS`, `META-INF/NOTICE-IRIS`). Copyright (c) 2020-2024 Iris Contributors.
+* **Shaderpack Pipeline (`net.pryzma.iris`):** Embedded optimized fork of [Iris](https://github.com/IrisShaders/Iris) 1.8.14, licensed under the **GNU LGPL-3.0** (`META-INF/LICENSE-IRIS`, `META-INF/NOTICE-IRIS`). Copyright (c) 2020-2024 Iris Contributors.
 * **glsl-transformer:** Bundled as a nested Jar-in-Jar under the **GNU AGPL-3.0**. Copyright (c) douira.
 * **jcpp & ithaka-digraph:** Licensed under the **Apache License 2.0**.
 

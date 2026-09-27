@@ -734,5 +734,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " WYŁ. - standardowe renderowanie wieloczęściowe (domyślnie)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " WŁ. - zoptymalizowane renderowanie jednosiadkowe (szybciej)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Przyspiesza renderowanie wszystkich obrazów (podstawowych i z modów),",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "łącząc je w 6 skonsolidowanych ścian z jednoprzebiegowym oświetleniem."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "łącząc je w 6 skonsolidowanych ścian z jednoprzebiegowym oświetleniem.",
+  "pr.options.REMOVE_REALMS": "Usuń Realms",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Przycisk usuwania Realms",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  WŁ. - ukryj przycisk Realms (domyślnie)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  WYŁ. - pokazuj przycisk Minecraft Realms w menu głównym",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Usuwa przycisk Minecraft Realms i powiadomienia",
+  "pr.options.REMOVE_REALMS.tooltip.5": "z menu głównego."
 }

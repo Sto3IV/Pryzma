@@ -353,8 +353,12 @@ public final class PrOptions {
             dir -> PryzmaConfig.prScreenshotSize = PryzmaConfig.prScreenshotSize + 1 > 4 ? 1 : PryzmaConfig.prScreenshotSize + 1);
     public static final PrOption.Cycle SHOW_GL_ERRORS = bool("pr.options.SHOW_GL_ERRORS",
             () -> PryzmaConfig.prShowGlErrors, v -> PryzmaConfig.prShowGlErrors = v);
+    /** Toggles the pause menu feedback buttons ("Give Feedback", "Report Bugs"). */
     public static final PrOption.Cycle FEEDBACK_BUTTONS = bool("pr.options.FEEDBACK_BUTTONS",
             () -> PryzmaConfig.prFeedbackButtons, v -> PryzmaConfig.prFeedbackButtons = v);
+    /** Toggles removing the Minecraft Realms button and background notifications from TitleScreen. */
+    public static final PrOption.Cycle REMOVE_REALMS = bool("pr.options.REMOVE_REALMS",
+            () -> PryzmaConfig.prRemoveRealms, v -> PryzmaConfig.prRemoveRealms = v);
 
     // ------------------------------------------------------------------ quick info
 

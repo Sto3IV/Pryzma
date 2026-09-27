@@ -730,5 +730,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " UIT - standaard meervoudige rendering (standaard)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " AAN - geoptimaliseerde enkelvoudige mesh (sneller)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Versnelt de rendering van alle schilderijen (standaard en gemod)",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "door ze samen te voegen tot 6 vlakken met éénpassingsbelichting."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "door ze samen te voegen tot 6 vlakken met éénpassingsbelichting.",
+  "pr.options.REMOVE_REALMS": "Realms verwijderen",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Knop Realms verwijderen",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  AAN - Realms-knop verbergen (standaard)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  UIT - Minecraft Realms-knop in hoofdmenu tonen",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Verwijdert de Minecraft Realms-knop en meldingen",
+  "pr.options.REMOVE_REALMS.tooltip.5": "uit het hoofdmenu."
 }

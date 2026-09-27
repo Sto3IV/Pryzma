@@ -730,5 +730,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " OFF - standard multi-quad painting rendering (default)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " ON - optimized single-mesh painting rendering (faster)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Accelerates rendering of all paintings (vanilla and modded)",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "by baking them into 6 consolidated faces with single-pass lighting."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "by baking them into 6 consolidated faces with single-pass lighting.",
+  "pr.options.REMOVE_REALMS": "Премахване на Realms",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Бутон за премахване на Realms",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  ВКЛ - скриване на бутона за Realms (по подразбиране)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  ИЗКЛ - показване на бутона за Minecraft Realms в главното меню",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Премахва бутона за Minecraft Realms и известията",
+  "pr.options.REMOVE_REALMS.tooltip.5": "от главното меню."
 }

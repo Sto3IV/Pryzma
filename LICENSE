@@ -33,11 +33,11 @@ The MIT License above applies to all original Pryzma components, including:
 - High-precision F3 debug overlay, zoom, and GUI systems
 
 ================================================================================
-2. SHADERPACK PIPELINE: PORT OF IRIS (GNU LGPL-3.0)
+2. SHADERPACK PIPELINE: EMBEDDED OPTIMIZED FORK OF IRIS (GNU LGPL-3.0)
 ================================================================================
 
 The shaderpack pipeline located under Java packages `net.pryzma.iris.*` is an
-independent port of Iris (https://github.com/IrisShaders/Iris, branch 1.21.1,
+independent optimized fork of Iris (https://github.com/IrisShaders/Iris, branch 1.21.1,
 version 1.8.14, commit eb7afb99f747cc8ed5ee4072119539035d33cefd).
 
 Copyright (c) 2020-2024 Iris Contributors.

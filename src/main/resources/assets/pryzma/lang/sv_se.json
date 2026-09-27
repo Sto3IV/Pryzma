@@ -738,5 +738,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " AV - standard rendering med flera delar (standard)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " PÅ - optimerad rendering i en enda mesh (snabbare)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Accelererar renderingen av alla tavlor (vanilj och moddade)",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "genom att slå ihop dem till 6 ytor med beräkning i ett enda pass."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "genom att slå ihop dem till 6 ytor med beräkning i ett enda pass.",
+  "pr.options.REMOVE_REALMS": "Ta bort Realms",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Knapp för att ta bort Realms",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  PÅ - dölj Realms-knappen (standard)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  AV - visa Minecraft Realms-knappen i huvudmenyn",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Tar bort Minecraft Realms-knappen och aviseringar",
+  "pr.options.REMOVE_REALMS.tooltip.5": "från huvudmenyn."
 }

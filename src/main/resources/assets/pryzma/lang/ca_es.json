@@ -764,5 +764,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " OFF - standard multi-quad painting rendering (default)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " ON - optimized single-mesh painting rendering (faster)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Accelerates rendering of all paintings (vanilla and modded)",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "by baking them into 6 consolidated faces with single-pass lighting."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "by baking them into 6 consolidated faces with single-pass lighting.",
+  "pr.options.REMOVE_REALMS": "Eliminar Realms",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Botó per a eliminar Realms",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  SÍ - amaga el botó de Realms (per defecte)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  NO - mostra el botó de Minecraft Realms al menú principal",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Elimina el botó de Minecraft Realms i les notificacions",
+  "pr.options.REMOVE_REALMS.tooltip.5": "del menú principal."
 }

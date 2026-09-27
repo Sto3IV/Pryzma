@@ -740,5 +740,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " AV - standard rendering med flere deler (standard)",
   "pr.options.FAST_PAINTINGS.tooltip.3": " PÅ - optimalisert rendering i én enkelt mesh (raskere)",
   "pr.options.FAST_PAINTINGS.tooltip.4": "Akselererer renderingen av alle malerier (vanilje og modifiserte)",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "ved å slå dem sammen til 6 flater med beregning i ett enkelt pass."
+  "pr.options.FAST_PAINTINGS.tooltip.5": "ved å slå dem sammen til 6 flater med beregning i ett enkelt pass.",
+  "pr.options.REMOVE_REALMS": "Fjern Realms",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Fjern Realms-knapp",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  PÅ - skjul Realms-knapp (standard)",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  AV - vis Minecraft Realms-knapp i hovedmenyen",
+  "pr.options.REMOVE_REALMS.tooltip.4": "Fjerner Minecraft Realms-knappen og varsler",
+  "pr.options.REMOVE_REALMS.tooltip.5": "fra hovedmenyen."
 }

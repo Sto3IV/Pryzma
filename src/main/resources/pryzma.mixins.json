@@ -57,6 +57,7 @@
     "TextureAtlasAccessor",
     "TextureAtlasSpriteMixin",
     "TextureStateShardAccessor",
+    "TitleScreenMixin",
     "VertexBufferRegionMixin",
     "ViewAreaRegionMixin",
     "WeightedBakedModelAccessor"

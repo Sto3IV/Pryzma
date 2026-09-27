@@ -98,8 +98,12 @@ public final class PryzmaConfig {
     public static boolean prDrippingWaterLava = true;
     public static boolean prAnimatedTerrain = true;
     public static boolean prAnimatedTextures = true;
+    /** Toggles the pause menu feedback buttons ("Give Feedback", "Report Bugs"). False = compact menu. */
     public static boolean prFeedbackButtons = false;
+    /** Single-mesh baking optimization for vanilla and modded paintings. */
     public static boolean prFastPaintings = false;
+    /** Removes the Minecraft Realms button and notifications from TitleScreen, restoring compact vanilla 3-row layout. */
+    public static boolean prRemoveRealms = true;
 
     public static boolean prQuickInfo = false;
     public static int prQuickInfoFps = VALUE_FULL;
@@ -278,6 +282,7 @@ public final class PryzmaConfig {
         prTelemetry = oneOf(v, "prTelemetry", prTelemetry, TELEMETRY_VALUES);
         prFeedbackButtons = bool(v, "prFeedbackButtons", prFeedbackButtons);
         prFastPaintings = bool(v, "prFastPaintings", prFastPaintings);
+        prRemoveRealms = bool(v, "prRemoveRealms", prRemoveRealms);
         prHeldItemTooltips = bool(v, "prHeldItemTooltips", prHeldItemTooltips);
 
         prQuickInfo = bool(v, "prQuickInfo", prQuickInfo);
@@ -334,6 +339,7 @@ public final class PryzmaConfig {
         Map<String, String> m = new LinkedHashMap<>();
         m.put("prFastPaintings", str(prFastPaintings));
         m.put("prFeedbackButtons", str(prFeedbackButtons));
+        m.put("prRemoveRealms", str(prRemoveRealms));
         m.put("prFogType", str(prFogType));
         m.put("prFogStart", Float.toString(prFogStart));
         m.put("prMipmapType", str(prMipmapType));
@@ -428,6 +434,7 @@ public final class PryzmaConfig {
         prHeldItemTooltips = true;
         prFastPaintings = false;
         prFeedbackButtons = false;
+        prRemoveRealms = true;
         prFogType = 2;
         prFogStart = 0.8F;
         prMipmapType = 0;

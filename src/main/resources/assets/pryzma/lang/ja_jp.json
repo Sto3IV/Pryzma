@@ -750,5 +750,11 @@
   "pr.options.FAST_PAINTINGS.tooltip.2": " オフ - 標準的な複数ポリゴン描画（初期設定）",
   "pr.options.FAST_PAINTINGS.tooltip.3": " オン - 最適化された単一メッシュ描画（高速）",
   "pr.options.FAST_PAINTINGS.tooltip.4": "すべての絵画（バニラおよびMOD追加分）の描画を高速化します。",
-  "pr.options.FAST_PAINTINGS.tooltip.5": "6面の一体型メッシュに統合し、1パスで光量計算を行います。"
+  "pr.options.FAST_PAINTINGS.tooltip.5": "6面の一体型メッシュに統合し、1パスで光量計算を行います。",
+  "pr.options.REMOVE_REALMS": "Realmsを削除",
+  "pr.options.REMOVE_REALMS.tooltip.1": "Realmsボタンの非表示",
+  "pr.options.REMOVE_REALMS.tooltip.2": "  オン - Realmsボタンを非表示（デフォルト）",
+  "pr.options.REMOVE_REALMS.tooltip.3": "  オフ - メインメニューにMinecraft Realmsボタンを表示",
+  "pr.options.REMOVE_REALMS.tooltip.4": "タイトル画面からMinecraft Realmsボタンと通知を",
+  "pr.options.REMOVE_REALMS.tooltip.5": "削除します。"
 }
