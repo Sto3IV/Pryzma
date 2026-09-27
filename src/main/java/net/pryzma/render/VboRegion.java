@@ -22,7 +22,9 @@ import net.pryzma.util.LinkedList;
  * {@link VboRange} of it; the visible ranges are queued while the layer draws and submitted with a
  * single {@code glMultiDrawElements} over the game's shared sequential index buffer. A range that
  * outgrows its slot moves to the top; the gaps left behind are closed by {@link #compactRanges},
- * one copy per call, while more than a tenth of the used span is free. Render thread only.
+ * one copy per call, while more than a tenth of the used span is free. The vertex format is the
+ * one of the meshes stored, not the layer's: under a shader pack chunk meshes use the pipeline's
+ * extended terrain format. Render thread only.
  */
 public class VboRegion {
     private static final int INITIAL_CAPACITY = 4096;
@@ -42,10 +44,12 @@ public class VboRegion {
     private PointerBuffer bufferIndexVertex;
     private IntBuffer bufferCountVertex;
     private final int vertexBytes;
+    /** Format of every mesh in the region; null only for the allocator tests. */
+    private final VertexFormat format;
     private VertexFormat.Mode drawMode = VertexFormat.Mode.QUADS;
 
-    public VboRegion(RenderType layer, long key) {
-        this(layer, key, layer.format().getVertexSize());
+    public VboRegion(RenderType layer, long key, VertexFormat format) {
+        this(layer, key, format, format.getVertexSize());
         glArrayObjectId = GlStateManager._glGenVertexArrays();
         glBufferId = GlStateManager._glGenBuffers();
         GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, glBufferId);
@@ -55,8 +59,13 @@ public class VboRegion {
 
     /** The allocator without GL objects; tests drive it through the GL seams. */
     VboRegion(RenderType layer, long key, int vertexBytes) {
+        this(layer, key, null, vertexBytes);
+    }
+
+    private VboRegion(RenderType layer, long key, VertexFormat format, int vertexBytes) {
         this.layer = layer;
         this.key = key;
+        this.format = format;
         this.vertexBytes = vertexBytes;
     }
 
@@ -221,7 +230,7 @@ public class VboRegion {
         GlStateManager._glBindVertexArray(glArrayObjectId);
         if (glAttribBufferId != glBufferId) {
             GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, glBufferId);
-            layer.format().setupBufferState();
+            format.setupBufferState();
             glAttribBufferId = glBufferId;
         }
         // Binding attaches the shared index buffer to this VAO and grows it; its type is final only afterwards.
@@ -291,6 +300,10 @@ public class VboRegion {
 
     public long getKey() {
         return key;
+    }
+
+    public VertexFormat getFormat() {
+        return format;
     }
 
     public boolean isDeleted() {

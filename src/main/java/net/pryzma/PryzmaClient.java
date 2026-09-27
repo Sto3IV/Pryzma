@@ -25,9 +25,8 @@ import net.pryzma.ctm.PryzmaCtm;
 import net.pryzma.gui.PrQuickInfo;
 import net.pryzma.gui.PrVideoSettingsScreen;
 import net.pryzma.gui.PrZoom;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.pryzma.iris.platform.IrisForgeHelpers;
 import net.pryzma.item.PrCitModels;
-import net.pryzma.shader.PrShaders;
 import net.pryzma.item.PrCitSpriteSource;
 import net.pryzma.mixin.OptionsSubScreenAccessor;
 import net.pryzma.perf.PrDebugTracker;
@@ -53,6 +52,10 @@ public final class PryzmaClient {
         modBus.addListener(ModelEvent.ModifyBakingResult.class, PrCitModels::onModifyBakingResult);
         modBus.addListener(ModelEvent.BakingCompleted.class, PrCitModels::onBakingCompleted);
         modBus.addListener(RegisterKeyMappingsEvent.class, PrZoom::onRegisterKeys);
+        modBus.addListener(RegisterKeyMappingsEvent.class, event -> {
+            IrisForgeHelpers.KEYLIST.forEach(event::register);
+            IrisForgeHelpers.KEYLIST.clear();
+        });
         modBus.addListener(RegisterGuiLayersEvent.class, event -> event.registerAbove(VanillaGuiLayers.DEBUG_OVERLAY,
                 ResourceLocation.fromNamespaceAndPath(Pryzma.MODID, "quick_info"), PrQuickInfo::render));
         gameBus.addListener(ViewportEvent.ComputeFov.class, PrZoom::onComputeFov);
@@ -61,8 +64,6 @@ public final class PryzmaClient {
         gameBus.addListener(ServerTickEvent.Post.class, PrWorldControl::onServerTick);
         gameBus.addListener(ViewportEvent.RenderFog.class, PrRenderHooks::onRenderFog);
         gameBus.addListener(RenderLevelStageEvent.class, PrRenderHooks::onRenderStage);
-        gameBus.addListener(RenderLevelStageEvent.class, event -> PrShaders.stage(event.getStage()));
-        modBus.addListener(FMLClientSetupEvent.class, event -> event.enqueueWork(PrShaders::init));
         gameBus.addListener(RenderFrameEvent.Pre.class, PrQuickInfo::onFrameStart);
         gameBus.addListener(RenderFrameEvent.Post.class, PrQuickInfo::onFrameEnd);
         gameBus.addListener(RenderFrameEvent.Pre.class, event -> {

@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.mojang.blaze3d.platform.NativeImage;
@@ -15,8 +16,11 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.pryzma.iris.uniforms.CapturedRenderingState;
+import net.pryzma.lightmap.PrGuiLightmap;
 import net.pryzma.lightmap.PryzmaLightmap;
 
 /**
@@ -30,6 +34,25 @@ public abstract class LightTextureMixin {
     @Shadow @Final private Minecraft minecraft;
     @Shadow private float blockLightRedFlicker;
     @Shadow private boolean updateLightTexture;
+
+    /** Vanilla's own table reached the texture: the GUI can sample it again. */
+    @Inject(method = "updateLightTexture", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/DynamicTexture;upload()V"))
+    private void prVanillaLightmapUploaded(float partialTicks, CallbackInfo ci) {
+        PrGuiLightmap.onLevelLightmap(false);
+    }
+
+    /** The GUI binds a white lightmap while the texture holds a custom one; see {@link PrGuiLightmap}. */
+    @ModifyArg(method = "turnOnLightLayer", at = @At(value = "INVOKE",
+            target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V"), index = 1)
+    private ResourceLocation prGuiLightmapShader(ResourceLocation location) {
+        return PrGuiLightmap.substitute(location);
+    }
+
+    @ModifyArg(method = "turnOnLightLayer", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/texture/TextureManager;bindForSetup(Lnet/minecraft/resources/ResourceLocation;)V"), index = 0)
+    private ResourceLocation prGuiLightmapBind(ResourceLocation location) {
+        return PrGuiLightmap.substitute(location);
+    }
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void prTickFlicker(CallbackInfo ci) {
@@ -64,6 +87,9 @@ public abstract class LightTextureMixin {
         this.minecraft.getProfiler().push("prLightTex");
         boolean done = PryzmaLightmap.update(level, frame, this.lightPixels);
         if (done) {
+            PrGuiLightmap.onLevelLightmap(true);
+            // Vanilla's path, which this replaces, is where the shader pipeline reads darknessLightFactor.
+            CapturedRenderingState.INSTANCE.setDarknessLightFactor(darkPulse);
             this.lightTexture.upload();
             this.updateLightTexture = false;
         }

@@ -48,6 +48,7 @@ sourceSets {
 }
 
 repositories {
+    mavenCentral()
 }
 
 neoForge {
@@ -71,6 +72,10 @@ neoForge {
             client()
             systemProperty 'pryzma.selftest', file('run/selftest.txt').absolutePath
             programArguments.addAll '--width', '1280', '--height', '720'
+            // -Ppryzma.jfr: record the run with Java Flight Recorder (allocation and CPU samples) into run/selftest.jfr.
+            if (providers.gradleProperty('pryzma.jfr').isPresent()) {
+                jvmArguments.add("-XX:StartFlightRecording=settings=profile,filename=${file('run/selftest.jfr').absolutePath}")
+            }
         }
 
         configureEach {
@@ -99,7 +104,25 @@ sourceSets.dev.runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets
 sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
 sourceSets.test.runtimeClasspath += sourceSets.main.compileClasspath
 
+// Shader pack pipeline (Iris port, net.pryzma.iris): GLSL parsing/transformation and the C
+// preprocessor shader packs are written for. They ship inside the mod jar (Jar-in-Jar) and are
+// on the dev runtime classpath, as Iris ships them. antlr4-runtime 4.13.1 is not bundled: NeoForge
+// already carries it (access transformers), and glsl-transformer's dependency on the ANTLR tool
+// is build-time only.
+def shaderLibraries = [
+        'io.github.douira:glsl-transformer:3.0.0-pre3',
+        'org.anarres:jcpp:1.4.14',
+]
+
 dependencies {
+    shaderLibraries.each { lib ->
+        jarJar(implementation(lib) {
+            exclude group: 'org.antlr', module: 'antlr4'
+        })
+        additionalRuntimeClasspath(lib) {
+            transitive = false
+        }
+    }
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }

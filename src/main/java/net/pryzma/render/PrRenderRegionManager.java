@@ -92,11 +92,19 @@ public final class PrRenderRegionManager {
         }
     }
 
-    /** The region of {@code key} for region layer {@code layer}, created on first use. */
-    public static VboRegion acquire(int layer, long key) {
+    /**
+     * The region of {@code key} for region layer {@code layer} holding meshes of {@code format}, created on
+     * first use. A region of another format is dropped: chunk meshes change format when a shader pack
+     * starts or stops, and the sections still pointing at the old region re-upload into the new one.
+     */
+    public static VboRegion acquire(int layer, long key, VertexFormat format) {
         VboRegion region = REGIONS[layer].get(key);
+        if (region != null && region.getFormat() != format) {
+            region.deleteGlBuffers();
+            region = null;
+        }
         if (region == null) {
-            region = new VboRegion(LAYERS[layer], key);
+            region = new VboRegion(LAYERS[layer], key, format);
             REGIONS[layer].put(key, region);
         }
         return region;

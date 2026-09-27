@@ -16,6 +16,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.neoforged.fml.ModList;
 import net.pryzma.Pryzma;
+import net.pryzma.iris.gui.screen.ShaderPackScreen;
 
 /**
  * The Pryzma video settings screen, laid out exactly as in Pryzma 1.x: eleven options in the
@@ -73,10 +74,10 @@ public final class PrVideoSettingsScreen extends PrScreen {
         minecraft.setScreen(new PrSettingsScreen(page, this));
     }
 
-    /** Pryzma's own shader pack screen. */
+    /** The shader pack screen of the Iris port; it returns here. */
     private void openShaders() {
         toChild = true;
-        minecraft.setScreen(new PrShaderScreen(this));
+        minecraft.setScreen(new ShaderPackScreen(this));
     }
 
     /** 1.x: right-click lowers GUI Scale, wrapping from Auto to the largest scale that fits. */
@@ -110,7 +111,7 @@ public final class PrVideoSettingsScreen extends PrScreen {
         g.pose().pushPose();
         g.pose().translate(0.0F, 0.0F, -10.0F);
         String version = "Pryzma " + ModList.get().getModContainerById(Pryzma.MODID)
-                .map(c -> c.getModInfo().getVersion().toString()).orElse("");
+                .map(c -> c.getModInfo().getVersion().toString()).orElse("2.0.1");
         g.drawString(font, version, 2, height - 10, VERSION_COLOR);
         String mc = "Minecraft " + SharedConstants.getCurrentVersion().getName();
         g.drawString(font, mc, width - font.width(mc) - 2, height - 10, VERSION_COLOR);

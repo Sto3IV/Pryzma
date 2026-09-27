@@ -145,8 +145,8 @@ abstract class VertexBufferRegionMixin implements IPrVertexBuffer {
             indexCount = state.indexCount();
             sequentialIndices = null;
             VboRegion region = pryzma$region;
-            if (region == null || region.isDeleted() || region.getKey() != pryzma$regionKey) {
-                region = PrRenderRegionManager.acquire(pryzma$layer, pryzma$regionKey);
+            if (region == null || region.isDeleted() || region.getKey() != pryzma$regionKey || region.getFormat() != format) {
+                region = PrRenderRegionManager.acquire(pryzma$layer, pryzma$regionKey, format);
                 pryzma$setVboRegion(region);
             }
             if (pryzma$range == null) {

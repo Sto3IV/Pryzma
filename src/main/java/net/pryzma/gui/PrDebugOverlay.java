@@ -12,11 +12,11 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.neoforged.fml.ModList;
 import net.pryzma.Pryzma;
 import net.pryzma.PryzmaConfig;
+import net.pryzma.iris.Iris;
 import net.pryzma.light.PrDynamicLights;
 import net.pryzma.mixin.TextureAtlasAccessor;
 import net.pryzma.perf.PrDebugTracker;
 import net.pryzma.render.PrAnimations;
-import net.pryzma.shader.PrShaders;
 
 /**
  * The Pryzma additions to the F3 screen, in the 1.x layout: the client brand; minimum FPS, section
@@ -46,7 +46,7 @@ public final class PrDebugOverlay {
         i = find(lines, "E: ");
         if (i >= 0) {
             lines.set(i, lines.get(i) + ", " + versionDebug(PrDynamicLights.isEnabled() ? PrDynamicLights.getSourceCount() : -1,
-                    version(), PrShaders.enabled() ? PrShaders.selected() : null));
+                    version(), shaderPack()));
         }
         i = find(lines, "P: ");
         if (i >= 0) {
@@ -95,7 +95,12 @@ public final class PrDebugOverlay {
     private static String flags() {
         return (PryzmaConfig.prSmoothFps ? " sf" : "") + (PryzmaConfig.prFastRender ? " fr" : "")
                 + (PryzmaConfig.prAfLevel > 1 ? " af" : "") + (PryzmaConfig.startupAaLevel() > 0 ? " aa" : "")
-                + (PryzmaConfig.prRenderRegions ? " rr" : "") + (PrShaders.enabled() ? " sh" : "");
+                + (PryzmaConfig.prRenderRegions ? " rr" : "") + (shaderPack() != null ? " sh" : "");
+    }
+
+    /** The active shader pack's name; null while no pack renders. */
+    private static String shaderPack() {
+        return Iris.isPackInUseQuick() ? Iris.getCurrentPackName() : null;
     }
 
     /** 1.x Config.getVersionDebug: {@code dynamicLights} is -1 while they are off, {@code shaderPack} null. */
@@ -128,7 +133,7 @@ public final class PrDebugOverlay {
         }
     }
 
-    /** "Pryzma_1.21.1_2.0.0", the 1.x version format. */
+    /** "Pryzma_1.21.1_2.0.1", the 1.x version format. */
     private static String version() {
         if (pryzmaVersion == null) {
             pryzmaVersion = "Pryzma_" + SharedConstants.getCurrentVersion().getName() + "_" + ModList.get()

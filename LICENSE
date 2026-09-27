@@ -1,6 +1,10 @@
-MIT License
+MIT License / Combined Open Source License
 
-Copyright (c) 2026 Pryzma Contributors
+Copyright (c) 2026 Sto3IV & Ranni (Pryzma Contributors)
+
+================================================================================
+1. PRYZMA CORE & ORIGINAL CONTRIBUTIONS (MIT LICENSE)
+================================================================================
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,44 +24,85 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
---------------------------------------------------------------------------------
-THIRD-PARTY COMPATIBILITY & INTEROPERABILITY NOTICE
---------------------------------------------------------------------------------
+The MIT License above applies to all original Pryzma components, including:
+- Multi-draw regional mesh batching (VboRegion, PrRenderRegionManager)
+- Real-time lock-free dynamic lights engine (PrDynamicLights)
+- Custom lighting, color maps & zero-allocation GUI Lightmap isolation (PryzmaLightmap, PrGuiLightmap)
+- Connected Textures (CTM), Custom Item Textures (CIT), Custom Entity Models (CEM)
+- Celestial dome and skybox rendering (PrSkyRenderer)
+- High-precision F3 debug overlay, zoom, and GUI systems
 
-1. SCOPE OF LICENSE
-   The MIT License above applies exclusively to original contributions,
-   architecture, bytecode transformers, runtime adapters, stub implementations,
-   and integration code authored by the Pryzma project contributors.
+================================================================================
+2. SHADERPACK PIPELINE: PORT OF IRIS (GNU LGPL-3.0)
+================================================================================
 
-2. INTEROPERABILITY & REVERSE ENGINEERING
-   Pryzma is an independent compatibility engine designed to restore and
-   maintain visual shaderpack and resourcepack functionality within modern
-   modding runtimes.
+The shaderpack pipeline located under Java packages `net.pryzma.iris.*` is an
+independent port of Iris (https://github.com/IrisShaders/Iris, branch 1.21.1,
+version 1.8.14, commit eb7afb99f747cc8ed5ee4072119539035d33cefd).
 
-   Portions of compatibility interfaces, format specifications, and runtime
-   adapters are developed and included strictly for the purpose of technical
-   interoperability, in accordance with recognized statutory reverse engineering
-   and interoperability provisions, including:
-   - United States Copyright Act (17 U.S.C. § 107 - Fair Use for Interoperability;
-     Sega Enterprises Ltd. v. Accolade, Inc.; Sony Computer Entertainment, Inc. v.
-     Connectix Corp.);
-   - European Union Directive 2009/24/EC, Article 6 (Decompilation for Interoperability);
-   - Civil Code of the Russian Federation, Part IV, Article 1280 (Right of Legitimate
-     Users to Decompile and Adapt for Interoperability).
+Copyright (c) 2020-2024 Iris Contributors.
 
-3. NO CLAIM TO PREDECESSOR INTELLECTUAL PROPERTY
-   The contributors claim no copyright or proprietary ownership in underlying
-   third-party shaderpack standards, legacy resource pack formats, or external
-   game assets. All trademarks, format identifiers, and intellectual property
-   belong to their respective rights holders.
+This component is licensed under the GNU Lesser General Public License version 3.0
+(LGPL-3.0) as published by the Free Software Foundation. The complete license text
+is provided in `META-INF/LICENSE-IRIS` and `META-INF/NOTICE-IRIS`.
 
-4. NON-AFFILIATION
-   Pryzma is an independent community open-source project and is not affiliated
-   with, sponsored by, or endorsed by Mojang Studios, Microsoft Corporation,
-   or the developers of predecessor visual modifications.
+All modifications made to the Iris codebase in Pryzma are released under the terms
+of the LGPL-3.0, including:
+- Decoupling from Sodium/Oculus runtimes to natively support vanilla/Pryzma chunk paths;
+- Vanilla chunk vertex attribute completion (block IDs, light emission in midBlock);
+- Direct section collection and counting-sort shadow pass (O(N) shadow culling);
+- Framebuffer and shader program state binding caches (GlBindingCache);
+- Two-tier memoization for celestial dome sky colors (PrSkyColorMemo).
 
-5. RIGHTS HOLDER CONTACT & GOOD FAITH RESOLUTION
-   In the event that any copyright holder identifies material in this repository
-   that they believe infringes upon their rights, they are encouraged to contact
-   the repository maintainer via project contact channels or repository issues.
-   Any substantiated inquiries will be handled promptly and in good faith.
+In accordance with LGPL-3.0 Section 4, the full corresponding source code for all
+modifications is publicly available at: https://github.com/Sto3IV/Pryzma
+
+================================================================================
+3. BUNDLED & VENDORED THIRD-PARTY LIBRARIES
+================================================================================
+
+Pryzma bundles or vendors the following third-party components:
+
+- glsl-transformer (io.github.douira):
+  Bundled unmodified as a nested Jar-in-Jar dependency under `META-INF/jarjar/`.
+  Licensed under the GNU Affero General Public License version 3.0 (AGPL-3.0).
+  Copyright (c) douira and contributors.
+
+- jcpp (org.anarres):
+  Bundled unmodified as a nested Jar-in-Jar dependency under `META-INF/jarjar/`.
+  Licensed under the Apache License, Version 2.0.
+  Copyright (c) anarres and contributors.
+
+- ithaka-digraph (`net.pryzma.iris.vendored.digraph`):
+  Licensed under the Apache License, Version 2.0.
+  Copyright (c) 2012 Odysseus Software GmbH.
+
+================================================================================
+4. DONATIONS, SUPPORT & MONETIZATION
+================================================================================
+
+Voluntary donations, sponsorship, and funding directed to the project maintainers
+(Sto3IV & Ranni) are permitted and encouraged. Such support is accepted in full
+compliance with the MIT, LGPL-3.0, and AGPL-3.0 licenses, without imposing any
+additional restrictions on the redistribution or modification of the software.
+
+================================================================================
+5. STATUTORY INTEROPERABILITY & FAIR USE NOTICE
+================================================================================
+
+Pryzma is an independent compatibility engine designed to restore visual shaderpack
+and resourcepack functionality in modern Minecraft runtimes.
+
+All compatibility interfaces, configuration parsers, and format adapters are
+developed and distributed strictly for the purpose of technical interoperability,
+under statutory provisions including:
+- United States Copyright Act (17 U.S.C. § 107 - Fair Use for Interoperability;
+  Sega Enterprises Ltd. v. Accolade, Inc.; Sony Computer Entertainment, Inc. v.
+  Connectix Corp.);
+- European Union Directive 2009/24/EC, Article 6 (Decompilation for Interoperability);
+- Civil Code of the Russian Federation, Part IV, Article 1280 (Right of Legitimate
+  Users to Decompile and Adapt for Interoperability).
+
+Pryzma is not affiliated with, sponsored by, or endorsed by Mojang Studios,
+Microsoft Corporation, or predecessor visual modification teams. All registered
+trademarks belong to their respective owners.

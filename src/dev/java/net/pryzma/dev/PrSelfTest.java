@@ -38,9 +38,9 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.pryzma.PryzmaConfig;
-import net.pryzma.gui.PrShaderScreen;
 import net.pryzma.gui.PrZoom;
-import net.pryzma.shader.PrShaders;
+import net.pryzma.iris.Iris;
+import net.pryzma.iris.gui.screen.ShaderPackScreen;
 
 /**
  * Scripted client self-test used only by the {@code runSelftest} Gradle run; never packaged.
@@ -72,12 +72,13 @@ import net.pryzma.shader.PrShaders;
  * slot &lt;0-8&gt;                    select a hotbar slot
  * view first|back|front         set the camera perspective
  * inventory                     open the player inventory
- * shaderpack &lt;name&gt;|OFF          select a shader pack from shaderpacks/
- * shaderoption &lt;name&gt; &lt;value&gt;    set a shader pack option, save and reload the pack
- * shaderstop &lt;pass&gt;|off          skip every pass after &lt;pass&gt; each frame (final still runs): with a
- *                               final that shows the buffers, a view of the chain at that point
- * screen shaders|shaderoptions  open the shader pack screen or its options
- * nopause                       do not pause when the window loses focus, and resume if paused
+ * shaderpack &lt;name&gt;|OFF        select a shader pack from shaderpacks/ and reload the pipeline
+ * screen shaders                open the shader pack screen
+ * screen pause|options          open the pause menu or the vanilla options screen
+ * leave                         save and quit to the title screen
+ * irisinfo                      log the pipeline state and its F3 lines (shadow sections, culling)
+ * fps &lt;frames&gt;                  log mean and worst frame time over the next frames
+ * nopause                      do not pause when the window loses focus, and resume if paused
  * quit                          stop the client
  * </pre>
  */
@@ -97,6 +98,11 @@ public final class PrSelfTest {
     private int lightMaxDelta;
     private long lightSumDelta;
     private int lightSamples;
+    private int fpsFrames;
+    private int fpsSamples;
+    private long fpsLast;
+    private long fpsTotal;
+    private long fpsWorst;
 
     private PrSelfTest(List<String> steps) {
         this.steps = steps;
@@ -132,7 +138,7 @@ public final class PrSelfTest {
             }
             return;
         }
-        if (pendingShot != null || lightFrames > 0) {
+        if (pendingShot != null || lightFrames > 0 || fpsFrames > 0) {
             return;
         }
         if (reloading) {
@@ -184,11 +190,11 @@ public final class PrSelfTest {
             }
             case "set" -> setField(a[1], a[2]);
             case "pack" -> {
-                selectPack(mc, a[1], true);
+                selectPack(mc, arg, true);
                 reloading = mc.getOverlay() != null;
             }
             case "unpack" -> {
-                selectPack(mc, a[1], false);
+                selectPack(mc, arg, false);
                 reloading = mc.getOverlay() != null;
             }
             case "reload" -> {
@@ -207,8 +213,9 @@ public final class PrSelfTest {
             }
             case "log" -> LOG.info("PRYZMA-SELFTEST {}", arg);
             case "screen" -> mc.setScreen(switch (arg) {
-                case "shaders" -> new PrShaderScreen(mc.screen);
-                case "shaderoptions" -> PrShaderScreen.optionsScreen(mc.screen);
+                case "shaders" -> new ShaderPackScreen(mc.screen);
+                case "pause" -> new PauseScreen(true);
+                case "options" -> new net.minecraft.client.gui.screens.options.OptionsScreen(mc.screen, mc.options);
                 default -> new VideoSettingsScreen(mc.screen, mc, mc.options);
             });
             case "press" -> click(mc, arg, 0);
@@ -228,14 +235,33 @@ public final class PrSelfTest {
                 default -> CameraType.FIRST_PERSON;
             });
             case "inventory" -> mc.setScreen(new InventoryScreen(mc.player));
-            case "shaderpack" -> PrShaders.select(arg);
-            case "shaderstop" -> PrShaders.debugStopAfter(arg.equals("off") ? null : arg);
-            case "shaderoption" -> {
-                if (!PrShaders.options().get(a[1]).set(a[2])) {
-                    throw new IllegalArgumentException("value " + a[2] + " not allowed for " + a[1]);
+            case "shaderpack" -> {
+                Iris.getIrisConfig().setShaderPackName(arg.equals("OFF") ? null : arg);
+                Iris.getIrisConfig().setShadersEnabled(!arg.equals("OFF"));
+                Iris.getIrisConfig().save();
+                Iris.reload();
+                if (!arg.equals("OFF") && !Iris.isPackInUseQuick()) {
+                    throw new IllegalStateException("shader pack " + arg + " did not load");
                 }
-                PrShaders.saveOptions();
-                PrShaders.reload();
+            }
+            case "irisinfo" -> {
+                List<String> lines = new ArrayList<>();
+                Iris.getPipelineManager().getPipeline().ifPresent(p -> p.addDebugText(lines));
+                LOG.info("PRYZMA-SELFTEST iris pack={} inUse={} fallback={} sections={}", Iris.getCurrentPackName(),
+                        Iris.isPackInUseQuick(), Iris.isFallback(), mc.levelRenderer.getSectionStatistics());
+                lines.forEach(l -> LOG.info("PRYZMA-SELFTEST iris {}", l));
+            }
+            case "fps" -> {
+                fpsFrames = Integer.parseInt(a[1]);
+                fpsSamples = 0;
+                fpsTotal = 0;
+                fpsWorst = 0;
+                fpsLast = 0;
+            }
+            case "leave" -> {
+                // As the pause menu's Save and Quit: back to the title screen.
+                mc.level.disconnect();
+                mc.disconnect(new TitleScreen());
             }
             case "nopause" -> {
                 // A background window loses focus; keep the game running for screenshots.
@@ -256,6 +282,9 @@ public final class PrSelfTest {
         if (lightFrames > 0) {
             sampleLightmap();
         }
+        if (fpsFrames > 0) {
+            sampleFrameTime();
+        }
         if (pendingShot == null) {
             return;
         }
@@ -270,6 +299,22 @@ public final class PrSelfTest {
             LOG.error("PRYZMA-SELFTEST screenshot failed", e);
         }
         pendingShot = null;
+    }
+
+    private void sampleFrameTime() {
+        long now = System.nanoTime();
+        if (fpsLast != 0) {
+            long dt = now - fpsLast;
+            fpsTotal += dt;
+            fpsWorst = Math.max(fpsWorst, dt);
+            fpsSamples++;
+        }
+        fpsLast = now;
+        if (--fpsFrames == 0 && fpsSamples > 0) {
+            double mean = fpsTotal / 1e6 / fpsSamples;
+            LOG.info("PRYZMA-SELFTEST fps frames={} mean={} ms ({} fps) worst={} ms", fpsSamples, String.format("%.3f", mean),
+                    String.format("%.1f", 1000.0 / mean), String.format("%.3f", fpsWorst / 1e6));
+        }
     }
 
     /** Frame-to-frame change of the uploaded lightmap: a strobing lightmap shows large maxima. */

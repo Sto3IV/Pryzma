@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.pryzma.iris.batchedentityrendering.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "BufferSourceAccessor",
+    "CompositeStateAccessor",
+    "MixinBannerRenderer",
+    "MixinBufferBuilder_SegmentRendering",
+    "MixinBufferSource",
+    "MixinByteBufferBuilder",
+    "MixinCompositeRenderType",
+    "MixinDebugScreenOverlay",
+    "MixinFishingHookRenderer",
+    "MixinLevelRenderer",
+    "MixinLevelRenderer_EntityListSorting",
+    "MixinRenderBuffers",
+    "MixinRenderType",
+    "MixinSheets",
+    "OutlineBufferSourceAccessor",
+    "RenderStateShardAccessor",
+    "RenderTypeAccessor",
+    "SectionBufferBuilderPackAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
