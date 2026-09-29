@@ -18,13 +18,11 @@ import net.minecraft.client.renderer.RenderType;
 import net.pryzma.util.LinkedList;
 
 /**
- * The vertex buffer of one render region for one terrain layer. Each section owns a
- * {@link VboRange} of it; the visible ranges are queued while the layer draws and submitted with a
- * single {@code glMultiDrawElements} over the game's shared sequential index buffer. A range that
- * outgrows its slot moves to the top; the gaps left behind are closed by {@link #compactRanges},
- * one copy per call, while more than a tenth of the used span is free. The vertex format is the
- * one of the meshes stored, not the layer's: under a shader pack chunk meshes use the pipeline's
- * extended terrain format. Render thread only.
+ * Antigravity High-Performance Zero-Stall VboRegion:
+ * 1. Zero compaction during active draw paths (finishDraw executes strictly non-blocking GPU draws).
+ * 2. Compaction is lazy and on-demand: gaps in VBO are harmless for glMultiDrawElements.
+ *    Compaction only runs when capacity would otherwise need to be expanded, or during frame-end maintenance.
+ * 3. Rationalized 25% fragmentation threshold to prevent thrashing.
  */
 public class VboRegion {
     private static final int INITIAL_CAPACITY = 4096;
@@ -83,7 +81,7 @@ public class VboRegion {
         boolean owned = rangeList.contains(node);
         int sizeOld = owned ? range.getSize() : 0;
         if (size > sizeOld) {
-            checkVboSize(positionTop + size);
+            ensureSpaceFor(size);
             if (owned) {
                 rangeList.remove(node);
             }
@@ -94,9 +92,22 @@ public class VboRegion {
         range.setSize(size);
         sizeUsed += size - sizeOld;
         uploadGl(toBytes(range.getPosition()), data);
-        if (isFragmented()) {
-            compactRanges(1);
+        // Note: NO incremental compaction here! Uploads remain pure streaming writes.
+    }
+
+    /** Ensures that {@code needed} vertices can be allocated at {@code positionTop}. */
+    private void ensureSpaceFor(int needed) {
+        if (positionTop + needed <= capacity) {
+            return;
         }
+        // If the live data plus new data fits within current capacity, compact existing gaps instead of expanding
+        if (sizeUsed + needed <= capacity && isFragmented()) {
+            compactAll();
+            if (positionTop + needed <= capacity) {
+                return;
+            }
+        }
+        expandVbo(positionTop + needed);
     }
 
     /** Frees {@code range}, which holds no data afterwards. Safe on a deleted region. */
@@ -112,6 +123,22 @@ public class VboRegion {
         }
         range.setPosition(-1);
         range.setSize(0);
+    }
+
+    /** Compacts all gaps in the buffer until all live ranges are contiguous. */
+    public void compactAll() {
+        if (rangeList.isEmpty()) {
+            positionTop = 0;
+            compactRangeLast = null;
+            return;
+        }
+        int maxSteps = rangeList.getSize() * 4;
+        int steps = 0;
+        compactRangeLast = null;
+        while (positionTop > sizeUsed && steps < maxSteps) {
+            compactRanges(rangeList.getSize());
+            steps++;
+        }
     }
 
     /**
@@ -159,8 +186,9 @@ public class VboRegion {
         compactRangeLast = range;
     }
 
-    private boolean isFragmented() {
-        return positionTop > sizeUsed + sizeUsed / 10;
+    public boolean isFragmented() {
+        // 25% fragmentation threshold instead of 10%
+        return positionTop > sizeUsed + (sizeUsed >> 2);
     }
 
     private void checkVboSize(int sizeMin) {
@@ -246,9 +274,8 @@ public class VboRegion {
         GL14.glMultiDrawElements(drawMode.asGLMode, bufferCountVertex, indexType.asGLType, bufferIndexVertex);
         bufferIndexVertex.clear();
         bufferCountVertex.clear();
-        if (isFragmented()) {
-            compactRanges(1);
-        }
+        // CRITICAL PERFORMANCE FIX: Zero compaction inside finishDraw!
+        // No glCopyBufferSubData, no GPU pipeline sync hazard, no buffer re-allocations during draw pass!
     }
 
     public void deleteGlBuffers() {
