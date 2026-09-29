@@ -1,7 +1,10 @@
 package net.pryzma.iris.gui.screen;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import org.lwjgl.opengl.GL11;
 import net.pryzma.iris.Iris;
 import net.pryzma.iris.api.v0.IrisApi;
 import net.pryzma.iris.gui.GuiUtil;
@@ -59,6 +62,23 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 	private static final Component CONFIGURE_TITLE = Component.translatable("pack.iris.configure.title").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
 	private static final int COMMENT_PANEL_WIDTH = 314;
 	private static final String development = "Development Environment";
+	private static String cachedGpuInfo = null;
+
+	public static String getGpuInfo() {
+		if (cachedGpuInfo == null) {
+			try {
+				String ver = GlStateManager._getString(GL11.GL_VERSION);
+				String vendor = GlUtil.getVendor();
+				String renderer = GlUtil.getRenderer();
+				cachedGpuInfo = "OpenGL: " + (ver != null ? ver : "Unknown") + ", " +
+						(vendor != null ? vendor : "Unknown") + ", " +
+						(renderer != null ? renderer : "Unknown");
+			} catch (Throwable t) {
+				cachedGpuInfo = "OpenGL: Unknown";
+			}
+		}
+		return cachedGpuInfo;
+	}
 	private final Screen parent;
 	private final MutableComponent irisTextComponent;
 	private final FrameUpdateNotifier notifier = new FrameUpdateNotifier();
@@ -175,6 +195,24 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 				}
 			}
 
+			if (!optionMenuOpen) {
+				String gpuInfo = getGpuInfo();
+				int textWidth = this.font.width(gpuInfo);
+				int maxAvailableWidth = this.width - 16;
+				int y = this.height - 62;
+				if (textWidth <= maxAvailableWidth) {
+					guiGraphics.drawCenteredString(this.font, gpuInfo, this.width / 2, y, 0xA0A0A0);
+				} else {
+					float scale = (float) maxAvailableWidth / (float) textWidth;
+					var pose = guiGraphics.pose();
+					pose.pushPose();
+					pose.translate(this.width / 2.0f, y, 0);
+					pose.scale(scale, scale, 1.0f);
+					guiGraphics.drawCenteredString(this.font, gpuInfo, 0, 0, 0xA0A0A0);
+					pose.popPose();
+				}
+			}
+
 			// Draw the comment panel
 			if (this.isDisplayingComment()) {
 				// Determine panel height and position
@@ -215,12 +253,12 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 		this.removeWidget(this.shaderPackList);
 		this.removeWidget(this.shaderOptionList);
 
-		this.shaderPackList = new ShaderPackSelectionList(this, this.minecraft, this.width, this.height, 32, this.height - 58 - 32, 0, this.width);
+		this.shaderPackList = new ShaderPackSelectionList(this, this.minecraft, this.width, this.height, 32, this.height - 58 - 44, 0, this.width);
 
 		if (Iris.getCurrentPack().isPresent() && this.navigation != null) {
 			ShaderPack currentPack = Iris.getCurrentPack().get();
 
-			this.shaderOptionList = new ShaderPackOptionList(this, this.navigation, currentPack, this.minecraft, this.width, this.height, 32, this.height - 58 - 32, 0, this.width);
+			this.shaderOptionList = new ShaderPackOptionList(this, this.navigation, currentPack, this.minecraft, this.width, this.height, 32, this.height - 58 - 44, 0, this.width);
 			this.navigation.setActiveOptionList(this.shaderOptionList);
 
 			this.shaderOptionList.rebuild();
