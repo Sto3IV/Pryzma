@@ -41,6 +41,7 @@ import net.pryzma.PryzmaConfig;
 import net.pryzma.gui.PrZoom;
 import net.pryzma.iris.Iris;
 import net.pryzma.iris.gui.screen.ShaderPackScreen;
+import net.pryzma.render.PrF3RenderCache;
 
 /**
  * Scripted client self-test used only by the {@code runSelftest} Gradle run; never packaged.
@@ -78,6 +79,11 @@ import net.pryzma.iris.gui.screen.ShaderPackScreen;
  * leave                         save and quit to the title screen
  * irisinfo                      log the pipeline state and its F3 lines (shadow sections, culling)
  * fps &lt;frames&gt;                  log mean and worst frame time over the next frames
+ * f3 on|off|charts              show or hide the debug screen, or toggle its FPS chart (F3+2)
+ * f3cache &lt;frames&gt;              log how many of the next frames replayed the F3 text, and its builds per second
+ * f3compare &lt;name&gt;              screenshot three frames, F3 cache off (vanilla), building, replaying; log their differences
+ * guiscale &lt;n&gt;                  set the GUI scale (0 = auto) and resize
+ * vsync on|off                  off also lifts the frame rate limit
  * nopause                      do not pause when the window loses focus, and resume if paused
  * quit                          stop the client
  * </pre>
@@ -103,6 +109,17 @@ public final class PrSelfTest {
     private long fpsLast;
     private long fpsTotal;
     private long fpsWorst;
+    private int f3Frames;
+    private int f3Sampled;
+    private int f3Replays;
+    private int f3Builds;
+    private long f3Start;
+    private long f3Last;
+    private long f3BuildNanos;
+    private long f3ReplayNanos;
+    private String compareName;
+    private int compareStage;
+    private final NativeImage[] compareShots = new NativeImage[3];
 
     private PrSelfTest(List<String> steps) {
         this.steps = steps;
@@ -138,7 +155,7 @@ public final class PrSelfTest {
             }
             return;
         }
-        if (pendingShot != null || lightFrames > 0 || fpsFrames > 0) {
+        if (pendingShot != null || lightFrames > 0 || fpsFrames > 0 || f3Frames > 0 || compareStage > 0) {
             return;
         }
         if (reloading) {
@@ -258,6 +275,41 @@ public final class PrSelfTest {
                 fpsWorst = 0;
                 fpsLast = 0;
             }
+            case "f3" -> {
+                var debug = mc.getDebugOverlay();
+                if ("charts".equals(a[1])) {
+                    debug.toggleFpsCharts();
+                } else if (debug.showDebugScreen() != "on".equals(a[1])) {
+                    debug.toggleOverlay();
+                }
+            }
+            case "f3cache" -> {
+                f3Frames = Integer.parseInt(a[1]);
+                f3Sampled = 0;
+                f3Replays = 0;
+                f3Builds = PrF3RenderCache.builds();
+                f3Start = System.nanoTime();
+                f3Last = 0;
+                f3BuildNanos = 0;
+                f3ReplayNanos = 0;
+            }
+            case "f3compare" -> {
+                // The next frame draws the text through vanilla renderLines; frame() takes it from there.
+                compareName = a[1];
+                PrF3RenderCache.enabled = false;
+                compareStage = 1;
+            }
+            case "guiscale" -> {
+                mc.options.guiScale().set(Integer.parseInt(a[1]));
+                mc.resizeDisplay();
+            }
+            case "vsync" -> {
+                boolean on = "on".equals(a[1]);
+                mc.options.enableVsync().set(on);
+                if (!on) {
+                    mc.options.framerateLimit().set(260);
+                }
+            }
             case "leave" -> {
                 // As the pause menu's Save and Quit: back to the title screen.
                 mc.level.disconnect();
@@ -284,6 +336,12 @@ public final class PrSelfTest {
         }
         if (fpsFrames > 0) {
             sampleFrameTime();
+        }
+        if (f3Frames > 0) {
+            sampleF3Cache();
+        }
+        if (compareStage > 0) {
+            compareF3();
         }
         if (pendingShot == null) {
             return;
@@ -315,6 +373,85 @@ public final class PrSelfTest {
             LOG.info("PRYZMA-SELFTEST fps frames={} mean={} ms ({} fps) worst={} ms", fpsSamples, String.format("%.3f", mean),
                     String.format("%.1f", 1000.0 / mean), String.format("%.3f", fpsWorst / 1e6));
         }
+    }
+
+    /** Each frame's decision, read after it was drawn, and its frame time (the first frame has none). */
+    private void sampleF3Cache() {
+        long now = System.nanoTime();
+        boolean replayed = PrF3RenderCache.replaying();
+        if (f3Last != 0) {
+            f3Sampled++;
+            if (replayed) {
+                f3Replays++;
+                f3ReplayNanos += now - f3Last;
+            } else {
+                f3BuildNanos += now - f3Last;
+            }
+        }
+        f3Last = now;
+        if (--f3Frames == 0) {
+            double seconds = (now - f3Start) / 1e9;
+            int builds = PrF3RenderCache.builds() - f3Builds;
+            int built = f3Sampled - f3Replays;
+            LOG.info("PRYZMA-SELFTEST f3cache frames={} replayed={} builds={} ({}/s over {} s) mean frame: build {} ms, replay {} ms",
+                    f3Sampled, f3Replays, builds, String.format("%.1f", builds / seconds), String.format("%.2f", seconds),
+                    built == 0 ? "-" : String.format("%.3f", f3BuildNanos / 1e6 / built),
+                    f3Replays == 0 ? "-" : String.format("%.3f", f3ReplayNanos / 1e6 / f3Replays));
+        }
+    }
+
+    /**
+     * Three consecutive frames: the cache off (vanilla renderLines), a build (drawn from the new vertex
+     * buffers), a replay. Build and replay must match; vanilla and build differ only where the text changed.
+     */
+    private void compareF3() {
+        Minecraft mc = Minecraft.getInstance();
+        int stage = compareStage - 1;
+        compareShots[stage] = Screenshot.takeScreenshot(mc.getMainRenderTarget());
+        LOG.info("PRYZMA-SELFTEST f3compare {} frame {} enabled={} replaying={}", compareName, stage, PrF3RenderCache.enabled,
+                PrF3RenderCache.replaying());
+        if (stage == 0) {
+            PrF3RenderCache.enabled = true;
+            PrF3RenderCache.invalidate();
+        }
+        if (++compareStage <= 3) {
+            return;
+        }
+        compareStage = 0;
+        LOG.info("PRYZMA-SELFTEST f3compare {} vanilla-vs-build {} build-vs-replay {}", compareName,
+                difference(compareShots[0], compareShots[1]), difference(compareShots[1], compareShots[2]));
+        Path dir = mc.gameDirectory.toPath().resolve("screenshots").resolve("selftest");
+        String[] names = {"vanilla", "build", "replay"};
+        for (int i = 0; i < 3; i++) {
+            try (NativeImage image = compareShots[i]) {
+                Files.createDirectories(dir);
+                image.writeToFile(dir.resolve(compareName + "_" + names[i] + ".png"));
+            } catch (IOException e) {
+                LOG.error("PRYZMA-SELFTEST f3compare screenshot failed", e);
+            }
+            compareShots[i] = null;
+        }
+    }
+
+    /** Differing pixels and their bounding box. */
+    private static String difference(NativeImage a, NativeImage b) {
+        int count = 0;
+        int x0 = Integer.MAX_VALUE;
+        int y0 = Integer.MAX_VALUE;
+        int x1 = -1;
+        int y1 = -1;
+        for (int y = 0; y < a.getHeight(); y++) {
+            for (int x = 0; x < a.getWidth(); x++) {
+                if (a.getPixelRGBA(x, y) != b.getPixelRGBA(x, y)) {
+                    count++;
+                    x0 = Math.min(x0, x);
+                    y0 = Math.min(y0, y);
+                    x1 = Math.max(x1, x);
+                    y1 = Math.max(y1, y);
+                }
+            }
+        }
+        return count == 0 ? "0 px" : count + " px in x " + x0 + ".." + x1 + " y " + y0 + ".." + y1;
     }
 
     /** Frame-to-frame change of the uploaded lightmap: a strobing lightmap shows large maxima. */

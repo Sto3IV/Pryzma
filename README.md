@@ -60,7 +60,7 @@ Soar across mountains and oceans without hitching or micro-stutters:
 
 ### 🔍 Quality of Life & Classic Ergonomics
 * **Smooth Cinematic Zoom:** Bound to `C` by default (fully rebindable).
-* **Enhanced F3 Debug Overlay:** Restored comprehensive statistics (min FPS, chunk updates, VRAM allocations, GPU usage).
+* **Enhanced F3 Debug Overlay:** Restored comprehensive statistics (min FPS, chunk updates, VRAM allocations, GPU usage). Its text refreshes ten times a second from buffers kept on the GPU, as in OptiFine, so an open F3 no longer costs framerate, even with TrueType font packs; the charts still update every frame.
 * **Granular Control:** Fine-tune clouds, fog, stars, particles, and details in familiar, beautifully organized menus.
 
 ---

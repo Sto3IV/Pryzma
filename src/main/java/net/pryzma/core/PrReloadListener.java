@@ -9,6 +9,7 @@ import net.pryzma.core.expr.PrSmoother;
 import net.pryzma.core.res.PrResources;
 import net.pryzma.entity.texture.PrEntityTextures;
 import net.pryzma.lightmap.PryzmaLightmap;
+import net.pryzma.render.PrF3RenderCache;
 import net.pryzma.sky.PryzmaSky;
 
 /**
@@ -44,5 +45,7 @@ public final class PrReloadListener extends SimplePreparableReloadListener<PrRel
         PryzmaSky.apply(prepared.sky());
         PrEntityTextures.apply(prepared.entityTextures());
         PrSmoother.reset();
+        // The font's atlas pages are rebuilt: the cached F3 vertices point into the old ones.
+        PrF3RenderCache.invalidate();
     }
 }
