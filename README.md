@@ -15,18 +15,16 @@ It revives the rich heritage of classic and modern resource packs — connected 
 
 ---
 
-## ✦ What's New in v2.0.2
+## ✦ What's New in v2.0.3
 
+* **⚡ Zero-Stall VboRegion & Lazy Compaction (Phase 1):**
+  Eliminated GPU pipeline stalls and driver synchronization bubbles during chunk meshing and high-speed flight. Aggressive `compactRanges` calls inside `finishDraw()` have been completely removed. Defragmentation is now performed strictly on-demand (`ensureSpaceFor()`) when a VBO buffer is fragmented and actually requires contiguous memory, keeping high-speed flight buttery smooth (300+ FPS in flight).
+* **🚀 F3 Debug Overlay RenderCache & TrueType Font Batching (Phase 2):**
+  Restored high framerates with the F3 debug screen open (recovering from ~430/580 FPS up to **1808 FPS**!). Debug overlay text refreshes 10 times a second (100 ms TTL) from vertex buffers cached directly in GPU memory (`VertexBuffer(DYNAMIC)`). Replay frames completely bypass terrain 3D noise router evaluations (`addDebugScreenInfo`), block/liquid voxel raycasts, and ~80 string allocations per frame. Custom TrueType fonts with high oversampling are consolidated into single GPU draw calls per page instead of issuing a separate draw call per character. Dynamic FPS, network, and profiler charts continue updating every frame.
+* **🖥️ OpenGL & GPU Hardware Profile String on Shaders Screen:**
+  Restored the classic OptiFine profile string (`OpenGL: <version>, <vendor>, <renderer>`) centered above the bottom button row on the Shaders screen (`ShaderPackScreen`), with cached GL queries, layout auto-scaling, and scissor margin protection against UI clipping.
 * **🚫 "Remove Realms" Option & Title Screen Compaction:**
-  Removes the commercial Minecraft Realms button and background notifications from the title screen. Intelligently promotes NeoForge's `Mods` button into the freed second row and restores the bottom navigation buttons (Language, Options, Quit, Accessibility) up by 22 px to native vanilla proportions. Completely blocks background `RealmsNotificationsScreen` initialization, stopping unwanted HTTP polling and offline "Couldn't connect to realms" log spam. Configurable in **Video Settings → Other → Remove Realms** (ON by default) with native translations across all 40 languages.
-* **🛡️ Zero-Allocation GUI Lightmap Isolation:**
-  Resolved a subtle rendering anomaly where custom night lightmaps from OptiFine/MCPatcher resource packs saturated the (15, 15) texel sampled by `rendertype_text.vsh`, tinting button labels and menu text peach/orange. Pryzma now seamlessly substitutes a 16×16 pure white texture during the GUI phase (`Lighting.setupFor3DItems()` to `GuiGraphics.flush()`) with zero runtime allocations and automatic world-boundary state persistence.
-* **🌌 Built-in Iris 1.8.14 Shaderpack Engine (Embedded Fork):**
-  The full power of Iris 1.8.14 (shadowcomp passes, compute shaders, PBR textures, custom uniforms) integrated directly as an optimized fork into Pryzma (`net.pryzma.iris`). Decoupled from external loaders, optimized with counting-sort shadow culling, GL state caching (`GlBindingCache`), and 52-byte chunk vertex emission.
-* **⚡ Multi-Draw Render Regions (`VboRegion`):**
-  Chunks clustered into 8×8 regions rendered via native `glMultiDrawElements` / `glMultiDrawElementsBaseVertex`, cutting draw calls by orders of magnitude for buttery-smooth 1000+ FPS in idle scenes.
-* **🧵 Dynamic Worker Scaling:**
-  Chunk compiler worker pool dynamically scales up to 22 dedicated threads on high-core processors (AMD Ryzen 9 5900X / Intel Core i9) while reserving threads for game tick and render loops.
+  Removes the commercial Minecraft Realms button and background notifications from the title screen. Intelligently promotes NeoForge's `Mods` button into the freed second row and restores the bottom navigation buttons up by 22 px to native vanilla proportions. Configurable in **Video Settings → Other → Remove Realms** (ON by default) with native translations across all 40 languages.
 
 ---
 
@@ -93,7 +91,7 @@ Why juggle dozens of conflicting mods with fragmented configs?
 ## ✦ Installation & Quick Start
 
 1. Install **[NeoForge](https://neoforged.net/)** for Minecraft **1.21.1**.
-2. Download the latest **`pryzma-2.0.2.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
+2. Download the latest **`pryzma-2.0.3.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
 3. Place your favorite shaderpacks into `.minecraft/shaderpacks/` and resource packs into `.minecraft/resourcepacks/`.
 4. Launch the game, open **Options → Video Settings**, and customize your visual experience to your heart's content.
 
