@@ -91,6 +91,23 @@ class PrDebugOverlayTest {
     void hookedVanillaMembersExist() throws ReflectiveOperationException {
         assertEquals(List.class, DebugScreenOverlay.class.getDeclaredMethod("getGameInformation").getReturnType());
         assertEquals(List.class, DebugScreenOverlay.class.getDeclaredMethod("getSystemInformation").getReturnType());
-        assertEquals(List.class, TextureAtlas.class.getDeclaredField("animatedTextures").getType());
+        assertEquals(TextureAtlas.class.getDeclaredField("animatedTextures").getType(), List.class);
+        // Verify DebugScreenOverlayMixin target methods exist
+        org.junit.jupiter.api.Assertions.assertNotNull(DebugScreenOverlay.class.getDeclaredMethod("drawGameInformation", net.minecraft.client.gui.GuiGraphics.class));
+        org.junit.jupiter.api.Assertions.assertNotNull(DebugScreenOverlay.class.getDeclaredMethod("drawSystemInformation", net.minecraft.client.gui.GuiGraphics.class));
+        org.junit.jupiter.api.Assertions.assertNotNull(DebugScreenOverlay.class.getDeclaredMethod("render", net.minecraft.client.gui.GuiGraphics.class));
+    }
+
+    @Test
+    void f3RenderCacheTimingAndResolution() {
+        net.pryzma.render.PrF3RenderCache.invalidate();
+        org.junit.jupiter.api.Assertions.assertFalse(net.pryzma.render.PrF3RenderCache.isCached());
+
+        net.pryzma.render.PrF3RenderCache.checkResolution(800, 600);
+        net.pryzma.render.PrF3RenderCache.recordRenderTick();
+
+        // Simulate resolution change
+        net.pryzma.render.PrF3RenderCache.checkResolution(1920, 1080);
+        org.junit.jupiter.api.Assertions.assertFalse(net.pryzma.render.PrF3RenderCache.isCached());
     }
 }
