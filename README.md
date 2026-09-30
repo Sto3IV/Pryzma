@@ -15,7 +15,7 @@ It revives the rich heritage of classic and modern resource packs — connected 
 
 ---
 
-## ✦ What's New in v2.0.3
+## ✦ What's New in v2.1.0
 
 * **⚡ Zero-Stall VboRegion & Lazy Compaction (Phase 1):**
   Eliminated GPU pipeline stalls and driver synchronization bubbles during chunk meshing and high-speed flight. Aggressive `compactRanges` calls inside `finishDraw()` have been completely removed. Defragmentation is now performed strictly on-demand (`ensureSpaceFor()`) when a VBO buffer is fragmented and actually requires contiguous memory, keeping high-speed flight buttery smooth (300+ FPS in flight).
@@ -91,7 +91,7 @@ Why juggle dozens of conflicting mods with fragmented configs?
 ## ✦ Installation & Quick Start
 
 1. Install **[NeoForge](https://neoforged.net/)** for Minecraft **1.21.1**.
-2. Download the latest **`pryzma-2.0.3.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
+2. Download the latest **`pryzma-2.1.0.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
 3. Place your favorite shaderpacks into `.minecraft/shaderpacks/` and resource packs into `.minecraft/resourcepacks/`.
 4. Launch the game, open **Options → Video Settings**, and customize your visual experience to your heart's content.
 
