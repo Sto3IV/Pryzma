@@ -34,6 +34,7 @@ public final class PryzmaConfig {
     public static float prFogStart = 0.8F;
     public static int prMipmapType = 0;
     public static boolean prOcclusionFancy = false;
+    public static boolean prEntityCulling = true;
     public static boolean prSmoothFps = false;
     public static boolean prSmoothWorld = isSingleProcessor();
     public static boolean prLazyChunkLoading = isSingleProcessor();
@@ -215,6 +216,7 @@ public final class PryzmaConfig {
         }
         prMipmapType = clampInt(v, "prMipmapType", prMipmapType, 0, 3);
         prOcclusionFancy = bool(v, "prOcclusionFancy", prOcclusionFancy);
+        prEntityCulling = bool(v, "prEntityCulling", prEntityCulling);
         prSmoothFps = bool(v, "prSmoothFps", prSmoothFps);
         prSmoothWorld = bool(v, "prSmoothWorld", prSmoothWorld);
         prAoLevel = clampDouble(v, "prAoLevel", prAoLevel);
@@ -344,6 +346,7 @@ public final class PryzmaConfig {
         m.put("prFogStart", Float.toString(prFogStart));
         m.put("prMipmapType", str(prMipmapType));
         m.put("prOcclusionFancy", str(prOcclusionFancy));
+        m.put("prEntityCulling", str(prEntityCulling));
         m.put("prSmoothFps", str(prSmoothFps));
         m.put("prSmoothWorld", str(prSmoothWorld));
         m.put("prAoLevel", Double.toString(prAoLevel));
@@ -439,6 +442,7 @@ public final class PryzmaConfig {
         prFogStart = 0.8F;
         prMipmapType = 0;
         prOcclusionFancy = false;
+        prEntityCulling = true;
         prSmartAnimations = true;
         prSmoothFps = false;
         prSmoothWorld = isSingleProcessor();

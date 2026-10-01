@@ -308,6 +308,13 @@ public final class PrOptions {
             () -> PryzmaConfig.prLazyChunkLoading, v -> PryzmaConfig.prLazyChunkLoading = v);
     public static final PrOption.Cycle FAST_PAINTINGS = bool("pr.options.FAST_PAINTINGS",
             () -> PryzmaConfig.prFastPaintings, v -> PryzmaConfig.prFastPaintings = v);
+    public static final PrOption.Cycle ENTITY_CULLING = bool("pr.options.ENTITY_CULLING",
+            () -> PryzmaConfig.prEntityCulling, v -> {
+                PryzmaConfig.prEntityCulling = v;
+                if (!v) {
+                    net.pryzma.render.PrEntityCulling.reset();
+                }
+            });
 
     // ------------------------------------------------------------------ other
 

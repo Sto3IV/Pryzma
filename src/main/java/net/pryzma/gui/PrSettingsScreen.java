@@ -94,7 +94,7 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.SMART_ANIMATIONS, PrOptions.FAST_MATH,
                         PrOptions.SMOOTH_FPS, PrOptions.SMOOTH_WORLD,
                         PrOptions.CHUNK_UPDATES, vanilla("options.prioritizeChunkUpdates", o.prioritizeChunkUpdates()),
-                        PrOptions.FAST_PAINTINGS, null);
+                        PrOptions.FAST_PAINTINGS, PrOptions.ENTITY_CULLING);
                 done(width / 2 - 100, 200);
             }
             case OTHER -> {
