@@ -119,10 +119,16 @@ public final class PrBiomes {
 
     /** Registry holder of the biome at {@code pos}, or {@code null} without a level. */
     public static Holder<Biome> biomeHolderAt(BlockAndTintGetter getter, BlockPos pos) {
+        if (getter instanceof Level level && com.mojang.blaze3d.systems.RenderSystem.isOnRenderThread()) {
+            return net.pryzma.render.PrBiomeCache.biome(level, pos);
+        }
         if (getter instanceof LevelReader reader) {
             return reader.getBiome(pos);
         }
         ClientLevel level = Minecraft.getInstance().level;
+        if (level != null && com.mojang.blaze3d.systems.RenderSystem.isOnRenderThread()) {
+            return net.pryzma.render.PrBiomeCache.biome(level, pos);
+        }
         return level == null ? null : level.getBiome(pos);
     }
 
