@@ -11,10 +11,12 @@ import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -28,7 +30,6 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.List;
-import java.util.function.Function;
 
 public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPackSelectionList.BaseEntry> {
 	private static final Component PACK_LIST_LABEL = Component.translatable("pack.pryzma.list.label").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
@@ -53,7 +54,7 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 				Util.getPlatform().openUri("https://modrinth.com/shaders");
 			}
 			this.minecraft.setScreen(this.screen);
-		}, "https://modrinth.com/shaders", true)), this);
+		}, "https://modrinth.com/shaders", true)));
 		try {
 			watcher1 = FileSystems.getDefault().newWatchService();
 			key1 = PryzmaShaders.getShaderpacksDirectory().register(watcher1,
@@ -149,6 +150,18 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 		return super.getRowTop(index) + 2;
 	}
 
+	/**
+	 * Only shader packs are selectable. {@link AbstractSelectionList#setFocused} selects every row that gains
+	 * focus, which put the black {@code renderSelection} box under the button rows and made
+	 * {@link ShaderPackScreen#applyChanges()} drop the chosen pack after the toggle was clicked.
+	 */
+	@Override
+	public void setSelected(@Nullable BaseEntry entry) {
+		if (entry == null || entry instanceof ShaderPackEntry) {
+			super.setSelected(entry);
+		}
+	}
+
 	public void refresh() {
 		this.clearEntries();
 
@@ -186,7 +199,7 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 
 		// Only allow the enable/disable shaders button if the user has
 		// added a shader pack. Otherwise, the button will be disabled.
-		topButtonRow.allowEnableShadersButton = !names.isEmpty();
+		topButtonRow.setAllowEnableShadersButton(!names.isEmpty());
 
 		int index = 0;
 		String selectedName = PryzmaShaders.getShaderConfig().getShaderPackName().orElse(null);
@@ -263,129 +276,100 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 		}
 	}
 
-	public static class TopButtonRowEntry extends BaseEntry {
-		private static final Component NONE_PRESENT_LABEL = Component.translatable("options.pryzma.shaders.nonePresent").withStyle(ChatFormatting.GRAY);
+	/**
+	 * A row that is a vanilla {@link Button}: the same {@code widget/button*} sprites, 20 px height, label colours,
+	 * click sound and Enter/Space handling as every other button on the screen.
+	 */
+	public abstract static class ButtonEntry extends BaseEntry {
+		protected final Button button;
+
+		protected ButtonEntry(Component message) {
+			this.button = Button.builder(message, b -> this.onPress()).build();
+		}
+
+		protected abstract void onPress();
+
+		@Override
+		public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			// The full row slot (itemHeight = 20 = Button.DEFAULT_HEIGHT): the rectangle renderSelection and the pack hover use.
+			this.button.setRectangle(entryWidth, entryHeight + 4, x - 2, y - 2);
+			this.button.setFocused(this.isFocused());
+			this.button.render(guiGraphics, mouseX, mouseY, tickDelta);
+		}
+
+		@Override
+		public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+			return this.button.mouseClicked(mouseX, mouseY, mouseButton);
+		}
+
+		@Override
+		public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+			return this.button.keyPressed(keyCode, scanCode, modifiers);
+		}
+
+		@Nullable
+		@Override
+		public ComponentPath nextFocusPath(FocusNavigationEvent event) {
+			return this.button.active && !this.isFocused() ? ComponentPath.leaf(this) : null;
+		}
+
+		@Override
+		public ScreenRectangle getRectangle() {
+			return this.button.getRectangle();
+		}
+	}
+
+	public static class TopButtonRowEntry extends ButtonEntry {
+		private static final Component NONE_PRESENT_LABEL = Component.translatable("options.pryzma.shaders.nonePresent");
 		private static final Component SHADERS_DISABLED_LABEL = Component.translatable("options.pryzma.shaders.disabled");
 		private static final Component SHADERS_ENABLED_LABEL = Component.translatable("options.pryzma.shaders.enabled");
 
 		private final ShaderPackSelectionList list;
 
-		public boolean allowEnableShadersButton = true;
 		public boolean shadersEnabled;
 
 		public TopButtonRowEntry(ShaderPackSelectionList list, boolean shadersEnabled) {
+			super(CommonComponents.EMPTY);
 			this.list = list;
 			this.shadersEnabled = shadersEnabled;
+			this.updateMessage();
+		}
+
+		@Override
+		protected void onPress() {
+			this.setShadersEnabled(!this.shadersEnabled);
 		}
 
 		public void setShadersEnabled(boolean shadersEnabled) {
 			this.shadersEnabled = shadersEnabled;
+			this.updateMessage();
 			this.list.screen.refreshScreenSwitchButton();
 		}
 
-		@Override
-		public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			GuiUtil.bindWidgetsTexture();
-			GuiUtil.drawButton(guiGraphics, x - 2, y - 2, entryWidth, entryHeight + 2, hovered, !allowEnableShadersButton);
-			guiGraphics.drawCenteredString(Minecraft.getInstance().font, getEnableDisableLabel(), (x + entryWidth / 2) - 2, y + (entryHeight - 11) / 2, 0xFFFFFF);
+		/**
+		 * With no packs installed the toggle is an inactive vanilla button: disabled sprite, grey label, not focusable.
+		 */
+		public void setAllowEnableShadersButton(boolean allow) {
+			this.button.active = allow;
+			this.updateMessage();
 		}
 
-		private Component getEnableDisableLabel() {
-			return this.allowEnableShadersButton ? this.shadersEnabled ? SHADERS_ENABLED_LABEL : SHADERS_DISABLED_LABEL : NONE_PRESENT_LABEL;
-		}
-
-		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button) {
-			if (this.allowEnableShadersButton) {
-				setShadersEnabled(!this.shadersEnabled);
-				GuiUtil.playButtonClickSound();
-				return true;
-			}
-
-			return false;
-		}
-
-		@Override
-		public boolean keyPressed(int keycode, int scancode, int modifiers) {
-			if (keycode == GLFW.GLFW_KEY_ENTER) {
-				if (this.allowEnableShadersButton) {
-					setShadersEnabled(!this.shadersEnabled);
-					GuiUtil.playButtonClickSound();
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		@Nullable
-		@Override
-		public ComponentPath nextFocusPath(FocusNavigationEvent pGuiEventListener0) {
-			return (!isFocused()) ? ComponentPath.leaf(this) : null;
-		}
-
-
-		public boolean isFocused() {
-			return this.list.getFocused() == this;
-		}
-
-		// Renders the label at an offset as to not look misaligned with the rest of the menu
-		public static class EnableShadersButtonElement extends ShaderElementRow.TextButtonElement {
-			private int centerX;
-
-			public EnableShadersButtonElement(Component text, Function<ShaderElementRow.TextButtonElement, Boolean> onClick) {
-				super(text, onClick);
-			}
-
-			@Override
-			public void renderLabel(GuiGraphics guiGraphics, int x, int y, int width, int height, int mouseX, int mouseY, float tickDelta, boolean hovered) {
-				int textX = this.centerX - (int) (this.font.width(this.text) * 0.5);
-				int textY = y + (int) ((height - 8) * 0.5);
-
-				guiGraphics.drawString(this.font, this.text, textX, textY, 0xFFFFFF);
-			}
+		private void updateMessage() {
+			this.button.setMessage(!this.button.active ? NONE_PRESENT_LABEL : this.shadersEnabled ? SHADERS_ENABLED_LABEL : SHADERS_DISABLED_LABEL);
 		}
 	}
 
-	private static class PinnedEntry extends BaseEntry {
-		public final boolean allowPressButton = true;
-		private final Component label;
+	private static class PinnedEntry extends ButtonEntry {
 		private final Runnable onClick;
 
-		public PinnedEntry(Component label, Runnable onClick, ShaderPackSelectionList list) {
-			this.label = label;
+		PinnedEntry(Component label, Runnable onClick) {
+			super(label);
 			this.onClick = onClick;
 		}
 
 		@Override
-		public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			GuiUtil.bindWidgetsTexture();
-			GuiUtil.drawButton(guiGraphics, x - 2, y - 2, entryWidth, entryHeight + 2, hovered, !allowPressButton);
-			guiGraphics.drawCenteredString(Minecraft.getInstance().font, label, (x + entryWidth / 2) - 2, y + (entryHeight - 11) / 2, 0xFFFFFF);
-		}
-
-		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button) {
-			if (this.allowPressButton) {
-				GuiUtil.playButtonClickSound();
-				onClick.run();
-				return false;
-			}
-
-			return false;
-		}
-
-		@Override
-		public boolean keyPressed(int keycode, int scancode, int modifiers) {
-			if (keycode == GLFW.GLFW_KEY_ENTER) {
-				if (this.allowPressButton) {
-					GuiUtil.playButtonClickSound();
-					onClick.run();
-					return false;
-				}
-			}
-
-			return false;
+		protected void onPress() {
+			this.onClick.run();
 		}
 	}
 
