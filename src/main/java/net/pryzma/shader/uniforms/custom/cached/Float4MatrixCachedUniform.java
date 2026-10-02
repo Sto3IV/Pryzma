@@ -1,0 +1,34 @@
+package net.pryzma.shader.uniforms.custom.cached;
+
+import net.pryzma.shader.gl.uniform.UniformUpdateFrequency;
+import net.pryzma.shader.parsing.MatrixType;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
+import org.lwjgl.opengl.GL21;
+
+import java.util.function.Supplier;
+
+public class Float4MatrixCachedUniform extends VectorCachedUniform<Matrix4fc> {
+	final private float[] buffer = new float[16];
+
+	public Float4MatrixCachedUniform(String name, UniformUpdateFrequency updateFrequency, Supplier<Matrix4fc> supplier) {
+		super(name, updateFrequency, new Matrix4f(), supplier);
+	}
+
+	@Override
+	protected void setFrom(Matrix4fc other) {
+		((Matrix4f) this.cached).set(other);
+	}
+
+	@Override
+	public void push(int location) {
+		// `gets` the values from the matrix and put's them into a buffer
+		this.cached.get(buffer);
+		GL21.glUniformMatrix4fv(location, false, buffer);
+	}
+
+	@Override
+	public MatrixType<Matrix4f> getType() {
+		return MatrixType.MAT4;
+	}
+}

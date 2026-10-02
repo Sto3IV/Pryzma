@@ -40,7 +40,7 @@ abstract class LevelRendererRegionMixin {
      * MixinExtras LocalRef for every section drawn, in the main and the shadow pass.
      *
      * <p>Phase B4: the buffer also learns whether its section lies beyond the detail distance, in whole
-     * sections from the camera's section. Iris' shadow pass passes the same camera position, so both passes
+     * sections from the camera's section. PryzmaShaders' shadow pass passes the same camera position, so both passes
      * cut at the same sections. Vanilla reads the same origin right after for the ChunkOffset, so the cost is the arithmetic.
      */
     @ModifyExpressionValue(method = "renderSectionLayer", at = @At(value = "INVOKE",

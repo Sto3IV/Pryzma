@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.pryzma.iris.uniforms.CapturedRenderingState;
+import net.pryzma.shader.uniforms.CapturedRenderingState;
 import net.pryzma.lightmap.PrGuiLightmap;
 import net.pryzma.lightmap.PryzmaLightmap;
 

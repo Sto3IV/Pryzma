@@ -44,8 +44,8 @@ import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.pryzma.PryzmaConfig;
 import net.pryzma.detail.PrDetailClassifier;
 import net.pryzma.gui.PrZoom;
-import net.pryzma.iris.Iris;
-import net.pryzma.iris.gui.screen.ShaderPackScreen;
+import net.pryzma.shader.PryzmaShaders;
+import net.pryzma.shader.gui.screen.ShaderPackScreen;
 import net.pryzma.render.PrF3RenderCache;
 
 /**
@@ -259,19 +259,19 @@ public final class PrSelfTest {
             });
             case "inventory" -> mc.setScreen(new InventoryScreen(mc.player));
             case "shaderpack" -> {
-                Iris.getIrisConfig().setShaderPackName(arg.equals("OFF") ? null : arg);
-                Iris.getIrisConfig().setShadersEnabled(!arg.equals("OFF"));
-                Iris.getIrisConfig().save();
-                Iris.reload();
-                if (!arg.equals("OFF") && !Iris.isPackInUseQuick()) {
+                PryzmaShaders.getShaderConfig().setShaderPackName(arg.equals("OFF") ? null : arg);
+                PryzmaShaders.getShaderConfig().setShadersEnabled(!arg.equals("OFF"));
+                PryzmaShaders.getShaderConfig().save();
+                PryzmaShaders.reload();
+                if (!arg.equals("OFF") && !PryzmaShaders.isPackInUseQuick()) {
                     throw new IllegalStateException("shader pack " + arg + " did not load");
                 }
             }
             case "irisinfo" -> {
                 List<String> lines = new ArrayList<>();
-                Iris.getPipelineManager().getPipeline().ifPresent(p -> p.addDebugText(lines));
-                LOG.info("PRYZMA-SELFTEST iris pack={} inUse={} fallback={} sections={}", Iris.getCurrentPackName(),
-                        Iris.isPackInUseQuick(), Iris.isFallback(), mc.levelRenderer.getSectionStatistics());
+                PryzmaShaders.getPipelineManager().getPipeline().ifPresent(p -> p.addDebugText(lines));
+                LOG.info("PRYZMA-SELFTEST iris pack={} inUse={} fallback={} sections={}", PryzmaShaders.getCurrentPackName(),
+                        PryzmaShaders.isPackInUseQuick(), PryzmaShaders.isFallback(), mc.levelRenderer.getSectionStatistics());
                 lines.forEach(l -> LOG.info("PRYZMA-SELFTEST iris {}", l));
             }
             case "detailblocks" -> {

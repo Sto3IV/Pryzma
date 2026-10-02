@@ -104,9 +104,9 @@ sourceSets.dev.runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets
 sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
 sourceSets.test.runtimeClasspath += sourceSets.main.compileClasspath
 
-// Shader pack pipeline (Iris port, net.pryzma.iris): GLSL parsing/transformation and the C
+// Native shader pack pipeline (net.pryzma.shader): GLSL parsing/transformation and the C
 // preprocessor shader packs are written for. They ship inside the mod jar (Jar-in-Jar) and are
-// on the dev runtime classpath, as Iris ships them. antlr4-runtime 4.13.1 is not bundled: NeoForge
+// on the dev runtime classpath. antlr4-runtime 4.13.1 is not bundled: NeoForge
 // already carries it (access transformers), and glsl-transformer's dependency on the ANTLR tool
 // is build-time only.
 def shaderLibraries = [

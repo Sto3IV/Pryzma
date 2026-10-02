@@ -16,12 +16,12 @@ description='''${mod_description}'''
 [[mixins]]
 config="${mod_id}.mixins.json"
 
-# Shader pack pipeline: a port of Iris (LGPL-3.0, see META-INF/LICENSE-IRIS) under net.pryzma.iris.
+# Native shader pack pipeline.
 [[mixins]]
-config="${mod_id}-iris.mixins.json"
+config="${mod_id}-shader.mixins.json"
 
 [[mixins]]
-config="${mod_id}-iris-batching.mixins.json"
+config="${mod_id}-shader-batching.mixins.json"
 
 [[accessTransformers]]
 file="META-INF/accesstransformer.cfg"
@@ -40,11 +40,11 @@ file="META-INF/accesstransformer.cfg"
     ordering="NONE"
     side="CLIENT"
 
-# Pryzma carries its own port of Iris; a second copy would hook the same render paths.
+# Native shader pack pipeline: conflicting standalone mods are disabled.
 [[dependencies.${mod_id}]]
     modId="iris"
     type="incompatible"
-    reason="Pryzma includes its own shader pack pipeline (a port of Iris). Remove Iris."
+    reason="Pryzma includes a built-in shader pipeline. Remove standalone Iris."
     versionRange="[0,)"
     ordering="NONE"
     side="CLIENT"
@@ -52,7 +52,7 @@ file="META-INF/accesstransformer.cfg"
 [[dependencies.${mod_id}]]
     modId="oculus"
     type="incompatible"
-    reason="Pryzma includes its own shader pack pipeline (a port of Iris). Remove Oculus."
+    reason="Pryzma includes a built-in shader pipeline. Remove standalone Oculus."
     versionRange="[0,)"
     ordering="NONE"
     side="CLIENT"

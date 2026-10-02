@@ -25,7 +25,7 @@ import net.pryzma.ctm.PryzmaCtm;
 import net.pryzma.gui.PrQuickInfo;
 import net.pryzma.gui.PrVideoSettingsScreen;
 import net.pryzma.gui.PrZoom;
-import net.pryzma.iris.platform.IrisForgeHelpers;
+import net.pryzma.shader.platform.ShaderForgeHelpers;
 import net.pryzma.item.PrCitModels;
 import net.pryzma.item.PrCitSpriteSource;
 import net.pryzma.mixin.OptionsSubScreenAccessor;
@@ -53,8 +53,8 @@ public final class PryzmaClient {
         modBus.addListener(ModelEvent.BakingCompleted.class, PrCitModels::onBakingCompleted);
         modBus.addListener(RegisterKeyMappingsEvent.class, PrZoom::onRegisterKeys);
         modBus.addListener(RegisterKeyMappingsEvent.class, event -> {
-            IrisForgeHelpers.KEYLIST.forEach(event::register);
-            IrisForgeHelpers.KEYLIST.clear();
+            ShaderForgeHelpers.KEYLIST.forEach(event::register);
+            ShaderForgeHelpers.KEYLIST.clear();
         });
         modBus.addListener(RegisterGuiLayersEvent.class, event -> event.registerAbove(VanillaGuiLayers.DEBUG_OVERLAY,
                 ResourceLocation.fromNamespaceAndPath(Pryzma.MODID, "quick_info"), PrQuickInfo::render));

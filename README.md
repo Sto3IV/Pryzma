@@ -36,10 +36,10 @@ It revives the rich heritage of classic and modern resource packs — connected 
 
 ### 🌌 Shaders, Built In
 Drop your favorite shaderpacks (*Complementary, BSL, Nostalgia, Photon, AstraLex*) directly into `shaderpacks/`.
-* **The Iris pipeline, inside Pryzma:** an optimized fork of [Iris](https://github.com/IrisShaders/Iris) 1.8.14 (package `net.pryzma.iris`): shadow maps, `shadowcomp`, composite and deferred passes, compute shaders, custom images and uniforms, PBR textures.
-* **No Sodium, no Oculus:** terrain renders on Pryzma's own chunk path, with block ids and light emission for the shader pack and render-region multi-draw in both the main and the shadow pass.
-* **Leaner than stock Iris on this path:** the shadow pass collects its sections directly, without rebuilding the occlusion graph every frame, and redundant framebuffer and program binds are skipped.
-* **In-Game Customization:** Iris' shader pack screen and option menus (**Video Settings → Shaders**, or `O`); `R` reloads, `K` toggles.
+* **High-Performance Built-in Pipeline:** native support for shadow maps, `shadowcomp`, composite and deferred passes, compute shaders, custom images and uniforms, PBR textures.
+* **No Sodium, no Oculus required:** terrain renders on Pryzma's own chunk path, with block ids and light emission for the shader pack and render-region multi-draw in both the main and the shadow pass.
+* **Zero Overhead Chunk Routing:** the shadow pass collects its sections directly, without rebuilding the occlusion graph every frame, and redundant framebuffer and program binds are skipped.
+* **In-Game Customization:** built-in shader pack screen and option menus (**Video Settings → Shaders**, or `O`); `R` reloads, `K` toggles.
 
 ### 🎨 Your Resource Packs, Exactly as Intended
 Pryzma provides 100% native drop-in support for both modern OptiFine formats and classic legacy MCPatcher packs:
@@ -73,7 +73,7 @@ Why juggle dozens of conflicting mods with fragmented configs?
 
 | Feature | Vanilla 1.21.1 | The Fragmented Mod Salad (15+ Mods) | Pryzma (NeoForge 1.21.1) |
 | :--- | :---: | :--- | :---: |
-| **Shaderpack Pipeline** (BSL, Complementary, Nostalgia) | ❌ No | ⚠️ Requires `Iris` / `Oculus` | ✅ **Built-in (Optimized Fork of Iris)** |
+| **Shaderpack Pipeline** (BSL, Complementary, Nostalgia) | ❌ No | ⚠️ Requires `Iris` / `Oculus` | ✅ **Built-in Native Pipeline** |
 | **OptiFine Format** (`optifine/` folder) | ❌ No | ⚠️ Fragmented across 8+ separate mods | ✅ **100% Native Drop-in** |
 | **Legacy MCPatcher Format** (`mcpatcher/` folder) | ❌ No | ❌ **Unsupported** *(requires manual conversion)* | ✅ **Native Runtime Aliasing** |
 | **Connected Textures (CTM)** | ❌ No | ⚠️ Requires `Continuity` or `Fusion` | ✅ **Native Full-Suite CTM** |

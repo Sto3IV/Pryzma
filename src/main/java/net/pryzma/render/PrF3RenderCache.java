@@ -18,7 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.pryzma.iris.vertices.ImmediateState;
+import net.pryzma.shader.vertices.ImmediateState;
 
 /**
  * The F3 text cache, OptiFine's {@code RenderCache(100L)} on Blaze3D. The two text columns of the
@@ -214,7 +214,7 @@ public final class PrF3RenderCache {
                 types.set(count, type);
             }
             VertexBuffer buffer = buffers.get(count++);
-            // With a shader pack active Iris lays POSITION_COLOR_TEX_LIGHTMAP out as its extended glyph
+            // With a shader pack active PryzmaShaders lays POSITION_COLOR_TEX_LIGHTMAP out as its extended glyph
             // format unless this flag is off; its flush hook turns it off for every GUI batch vanilla draws.
             boolean extended = ImmediateState.renderWithExtendedVertexFormat;
             ImmediateState.renderWithExtendedVertexFormat = false;

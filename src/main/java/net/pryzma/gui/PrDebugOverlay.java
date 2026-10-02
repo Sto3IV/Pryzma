@@ -12,7 +12,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.neoforged.fml.ModList;
 import net.pryzma.Pryzma;
 import net.pryzma.PryzmaConfig;
-import net.pryzma.iris.Iris;
+import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.light.PrDynamicLights;
 import net.pryzma.mixin.TextureAtlasAccessor;
 import net.pryzma.perf.PrDebugTracker;
@@ -100,7 +100,7 @@ public final class PrDebugOverlay {
 
     /** The active shader pack's name; null while no pack renders. */
     private static String shaderPack() {
-        return Iris.isPackInUseQuick() ? Iris.getCurrentPackName() : null;
+        return PryzmaShaders.isPackInUseQuick() ? PryzmaShaders.getCurrentPackName() : null;
     }
 
     /** 1.x Config.getVersionDebug: {@code dynamicLights} is -1 while they are off, {@code shaderPack} null. */

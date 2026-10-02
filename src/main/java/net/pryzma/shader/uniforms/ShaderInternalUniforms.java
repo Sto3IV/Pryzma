@@ -1,0 +1,41 @@
+package net.pryzma.shader.uniforms;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.pryzma.shader.gl.state.FogMode;
+import net.pryzma.shader.gl.uniform.DynamicUniformHolder;
+import org.joml.Vector4f;
+
+import static net.pryzma.shader.gl.uniform.UniformUpdateFrequency.PER_FRAME;
+
+/**
+ * Internal PryzmaShaders uniforms that are not directly accessible by shaders.
+ */
+public class ShaderInternalUniforms {
+	private ShaderInternalUniforms() {
+		// no construction
+	}
+
+	public static void addFogUniforms(DynamicUniformHolder uniforms, FogMode fogMode) {
+		uniforms
+			.uniform4f(PER_FRAME, "iris_FogColor", () -> {
+				float[] fogColor = RenderSystem.getShaderFogColor();
+				return new Vector4f(fogColor[0], fogColor[1], fogColor[2], fogColor[3]);
+			});
+
+		uniforms.uniform1f(PER_FRAME, "iris_FogStart", RenderSystem::getShaderFogStart)
+			.uniform1f(PER_FRAME, "iris_FogEnd", RenderSystem::getShaderFogEnd);
+
+		uniforms.uniform1f("iris_FogDensity", () -> {
+			// ensure that the minimum value is 0.0
+			return Math.max(0.0F, CapturedRenderingState.INSTANCE.getFogDensity());
+		}, notifier -> {
+		});
+
+		uniforms.uniform1f("iris_currentAlphaTest", CapturedRenderingState.INSTANCE::getCurrentAlphaTest, notifier -> {
+		});
+
+		// Optifine compatibility
+		uniforms.uniform1f("alphaTestRef", CapturedRenderingState.INSTANCE::getCurrentAlphaTest, notifier -> {
+		});
+	}
+}
