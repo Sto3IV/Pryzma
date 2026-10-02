@@ -15,8 +15,12 @@ It revives the rich heritage of classic and modern resource packs — connected 
 
 ---
 
-## ✦ What's New in v2.1.1
+## ✦ What's New in v2.1.2
 
+* **🎨 Native Vanilla Widget Overhaul for Shader Pack Screen:**
+  Completely modernized the Shader Pack Screen (`ShaderPackScreen`) with 100% vanilla widget architecture. The shaders toggle and pinned rows now wrap native vanilla `Button` components using standard GUI sprite atlasing (`widget/button`), full keyboard accessibility (<kbd>Space</kbd>/<kbd>Enter</kbd>), and vanilla sound effects. Eliminated legacy selection glitches and rogue black background frames.
+* **🛡️ Full CurseForge-Compliance Brand & Metadata Alignment:**
+  Completed full internal purification of all third-party comments, javadoc annotations, and mixin prefixes (`pryzma$`) across the entire shader pipeline and render shards. Preserves 100% shaderpack GLSL interface contracts while delivering a clean, compliant codebase.
 * **🌐 Complete 40-Language Localization Sync:**
   Full multi-language coverage across all 39 supported language files (`ru_ru`, `zh_cn`, `ja_jp`, `de_de`, `es_es`, `fr_fr`, etc.). Every UI string, tooltips, and Pryzma setting are 100% synchronized and parity-validated against vanilla and OptiFine conventions.
 * **⚡ 1% Low FPS & Frametime Optimization:**
@@ -95,7 +99,7 @@ Why juggle dozens of conflicting mods with fragmented configs?
 ## ✦ Installation & Quick Start
 
 1. Install **[NeoForge](https://neoforged.net/)** for Minecraft **1.21.1**.
-2. Download the latest **`pryzma-2.1.1.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
+2. Download the latest **`pryzma-2.1.2.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
 3. Place your favorite shaderpacks into `.minecraft/shaderpacks/` and resource packs into `.minecraft/resourcepacks/`.
 4. Launch the game, open **Options → Video Settings**, and customize your visual experience to your heart's content.
 

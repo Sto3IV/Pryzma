@@ -38,8 +38,8 @@ class PrDebugOverlayTest {
 
     @Test
     void versionDebugReadsAs1x() {
-        assertEquals("DL: 7, Pryzma_1.21.1_2.1.1", PrDebugOverlay.versionDebug(7, "Pryzma_1.21.1_2.1.1", null));
-        assertEquals("Pryzma_1.21.1_2.1.1, BSL_v8.2.09.zip", PrDebugOverlay.versionDebug(-1, "Pryzma_1.21.1_2.1.1", "BSL_v8.2.09.zip"));
+        assertEquals("DL: 7, Pryzma_1.21.1_2.1.2", PrDebugOverlay.versionDebug(7, "Pryzma_1.21.1_2.1.2", null));
+        assertEquals("Pryzma_1.21.1_2.1.2, BSL_v8.2.09.zip", PrDebugOverlay.versionDebug(-1, "Pryzma_1.21.1_2.1.2", "BSL_v8.2.09.zip"));
     }
 
     @Test
