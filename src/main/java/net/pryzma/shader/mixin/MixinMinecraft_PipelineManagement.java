@@ -36,8 +36,8 @@ public class MixinMinecraft_PipelineManagement {
 	 * We destroy any pipelines here to guard against potential memory leaks related to pipelines for
 	 * other dimensions never being unloaded.
 	 * <p>
-	 * This injection point is needed so that we can reload the PryzmaShaders shader pipeline before Sodium starts trying
-	 * to reload its world renderer. Otherwise, there will be inconsistent state since Sodium might initialize and
+	 * This injection point is needed so that we can reload the PryzmaShaders shader pipeline before the world renderer starts trying
+	 * to reload. Otherwise, there will be inconsistent state since the renderer might initialize and
 	 * use the non-extended vertex format (since we do it based on whether the pipeline is available,
 	 * then PryzmaShaders will switch on its pipeline, then code will assume that the extended vertex format
 	 * is used everywhere.
@@ -51,8 +51,8 @@ public class MixinMinecraft_PipelineManagement {
 			// Destroy pipelines when changing dimensions.
 			PryzmaShaders.getPipelineManager().destroyPipeline();
 
-			// NB: We need create the pipeline immediately, so that it is ready by the time that Sodium starts trying to
-			// initialize its world renderer.
+			// NB: We need create the pipeline immediately, so that it is ready by the time that the world renderer starts trying to
+			// initialize.
 			if (level != null) {
 				PryzmaShaders.getPipelineManager().preparePipeline(PryzmaShaders.getCurrentDimension());
 			}

@@ -54,7 +54,7 @@ public abstract class MixinDebugScreenOverlay {
 		return String.format("%.3f %ciB", value / 1024.0, ci.current());
 	}
 
-	// From Sodium
+	// Memory tracking utility
 	@Unique
 	private static long pryzma$getNativeMemoryUsage() {
 		return ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage().getUsed();
@@ -77,20 +77,11 @@ public abstract class MixinDebugScreenOverlay {
 		}
 
 		messages.add(3, "Direct Buffers: +" + pryzma$humanReadableByteCountBin(pryzma$directPool.getMemoryUsed()));
-
-		//if (!PryzmaShaders.isSodiumInstalled()) {
-		//	messages.add(3, "Native Memory: +" + pryzma$humanReadableByteCountBin(pryzma$getNativeMemoryUsage()));
-		//}
 	}
 
 	@Inject(method = "getGameInformation", at = @At("RETURN"))
 	private void pryzma$appendShadowDebugText(CallbackInfoReturnable<List<String>> cir) {
 		List<String> messages = cir.getReturnValue();
-
-		//if (!PryzmaShaders.isSodiumInstalled() && PryzmaShaders.getCurrentPack().isPresent()) {
-		//	messages.add(1, ChatFormatting.YELLOW + "[" + PryzmaShaders.MODNAME + "] Sodium isn't installed; you will have poor performance.");
-		//	messages.add(2, ChatFormatting.YELLOW + "[" + PryzmaShaders.MODNAME + "] Install Sodium if you want to run benchmarks or get higher FPS!");
-		//}
 
 		PryzmaShaders.getPipelineManager().getPipeline().ifPresent(pipeline -> pipeline.addDebugText(messages));
 	}

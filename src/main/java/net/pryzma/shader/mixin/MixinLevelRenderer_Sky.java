@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-// This is a modified version of a mixin in Sodium, with a check for if a shader pack is active.
+// This is a modified version of upstream sky mixin, with a check for if a shader pack is active.
 @Mixin(LevelRenderer.class)
 public class MixinLevelRenderer_Sky {
 	@Shadow
@@ -38,7 +38,7 @@ public class MixinLevelRenderer_Sky {
 	 * also more "correct" in the sense that underwater fog is applied to chunks
 	 * outside of water, so the fog should also be covering the sun and sky.</p>
 	 *
-	 * <p>When updating Sodium to new releases of the game, please check for new
+	 * <p>When updating to new releases of the game, please check for new
 	 * ways the fog can be reduced in {@link FogRenderer#setupFog}.</p>
 	 */
 	@Inject(method = "renderSky", at = @At("HEAD"), cancellable = true)

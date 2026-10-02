@@ -786,10 +786,6 @@
   "pryzma.keybinds": "Pryzma Shaders",
   "pryzma.shaders.reloaded.failure": "Не удалось перезагрузить шейдеры. Причина: %s",
   "pryzma.shaders.toggled.failure": "Не удалось переключить шейдеры. Причина: %s",
-  "pryzma.sodium.failure.title": "Не удалось загрузить Pryzma.",
-  "pryzma.sodium.failure.download": "Загрузить Sodium",
-  "pryzma.sodium.failure.reason.notFound": "Pryzma требует Sodium для лучшей производительности, но Sodium не установлен. Пожалуйста, загрузите Sodium, добавьте его в папку с модами и перезапустите игру.",
-  "pryzma.sodium.failure.reason.incompatible": "Pryzma требует Sodium для лучшей производительности, но ваша версия Sodium несовместима. Пожалуйста, загрузите и добавьте в папку с модами подходящую версию Sodium, удалите старую версию и перезапустите игру.",
   "pryzma.nec.failure.title": "[%s] обнаружен Not Enough Crashes!",
   "pryzma.nec.failure.description": "Not Enough Crashes может серьёзно сломать игру при обработке сбоев, при этом не давая точных результатов.\nВ качестве альтернатив есть MixinTrace, которые более надёжно определяют причину сбоя и не доводят игру до нестабильного состояния.",
   "pryzma.unsupported.pipelineorpc": "не поддерживает Pryzma или ваше устройство",
@@ -831,7 +827,6 @@
   "options.pryzma.shadowDistance": "Дальность теней",
   "options.pryzma.shadowDistance.enabled": "Позволяет изменять максимальное расстояние видимости теней. Блоки и сущности за его пределами не будут иметь теней. Снижая этот параметр, вы можете значительно улучшить производительность.",
   "options.pryzma.shadowDistance.disabled": "Ваш текущий набор шейдеров уже установил своё расстояние для теней; вы не сможете его изменить.",
-  "options.pryzma.shadowDistance.sodium_tooltip": "Дальность теней определяет, насколько далеко местность может обрабатываться на этапе просчёта теней. Меньшие значения соответствуют меньшей площади, что улучшает частоту кадров. Этот параметр нельзя изменить для наборов, в которых установлено своё расстояние рендеринга теней. Фактическое расстояние рендеринга ограничено дальностью прорисовки.",
   "options.pryzma.gui.hide": "Скрыть",
   "options.pryzma.gui.show": "Показать",
   "pack.pryzma.select.title": "Список",
@@ -845,6 +840,5 @@
   "pryzma.load.failure.shader": "Не удалось загрузить шейдерпак! Пожалуйста, сообщите об ошибке разработчику шейдера. ",
   "pryzma.load.failure.generic": "Pryzma encountered an issue trying to load the shader.",
   "pryzma.keybind.wireframe": "Каркасный режим (только в одиночной игре)",
-  "options.pryzma.colorSpace": "Цветовое пространство",
-  "options.pryzma.colorSpace.sodium_tooltip": "Цветовое пространство для преобразования изображения экрана. Работает поверх шейдерпаков. Если не уверены, используйте sRGB."
+  "options.pryzma.colorSpace": "Цветовое пространство"
 }

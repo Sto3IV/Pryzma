@@ -71,7 +71,7 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 	private int currentBlock = -1;
 	@Unique
 	private byte currentRenderType = -1;
-	/** Light emission of the block being meshed; at_midBlock.w, as PryzmaShaders writes it on Sodium's chunk path. */
+	/** Light emission of the block being meshed; at_midBlock.w, as PryzmaShaders writes it on the terrain chunk path. */
 	@Unique
 	private byte currentBlockEmission;
 	@Unique

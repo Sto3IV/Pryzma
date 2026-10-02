@@ -77,7 +77,7 @@ public final class PryzmaChunkExecutor {
 
     /**
      * Dynamically adjusts thread pool size according to the Chunk Updates setting (1..5),
-     * matching Sodium's chunkBuilderThreads paradigm without requiring restart.
+     * matching dynamic chunkBuilderThreads paradigm without requiring restart.
      */
     public static synchronized void applyChunkUpdatesOption(int option) {
         int targetThreads = getThreadsForOption(option);

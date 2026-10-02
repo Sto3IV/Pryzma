@@ -30,7 +30,7 @@ public class ShaderVertexFormats {
 		ENTITY_ID_ELEMENT = VertexFormatElement.register(getNextVertexFormatElementId(), LAST_UV + 1, VertexFormatElement.Type.USHORT, VertexFormatElement.Usage.UV, 3);
 		MID_TEXTURE_ELEMENT = VertexFormatElement.register(getNextVertexFormatElementId(), 0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.GENERIC, 2);
 		TANGENT_ELEMENT = VertexFormatElement.register(getNextVertexFormatElementId(), 0, VertexFormatElement.Type.BYTE, VertexFormatElement.Usage.GENERIC, 4);
-		// xyz: offset to the block centre (x64); w: block light emission, as on Sodium's chunk path.
+		// xyz: offset to the block centre (x64); w: block light emission, as on the terrain chunk path.
 		MID_BLOCK_ELEMENT = VertexFormatElement.register(getNextVertexFormatElementId(), 0, VertexFormatElement.Type.BYTE, VertexFormatElement.Usage.GENERIC, 4);
 
 		TERRAIN = VertexFormat.builder()

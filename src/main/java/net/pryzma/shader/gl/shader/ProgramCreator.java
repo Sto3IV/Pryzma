@@ -1,4 +1,4 @@
-// This file is based on code from Sodium by JellySquid, licensed under the LGPLv3 license.
+// This file is based on upstream shader code by JellySquid, licensed under the LGPLv3 license.
 
 package net.pryzma.shader.gl.shader;
 

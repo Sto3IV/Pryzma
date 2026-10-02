@@ -762,8 +762,6 @@
   "pryzma.keybind.reload": "بارگیری مجدد shader ها",
   "pryzma.keybinds": "Pryzma Shaders",
   "pryzma.shaders.reloaded.failure": "خطا در بارگیری مجدد shader ها ، علت : %s",
-  "pryzma.sodium.failure.title": "Pryzma اشکال در بارگذاری",
-  "pryzma.sodium.failure.reason": "شما Sodium پرونده اجرایی را در پوشه mods بازی خود دارید، اما Pryzma پرونده اجرایی Sodium را به همراه دارد،‌ لطفا بازی را ببندید و پرونده اجرایی Sodium را از پوشه mods بازی حذف کنید.",
   "options.pryzma.shadowDistance": "حداکثر فاصله سایه ها",
   "options.pryzma.shadowDistance.enabled": "به شما قابلیت تغییر میزان حداکثر فاصله سایه ها را می‌دهد. موجودات خارج از این فاصله هیچ سایه ای نمی‌اندازند. کم کردن این گزینه می‌تواند تاثیر زیادی در عملکرد بهتر بازی داشته باشد.",
   "options.pryzma.shadowDistance.disabled": "Shaderpack انتخابی شما میزان حداکثر فاصله سایه ها را تایین کرده است و شما نمی توانید آن را تغییر دهد.",

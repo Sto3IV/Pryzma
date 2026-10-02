@@ -37,7 +37,7 @@ It revives the rich heritage of classic and modern resource packs — connected 
 ### 🌌 Shaders, Built In
 Drop your favorite shaderpacks (*Complementary, BSL, Nostalgia, Photon, AstraLex*) directly into `shaderpacks/`.
 * **High-Performance Built-in Pipeline:** native support for shadow maps, `shadowcomp`, composite and deferred passes, compute shaders, custom images and uniforms, PBR textures.
-* **No Sodium, no Oculus required:** terrain renders on Pryzma's own chunk path, with block ids and light emission for the shader pack and render-region multi-draw in both the main and the shadow pass.
+* **No external shader mods required:** terrain renders on Pryzma's own chunk path, with block ids and light emission for the shader pack and render-region multi-draw in both the main and the shadow pass.
 * **Zero Overhead Chunk Routing:** the shadow pass collects its sections directly, without rebuilding the occlusion graph every frame, and redundant framebuffer and program binds are skipped.
 * **In-Game Customization:** built-in shader pack screen and option menus (**Video Settings → Shaders**, or `O`); `R` reloads, `K` toggles.
 
@@ -86,7 +86,7 @@ Why juggle dozens of conflicting mods with fragmented configs?
 | **Cinematic Smooth Zoom** | ⚠️ Spyglass Only | ⚠️ Requires `Zoomify` or `Just Zoom` | ✅ **Native ('C' Key)** |
 | **Fast Paintings Optimization** | ❌ Multi-quad Lag | ⚠️ Requires `FastPaintings` | ✅ **Native Consolidated Meshes** |
 | **Remove Realms & Compact Menu** | ❌ Commercial Clutter | ⚠️ Requires separate tweak mod | ✅ **Native Toggle (Settings → Other)** |
-| **Multithreaded Chunk Meshing** | ⚠️ Basic Sync | ✅ `Sodium` | ✅ **Native Dedicated Worker Pool** |
+| **Multithreaded Chunk Meshing** | ⚠️ Basic Sync | ✅ External renderers | ✅ **Native Dedicated Worker Pool** |
 | **Number of JAR Files Required** | **0** | **15–20+ separate individual mods** | **ONE. SINGLE. JAR.** |
 | **Architecture & Compatibility** | Baseline | Complex web of competing mixins | **Clean Sponge Mixin Monolith** |
 

@@ -570,7 +570,7 @@ public class ShadowRenderer {
 			levelRenderer.invokeRenderSectionLayer(RenderType.cutoutMipped(), cameraX, cameraY, cameraZ, MODELVIEW, shadowProjection);
 		}
 
-		// Reset our viewport in case Sodium overrode it
+		// Reset our viewport in case an external renderer overrode it
 		RenderSystem.viewport(0, 0, resolution, resolution);
 
 		levelRenderer.getLevel().getProfiler().popPush("entities");

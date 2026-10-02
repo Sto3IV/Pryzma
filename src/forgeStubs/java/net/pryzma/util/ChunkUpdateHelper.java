@@ -12,8 +12,8 @@ import net.pryzma.Config;
 
 /**
  * Dedicated helper for chunk update dispatching, replacing the legacy single-chunk
- * frame-choke with a modern worker-budgeted capacity engine inspired by Sodium's
- * ChunkBuilder architecture.
+ * frame-choke with a modern worker-budgeted capacity engine inspired by modern
+ * ChunkBuilder worker-pool architecture.
  *
  * <p>Preserves exact calls to {@code rebuildSectionAsync(dispatcher, cache)} and
  * {@code setNotDirty()}, ensuring 100% compatibility with Pryzma CTM, CEM, shaders,

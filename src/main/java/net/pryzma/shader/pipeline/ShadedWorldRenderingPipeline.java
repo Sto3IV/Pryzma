@@ -370,7 +370,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 			ShaderSamplers.addCustomImages(customTextureSamplerInterceptor, customImages);
 
 			if (ShaderSamplers.hasShadowSamplers(customTextureSamplerInterceptor)) {
-				// we compiled the non-Sodium version of this program first... so if this is somehow null, something
+				// we compiled the standard version of this program first... so if this is somehow null, something
 				// very odd is going on.
 				ShaderSamplers.addShadowSamplers(customTextureSamplerInterceptor, Objects.requireNonNull(shadowRenderTargets), null, separateHardwareSamplers);
 			}
@@ -385,7 +385,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 			ShaderImages.addCustomImages(builder, customImages);
 
 			if (ShaderImages.hasShadowImages(builder)) {
-				// we compiled the non-Sodium version of this program first... so if this is somehow null, something
+				// we compiled the standard version of this program first... so if this is somehow null, something
 				// very odd is going on.
 				ShaderImages.addShadowColorImages(builder, Objects.requireNonNull(shadowRenderTargets), null);
 			}

@@ -27,7 +27,7 @@ public class ExternallyManagedUniforms {
 	public static void addExternallyManagedUniforms117(UniformHolder uniformHolder) {
 		addExternallyManagedUniforms(uniformHolder);
 
-		// Sodium
+		// Chunk shader uniforms
 		addFloat(uniformHolder, "iris_FogStart");
 		addFloat(uniformHolder, "iris_FogEnd");
 		addVec4(uniformHolder, "iris_FogColor");

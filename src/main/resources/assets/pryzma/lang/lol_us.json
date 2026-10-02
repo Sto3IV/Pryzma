@@ -7,8 +7,6 @@
   "pryzma.keybinds": "Pryzma Shaders",
   "pryzma.shaders.reloaded.failure": "cant turn off and on fanceh! Reason: %s",
   "pryzma.shaders.toggled.failure": "cant toggle fanceh! Reason: %s",
-  "pryzma.sodium.failure.title": "Iwis faiwed to woad!",
-  "pryzma.sodium.failure.reason": "You have Sodium in youw mods fowdew, howevew Iwis incwudes it. Pwease cwose da game, and wemove Sodium from youw mods fowdew.",
   "options.pryzma.apply": "yis",
   "options.pryzma.refresh": "redog",
   "options.pryzma.openShaderPackFolder": "take me to fanceh box...",

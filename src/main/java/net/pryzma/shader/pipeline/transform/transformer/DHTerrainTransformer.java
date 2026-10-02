@@ -106,7 +106,7 @@ public class DHTerrainTransformer {
 		Root root,
 		Parameters parameters) {
 		tree.parseAndInjectNodes(t, ASTInjectionPoint.BEFORE_FUNCTIONS,
-			// translated from sodium's chunk_vertex.glsl
+			// translated from chunk_vertex.glsl
 			"vec3 _vert_position;",
 			"vec2 _vert_tex_light_coord;",
 			"int dhMaterialId;",

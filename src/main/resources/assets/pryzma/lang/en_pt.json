@@ -7,8 +7,6 @@
   "pryzma.keybinds": "Pryzma Shaders",
   "pryzma.shaders.reloaded.failure": "Failed to clean ye Glass eyes! Reason: %s",
   "pryzma.shaders.toggled.failure": "Failed to place ye Glass eyes back in! Reason: %s",
-  "pryzma.sodium.failure.title": "Pryzma failed to load!",
-  "pryzma.sodium.failure.reason": "Yee 'ave Sodium in yer mods folder, however Pryzma includes it. Please close the game 'n remove Sodium from yer mods Coffer.",
   "options.pryzma.apply": "Apply",
   "options.pryzma.refresh": "Refresh",
   "options.pryzma.openShaderPackFolder": "Open yer Coffer o' Glass Eyes",
@@ -27,8 +25,5 @@
   "options.pryzma.shadowDistance.enabled": "Allows you to change height o' t'mast fer yer shadows. Terrain and entities beyond t'mast will not cast shadows. Lowering t'shadow mast can significantly increase performance.",
   "options.pryzma.shadowDistance.disabled": "Yer current Glass eye has already set a height for t'shadow mast; yee cannot change it.",
   "pack.pryzma.select.title": "Select",
-  "pack.pryzma.list.label": "+ Drop yer Glass eye files in this ole window t' add yer Glass eyes",
-  "pryzma.sodium.failure.download": "Download Sodium",
-  "pryzma.sodium.failure.reason.notFound": "Pryzma needs e' Sodium for smooth sailin', but Sodium ain't found. Find the Sodium, add it to t'mods, and open the game.",
-  "pryzma.sodium.failure.reason.incompatible": "Pryzma needs e' Sodium for smooth sailin', but the one here ain't it. Find t'correct Sodium, add it to t'mods, throw overboard t'old one, and open the game."
+  "pack.pryzma.list.label": "+ Drop yer Glass eye files in this ole window t' add yer Glass eyes"
 }

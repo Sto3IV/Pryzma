@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * Allows the current pipeline to override the cloud video mode setting.
  * <p>
- * Uses a priority of 1010 to apply after Sodium's MixinGameOptions, which overwrites getCloudsType, so that we can
+ * Uses a priority of 1010 to apply after external options mixins, which overwrite getCloudsType, so that we can
  * override its behavior.
  */
 @Mixin(value = Options.class, priority = 1010)

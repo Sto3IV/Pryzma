@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * Tries to ensure that texture unit 0 ends up as the semantically default texture unit with PryzmaShaders extended shaders.
  * <p>
- * Located in {@link Uniform} to avoid a conflict with a Sodium mixin to ShaderInstance.
+ * Located in {@link Uniform} to avoid a conflict with an external mixin to ShaderInstance.
  */
 @Mixin(Uniform.class)
 public class MixinUniform {

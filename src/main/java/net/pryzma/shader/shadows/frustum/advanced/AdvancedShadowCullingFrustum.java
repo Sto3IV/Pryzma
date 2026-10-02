@@ -294,7 +294,7 @@ public class AdvancedShadowCullingFrustum extends Frustum {
 		return this.isVisible(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ) != FrustumIntersection.OUTSIDE;
 	}
 
-	// For Sodium
+	// Fast AABB intersection test
 	public int fastAabbTest(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
 		if (boxCuller != null && boxCuller.isCulled(minX, minY, minZ, maxX, maxY, maxZ)) {
 			return 0;

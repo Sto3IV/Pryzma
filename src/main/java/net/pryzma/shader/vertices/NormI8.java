@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 /**
  * Provides some utilities for working with packed normal vectors. Each normal component provides 8 bits of
  * precision in the range of [-1.0,1.0].
- * Copied from Sodium, licensed under the LGPLv3. Modified to support a W component.
+ * Based on upstream math utilities, licensed under the LGPLv3. Modified to support a W component.
  * <p>
  * | 32        | 24        | 16        | 8          |
  * | 0000 0000 | 0110 1100 | 0110 1100 | 0110 1100  |

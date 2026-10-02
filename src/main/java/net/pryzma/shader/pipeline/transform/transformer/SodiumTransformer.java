@@ -116,7 +116,7 @@ public class SodiumTransformer {
 		Root root,
 		SodiumParameters parameters, boolean needsNormal) {
 		tree.parseAndInjectNodes(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
-			// translated from sodium's chunk_vertex.glsl
+			// translated from chunk_vertex.glsl
 			"vec3 _vert_position;",
 			"vec2 _vert_tex_diffuse_coord;",
 			"vec2 _vert_tex_diffuse_coord_bias;",

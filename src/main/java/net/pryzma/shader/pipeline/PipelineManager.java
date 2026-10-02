@@ -58,12 +58,12 @@ public class PipelineManager {
 
 	/**
 	 * In ShaderChunkProgramOverrides#getProgramOverride,
-	 * it uses version counter to check whether to reload sodium shaders.
+	 * it uses version counter to check whether to reload chunk shaders.
 	 * This fixes a compat issue with Immersive Portals(#1188).
 	 * Immersive Portals may load multiple client dimensions at the same time,
 	 * and every dimension corresponds to a ShaderChunkProgramOverrides object.
 	 * Multiple dimensions (mod dimensions that fallback to overworld shaders) may use the same pipeline.
-	 * This ensures that the sodium shader for each dimension will get properly reloaded.
+	 * This ensures that the terrain shader for each dimension will get properly reloaded.
 	 */
 	public int getVersionCounterForSodiumShaderReload() {
 		return versionCounterForSodiumShaderReload;

@@ -5,7 +5,7 @@ import net.minecraft.util.FastColor;
 
 /**
  * This is a port of the fast-srgb8 library from thomcc on <a href="https://github.com/thomcc/fast-srgb8">GitHub</a>.
- * This is also ported from Sodium's 1.19.3 branch for use in 1.18.2 and 1.19.2 versions of PryzmaShaders.
+ * This is also ported from the upstream 1.19.3 branch for use in 1.18.2 and 1.19.2 versions of PryzmaShaders.
  * The source code is provided under both the MIT and Apache-2.0 licenses, whichever is more suitable for your purposes.
  */
 public class ColorSRGB {

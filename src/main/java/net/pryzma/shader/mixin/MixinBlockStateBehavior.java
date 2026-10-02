@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *
  * <ul>
  *     <li>Vanilla: Calls the relevant method in its block / fluid renderers</li>
- *     <li>Sodium / FRAPI / FREX / etc: Calls this method in relevant renderers</li>
+ *     <li>Modern renderers / FRAPI / FREX / etc: Calls this method in relevant renderers</li>
  *     <li>Better Foliage: Unusually, Better Foliage injects into this method, but it merely redirects the call to
  *         getShadeBrightness. By using a priority of 990, we apply before Better Foliage, allowing its redirect to
  *         succeed.</li>

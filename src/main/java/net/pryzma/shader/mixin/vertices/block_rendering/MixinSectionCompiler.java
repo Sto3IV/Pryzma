@@ -24,8 +24,8 @@ import org.spongepowered.asm.mixin.injection.At;
 /**
  * Block context for the extended terrain format on the vanilla chunk path: each block and fluid is
  * meshed with its {@code block.properties} id ({@code mc_Entity}), light emission and section-local
- * position ({@code at_midBlock}), as PryzmaShaders supplies them on Sodium's chunk path. PryzmaShaders dropped this
- * for vanilla meshing once it required Sodium, which leaves every vanilla chunk vertex at id -1.
+ * position ({@code at_midBlock}), as PryzmaShaders supplies them on the terrain chunk path. Previously,
+ * vanilla meshing left every vanilla chunk vertex at id -1.
  *
  * <p>Runs on the chunk workers. The id map is replaced, never mutated, when a pipeline is built.
  */
