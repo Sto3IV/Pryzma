@@ -24,18 +24,19 @@ public class ShaderButton extends Button {
 	}
 
 	@Override
-	protected void renderWidget(GuiGraphics guiGraphics, int pInt1, int pInt2, float pFloat3) {
-		Minecraft lvMinecraft5 = Minecraft.getInstance();
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.isHoveredOrFocused() ? this.alphaSupplier.getAsFloat() * 1.8f : this.alphaSupplier.getAsFloat());
+	protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+		Minecraft mc = Minecraft.getInstance();
+		float alpha = this.alphaSupplier.getAsFloat();
+		if (alpha < 0.01f) {
+			return;
+		}
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, alpha);
 		RenderSystem.enableBlend();
 		RenderSystem.enableDepthTest();
-		GuiUtil.bindWidgetsTexture();
-		GuiUtil.drawButton(guiGraphics, this.getX(), this.getY(), this.getWidth(), this.getHeight(), this.isHoveredOrFocused(), this.active);
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alphaSupplier.getAsFloat());
-		int lvInt6 = this.active ? 16777215 : 10526880;
-		this.renderString(guiGraphics, lvMinecraft5.font, lvInt6 | Mth.ceil(this.alphaSupplier.getAsFloat() * 255.0F) << 24);
+		guiGraphics.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-
+		int fgColor = this.getFGColor();
+		this.renderString(guiGraphics, mc.font, fgColor | Mth.ceil(alpha * 255.0F) << 24);
 	}
 
 	public static class Builder {

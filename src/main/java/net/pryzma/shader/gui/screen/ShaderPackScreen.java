@@ -9,7 +9,6 @@ import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.api.v0.ShaderApi;
 import net.pryzma.shader.gui.GuiUtil;
 import net.pryzma.shader.gui.NavigationController;
-import net.pryzma.shader.gui.OldImageButton;
 import net.pryzma.shader.gui.element.ShaderPackOptionList;
 import net.pryzma.shader.gui.element.ShaderPackSelectionList;
 import net.pryzma.shader.gui.element.screen.ShaderButton;
@@ -123,7 +122,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 			return backgroundInit;
 		}
 	}, notifier);
-	private OldImageButton showHideButton;
+	private Button showHideButton;
 
 	public ShaderPackScreen(Screen parent) {
 		super(Component.translatable("options.pryzma.shaderPackSelection.title"));
@@ -174,7 +173,9 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 			super.render(guiGraphics, mouseX, mouseY, delta);
 		} else {
 			this.renderBlurredBackground(delta);
-			this.showHideButton.render(guiGraphics, mouseX, mouseY, delta);
+			if (this.showHideButton != null) {
+				this.showHideButton.render(guiGraphics, mouseX, mouseY, delta);
+			}
 		}
 
 		float previousHoverTimer = this.guiButtonHoverTimer;
@@ -312,32 +313,17 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 				? Component.translatable("options.pryzma.gui.show")
 				: Component.translatable("options.pryzma.gui.hide");
 
-			float endOfLastButton = this.width / 2.0f + 154.0f;
-			float freeSpace = this.width - endOfLastButton;
-			int x;
-			if (freeSpace > 100.0f) {
-				x = this.width - 50;
-			} else if (freeSpace < 20.0f) {
-				x = this.width - 20;
-			} else {
-				x = (int) (endOfLastButton + (freeSpace / 2.0f)) - 10;
-			}
+			int buttonWidth = Math.max(76, this.font.width(showOrHide) + 16);
+			int rightOfDone = this.width / 2 + 156;
+			int x = this.width - buttonWidth - 10;
+			int y = (this.guiHidden || this.width - buttonWidth - 10 >= rightOfDone)
+				? this.height - 27
+				: this.height - 51;
 
-			this.showHideButton = new OldImageButton(
-				x, this.height - 39,
-				20, 20,
-				this.guiHidden ? 20 : 0, 146, 20,
-				GuiUtil.IRIS_WIDGETS_TEX,
-				256, 256,
-				(button) -> {
-					this.guiHidden = !this.guiHidden;
-					this.init();
-				},
-				showOrHide
-			);
-
-			showHideButton.setTooltip(Tooltip.create(showOrHide));
-			showHideButton.setTooltipDelay(Duration.ofSeconds(10));
+			this.showHideButton = Button.builder(showOrHide, button -> {
+				this.guiHidden = !this.guiHidden;
+				this.init();
+			}).bounds(x, y, buttonWidth, 20).build();
 
 			this.addRenderableWidget(showHideButton);
 		}
