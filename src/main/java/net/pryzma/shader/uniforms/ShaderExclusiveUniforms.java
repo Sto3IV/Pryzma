@@ -29,7 +29,7 @@ import static net.pryzma.shader.gl.uniform.UniformUpdateFrequency.PER_FRAME;
 public class ShaderExclusiveUniforms {
 	private static final Vector3d ZERO = new Vector3d(0);
 
-	public static void addIrisExclusiveUniforms(UniformHolder uniforms) {
+	public static void addPryzmaExclusiveUniforms(UniformHolder uniforms) {
 		WorldInfoUniforms.addWorldInfoUniforms(uniforms);
 
 		uniforms.uniform1i(UniformUpdateFrequency.PER_TICK, "currentColorSpace", () -> ShaderVideoSettings.colorSpace.ordinal());
@@ -71,6 +71,11 @@ public class ShaderExclusiveUniforms {
 				return zero;
 			}
 		});
+	}
+
+	@Deprecated
+	public static void addIrisExclusiveUniforms(UniformHolder uniforms) {
+		addPryzmaExclusiveUniforms(uniforms);
 	}
 
 	private static int getCurrentSelectedBlockId() {

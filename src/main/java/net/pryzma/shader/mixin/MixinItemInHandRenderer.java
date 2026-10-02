@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ItemInHandRenderer.class)
 public class MixinItemInHandRenderer implements ItemInHandInterface {
 	@Inject(method = "renderArmWithItem", at = @At("HEAD"), cancellable = true)
-	private void iris$skipTranslucentHands(AbstractClientPlayer abstractClientPlayer, float f, float g, InteractionHand interactionHand, float h, ItemStack itemStack, float i, PoseStack poseStack, MultiBufferSource multiBufferSource, int j, CallbackInfo ci) {
+	private void pryzma$skipTranslucentHands(AbstractClientPlayer abstractClientPlayer, float f, float g, InteractionHand interactionHand, float h, ItemStack itemStack, float i, PoseStack poseStack, MultiBufferSource multiBufferSource, int j, CallbackInfo ci) {
 		if (PryzmaShaders.isPackInUseQuick()) {
 			if (HandRenderer.INSTANCE.isRenderingSolid() == HandRenderer.INSTANCE.isHandTranslucent(itemStack)) {
 				ci.cancel();
@@ -32,12 +32,12 @@ public class MixinItemInHandRenderer implements ItemInHandInterface {
 	private ItemStack offHandItem;
 
 	@Override
-	public boolean iris$isAnyHandTranslucent () {
+	public boolean pryzma$isAnyHandTranslucent () {
 		return HandRenderer.INSTANCE.isHandTranslucent(mainHandItem) || HandRenderer.INSTANCE.isHandTranslucent(offHandItem);
 	}
 
 	@Override
-	public boolean iris$isAnyHandSolid () {
+	public boolean pryzma$isAnyHandSolid () {
 		return !(HandRenderer.INSTANCE.isHandTranslucent(mainHandItem) && HandRenderer.INSTANCE.isHandTranslucent(offHandItem));
 	}
 }

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(ClientLevel.class)
 public class MixinClientLevel {
 	@ModifyVariable(method = "getShade", at = @At("HEAD"), argsOnly = true)
-	private boolean iris$maybeDisableDirectionalShading(boolean shaded) {
+	private boolean pryzma$maybeDisableDirectionalShading(boolean shaded) {
 		if (WorldRenderingSettings.INSTANCE.shouldDisableDirectionalShading()) {
 			return false;
 		} else {

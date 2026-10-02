@@ -90,7 +90,7 @@ public class PryzmaShaders {
 	// Used in favor of queueDefaultShaderPackOptionValues() for resetting as the
 	// behavior is more concrete and therefore is more likely to repair a user's issues
 	private static boolean resetShaderPackOptions = false;
-	private static String IRIS_VERSION;
+	private static String SHADER_VERSION;
 	private static boolean fallback;
 	private static boolean loadShaderPackWhenPossible;
 
@@ -131,7 +131,7 @@ public class PryzmaShaders {
 
 		// Initialize the pipeline now so that we don't increase world loading time. Just going to guess that
 		// the player is in the overworld.
-		// See: https://github.com/IrisShaders/PryzmaShaders/issues/323
+		// See: upstream issue #323
 		lastDimension = DimensionId.OVERWORLD;
 		PryzmaShaders.getPipelineManager().preparePipeline(DimensionId.OVERWORLD);
 	}
@@ -147,14 +147,14 @@ public class PryzmaShaders {
 				reload();
 
 				if (minecraft.player != null) {
-					minecraft.player.displayClientMessage(Component.translatable("iris.shaders.reloaded"), false);
+					minecraft.player.displayClientMessage(Component.translatable("pryzma.shaders.reloaded"), false);
 				}
 
 			} catch (Exception e) {
 				logger.error("Error while reloading Shaders for PryzmaShaders!", e);
 
 				if (minecraft.player != null) {
-					minecraft.player.displayClientMessage(Component.translatable("iris.shaders.reloaded.failure", Throwables.getRootCause(e).getMessage()).withStyle(ChatFormatting.RED), false);
+					minecraft.player.displayClientMessage(Component.translatable("pryzma.shaders.reloaded.failure", Throwables.getRootCause(e).getMessage()).withStyle(ChatFormatting.RED), false);
 				}
 			}
 		} else if (toggleShadersKeybind.consumeClick()) {
@@ -164,7 +164,7 @@ public class PryzmaShaders {
 				logger.error("Error while toggling shaders!", e);
 
 				if (minecraft.player != null) {
-					minecraft.player.displayClientMessage(Component.translatable("iris.shaders.toggled.failure", Throwables.getRootCause(e).getMessage()).withStyle(ChatFormatting.RED), false);
+					minecraft.player.displayClientMessage(Component.translatable("pryzma.shaders.toggled.failure", Throwables.getRootCause(e).getMessage()).withStyle(ChatFormatting.RED), false);
 				}
 				setShadersDisabled();
 				fallback = true;
@@ -188,7 +188,7 @@ public class PryzmaShaders {
 
 		reload();
 		if (minecraft.player != null) {
-			minecraft.player.displayClientMessage(enabled ? Component.translatable("iris.shaders.toggled", currentPackName) : Component.translatable("iris.shaders.disabled"), false);
+			minecraft.player.displayClientMessage(enabled ? Component.translatable("pryzma.shaders.toggled", currentPackName) : Component.translatable("pryzma.shaders.disabled"), false);
 		}
 	}
 
@@ -198,12 +198,12 @@ public class PryzmaShaders {
 				throw new IllegalStateException("PryzmaShaders::loadShaderpack was called, but PryzmaShaders::onInitializeClient wasn't" +
 					" called yet. How did this happen?");
 			} else {
-				throw new NullPointerException("PryzmaShaders.irisConfig was null unexpectedly");
+				throw new NullPointerException("PryzmaShaders.shaderConfig was null unexpectedly");
 			}
 		}
 
 		if (!shaderConfig.areShadersEnabled()) {
-			logger.info("Shaders are disabled because enableShaders is set to false in iris.properties");
+			logger.info("Shaders are disabled because enableShaders is set to false in shader settings");
 
 			setShadersDisabled();
 
@@ -336,7 +336,7 @@ public class PryzmaShaders {
 			Minecraft.getInstance().setScreen(new DebugLoadFailedGridScreen(Minecraft.getInstance().screen, Component.literal(e instanceof ShaderCompileException ? "Failed to compile shaders" : "Exception"), e));
 		} else {
 			if (Minecraft.getInstance().player != null) {
-				Minecraft.getInstance().player.displayClientMessage(Component.translatable(e instanceof ShaderCompileException ? "iris.load.failure.shader" : "iris.load.failure.generic").append(Component.literal("Copy Info").withStyle(arg -> arg.withUnderlined(true).withColor(
+				Minecraft.getInstance().player.displayClientMessage(Component.translatable(e instanceof ShaderCompileException ? "pryzma.load.failure.shader" : "pryzma.load.failure.generic").append(Component.literal("Copy Info").withStyle(arg -> arg.withUnderlined(true).withColor(
 					ChatFormatting.BLUE).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, e.getMessage())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))))), false);
 			} else {
 				storedError = Optional.of(e);
@@ -397,13 +397,13 @@ public class PryzmaShaders {
 		logger.info("Debug functionality is " + (enable ? "enabled, logging will be more verbose!" : "disabled."));
 		if (Minecraft.getInstance().player != null) {
 			if (ShaderPlatformHelpers.getInstance().useELS()) {
-				Minecraft.getInstance().player.displayClientMessage(Component.translatable("iris.shaders.debug.restartNoDebug"), false);
+				Minecraft.getInstance().player.displayClientMessage(Component.translatable("pryzma.shaders.debug.restartNoDebug"), false);
 			} else {
-				Minecraft.getInstance().player.displayClientMessage(Component.translatable(success != 0 ? (enable ? "iris.shaders.debug.enabled" : "iris.shaders.debug.disabled") : "iris.shaders.debug.failure"), false);
+				Minecraft.getInstance().player.displayClientMessage(Component.translatable(success != 0 ? (enable ? "pryzma.shaders.debug.enabled" : "pryzma.shaders.debug.disabled") : "pryzma.shaders.debug.failure"), false);
 			}
 
 			if (success == 2 && !ShaderPlatformHelpers.getInstance().useELS()) {
-				Minecraft.getInstance().player.displayClientMessage(Component.translatable("iris.shaders.debug.restart"), false);
+				Minecraft.getInstance().player.displayClientMessage(Component.translatable("pryzma.shaders.debug.restart"), false);
 			}
 		}
 	}
@@ -548,7 +548,7 @@ public class PryzmaShaders {
 		loadShaderpack();
 
 		// Very important - we need to re-create the pipeline straight away.
-		// https://github.com/IrisShaders/PryzmaShaders/issues/1330
+		// upstream issue #1330
 		if (Minecraft.getInstance().level != null) {
 			PryzmaShaders.getPipelineManager().preparePipeline(PryzmaShaders.getCurrentDimension());
 		}
@@ -593,7 +593,7 @@ public class PryzmaShaders {
 			// This is minecraft:overworld by default, but can also be minecraft:the_nether or minecraft:the_end.
 			// The appropriate shader for the dimension should be used by default in order to prevent buggy results.
 			// More information at https://minecraft.wiki/w/Dimension_type
-			// https://github.com/IrisShaders/PryzmaShaders/issues/2200
+			// upstream issue #2200
 			ResourceLocation effects = level.dimensionType().effectsLocation();
 
 			if (Level.END.location().equals(effects)) {
@@ -664,6 +664,7 @@ public class PryzmaShaders {
 		return shaderConfig;
 	}
 
+	@Deprecated
 	public static ShaderConfig getIrisConfig() {
 		return shaderConfig;
 	}
@@ -673,11 +674,11 @@ public class PryzmaShaders {
 	}
 
 	public static String getVersion() {
-		if (IRIS_VERSION == null) {
+		if (SHADER_VERSION == null) {
 			return "Version info unknown!";
 		}
 
-		return IRIS_VERSION;
+		return SHADER_VERSION;
 	}
 
 	public static String getFormattedVersion() {
@@ -756,12 +757,12 @@ public class PryzmaShaders {
 	 * <p>This is called right before options are loaded, so we can add key bindings here.</p>
 	 */
 	public void onEarlyInitialize() {
-		IRIS_VERSION = ShaderPlatformHelpers.getInstance().getVersion();
+		SHADER_VERSION = ShaderPlatformHelpers.getInstance().getVersion();
 
-		reloadKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("iris.keybind.reload", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "iris.keybinds"));
-		toggleShadersKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("iris.keybind.toggleShaders", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "iris.keybinds"));
-		shaderpackScreenKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("iris.keybind.shaderPackSelection", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, "iris.keybinds"));
-		wireframeKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("iris.keybind.wireframe", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), "iris.keybinds"));
+		reloadKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.reload", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "pryzma.keybinds"));
+		toggleShadersKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.toggleShaders", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "pryzma.keybinds"));
+		shaderpackScreenKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.shaderPackSelection", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, "pryzma.keybinds"));
+		wireframeKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.wireframe", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), "pryzma.keybinds"));
 
 		try {
 			if (!Files.exists(getShaderpacksDirectory())) {

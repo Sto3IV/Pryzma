@@ -23,8 +23,8 @@ public class MixinBufferSource {
 	@WrapOperation(method = "getBuffer",
 		at = @At(value = "NEW",
 			target = "(Lcom/mojang/blaze3d/vertex/ByteBufferBuilder;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;Lcom/mojang/blaze3d/vertex/VertexFormat;)Lcom/mojang/blaze3d/vertex/BufferBuilder;"))
-	private BufferBuilder iris$redirectBegin(ByteBufferBuilder byteBufferBuilder, VertexFormat.Mode mode, VertexFormat vertexFormat, Operation<BufferBuilder> original) {
-		ImmediateState.skipExtension.set(iris$notRenderingLevel());
+	private BufferBuilder pryzma$redirectBegin(ByteBufferBuilder byteBufferBuilder, VertexFormat.Mode mode, VertexFormat vertexFormat, Operation<BufferBuilder> original) {
+		ImmediateState.skipExtension.set(pryzma$notRenderingLevel());
 		BufferBuilder builder = original.call(byteBufferBuilder, mode, vertexFormat);
 		ImmediateState.skipExtension.set(false);
 
@@ -34,8 +34,8 @@ public class MixinBufferSource {
 	@Inject(method = "endBatch(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/BufferBuilder;)V",
 		at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/client/renderer/RenderType;draw(Lcom/mojang/blaze3d/vertex/MeshData;)V"))
-	private void iris$beforeFlushBuffer(RenderType renderType, BufferBuilder bufferBuilder, CallbackInfo ci) {
-		if (iris$notRenderingLevel()) {
+	private void pryzma$beforeFlushBuffer(RenderType renderType, BufferBuilder bufferBuilder, CallbackInfo ci) {
+		if (pryzma$notRenderingLevel()) {
 			ImmediateState.renderWithExtendedVertexFormat = false;
 		}
 	}
@@ -44,14 +44,14 @@ public class MixinBufferSource {
 		at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/client/renderer/RenderType;draw(Lcom/mojang/blaze3d/vertex/MeshData;)V",
 			shift = At.Shift.AFTER))
-	private void iris$afterFlushBuffer(RenderType renderType, BufferBuilder bufferBuilder, CallbackInfo ci) {
-		if (iris$notRenderingLevel()) {
+	private void pryzma$afterFlushBuffer(RenderType renderType, BufferBuilder bufferBuilder, CallbackInfo ci) {
+		if (pryzma$notRenderingLevel()) {
 			ImmediateState.renderWithExtendedVertexFormat = true;
 		}
 	}
 
 	@Unique
-	private boolean iris$notRenderingLevel() {
+	private boolean pryzma$notRenderingLevel() {
 		return !ImmediateState.isRenderingLevel;
 	}
 }

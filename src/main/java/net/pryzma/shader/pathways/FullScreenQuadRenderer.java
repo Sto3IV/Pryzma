@@ -60,7 +60,7 @@ public class FullScreenQuadRenderer {
 		// have the same format, and buffer state is only associated with a given VAO, so we can keep it bound.
 		//
 		// Using quad.getFormat().clearBufferState() causes some Intel drivers to freak out:
-		// https://github.com/IrisShaders/PryzmaShaders/issues/1214
+		// upstream issue #1214
 
 		RenderSystem.enableDepthTest();
 		((VertexBufferHelper) quad).restoreBinding();

@@ -58,8 +58,8 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 	 */
 	public static final Set<Runnable> TOP_LAYER_RENDER_QUEUE = new HashSet<>();
 
-	private static final Component SELECT_TITLE = Component.translatable("pack.iris.select.title").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
-	private static final Component CONFIGURE_TITLE = Component.translatable("pack.iris.configure.title").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+	private static final Component SELECT_TITLE = Component.translatable("pack.pryzma.select.title").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+	private static final Component CONFIGURE_TITLE = Component.translatable("pack.pryzma.configure.title").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
 	private static final int COMMENT_PANEL_WIDTH = 314;
 	private static final String development = "Development Environment";
 	private static String cachedGpuInfo = null;
@@ -80,7 +80,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 		return cachedGpuInfo;
 	}
 	private final Screen parent;
-	private final MutableComponent irisTextComponent;
+	private final MutableComponent modInfoComponent;
 	private final FrameUpdateNotifier notifier = new FrameUpdateNotifier();
 	private ShaderPackSelectionList shaderPackList;
 	private @Nullable ShaderPackOptionList shaderOptionList = null;
@@ -126,17 +126,17 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 	private OldImageButton showHideButton;
 
 	public ShaderPackScreen(Screen parent) {
-		super(Component.translatable("options.iris.shaderPackSelection.title"));
+		super(Component.translatable("options.pryzma.shaderPackSelection.title"));
 
 		this.parent = parent;
 
-		String irisName = PryzmaShaders.MODNAME + " " + PryzmaShaders.getVersion();
+		String modInfo = PryzmaShaders.MODNAME + " " + PryzmaShaders.getVersion();
 
 		if (ShaderPlatformHelpers.getInstance().isDevelopmentEnvironment()) {
 			this.developmentComponent = Component.literal("Development Environment").withStyle(ChatFormatting.GOLD);
 		}
 
-		this.irisTextComponent = Component.literal(irisName).withStyle(ChatFormatting.GRAY);
+		this.modInfoComponent = Component.literal(modInfo).withStyle(ChatFormatting.GRAY);
 
 		refreshForChangedPack();
 	}
@@ -237,9 +237,9 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 
 		if (this.developmentComponent != null) {
 			guiGraphics.drawString(font, developmentComponent, 2, this.height - 10, 0xFFFFFF);
-			guiGraphics.drawString(font, irisTextComponent, 2, this.height - 20, 0xFFFFFF);
+			guiGraphics.drawString(font, modInfoComponent, 2, this.height - 20, 0xFFFFFF);
 		} else {
-			guiGraphics.drawString(font, irisTextComponent, 2, this.height - 10, 0xFFFFFF);
+			guiGraphics.drawString(font, modInfoComponent, 2, this.height - 10, 0xFFFFFF);
 		}
 	}
 
@@ -276,20 +276,20 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 				this.addRenderableWidget(shaderPackList);
 			}
 
-			this.addRenderableWidget(ShaderButton.iris$builder(CommonComponents.GUI_DONE, button -> onClose(), buttonTransition).bounds(bottomCenter + 104, this.height - 27, 100, 20
+			this.addRenderableWidget(ShaderButton.pryzma$builder(CommonComponents.GUI_DONE, button -> onClose(), buttonTransition).bounds(bottomCenter + 104, this.height - 27, 100, 20
 			).build());
 
-			this.addRenderableWidget(ShaderButton.iris$builder(Component.translatable("options.iris.apply"), button -> this.applyChanges(), buttonTransition).bounds(bottomCenter, this.height - 27, 100, 20
+			this.addRenderableWidget(ShaderButton.pryzma$builder(Component.translatable("options.pryzma.apply"), button -> this.applyChanges(), buttonTransition).bounds(bottomCenter, this.height - 27, 100, 20
 			).build());
 
-			this.addRenderableWidget(ShaderButton.iris$builder(CommonComponents.GUI_CANCEL, button -> this.dropChangesAndClose(), buttonTransition).bounds(bottomCenter - 104, this.height - 27, 100, 20
+			this.addRenderableWidget(ShaderButton.pryzma$builder(CommonComponents.GUI_CANCEL, button -> this.dropChangesAndClose(), buttonTransition).bounds(bottomCenter - 104, this.height - 27, 100, 20
 			).build());
 
-			this.openFolderButton = ShaderButton.iris$builder(Component.translatable("options.iris.openShaderPackFolder"), button -> openShaderPackFolder(), buttonTransition).bounds(topCenter - 78, this.height - 51, 152, 20
+			this.openFolderButton = ShaderButton.pryzma$builder(Component.translatable("options.pryzma.openShaderPackFolder"), button -> openShaderPackFolder(), buttonTransition).bounds(topCenter - 78, this.height - 51, 152, 20
 			).build();
 			this.addRenderableWidget(openFolderButton);
 
-			this.screenSwitchButton = this.addRenderableWidget(ShaderButton.iris$builder(Component.translatable("options.iris.shaderPackList"), button -> {
+			this.screenSwitchButton = this.addRenderableWidget(ShaderButton.pryzma$builder(Component.translatable("options.pryzma.shaderPackList"), button -> {
 					this.optionMenuOpen = !this.optionMenuOpen;
 
 					// UX: Apply changes before switching screens to avoid unintuitive behavior
@@ -309,8 +309,8 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 
 		if (inWorld) {
 			Component showOrHide = this.guiHidden
-				? Component.translatable("options.iris.gui.show")
-				: Component.translatable("options.iris.gui.hide");
+				? Component.translatable("options.pryzma.gui.show")
+				: Component.translatable("options.pryzma.gui.hide");
 
 			float endOfLastButton = this.width / 2.0f + 154.0f;
 			float freeSpace = this.width - endOfLastButton;
@@ -343,7 +343,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 		}
 
 		// NB: Don't let comment remain when exiting options screen
-		// https://github.com/IrisShaders/PryzmaShaders/issues/1494
+		// upstream issue #1494
 		this.hoveredElement = null;
 		this.hoveredElementCommentTimer = 0;
 	}
@@ -369,8 +369,8 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 		if (this.screenSwitchButton != null) {
 			this.screenSwitchButton.setMessage(
 				optionMenuOpen ?
-					Component.translatable("options.iris.shaderPackList")
-					: Component.translatable("options.iris.shaderPackSettings")
+					Component.translatable("options.pryzma.shaderPackList")
+					: Component.translatable("options.pryzma.shaderPackSettings")
 			);
 			this.screenSwitchButton.active = optionMenuOpen || shaderPackList.getTopButtonRow().shadersEnabled;
 		}
@@ -469,7 +469,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 				PryzmaShaders.getShaderpacksDirectoryManager().copyPackIntoDirectory(fileName, pack);
 			} catch (FileAlreadyExistsException e) {
 				this.notificationDialog = Component.translatable(
-					"options.iris.shaderPackSelection.copyErrorAlreadyExists",
+					"options.pryzma.shaderPackSelection.copyErrorAlreadyExists",
 					fileName
 				).withStyle(ChatFormatting.ITALIC, ChatFormatting.RED);
 
@@ -481,7 +481,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 				PryzmaShaders.logger.warn("Error copying dragged shader pack", e);
 
 				this.notificationDialog = Component.translatable(
-					"options.iris.shaderPackSelection.copyError",
+					"options.pryzma.shaderPackSelection.copyError",
 					fileName
 				).withStyle(ChatFormatting.ITALIC, ChatFormatting.RED);
 
@@ -504,14 +504,14 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 				String fileName = paths.getFirst().getFileName().toString();
 
 				this.notificationDialog = Component.translatable(
-					"options.iris.shaderPackSelection.failedAddSingle",
+					"options.pryzma.shaderPackSelection.failedAddSingle",
 					fileName
 				).withStyle(ChatFormatting.ITALIC, ChatFormatting.RED);
 			} else {
 				// Otherwise, show a generic message.
 
 				this.notificationDialog = Component.translatable(
-					"options.iris.shaderPackSelection.failedAdd"
+					"options.pryzma.shaderPackSelection.failedAdd"
 				).withStyle(ChatFormatting.ITALIC, ChatFormatting.RED);
 			}
 
@@ -520,7 +520,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 			String packName = packs.getFirst().getFileName().toString();
 
 			this.notificationDialog = Component.translatable(
-				"options.iris.shaderPackSelection.addedPack",
+				"options.pryzma.shaderPackSelection.addedPack",
 				packName
 			).withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW);
 
@@ -531,7 +531,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 			// We also support multiple packs being dragged and dropped at a time. Just show a generic success message
 			// in that case.
 			this.notificationDialog = Component.translatable(
-				"options.iris.shaderPackSelection.addedPacks",
+				"options.pryzma.shaderPackSelection.addedPacks",
 				packs.size()
 			).withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW);
 		}
@@ -550,7 +550,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 		// as only one option file should be imported at a time
 		if (paths.size() != 1) {
 			this.notificationDialog = Component.translatable(
-				"options.iris.shaderPackOptions.tooManyFiles"
+				"options.pryzma.shaderPackOptions.tooManyFiles"
 			).withStyle(ChatFormatting.ITALIC, ChatFormatting.RED);
 			this.notificationDialogTimer = 100; // 5 seconds (100 ticks)
 
@@ -568,7 +568,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 			PryzmaShaders.queueShaderPackOptionsFromProperties(properties);
 
 			this.notificationDialog = Component.translatable(
-				"options.iris.shaderPackOptions.importedSettings",
+				"options.pryzma.shaderPackOptions.importedSettings",
 				settingFile.getFileName().toString()
 			).withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW);
 			this.notificationDialogTimer = 100; // 5 seconds (100 ticks)
@@ -582,7 +582,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 			PryzmaShaders.logger.error("Error importing shader settings file \"" + settingFile.toString() + "\"", e);
 
 			this.notificationDialog = Component.translatable(
-				"options.iris.shaderPackOptions.failedImport",
+				"options.pryzma.shaderPackOptions.failedImport",
 				settingFile.getFileName().toString()
 			).withStyle(ChatFormatting.ITALIC, ChatFormatting.RED);
 			this.notificationDialogTimer = 100; // 5 seconds (100 ticks)

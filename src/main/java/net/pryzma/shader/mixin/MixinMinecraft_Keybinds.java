@@ -22,7 +22,7 @@ public class MixinMinecraft_Keybinds {
 	private ProfilerFiller profiler;
 
 	@Inject(method = "tick()V", at = @At("RETURN"))
-	private void iris$onTick(CallbackInfo ci) {
+	private void pryzma$onTick(CallbackInfo ci) {
 		this.profiler.push("iris_keybinds");
 
 		PryzmaShaders.handleKeybinds((Minecraft) (Object) this);

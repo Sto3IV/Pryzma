@@ -119,7 +119,7 @@ public final class CommonUniforms {
 		SystemTimeUniforms.addSystemTimeUniforms(uniforms);
 		BiomeUniforms.addBiomeUniforms(uniforms);
 		new CelestialUniforms(directives.getSunPathRotation()).addCelestialUniforms(uniforms);
-		ShaderExclusiveUniforms.addIrisExclusiveUniforms(uniforms);
+		ShaderExclusiveUniforms.addPryzmaExclusiveUniforms(uniforms);
 		ShaderTimeUniforms.addTimeUniforms(uniforms);
 		MatrixUniforms.addMatrixUniforms(uniforms, directives);
 		IdMapUniforms.addIdMapUniforms(updateNotifier, uniforms, idMap, directives.isOldHandLight());
@@ -306,7 +306,7 @@ public final class CommonUniforms {
 		if (cameraEntity instanceof LivingEntity livingEntity) {
 
 			try {
-				// See MixinGameRenderer#iris$safecheckNightvisionStrength.
+				// See MixinGameRenderer#pryzma$safecheckNightvisionStrength.
 				//
 				// We modify the behavior of getNightVisionScale so that it's safe for us to call it even on entities
 				// that don't have the effect, allowing us to pick up modified night vision strength values from mods

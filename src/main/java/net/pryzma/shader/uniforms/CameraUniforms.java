@@ -11,7 +11,7 @@ import static net.pryzma.shader.gl.uniform.UniformUpdateFrequency.ONCE;
 import static net.pryzma.shader.gl.uniform.UniformUpdateFrequency.PER_FRAME;
 
 /**
- * @see <a href="https://github.com/IrisShaders/ShaderDoc/blob/master/uniforms.md#camera">Uniforms: Camera</a>
+ * @see <a href="Shader uniform documentation (camera)">Uniforms: Camera</a>
  */
 public class CameraUniforms {
 	private static final Minecraft client = Minecraft.getInstance();

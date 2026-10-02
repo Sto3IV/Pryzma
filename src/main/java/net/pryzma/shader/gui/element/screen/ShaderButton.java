@@ -19,7 +19,7 @@ public class ShaderButton extends Button {
 		this.alphaSupplier = alpha;
 	}
 
-	public static ShaderButton.Builder iris$builder(Component pComponent0, Button.OnPress pButton$OnPress1, FloatSupplier alpha) {
+	public static ShaderButton.Builder pryzma$builder(Component pComponent0, Button.OnPress pButton$OnPress1, FloatSupplier alpha) {
 		return new ShaderButton.Builder(pComponent0, pButton$OnPress1, alpha);
 	}
 
@@ -29,7 +29,7 @@ public class ShaderButton extends Button {
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.isHoveredOrFocused() ? this.alphaSupplier.getAsFloat() * 1.8f : this.alphaSupplier.getAsFloat());
 		RenderSystem.enableBlend();
 		RenderSystem.enableDepthTest();
-		GuiUtil.bindIrisWidgetsTexture();
+		GuiUtil.bindWidgetsTexture();
 		GuiUtil.drawButton(guiGraphics, this.getX(), this.getY(), this.getWidth(), this.getHeight(), this.isHoveredOrFocused(), this.active);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alphaSupplier.getAsFloat());
 		int lvInt6 = this.active ? 16777215 : 10526880;

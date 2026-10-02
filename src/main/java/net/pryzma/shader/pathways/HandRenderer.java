@@ -71,7 +71,7 @@ public class HandRenderer {
 	}
 
 	public void renderSolid(Matrix4fc modelMatrix, float tickDelta, Camera camera, GameRenderer gameRenderer, WorldRenderingPipeline pipeline) {
-		if (!canRender(camera, gameRenderer) || !((ItemInHandInterface)gameRenderer.itemInHandRenderer).iris$isAnyHandSolid() || !PryzmaShaders.isPackInUseQuick()) {
+		if (!canRender(camera, gameRenderer) || !((ItemInHandInterface)gameRenderer.itemInHandRenderer).pryzma$isAnyHandSolid() || !PryzmaShaders.isPackInUseQuick()) {
 			return;
 		}
 
@@ -112,7 +112,7 @@ public class HandRenderer {
 	}
 
 	public void renderTranslucent(Matrix4fc modelMatrix, float tickDelta, Camera camera, GameRenderer gameRenderer, WorldRenderingPipeline pipeline) {
-		if (!canRender(camera, gameRenderer) || !((ItemInHandInterface)gameRenderer.itemInHandRenderer).iris$isAnyHandTranslucent() || !PryzmaShaders.isPackInUseQuick()) {
+		if (!canRender(camera, gameRenderer) || !((ItemInHandInterface)gameRenderer.itemInHandRenderer).pryzma$isAnyHandTranslucent() || !PryzmaShaders.isPackInUseQuick()) {
 			return;
 		}
 

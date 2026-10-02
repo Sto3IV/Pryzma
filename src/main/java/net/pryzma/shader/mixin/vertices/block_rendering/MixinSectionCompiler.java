@@ -37,9 +37,9 @@ public class MixinSectionCompiler {
 
 	@WrapOperation(method = "compile(Lnet/minecraft/core/SectionPos;Lnet/minecraft/client/renderer/chunk/RenderChunkRegion;Lcom/mojang/blaze3d/vertex/VertexSorting;Lnet/minecraft/client/renderer/SectionBufferBuilderPack;Ljava/util/List;)Lnet/minecraft/client/renderer/chunk/SectionCompiler$Results;",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/BlockRenderDispatcher;renderLiquid(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/BlockAndTintGetter;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/material/FluidState;)V"))
-	private void iris$liquidContext(BlockRenderDispatcher dispatcher, BlockPos pos, BlockAndTintGetter level, VertexConsumer consumer,
+	private void pryzma$liquidContext(BlockRenderDispatcher dispatcher, BlockPos pos, BlockAndTintGetter level, VertexConsumer consumer,
 									BlockState blockState, FluidState fluidState, Operation<Void> original) {
-		Object2IntMap<BlockState> ids = iris$ids(consumer);
+		Object2IntMap<BlockState> ids = pryzma$ids(consumer);
 		if (ids == null) {
 			original.call(dispatcher, pos, level, consumer, blockState, fluidState);
 			return;
@@ -56,7 +56,7 @@ public class MixinSectionCompiler {
 
 	@WrapOperation(method = "compile(Lnet/minecraft/core/SectionPos;Lnet/minecraft/client/renderer/chunk/RenderChunkRegion;Lcom/mojang/blaze3d/vertex/VertexSorting;Lnet/minecraft/client/renderer/SectionBufferBuilderPack;Ljava/util/List;)Lnet/minecraft/client/renderer/chunk/SectionCompiler$Results;",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/BlockRenderDispatcher;renderBatched(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/BlockAndTintGetter;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;Lnet/neoforged/neoforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V"))
-	private void iris$blockContext(BlockRenderDispatcher dispatcher, BlockState state, BlockPos pos, BlockAndTintGetter level, PoseStack pose,
+	private void pryzma$blockContext(BlockRenderDispatcher dispatcher, BlockState state, BlockPos pos, BlockAndTintGetter level, PoseStack pose,
 								   VertexConsumer consumer, boolean checkSides, RandomSource random, ModelData modelData, RenderType renderType,
 								   Operation<Void> original) {
 		BlockSensitiveBufferBuilder builder = BlockContext.begin(consumer, state, pos);
@@ -73,7 +73,7 @@ public class MixinSectionCompiler {
 
 	/** The pack's id map while chunks are meshed in the extended format, else null. */
 	@Unique
-	private static Object2IntMap<BlockState> iris$ids(VertexConsumer consumer) {
+	private static Object2IntMap<BlockState> pryzma$ids(VertexConsumer consumer) {
 		if (!WorldRenderingSettings.INSTANCE.shouldUseExtendedVertexFormat() || !(consumer instanceof BlockSensitiveBufferBuilder)) {
 			return null;
 		}

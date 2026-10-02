@@ -16,7 +16,7 @@ import java.util.function.BiConsumer;
 @Mixin(DirectoryLister.class)
 public class MixinDirectoryLister {
 	@ModifyArgs(method = "run(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/client/renderer/texture/atlas/SpriteSource$Output;)V", at = @At(value = "INVOKE", target = "Ljava/util/Map;forEach(Ljava/util/function/BiConsumer;)V", remap = false, ordinal = 0))
-	private void iris$modifyForEachAction(Args args, ResourceManager resourceManager, SpriteSource.Output output) {
+	private void pryzma$modifyForEachAction(Args args, ResourceManager resourceManager, SpriteSource.Output output) {
 		BiConsumer<? super ResourceLocation, ? super Resource> action = args.get(0);
 		BiConsumer<? super ResourceLocation, ? super Resource> wrappedAction = (location, resource) -> {
 			String basePath = PBRType.removeSuffix(location.getPath());

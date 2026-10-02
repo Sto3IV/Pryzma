@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ScreenEffectRenderer.class)
 public abstract class MixinScreenEffectRenderer {
 	@Inject(method = "renderWater", at = @At(value = "HEAD"), cancellable = true)
-	private static void iris$disableUnderWaterOverlayRendering(Minecraft minecraft, PoseStack poseStack, CallbackInfo ci) {
+	private static void pryzma$disableUnderWaterOverlayRendering(Minecraft minecraft, PoseStack poseStack, CallbackInfo ci) {
 		WorldRenderingPipeline pipeline = PryzmaShaders.getPipelineManager().getPipelineNullable();
 
 		if (pipeline != null && !pipeline.shouldRenderUnderwaterOverlay()) {

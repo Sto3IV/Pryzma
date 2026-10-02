@@ -1,5 +1,5 @@
 /*
- * Copyright LWJGL. All rights reserved. Modified by IMS for use in PryzmaShaders (net.coderbot.iris.gl).
+ * Copyright LWJGL. All rights reserved. Modified for use in Pryzma Shaders (net.pryzma.shader.gl).
  * License terms: https://www.lwjgl.org/license
  */
 

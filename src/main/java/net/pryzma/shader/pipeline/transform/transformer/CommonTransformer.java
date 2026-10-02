@@ -195,7 +195,7 @@ public class CommonTransformer {
 				tree.parseAndInjectNode(t, ASTInjectionPoint.BEFORE_DECLARATIONS, "in vec4 irs_Color;");
 			}
 
-			// change gl_FragData[i] to iris_FragDatai
+			// change gl_FragData[i] to fragment output data
 			replaceExpressions.clear();
 			replaceIndexes.clear();
 			Set<Long> replaceIndexesSet = new HashSet<>();
@@ -222,7 +222,7 @@ public class CommonTransformer {
 			replaceExpressions.clear();
 			replaceIndexes.clear();
 
-			// insert alpha test for iris_FragData0 in the fragment shader
+			// insert alpha test for fragment output 0 in the fragment shader
 			if ((parameters.getAlphaTest() != AlphaTest.ALWAYS && !core) && replaceIndexesSet.contains(0L)) {
 				tree.parseAndInjectNode(t, ASTInjectionPoint.BEFORE_DECLARATIONS, "uniform float iris_currentAlphaTest;");
 				tree.appendMainFunctionBody(t,
@@ -367,7 +367,7 @@ public class CommonTransformer {
 		// here, since it no longer thinks that we're trying to call the compatibility
 		// profile fransform() function.
 		//
-		// See: https://github.com/IrisShaders/PryzmaShaders/issues/441
+		// See: upstream issue #441
 		//
 		// Note that this happens after we've added our ftransform function - so that
 		// both all the calls and our function are renamed in one go.

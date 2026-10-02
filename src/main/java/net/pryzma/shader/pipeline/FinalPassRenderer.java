@@ -65,7 +65,7 @@ public class FinalPassRenderer {
 	private final ImmutableList<SwapPass> swapPasses;
 	private final GlFramebuffer baseline;
 	private final GlFramebuffer colorHolder;
-	private final Object2ObjectMap<String, TextureAccess> irisCustomTextures;
+	private final Object2ObjectMap<String, TextureAccess> extendedCustomTextures;
 	private final Set<GlImage> customImages;
 	private final TextureAccess noiseTexture;
 	private final CenterDepthSampler centerDepthSampler;
@@ -81,12 +81,12 @@ public class FinalPassRenderer {
 							 CenterDepthSampler centerDepthSampler,
 							 Supplier<ShadowRenderTargets> shadowTargetsSupplier,
 							 Object2ObjectMap<String, TextureAccess> customTextureIds,
-							 Object2ObjectMap<String, TextureAccess> irisCustomTextures, Set<GlImage> customImages, ImmutableSet<Integer> flippedAtLeastOnce
+							 Object2ObjectMap<String, TextureAccess> extendedCustomTextures, Set<GlImage> customImages, ImmutableSet<Integer> flippedAtLeastOnce
 		, CustomUniforms customUniforms) {
 		this.pipeline = pipeline;
 		this.centerDepthSampler = centerDepthSampler;
 		this.customTextureIds = customTextureIds;
-		this.irisCustomTextures = irisCustomTextures;
+		this.extendedCustomTextures = extendedCustomTextures;
 		this.customImages = customImages;
 
 		final PackRenderTargetDirectives renderTargetDirectives = pack.getPackDirectives().getRenderTargetDirectives();
@@ -117,7 +117,7 @@ public class FinalPassRenderer {
 		this.baseline = renderTargets.createGbufferFramebuffer(flippedBuffers, new int[]{0});
 		this.colorHolder = new GlFramebuffer();
 		this.lastColorTextureId = Minecraft.getInstance().getMainRenderTarget().getColorTextureId();
-		this.lastColorTextureVersion = ((Blaze3dRenderTargetExt) Minecraft.getInstance().getMainRenderTarget()).iris$getColorBufferVersion();
+		this.lastColorTextureVersion = ((Blaze3dRenderTargetExt) Minecraft.getInstance().getMainRenderTarget()).pryzma$getColorBufferVersion();
 		this.colorHolder.addColorAttachment(0, lastColorTextureId);
 
 		// TODO: We don't actually fully swap the content, we merely copy it from alt to main
@@ -212,8 +212,8 @@ public class FinalPassRenderer {
 		//
 		// This is not a concern for depthtex1 / depthtex2 since the copy call extracts the depth values, and the
 		// shader pack only ever uses them to read the depth values.
-		if (((Blaze3dRenderTargetExt) main).iris$getColorBufferVersion() != lastColorTextureVersion || main.getColorTextureId() != lastColorTextureId) {
-			lastColorTextureVersion = ((Blaze3dRenderTargetExt) main).iris$getColorBufferVersion();
+		if (((Blaze3dRenderTargetExt) main).pryzma$getColorBufferVersion() != lastColorTextureVersion || main.getColorTextureId() != lastColorTextureId) {
+			lastColorTextureVersion = ((Blaze3dRenderTargetExt) main).pryzma$getColorBufferVersion();
 			this.lastColorTextureId = main.getColorTextureId();
 			colorHolder.addColorAttachment(0, lastColorTextureId);
 		}
@@ -361,7 +361,7 @@ public class FinalPassRenderer {
 		ShaderImages.addRenderTargetImages(builder, () -> flipped, renderTargets);
 		ShaderImages.addCustomImages(builder, customImages);
 
-		ShaderSamplers.addCustomTextures(builder, irisCustomTextures);
+		ShaderSamplers.addCustomTextures(builder, extendedCustomTextures);
 		ShaderSamplers.addNoiseSampler(customTextureSamplerInterceptor, noiseTexture);
 		ShaderSamplers.addCompositeSamplers(customTextureSamplerInterceptor, renderTargets);
 
@@ -411,7 +411,7 @@ public class FinalPassRenderer {
 				customUniforms.assignTo(builder);
 
 				ShaderSamplers.addRenderTargetSamplers(customTextureSamplerInterceptor, () -> flipped, renderTargets, true, pipeline);
-				ShaderSamplers.addCustomTextures(builder, irisCustomTextures);
+				ShaderSamplers.addCustomTextures(builder, extendedCustomTextures);
 				ShaderSamplers.addCustomImages(customTextureSamplerInterceptor, customImages);
 
 				ShaderImages.addRenderTargetImages(builder, () -> flipped, renderTargets);

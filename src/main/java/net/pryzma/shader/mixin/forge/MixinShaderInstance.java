@@ -23,21 +23,21 @@ import static net.pryzma.shader.compat.SkipList.shouldSkipList;
 @Mixin(ShaderInstance.class)
 public abstract class MixinShaderInstance implements ShaderInstanceInterface {
 	@Inject(method = "<init>(Lnet/minecraft/server/packs/resources/ResourceProvider;Lnet/minecraft/resources/ResourceLocation;Lcom/mojang/blaze3d/vertex/VertexFormat;)V", require = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/GsonHelper;parse(Ljava/io/Reader;)Lcom/google/gson/JsonObject;"))
-	public void iris$setupGeometryShader(ResourceProvider resourceProvider, ResourceLocation shaderLocation, VertexFormat p_173338_, CallbackInfo ci) {
+	public void pryzma$setupGeometryShader(ResourceProvider resourceProvider, ResourceLocation shaderLocation, VertexFormat p_173338_, CallbackInfo ci) {
 		try {
-			this.iris$createExtraShaders(resourceProvider, shaderLocation.getPath());
+			this.pryzma$createExtraShaders(resourceProvider, shaderLocation.getPath());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	@Inject(method = "<init>(Lnet/minecraft/server/packs/resources/ResourceProvider;Lnet/minecraft/resources/ResourceLocation;Lcom/mojang/blaze3d/vertex/VertexFormat;)V", at = @At("TAIL"), require = 0)
-	private void iriss$storeSkipNeo(ResourceProvider resourceProvider, ResourceLocation string, VertexFormat vertexFormat, CallbackInfo ci) {
+	private void pryzma$storeSkipNeo(ResourceProvider resourceProvider, ResourceLocation string, VertexFormat vertexFormat, CallbackInfo ci) {
 		MethodHandle shouldSkip = shouldSkipList.computeIfAbsent(getClass(), x -> {
 			try {
-				MethodHandle iris$skipDraw = MethodHandles.lookup().findVirtual(x, "iris$skipDraw", MethodType.methodType(boolean.class));
+				MethodHandle pryzma$skipDraw = MethodHandles.lookup().findVirtual(x, "pryzma$skipDraw", MethodType.methodType(boolean.class));
 				PryzmaShaders.logger.warn("Class " + x.getName() + " has opted out of being rendered with shaders.");
-				return iris$skipDraw;
+				return pryzma$skipDraw;
 			} catch (NoSuchMethodException | IllegalAccessException e) {
 				return SkipList.NONE;
 			}

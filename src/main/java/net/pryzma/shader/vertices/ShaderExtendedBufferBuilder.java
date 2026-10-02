@@ -3,29 +3,29 @@ package net.pryzma.shader.vertices;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 public interface ShaderExtendedBufferBuilder {
-	VertexFormat iris$format();
+	VertexFormat pryzma$format();
 
-	VertexFormat.Mode iris$mode();
+	VertexFormat.Mode pryzma$mode();
 
-	boolean iris$extending();
+	boolean pryzma$extending();
 
-	boolean iris$isTerrain();
+	boolean pryzma$isTerrain();
 
-	boolean iris$injectNormalAndUV1();
+	boolean pryzma$injectNormalAndUV1();
 
-	int iris$vertexCount();
+	int pryzma$vertexCount();
 
-	void iris$incrementVertexCount();
+	void pryzma$incrementVertexCount();
 
-	void iris$resetVertexCount();
+	void pryzma$resetVertexCount();
 
-	short iris$currentBlock();
+	short pryzma$currentBlock();
 
-	short iris$currentRenderType();
+	short pryzma$currentRenderType();
 
-	int iris$currentLocalPosX();
+	int pryzma$currentLocalPosX();
 
-	int iris$currentLocalPosY();
+	int pryzma$currentLocalPosY();
 
-	int iris$currentLocalPosZ();
+	int pryzma$currentLocalPosZ();
 }

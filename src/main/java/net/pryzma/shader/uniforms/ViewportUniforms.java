@@ -8,7 +8,7 @@ import static net.pryzma.shader.gl.uniform.UniformUpdateFrequency.PER_FRAME;
 /**
  * Implements uniforms relating the current viewport
  *
- * @see <a href="https://github.com/IrisShaders/ShaderDoc/blob/master/uniforms.md#viewport">Uniforms: Viewport</a>
+ * @see <a href="Shader uniform documentation (viewport)">Uniforms: Viewport</a>
  */
 public final class ViewportUniforms {
 	// cannot be constructed

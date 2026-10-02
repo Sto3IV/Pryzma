@@ -22,7 +22,8 @@ import net.minecraft.sounds.SoundEvents;
  * some code that will be changed.
  */
 public final class GuiUtil {
-	public static final ResourceLocation IRIS_WIDGETS_TEX = ResourceLocation.fromNamespaceAndPath("pryzma", "textures/gui/widgets.png");
+	public static final ResourceLocation WIDGETS_TEX = ResourceLocation.fromNamespaceAndPath("pryzma", "textures/gui/widgets.png");
+	public static final ResourceLocation IRIS_WIDGETS_TEX = WIDGETS_TEX;
 	private static final Component ELLIPSIS = Component.literal("...");
 
 	private GuiUtil() {
@@ -36,8 +37,13 @@ public final class GuiUtil {
 	 * Binds PryzmaShaders's widgets texture to be
 	 * used for succeeding draw calls.
 	 */
+	public static void bindWidgetsTexture() {
+		RenderSystem.setShaderTexture(0, WIDGETS_TEX);
+	}
+
+	@Deprecated
 	public static void bindIrisWidgetsTexture() {
-		RenderSystem.setShaderTexture(0, IRIS_WIDGETS_TEX);
+		bindWidgetsTexture();
 	}
 
 	/**

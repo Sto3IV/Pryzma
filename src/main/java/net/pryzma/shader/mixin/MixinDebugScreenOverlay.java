@@ -19,27 +19,27 @@ import java.util.Objects;
 @Mixin(DebugScreenOverlay.class)
 public abstract class MixinDebugScreenOverlay {
 	@Unique
-	private static final List<BufferPoolMXBean> iris$pools = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
+	private static final List<BufferPoolMXBean> pryzma$pools = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
 
 	@Unique
-	private static final BufferPoolMXBean iris$directPool;
+	private static final BufferPoolMXBean pryzma$directPool;
 
 	static {
 		BufferPoolMXBean found = null;
 
-		for (BufferPoolMXBean pool : iris$pools) {
+		for (BufferPoolMXBean pool : pryzma$pools) {
 			if (pool.getName().equals("direct")) {
 				found = pool;
 				break;
 			}
 		}
 
-		iris$directPool = Objects.requireNonNull(found);
+		pryzma$directPool = Objects.requireNonNull(found);
 	}
 
 	// stackoverflow.com/a/3758880
 	@Unique
-	private static String iris$humanReadableByteCountBin(long bytes) {
+	private static String pryzma$humanReadableByteCountBin(long bytes) {
 		long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
 		if (absB < 1024) {
 			return bytes + " B";
@@ -56,12 +56,12 @@ public abstract class MixinDebugScreenOverlay {
 
 	// From Sodium
 	@Unique
-	private static long iris$getNativeMemoryUsage() {
+	private static long pryzma$getNativeMemoryUsage() {
 		return ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage().getUsed();
 	}
 
 	@Inject(method = "getSystemInformation", at = @At("RETURN"))
-	private void iris$appendShaderPackText(CallbackInfoReturnable<List<String>> cir) {
+	private void pryzma$appendShaderPackText(CallbackInfoReturnable<List<String>> cir) {
 		List<String> messages = cir.getReturnValue();
 
 		messages.add("");
@@ -76,15 +76,15 @@ public abstract class MixinDebugScreenOverlay {
 			messages.add("[" + PryzmaShaders.MODNAME + "] Shaders are disabled");
 		}
 
-		messages.add(3, "Direct Buffers: +" + iris$humanReadableByteCountBin(iris$directPool.getMemoryUsed()));
+		messages.add(3, "Direct Buffers: +" + pryzma$humanReadableByteCountBin(pryzma$directPool.getMemoryUsed()));
 
 		//if (!PryzmaShaders.isSodiumInstalled()) {
-		//	messages.add(3, "Native Memory: +" + iris$humanReadableByteCountBin(iris$getNativeMemoryUsage()));
+		//	messages.add(3, "Native Memory: +" + pryzma$humanReadableByteCountBin(pryzma$getNativeMemoryUsage()));
 		//}
 	}
 
 	@Inject(method = "getGameInformation", at = @At("RETURN"))
-	private void iris$appendShadowDebugText(CallbackInfoReturnable<List<String>> cir) {
+	private void pryzma$appendShadowDebugText(CallbackInfoReturnable<List<String>> cir) {
 		List<String> messages = cir.getReturnValue();
 
 		//if (!PryzmaShaders.isSodiumInstalled() && PryzmaShaders.getCurrentPack().isPresent()) {

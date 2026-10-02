@@ -57,11 +57,11 @@ public class PipelineManager {
 	}
 
 	/**
-	 * In IrisChunkProgramOverrides#getProgramOverride,
+	 * In ShaderChunkProgramOverrides#getProgramOverride,
 	 * it uses version counter to check whether to reload sodium shaders.
 	 * This fixes a compat issue with Immersive Portals(#1188).
 	 * Immersive Portals may load multiple client dimensions at the same time,
-	 * and every dimension corresponds to a IrisChunkProgramOverrides object.
+	 * and every dimension corresponds to a ShaderChunkProgramOverrides object.
 	 * Multiple dimensions (mod dimensions that fallback to overworld shaders) may use the same pipeline.
 	 * This ensures that the sodium shader for each dimension will get properly reloaded.
 	 */
@@ -78,7 +78,7 @@ public class PipelineManager {
 	 *
 	 * <p>In particular, </p>
 	 *
-	 * @see <a href="https://github.com/IrisShaders/PryzmaShaders/issues/1330">this GitHub issue</a>
+	 * @see <a href="upstream issue #1330">this GitHub issue</a>
 	 */
 	public void destroyPipeline() {
 		pipelinesPerDimension.forEach((dimensionId, pipeline) -> {

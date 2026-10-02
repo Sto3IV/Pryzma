@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(RenderSystem.class)
 public class MixinRenderSystem {
 	@Inject(method = "initRenderer", at = @At("RETURN"), remap = false)
-	private static void iris$onRendererInit(int debugVerbosity, boolean alwaysFalse, CallbackInfo ci) {
+	private static void pryzma$onRendererInit(int debugVerbosity, boolean alwaysFalse, CallbackInfo ci) {
 		PryzmaShaders.duringRenderSystemInit();
 		GLDebug.reloadDebugState();
 		ShaderRenderSystem.initRenderer();

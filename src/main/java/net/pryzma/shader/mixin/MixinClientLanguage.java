@@ -50,8 +50,8 @@ public class MixinClientLanguage {
 	@Inject(method = "appendFrom", at = @At(value = "HEAD"))
 	private static void injectFrom(String string, List<Resource> list, Map<String, String> map, CallbackInfo ci) {
 		String json = String.format(Locale.ROOT, "lang/%s.json", string);
-		if (PryzmaShaders.class.getResource("/assets/iris/" + json) != null) {
-			Language.loadFromJson(PryzmaShaders.class.getResourceAsStream("/assets/iris/" + json), map::put);
+		if (PryzmaShaders.class.getResource("/assets/pryzma/" + json) != null) {
+			Language.loadFromJson(PryzmaShaders.class.getResourceAsStream("/assets/pryzma/" + json), map::put);
 		}
 	}
 
@@ -65,8 +65,8 @@ public class MixinClientLanguage {
 	}
 
 	@Inject(method = "getOrDefault", at = @At("HEAD"), cancellable = true)
-	private void iris$addLanguageEntries(String key, String value, CallbackInfoReturnable<String> cir) {
-		String override = iris$lookupOverriddenEntry(key);
+	private void pryzma$addLanguageEntries(String key, String value, CallbackInfoReturnable<String> cir) {
+		String override = pryzma$lookupOverriddenEntry(key);
 
 		if (override != null) {
 			cir.setReturnValue(override);
@@ -74,8 +74,8 @@ public class MixinClientLanguage {
 	}
 
 	@Inject(method = "has", at = @At("HEAD"), cancellable = true)
-	private void iris$addLanguageEntriesToTranslationChecks(String key, CallbackInfoReturnable<Boolean> cir) {
-		String override = iris$lookupOverriddenEntry(key);
+	private void pryzma$addLanguageEntriesToTranslationChecks(String key, CallbackInfoReturnable<Boolean> cir) {
+		String override = pryzma$lookupOverriddenEntry(key);
 
 		if (override != null) {
 			cir.setReturnValue(true);
@@ -83,7 +83,7 @@ public class MixinClientLanguage {
 	}
 
 	@Unique
-	private String iris$lookupOverriddenEntry(String key) {
+	private String pryzma$lookupOverriddenEntry(String key) {
 		ShaderPack pack = PryzmaShaders.getCurrentPack().orElse(null);
 
 		if (pack == null) {

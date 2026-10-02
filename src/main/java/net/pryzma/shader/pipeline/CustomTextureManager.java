@@ -40,7 +40,7 @@ import java.util.List;
 
 public class CustomTextureManager {
 	private final EnumMap<TextureStage, Object2ObjectMap<String, TextureAccess>> customTextureIdMap = new EnumMap<>(TextureStage.class);
-	private final Object2ObjectMap<String, TextureAccess> irisCustomTextures = new Object2ObjectOpenHashMap<>();
+	private final Object2ObjectMap<String, TextureAccess> extendedCustomTextures = new Object2ObjectOpenHashMap<>();
 	private final TextureAccess noise;
 
 	/**
@@ -53,7 +53,7 @@ public class CustomTextureManager {
 
 	public CustomTextureManager(PackDirectives packDirectives,
 								EnumMap<TextureStage, Object2ObjectMap<String, CustomTextureData>> customTextureDataMap,
-								Object2ObjectMap<String, CustomTextureData> irisCustomTextureDataMap, CustomTextureData customNoiseTextureData) {
+								Object2ObjectMap<String, CustomTextureData> extendedCustomTextureDataMap, CustomTextureData customNoiseTextureData) {
 		customTextureDataMap.forEach((textureStage, customTextureStageDataMap) -> {
 			Object2ObjectMap<String, TextureAccess> customTextureIds = new Object2ObjectOpenHashMap<>();
 
@@ -69,9 +69,9 @@ public class CustomTextureManager {
 			customTextureIdMap.put(textureStage, customTextureIds);
 		});
 
-		irisCustomTextureDataMap.forEach((name, texture) -> {
+		extendedCustomTextureDataMap.forEach((name, texture) -> {
 			try {
-				irisCustomTextures.put(name, createCustomTexture(texture));
+				extendedCustomTextures.put(name, createCustomTexture(texture));
 			} catch (IOException e) {
 				PryzmaShaders.logger.error("Unable to parse the image data for the custom texture on sampler " + name, e);
 			}
@@ -206,8 +206,13 @@ public class CustomTextureManager {
 		return customTextureIdMap.getOrDefault(stage, Object2ObjectMaps.emptyMap());
 	}
 
+	public Object2ObjectMap<String, TextureAccess> getExtendedCustomTextures() {
+		return extendedCustomTextures;
+	}
+
+	@Deprecated
 	public Object2ObjectMap<String, TextureAccess> getIrisCustomTextures() {
-		return irisCustomTextures;
+		return getExtendedCustomTextures();
 	}
 
 	public TextureAccess getNoiseTexture() {

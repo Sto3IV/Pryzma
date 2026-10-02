@@ -17,13 +17,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ClientPacketListener.class)
 public class MixinClientPacketListener {
 	@Inject(method = "handleLogin", at = @At("TAIL"))
-	private void iris$showUpdateMessage(ClientboundLoginPacket a, CallbackInfo ci) {
+	private void pryzma$showUpdateMessage(ClientboundLoginPacket a, CallbackInfo ci) {
 		if (Minecraft.getInstance().player == null) {
 			return;
 		}
 
 		PryzmaShaders.getStoredError().ifPresent(e ->
-			Minecraft.getInstance().player.displayClientMessage(Component.translatable(e instanceof ShaderCompileException ? "iris.load.failure.shader" : "iris.load.failure.generic").append(Component.literal("Copy Info").withStyle(arg -> arg.withUnderlined(true).withColor(ChatFormatting.BLUE).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, e.getMessage())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))))), false));
+			Minecraft.getInstance().player.displayClientMessage(Component.translatable(e instanceof ShaderCompileException ? "pryzma.load.failure.shader" : "pryzma.load.failure.generic").append(Component.literal("Copy Info").withStyle(arg -> arg.withUnderlined(true).withColor(ChatFormatting.BLUE).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, e.getMessage())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))))), false));
 
 		if (PryzmaShaders.loadedIncompatiblePack()) {
 			Minecraft.getInstance().gui.setTimes(10, 70, 140);

@@ -11,10 +11,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 public class BooleanElementWidget extends BaseOptionElementWidget<OptionMenuBooleanOptionElement> {
-	private static final Component TEXT_TRUE = Component.translatable("label.iris.true").withStyle(ChatFormatting.GREEN);
-	private static final Component TEXT_FALSE = Component.translatable("label.iris.false").withStyle(ChatFormatting.RED);
-	private static final Component TEXT_TRUE_DEFAULT = Component.translatable("label.iris.true");
-	private static final Component TEXT_FALSE_DEFAULT = Component.translatable("label.iris.false");
+	private static final Component TEXT_TRUE = Component.translatable("label.pryzma.true").withStyle(ChatFormatting.GREEN);
+	private static final Component TEXT_FALSE = Component.translatable("label.pryzma.false").withStyle(ChatFormatting.RED);
+	private static final Component TEXT_TRUE_DEFAULT = Component.translatable("label.pryzma.true");
+	private static final Component TEXT_FALSE_DEFAULT = Component.translatable("label.pryzma.false");
 
 	private final BooleanOption option;
 

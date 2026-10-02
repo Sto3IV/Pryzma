@@ -35,7 +35,7 @@ public class SodiumTransformer {
 
 		if (parameters.type.glShaderType == ShaderType.VERTEX) {
 			// Alias of gl_MultiTexCoord1 on 1.15+ for OptiFine
-			// See https://github.com/IrisShaders/PryzmaShaders/issues/1149
+			// See upstream issue #1149
 			root.rename("gl_MultiTexCoord2", "gl_MultiTexCoord1");
 			tree.parseAndInjectNode(t, ASTInjectionPoint.BEFORE_DECLARATIONS, "uniform vec2 u_TexCoordShrink;");
 

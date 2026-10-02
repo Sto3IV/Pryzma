@@ -45,7 +45,7 @@ public class StandardMacros {
 
 		define(standardDefines, "MC_VERSION", getMcVersion());
 		define(standardDefines, "MC_MIPMAP_LEVEL", String.valueOf(Minecraft.getInstance().options.mipmapLevels().get()));
-		define(standardDefines, "IRIS_VERSION", getFormattedIrisVersion());
+		define(standardDefines, "IRIS_VERSION", getFormattedVersion());
 		define(standardDefines, "MC_GL_VERSION", getGlVersion(GL20C.GL_VERSION));
 		define(standardDefines, "MC_GLSL_VERSION", getGlVersion(GL20C.GL_SHADING_LANGUAGE_VERSION));
 		define(standardDefines, getOsString());
@@ -106,8 +106,8 @@ public class StandardMacros {
 
 		getRenderStages().forEach((stage, index) -> define(standardDefines, stage, index));
 
-		for (String irisDefine : getIrisDefines()) {
-			define(standardDefines, irisDefine);
+		for (String shaderDefine : getShaderDefines()) {
+			define(standardDefines, shaderDefine);
 		}
 
 		return ImmutableList.copyOf(standardDefines);
@@ -146,7 +146,7 @@ public class StandardMacros {
 	 *
 	 * @return The PryzmaShaders version string
 	 */
-	public static String getFormattedIrisVersion() {
+	public static String getFormattedVersion() {
 		String rawVersion = PryzmaShaders.getVersion();
 		if (rawVersion == null) {
 			throw new IllegalArgumentException("Could not get current PryzmaShaders version!");
@@ -164,13 +164,18 @@ public class StandardMacros {
 		if (major == null || minor == null) {
 			throw new IllegalArgumentException("Could not parse semantic PryzmaShaders version from \"" + rawVersion + "\"");
 		}
-		String irisSemver = "%s.%s.%s".formatted(major, minor, bugFix);
-		String formattedSemver = formatVersionString(irisSemver);
+		String semver = "%s.%s.%s".formatted(major, minor, bugFix);
+		String formattedSemver = formatVersionString(semver);
 		if (formattedSemver == null) {
-			throw new IllegalArgumentException("Could not get a valid semantic version string for PryzmaShaders version \"" + irisSemver + "\"");
+			throw new IllegalArgumentException("Could not get a valid semantic version string for PryzmaShaders version \"" + semver + "\"");
 		} else {
 			return formattedSemver;
 		}
+	}
+
+	@Deprecated
+	public static String getFormattedIrisVersion() {
+		return getFormattedVersion();
 	}
 
 	/**
@@ -338,7 +343,7 @@ public class StandardMacros {
 		// NB: Use Collectors.toSet(). In some cases, there are duplicate extensions in the extension list.
 		// RenderDoc is one example - it causes the GL_KHR_debug extension to appear twice:
 		//
-		// https://github.com/IrisShaders/PryzmaShaders/issues/971
+		// upstream issue #971
 		return Arrays.stream(extensions).map(s -> "MC_" + s).collect(Collectors.toSet());
 	}
 
@@ -356,10 +361,15 @@ public class StandardMacros {
 	 *
 	 * @return List of definitions corresponding to the uniform names prefixed with "MC_"
 	 */
-	public static List<String> getIrisDefines() {
+	public static List<String> getShaderDefines() {
 		// All PryzmaShaders-exclusive uniforms should have a corresponding definition here. Example:
 		// defines.add("MC_UNIFORM_DRAGON_DEATH_PROGRESS");
 
 		return new ArrayList<>();
+	}
+
+	@Deprecated
+	public static List<String> getIrisDefines() {
+		return getShaderDefines();
 	}
 }

@@ -11,15 +11,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = Options.class, priority = 990)
 public class MixinOptions_Entrypoint {
 	@Unique
-	private static boolean iris$initialized;
+	private static boolean pryzma$initialized;
 
 	@Inject(method = "load()V", at = @At("HEAD"))
-	private void iris$beforeLoadOptions(CallbackInfo ci) {
-		if (iris$initialized) {
+	private void pryzma$beforeLoadOptions(CallbackInfo ci) {
+		if (pryzma$initialized) {
 			return;
 		}
 
-		iris$initialized = true;
+		pryzma$initialized = true;
 		new PryzmaShaders().onEarlyInitialize();
 	}
 }

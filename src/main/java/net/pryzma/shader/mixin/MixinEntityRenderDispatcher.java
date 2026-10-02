@@ -41,10 +41,10 @@ public class MixinEntityRenderDispatcher {
 	private static int cachedId;
 
 	@Inject(method = RENDER_SHADOW, at = @At("HEAD"), cancellable = true)
-	private static void iris$maybeSuppressEntityShadow(PoseStack poseStack, MultiBufferSource bufferSource,
+	private static void pryzma$maybeSuppressEntityShadow(PoseStack poseStack, MultiBufferSource bufferSource,
 													   Entity entity, float opacity, float tickDelta, LevelReader level,
 													   float radius, CallbackInfo ci) {
-		if (!iris$maybeSuppressShadow(ci)) {
+		if (!pryzma$maybeSuppressShadow(ci)) {
 			Object2IntFunction<NamespacedId> entityIds = WorldRenderingSettings.INSTANCE.getEntityIds();
 
 			if (entityIds == null) {
@@ -65,7 +65,7 @@ public class MixinEntityRenderDispatcher {
 	// The underlying method called by renderShadow.
 	@Inject(method = "renderBlockShadow", at = @At("HEAD"), cancellable = true)
 	private static void renderBlockShadow(PoseStack.Pose pPoseStack$Pose0, VertexConsumer pVertexConsumer1, ChunkAccess pChunkAccess2, LevelReader pLevelReader3, BlockPos pBlockPos4, double pDouble5, double pDouble6, double pDouble7, float pFloat8, float pFloat9, CallbackInfo ci) {
-		iris$maybeSuppressShadow(ci);
+		pryzma$maybeSuppressShadow(ci);
 	}
 
 	// First Person Model by tr7zw compatibility, this is a method added by First Person Model:
@@ -73,14 +73,14 @@ public class MixinEntityRenderDispatcher {
 	// The renderBlockShadow injection will handle this, but it's easier to suppress it before all of the other calculations.
 	@SuppressWarnings("all")
 	@Inject(method = "renderOffsetShadow", at = @At("HEAD"), cancellable = true, require = 0, remap = false, expect = 0)
-	private static void iris$maybeSuppressEntityShadow(PoseStack poseStack, MultiBufferSource bufferSource,
+	private static void pryzma$maybeSuppressEntityShadow(PoseStack poseStack, MultiBufferSource bufferSource,
 													   Entity entity, float opacity, float tickDelta, LevelReader level,
 													   float radius, Vec3 offset, CallbackInfo ci) {
-		iris$maybeSuppressShadow(ci);
+		pryzma$maybeSuppressShadow(ci);
 	}
 
 	@Unique
-	private static boolean iris$maybeSuppressShadow(CallbackInfo ci) {
+	private static boolean pryzma$maybeSuppressShadow(CallbackInfo ci) {
 		WorldRenderingPipeline pipeline = PryzmaShaders.getPipelineManager().getPipelineNullable();
 
 		if (pipeline != null && pipeline.shouldDisableVanillaEntityShadows()) {
@@ -92,7 +92,7 @@ public class MixinEntityRenderDispatcher {
 	}
 
 	@Inject(method = "renderFlame", at = @At("HEAD"))
-	private void iris$setFlameId(PoseStack pEntityRenderDispatcher0, MultiBufferSource pMultiBufferSource1, Entity pEntity2, Quaternionf pQuaternionf3, CallbackInfo ci) {
+	private void pryzma$setFlameId(PoseStack pEntityRenderDispatcher0, MultiBufferSource pMultiBufferSource1, Entity pEntity2, Quaternionf pQuaternionf3, CallbackInfo ci) {
 		Object2IntFunction<NamespacedId> entityIds = WorldRenderingSettings.INSTANCE.getEntityIds();
 
 		if (entityIds == null) {

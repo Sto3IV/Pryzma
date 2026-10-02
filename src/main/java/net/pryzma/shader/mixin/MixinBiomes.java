@@ -16,7 +16,7 @@ public class MixinBiomes {
 	private static int currentId = 0;
 
 	@Inject(method = "register", at = @At("TAIL"))
-	private static void iris$registerBiome(String string, CallbackInfoReturnable<ResourceKey<Biome>> cir) {
+	private static void pryzma$registerBiome(String string, CallbackInfoReturnable<ResourceKey<Biome>> cir) {
 		BiomeUniforms.getBiomeMap().put(cir.getReturnValue(), currentId++);
 	}
 }

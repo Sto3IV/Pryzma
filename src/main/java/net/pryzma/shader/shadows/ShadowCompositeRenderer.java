@@ -55,19 +55,19 @@ public class ShadowCompositeRenderer {
 	private final Object2ObjectMap<String, TextureAccess> customTextureIds;
 	private final ImmutableSet<Integer> flippedAtLeastOnceFinal;
 	private final CustomUniforms customUniforms;
-	private final Object2ObjectMap<String, TextureAccess> irisCustomTextures;
+	private final Object2ObjectMap<String, TextureAccess> extendedCustomTextures;
 	private final WorldRenderingPipeline pipeline;
-	private final Set<GlImage> irisCustomImages;
+	private final Set<GlImage> extendedCustomImages;
 
 	public ShadowCompositeRenderer(WorldRenderingPipeline pipeline, PackDirectives packDirectives, ProgramSource[] sources, ComputeSource[][] computes, ShadowRenderTargets renderTargets, ShaderStorageBufferHolder holder,
 								   TextureAccess noiseTexture, FrameUpdateNotifier updateNotifier,
-								   Object2ObjectMap<String, TextureAccess> customTextureIds, Set<GlImage> customImages, ImmutableMap<Integer, Boolean> explicitPreFlips, Object2ObjectMap<String, TextureAccess> irisCustomTextures, CustomUniforms customUniforms) {
+								   Object2ObjectMap<String, TextureAccess> customTextureIds, Set<GlImage> customImages, ImmutableMap<Integer, Boolean> explicitPreFlips, Object2ObjectMap<String, TextureAccess> extendedCustomTextures, CustomUniforms customUniforms) {
 		this.pipeline = pipeline;
 		this.noiseTexture = noiseTexture;
 		this.renderTargets = renderTargets;
 		this.customTextureIds = customTextureIds;
-		this.irisCustomTextures = irisCustomTextures;
-		this.irisCustomImages = customImages;
+		this.extendedCustomTextures = extendedCustomTextures;
+		this.extendedCustomImages = customImages;
 		this.customUniforms = customUniforms;
 
 		final PackRenderTargetDirectives renderTargetDirectives = packDirectives.getRenderTargetDirectives();
@@ -281,12 +281,12 @@ public class ShadowCompositeRenderer {
 		this.customUniforms.assignTo(builder);
 
 		ShaderSamplers.addNoiseSampler(customTextureSamplerInterceptor, noiseTexture);
-		ShaderSamplers.addCustomTextures(customTextureSamplerInterceptor, irisCustomTextures);
+		ShaderSamplers.addCustomTextures(customTextureSamplerInterceptor, extendedCustomTextures);
 
 		ShaderSamplers.addShadowSamplers(customTextureSamplerInterceptor, targets, flipped, pipeline.hasFeature(FeatureFlags.SEPARATE_HARDWARE_SAMPLERS));
 		ShaderImages.addShadowColorImages(builder, targets, flipped);
-		ShaderImages.addCustomImages(builder, irisCustomImages);
-		ShaderSamplers.addCustomImages(builder, irisCustomImages);
+		ShaderImages.addCustomImages(builder, extendedCustomImages);
+		ShaderSamplers.addCustomImages(builder, extendedCustomImages);
 		Program build = builder.build();
 		this.customUniforms.mapholderToPass(builder, build);
 
@@ -319,13 +319,13 @@ public class ShadowCompositeRenderer {
 				CommonUniforms.addDynamicUniforms(builder, FogMode.OFF);
 				this.customUniforms.assignTo(builder);
 				ShaderSamplers.addNoiseSampler(customTextureSamplerInterceptor, noiseTexture);
-				ShaderSamplers.addCustomTextures(customTextureSamplerInterceptor, irisCustomTextures);
+				ShaderSamplers.addCustomTextures(customTextureSamplerInterceptor, extendedCustomTextures);
 
 				ShaderSamplers.addShadowSamplers(customTextureSamplerInterceptor, targets, flipped, pipeline.hasFeature(FeatureFlags.SEPARATE_HARDWARE_SAMPLERS));
 				ShaderImages.addShadowColorImages(builder, targets, flipped);
 
-				ShaderImages.addCustomImages(builder, irisCustomImages);
-				ShaderSamplers.addCustomImages(builder, irisCustomImages);
+				ShaderImages.addCustomImages(builder, extendedCustomImages);
+				ShaderSamplers.addCustomImages(builder, extendedCustomImages);
 				programs[i] = builder.buildCompute();
 
 				this.customUniforms.mapholderToPass(builder, programs[i]);

@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPackSelectionList.BaseEntry> {
-	private static final Component PACK_LIST_LABEL = Component.translatable("pack.iris.list.label").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
+	private static final Component PACK_LIST_LABEL = Component.translatable("pack.pryzma.list.label").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
 	private static final ResourceLocation MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/menu_background.png");
 	private final ShaderPackScreen screen;
 	private final TopButtonRowEntry topButtonRow;
@@ -161,7 +161,7 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 
 			// Not translating this since it's going to be seen very rarely,
 			// We're just trying to get more information on a seemingly untraceable bug:
-			// - https://github.com/IrisShaders/PryzmaShaders/issues/785
+			// - upstream issue #785
 			this.addLabelEntries(
 				Component.empty(),
 				Component.literal("There was an error reading your shaderpacks directory")
@@ -264,9 +264,9 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 	}
 
 	public static class TopButtonRowEntry extends BaseEntry {
-		private static final Component NONE_PRESENT_LABEL = Component.translatable("options.iris.shaders.nonePresent").withStyle(ChatFormatting.GRAY);
-		private static final Component SHADERS_DISABLED_LABEL = Component.translatable("options.iris.shaders.disabled");
-		private static final Component SHADERS_ENABLED_LABEL = Component.translatable("options.iris.shaders.enabled");
+		private static final Component NONE_PRESENT_LABEL = Component.translatable("options.pryzma.shaders.nonePresent").withStyle(ChatFormatting.GRAY);
+		private static final Component SHADERS_DISABLED_LABEL = Component.translatable("options.pryzma.shaders.disabled");
+		private static final Component SHADERS_ENABLED_LABEL = Component.translatable("options.pryzma.shaders.enabled");
 
 		private final ShaderPackSelectionList list;
 
@@ -285,7 +285,7 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 
 		@Override
 		public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			GuiUtil.bindIrisWidgetsTexture();
+			GuiUtil.bindWidgetsTexture();
 			GuiUtil.drawButton(guiGraphics, x - 2, y - 2, entryWidth, entryHeight + 2, hovered, !allowEnableShadersButton);
 			guiGraphics.drawCenteredString(Minecraft.getInstance().font, getEnableDisableLabel(), (x + entryWidth / 2) - 2, y + (entryHeight - 11) / 2, 0xFFFFFF);
 		}
@@ -359,7 +359,7 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 
 		@Override
 		public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			GuiUtil.bindIrisWidgetsTexture();
+			GuiUtil.bindWidgetsTexture();
 			GuiUtil.drawButton(guiGraphics, x - 2, y - 2, entryWidth, entryHeight + 2, hovered, !allowPressButton);
 			guiGraphics.drawCenteredString(Minecraft.getInstance().font, label, (x + entryWidth / 2) - 2, y + (entryHeight - 11) / 2, 0xFFFFFF);
 		}
@@ -428,7 +428,7 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 			String name = packName;
 
 			if (hovered) {
-				GuiUtil.bindIrisWidgetsTexture();
+				GuiUtil.bindWidgetsTexture();
 				GuiUtil.drawButton(guiGraphics, x - 2, y - 2, entryWidth, entryHeight + 4, hovered, false);
 			}
 

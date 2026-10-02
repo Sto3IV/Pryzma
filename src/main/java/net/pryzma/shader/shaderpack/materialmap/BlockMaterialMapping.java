@@ -59,7 +59,7 @@ public class BlockMaterialMapping {
 						for (BlockState state : block.value().getStateDefinition().getPossibleStates()) {
 							// NB: Using putIfAbsent means that the first successful mapping takes precedence
 							//     Needed for OptiFine parity:
-							//     https://github.com/IrisShaders/PryzmaShaders/issues/1327
+							//     upstream issue #1327
 							idMap.putIfAbsent(state, intId);
 						}
 
@@ -91,7 +91,7 @@ public class BlockMaterialMapping {
 						if (checkState(state, properties)) {
 							// NB: Using putIfAbsent means that the first successful mapping takes precedence
 							//     Needed for OptiFine parity:
-							//     https://github.com/IrisShaders/PryzmaShaders/issues/1327
+							//     upstream issue #1327
 							idMap.putIfAbsent(state, intId);
 						}
 					}
@@ -153,7 +153,7 @@ public class BlockMaterialMapping {
 			for (BlockState state : block.getStateDefinition().getPossibleStates()) {
 				// NB: Using putIfAbsent means that the first successful mapping takes precedence
 				//     Needed for OptiFine parity:
-				//     https://github.com/IrisShaders/PryzmaShaders/issues/1327
+				//     upstream issue #1327
 				idMap.putIfAbsent(state, intId);
 			}
 
@@ -185,7 +185,7 @@ public class BlockMaterialMapping {
 			if (checkState(state, properties)) {
 				// NB: Using putIfAbsent means that the first successful mapping takes precedence
 				//     Needed for OptiFine parity:
-				//     https://github.com/IrisShaders/PryzmaShaders/issues/1327
+				//     upstream issue #1327
 				idMap.putIfAbsent(state, intId);
 			}
 		}

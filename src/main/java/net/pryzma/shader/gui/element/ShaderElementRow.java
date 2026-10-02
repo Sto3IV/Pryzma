@@ -156,7 +156,7 @@ public class ShaderElementRow {
 		public void render(GuiGraphics guiGraphics, int x, int y, int width, int height, int mouseX, int mouseY, float tickDelta, boolean hovered) {
 			this.bounds = new ScreenRectangle(x, y, width, height);
 
-			GuiUtil.bindIrisWidgetsTexture();
+			GuiUtil.bindWidgetsTexture();
 			GuiUtil.drawButton(guiGraphics, x, y, width, height, isHovered() || isFocused(), this.disabled);
 
 			this.hovered = hovered;
@@ -243,7 +243,7 @@ public class ShaderElementRow {
 			int iconX = x + (int) ((width - this.icon.getWidth()) * 0.5);
 			int iconY = y + (int) ((height - this.icon.getHeight()) * 0.5);
 
-			GuiUtil.bindIrisWidgetsTexture();
+			GuiUtil.bindWidgetsTexture();
 			if (!this.disabled && (hovered || isFocused())) {
 				this.hoveredIcon.draw(guiGraphics, iconX, iconY);
 			} else {

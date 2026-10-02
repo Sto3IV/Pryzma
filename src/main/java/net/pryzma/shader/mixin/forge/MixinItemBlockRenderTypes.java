@@ -30,7 +30,7 @@ public class MixinItemBlockRenderTypes {
 	}
 
 	@Inject(method = "getRenderLayers", at = @At("HEAD"), cancellable = true)
-	private static void iris$setCustomRenderType(BlockState arg, CallbackInfoReturnable<ChunkRenderTypeSet> cir) {
+	private static void pryzma$setCustomRenderType(BlockState arg, CallbackInfoReturnable<ChunkRenderTypeSet> cir) {
 		BlockRenderType type = WorldRenderingSettings.INSTANCE.getBlockTypeIds().get(arg.getBlock());
 		if (type != null) {
 			cir.setReturnValue(LAYER_SET[type.ordinal()]);

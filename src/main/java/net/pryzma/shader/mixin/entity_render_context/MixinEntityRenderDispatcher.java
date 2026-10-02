@@ -47,7 +47,7 @@ public class MixinEntityRenderDispatcher {
 	// Inject after MatrixStack#push since at this point we know that most cancellation checks have already passed.
 	@ModifyVariable(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = At.Shift.AFTER),
 		allow = 1, require = 1, argsOnly = true)
-	private MultiBufferSource iris$beginEntityRender(MultiBufferSource bufferSource, Entity entity) {
+	private MultiBufferSource pryzma$beginEntityRender(MultiBufferSource bufferSource, Entity entity) {
 		Object2IntFunction<NamespacedId> entityIds = WorldRenderingSettings.INSTANCE.getEntityIds();
 
 		if (entityIds == null || !ImmediateState.isRenderingLevel) {
@@ -76,13 +76,13 @@ public class MixinEntityRenderDispatcher {
 
 		CapturedRenderingState.INSTANCE.setCurrentEntity(intId);
 
-		return new BufferSourceWrapper(bufferSource, (renderType) -> OuterWrappedRenderType.wrapExactlyOnce("iris:entity", renderType, EntityRenderStateShard.INSTANCE));
+		return new BufferSourceWrapper(bufferSource, (renderType) -> OuterWrappedRenderType.wrapExactlyOnce("pryzma:entity", renderType, EntityRenderStateShard.INSTANCE));
 	}
 
 	// Inject before MatrixStack#pop so that our wrapper stack management operations naturally line up
 	// with vanilla's MatrixStack management functions.
 	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V"))
-	private void iris$endEntityRender(Entity entity, double x, double y, double z, float yaw, float tickDelta,
+	private void pryzma$endEntityRender(Entity entity, double x, double y, double z, float yaw, float tickDelta,
 									  PoseStack poseStack, MultiBufferSource bufferSource, int light,
 									  CallbackInfo ci) {
 		CapturedRenderingState.INSTANCE.setCurrentEntity(0);

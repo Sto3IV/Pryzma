@@ -18,14 +18,14 @@ public class MixinGlStateManager {
 	}
 
 	@Inject(method = "_blendFunc", at = @At("RETURN"), remap = false)
-	private static void iris$onBlendFunc(int srcRgb, int dstRgb, CallbackInfo ci) {
+	private static void pryzma$onBlendFunc(int srcRgb, int dstRgb, CallbackInfo ci) {
 		if (blendFuncListener != null) {
 			blendFuncListener.run();
 		}
 	}
 
 	@Inject(method = "_blendFuncSeparate", at = @At("RETURN"), remap = false)
-	private static void iris$onBlendFuncSeparate(int srcRgb, int dstRgb, int srcAlpha, int dstAlpha, CallbackInfo ci) {
+	private static void pryzma$onBlendFuncSeparate(int srcRgb, int dstRgb, int srcAlpha, int dstAlpha, CallbackInfo ci) {
 		if (blendFuncListener != null) {
 			blendFuncListener.run();
 		}

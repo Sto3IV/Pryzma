@@ -21,14 +21,14 @@ public class MixinRenderSystem {
 	}
 
 	@Inject(method = "setShaderFogStart", at = @At(value = "FIELD", target = "Lcom/mojang/blaze3d/systems/RenderSystem;shaderFogStart:F", shift = At.Shift.AFTER))
-	private static void iris$onFogStart(float start, CallbackInfo ci) {
+	private static void pryzma$onFogStart(float start, CallbackInfo ci) {
 		if (fogStartListener != null) {
 			fogStartListener.run();
 		}
 	}
 
 	@Inject(method = "setShaderFogEnd", at = @At(value = "FIELD", target = "Lcom/mojang/blaze3d/systems/RenderSystem;shaderFogEnd:F", shift = At.Shift.AFTER))
-	private static void iris$onFogEnd(float end, CallbackInfo ci) {
+	private static void pryzma$onFogEnd(float end, CallbackInfo ci) {
 		if (fogEndListener != null) {
 			fogEndListener.run();
 		}

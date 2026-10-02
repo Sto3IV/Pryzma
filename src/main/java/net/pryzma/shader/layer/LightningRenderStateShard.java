@@ -11,7 +11,7 @@ public class LightningRenderStateShard extends RenderStateShard {
 	private static int backupValue = 0;
 
 	public LightningRenderStateShard() {
-		super("iris:lightning", () -> {
+		super("pryzma:lightning", () -> {
 			if (WorldRenderingSettings.INSTANCE.getEntityIds() != null) {
 				backupValue = CapturedRenderingState.INSTANCE.getCurrentRenderedEntity();
 				CapturedRenderingState.INSTANCE.setCurrentEntity(WorldRenderingSettings.INSTANCE.getEntityIds().applyAsInt(LIGHT));

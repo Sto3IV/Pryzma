@@ -26,11 +26,11 @@ public abstract class MixinItemRenderer {
 
 	@Inject(method = "render", at = @At(value = "HEAD"))
 	private void changeId(ItemStack pItemRenderer0, ItemDisplayContext pItemTransforms$TransformType1, boolean pBoolean2, PoseStack pPoseStack3, MultiBufferSource pMultiBufferSource4, int pInt5, int pInt6, BakedModel pBakedModel7, CallbackInfo ci) {
-		iris$setupId(pItemRenderer0);
+		pryzma$setupId(pItemRenderer0);
 	}
 
 	@Unique
-	private void iris$setupId(ItemStack pItemRenderer0) {
+	private void pryzma$setupId(ItemStack pItemRenderer0) {
 		if (WorldRenderingSettings.INSTANCE.getItemIds() == null) return;
 
 		if (pItemRenderer0.getItem() instanceof BlockItem blockItem && !(pItemRenderer0.getItem() instanceof SolidBucketItem)) {

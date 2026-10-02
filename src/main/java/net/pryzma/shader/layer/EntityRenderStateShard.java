@@ -6,6 +6,6 @@ public final class EntityRenderStateShard extends RenderStateShard {
 	public static final EntityRenderStateShard INSTANCE = new EntityRenderStateShard();
 
 	private EntityRenderStateShard() {
-		super("iris:is_entity", GbufferPrograms::beginEntities, GbufferPrograms::endEntities);
+		super("pryzma:is_entity", GbufferPrograms::beginEntities, GbufferPrograms::endEntities);
 	}
 }

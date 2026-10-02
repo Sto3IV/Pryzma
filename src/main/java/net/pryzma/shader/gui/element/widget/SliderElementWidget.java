@@ -68,7 +68,7 @@ public class SliderElementWidget extends StringElementWidget {
 	}
 
 	private void renderSlider(GuiGraphics guiGraphics) {
-		GuiUtil.bindIrisWidgetsTexture();
+		GuiUtil.bindWidgetsTexture();
 
 		// Draw background button
 		GuiUtil.drawButton(guiGraphics, bounds.position().x(), bounds.position().y(), bounds.width(), bounds.height(), isFocused(), false);

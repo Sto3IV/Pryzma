@@ -54,8 +54,8 @@ public class ProgramSet implements ProgramSetInterface {
 		//       relative to the player camera, not the shadow camera, so we can't rely on chunks being properly
 		//       sorted in the shadow pass.
 		//
-		// - https://github.com/IrisShaders/PryzmaShaders/issues/483
-		// - https://github.com/IrisShaders/PryzmaShaders/issues/987
+		// - upstream issue #483
+		// - upstream issue #987
 		boolean readTesselation = pack.hasFeature(FeatureFlags.TESSELLATION_SHADERS);
 
 		this.shadowCompute = readComputeArray(directory, sourceProvider, "shadow", shaderProperties);

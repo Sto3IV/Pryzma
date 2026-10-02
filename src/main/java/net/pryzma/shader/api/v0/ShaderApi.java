@@ -78,11 +78,16 @@ public interface ShaderApi {
 	 * @return A {@code Screen} class for the main PryzmaShaders GUI screen.
 	 * @since API v0.0
 	 */
-	Object openMainIrisScreenObj(Object parent);
+	Object openMainShaderScreenObj(Object parent);
+
+	@Deprecated
+	default Object openMainIrisScreenObj(Object parent) {
+		return openMainShaderScreenObj(parent);
+	}
 
 	/**
 	 * Gets the language key of the main screen. Currently, this
-	 * is "options.iris.shaderPackSelection".
+	 * is "options.pryzma.shaderPackSelection".
 	 *
 	 * @return the language key, for use with {@code TranslatableText}
 	 * / {@code TranslatableComponent}

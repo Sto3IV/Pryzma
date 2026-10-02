@@ -20,18 +20,18 @@ public class MixinTextureManager {
 		"method_18167",
 		"lambda$reload$5"
 	}, at = @At("TAIL"), require = 1)
-	private void iris$onTailReloadLambda(ResourceManager resourceManager, Executor applyExecutor, CompletableFuture<?> future, Void void1, CallbackInfo ci) {
+	private void pryzma$onTailReloadLambda(ResourceManager resourceManager, Executor applyExecutor, CompletableFuture<?> future, Void void1, CallbackInfo ci) {
 		TextureFormatLoader.reload(resourceManager);
 		PBRTextureManager.INSTANCE.clear();
 	}
 
 	@Inject(method = "_dumpAllSheets(Ljava/nio/file/Path;)V", at = @At("RETURN"))
-	private void iris$onInnerDumpTextures(Path path, CallbackInfo ci) {
+	private void pryzma$onInnerDumpTextures(Path path, CallbackInfo ci) {
 		PBRTextureManager.INSTANCE.dumpTextures(path);
 	}
 
 	@Inject(method = "close()V", at = @At("TAIL"), remap = false)
-	private void iris$onTailClose(CallbackInfo ci) {
+	private void pryzma$onTailClose(CallbackInfo ci) {
 		PBRTextureManager.INSTANCE.close();
 	}
 }

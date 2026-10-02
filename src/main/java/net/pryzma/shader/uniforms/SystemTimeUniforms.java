@@ -9,7 +9,7 @@ import java.util.function.IntSupplier;
 /**
  * Implements uniforms relating the system time (as opposed to the world time)
  *
- * @see <a href="https://github.com/IrisShaders/ShaderDoc/blob/master/uniforms.md#system-time">Uniforms: System time</a>
+ * @see <a href="Shader uniform documentation (system-time)">Uniforms: System time</a>
  */
 public final class SystemTimeUniforms {
 	public static final Timer TIMER = new Timer();

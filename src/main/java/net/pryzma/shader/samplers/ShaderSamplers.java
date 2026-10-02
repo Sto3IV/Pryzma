@@ -218,8 +218,8 @@ public class ShaderSamplers {
 			"depthtex2");
 	}
 
-	public static void addCustomTextures(SamplerHolder samplers, Object2ObjectMap<String, TextureAccess> irisCustomTextures) {
-		irisCustomTextures.forEach((name, texture) -> samplers.addDynamicSampler(texture.getType(), texture.getTextureId(), null, name));
+	public static void addCustomTextures(SamplerHolder samplers, Object2ObjectMap<String, TextureAccess> customTextures) {
+		customTextures.forEach((name, texture) -> samplers.addDynamicSampler(texture.getType(), texture.getTextureId(), null, name));
 	}
 
 	public static void addCustomImages(SamplerHolder images, Set<GlImage> customImages) {

@@ -10,11 +10,11 @@ import net.minecraft.network.chat.Component;
 import java.io.IOException;
 
 public class ShaderVideoSettings {
-	private static final Tooltip DISABLED_TOOLTIP = Tooltip.create(Component.translatable("options.iris.shadowDistance.disabled"));
-	private static final Tooltip ENABLED_TOOLTIP = Tooltip.create(Component.translatable("options.iris.shadowDistance.enabled"));
+	private static final Tooltip DISABLED_TOOLTIP = Tooltip.create(Component.translatable("options.pryzma.shadowDistance.disabled"));
+	private static final Tooltip ENABLED_TOOLTIP = Tooltip.create(Component.translatable("options.pryzma.shadowDistance.enabled"));
 	public static int shadowDistance = 32;
 	public static ColorSpace colorSpace = ColorSpace.SRGB;
-	public static final OptionInstance<Integer> RENDER_DISTANCE = new ShadowDistanceOption<>("options.iris.shadowDistance",
+	public static final OptionInstance<Integer> RENDER_DISTANCE = new ShadowDistanceOption<>("options.pryzma.shadowDistance",
 		mc -> {
 			WorldRenderingPipeline pipeline = PryzmaShaders.getPipelineManager().getPipelineNullable();
 
@@ -40,10 +40,10 @@ public class ShaderVideoSettings {
 			}
 
 			if (d <= 0.0) {
-				return Component.translatable("options.generic_value", Component.translatable("options.iris.shadowDistance"), "0 (disabled)");
+				return Component.translatable("options.generic_value", Component.translatable("options.pryzma.shadowDistance"), "0 (disabled)");
 			} else {
 				return Component.translatable("options.generic_value",
-					Component.translatable("options.iris.shadowDistance"),
+					Component.translatable("options.pryzma.shadowDistance"),
 					Component.translatable("options.chunks", d));
 			}
 		},

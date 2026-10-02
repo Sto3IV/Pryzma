@@ -32,7 +32,7 @@ public class MixinGui {
 	private DebugScreenOverlay debugOverlay;
 
 	@WrapMethod(method = "render")
-	public void iris$handleHudHidingScreens(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Operation<Void> original) {
+	public void pryzma$handleHudHidingScreens(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Operation<Void> original) {
 		Screen screen = this.minecraft.screen;
 
 		if (screen instanceof HudHideable) {
@@ -47,7 +47,7 @@ public class MixinGui {
 	}
 
 	@Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
-	private void iris$disableVignetteRendering(GuiGraphics pGui0, Entity pEntity1, CallbackInfo ci) {
+	private void pryzma$disableVignetteRendering(GuiGraphics pGui0, Entity pEntity1, CallbackInfo ci) {
 		WorldRenderingPipeline pipeline = PryzmaShaders.getPipelineManager().getPipelineNullable();
 
 		if (pipeline != null && !pipeline.shouldRenderVignette()) {

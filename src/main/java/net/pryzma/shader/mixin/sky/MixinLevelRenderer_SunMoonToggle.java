@@ -31,7 +31,7 @@ public class MixinLevelRenderer_SunMoonToggle {
 			from = @At(value = "FIELD", target = "net/minecraft/client/renderer/LevelRenderer.SUN_LOCATION : Lnet/minecraft/resources/ResourceLocation;"),
 			to = @At(value = "FIELD", target = "net/minecraft/client/renderer/LevelRenderer.MOON_LOCATION : Lnet/minecraft/resources/ResourceLocation;")),
 		allow = 1)
-	private void iris$beforeDrawSun(MeshData meshData, Operation<Void> original) {
+	private void pryzma$beforeDrawSun(MeshData meshData, Operation<Void> original) {
 		if (PryzmaShaders.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderSun).orElse(true)) {
 			original.call(meshData);
 		} else {
@@ -40,7 +40,7 @@ public class MixinLevelRenderer_SunMoonToggle {
 	}
 
 	@WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSnowAndRain(Lnet/minecraft/client/renderer/LightTexture;FDDD)V"))
-	private boolean iris$disableWeather(LevelRenderer instance, LightTexture lightTexture, float f, double d, double e, double g) {
+	private boolean pryzma$disableWeather(LevelRenderer instance, LightTexture lightTexture, float f, double d, double e, double g) {
 		return PryzmaShaders.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderWeather).orElse(true);
 	}
 
@@ -58,7 +58,7 @@ public class MixinLevelRenderer_SunMoonToggle {
 			from = @At(value = "FIELD", target = "net/minecraft/client/renderer/LevelRenderer.MOON_LOCATION : Lnet/minecraft/resources/ResourceLocation;"),
 			to = @At(value = "INVOKE", target = "net/minecraft/client/multiplayer/ClientLevel.getStarBrightness (F)F")),
 		allow = 1)
-	private void iris$beforeDrawMoon(MeshData meshData, Operation<Void> original) {
+	private void pryzma$beforeDrawMoon(MeshData meshData, Operation<Void> original) {
 		if (PryzmaShaders.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderMoon).orElse(true)) {
 			original.call(meshData);
 		} else {
@@ -73,14 +73,14 @@ public class MixinLevelRenderer_SunMoonToggle {
 			from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/FogRenderer;levelFogColor()V"),
 			to = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/VertexBuffer;unbind()V", ordinal = 0)),
 		allow = 1)
-	private void iris$beforeDrawSkyDisc(VertexBuffer instance, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, ShaderInstance shader, Operation<Void> original) {
+	private void pryzma$beforeDrawSkyDisc(VertexBuffer instance, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, ShaderInstance shader, Operation<Void> original) {
 		if (PryzmaShaders.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderSkyDisc).orElse(true)) {
 			original.call(instance, modelViewMatrix, projectionMatrix, shader);
 		}
 	}
 
 	@WrapOperation(method = "renderSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DimensionSpecialEffects;getSunriseColor(FF)[F"))
-	private float[] iris$beforeDrawHorizon(DimensionSpecialEffects instance, float timeOfDay, float partialTicks, Operation<float[]> original) {
+	private float[] pryzma$beforeDrawHorizon(DimensionSpecialEffects instance, float timeOfDay, float partialTicks, Operation<float[]> original) {
 		if (PryzmaShaders.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderSkyDisc).orElse(true)) {
 			return original.call(instance, timeOfDay, partialTicks);
 		} else {
@@ -89,7 +89,7 @@ public class MixinLevelRenderer_SunMoonToggle {
 	}
 
 	@WrapOperation(method = "renderSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel$ClientLevelData;getHorizonHeight(Lnet/minecraft/world/level/LevelHeightAccessor;)D"))
-	private double iris$beforeDrawHorizon(ClientLevel.ClientLevelData instance, LevelHeightAccessor level, Operation<Double> original) {
+	private double pryzma$beforeDrawHorizon(ClientLevel.ClientLevelData instance, LevelHeightAccessor level, Operation<Double> original) {
 		if (PryzmaShaders.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderSkyDisc).orElse(true)) {
 			return original.call(instance, level);
 		} else {
@@ -98,7 +98,7 @@ public class MixinLevelRenderer_SunMoonToggle {
 	}
 
 	@WrapOperation(method = "renderSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getStarBrightness(F)F"))
-	private float iris$beforeDrawStars(ClientLevel instance, float partialTick, Operation<Float> original) {
+	private float pryzma$beforeDrawStars(ClientLevel instance, float partialTick, Operation<Float> original) {
 		if (PryzmaShaders.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderStars).orElse(true)) {
 			return original.call(instance, partialTick);
 		} else {

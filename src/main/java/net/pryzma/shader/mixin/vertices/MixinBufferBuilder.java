@@ -66,7 +66,7 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 	@Unique
 	private boolean injectNormalAndUV1;
 	@Unique
-	private int iris$vertexCount;
+	private int pryzma$vertexCount;
 	@Unique
 	private int currentBlock = -1;
 	@Unique
@@ -91,8 +91,8 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 	protected abstract long beginElement(VertexFormatElement vertexFormatElement);
 
 	@ModifyVariable(method = "<init>", at = @At(value = "FIELD", target = "Lcom/mojang/blaze3d/vertex/VertexFormatElement;POSITION:Lcom/mojang/blaze3d/vertex/VertexFormatElement;", ordinal = 0), argsOnly = true)
-	private VertexFormat iris$extendFormat(VertexFormat format) {
-		boolean iris$isTerrain = false;
+	private VertexFormat pryzma$extendFormat(VertexFormat format) {
+		boolean pryzma$isTerrain = false;
 		injectNormalAndUV1 = false;
 
 		if (ImmediateState.skipExtension.get() || !PryzmaShaders.isPackInUseQuick()) {
@@ -101,17 +101,17 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 
 		if (format == DefaultVertexFormat.BLOCK || format == ShaderVertexFormats.TERRAIN) {
 			extending = true;
-			iris$isTerrain = true;
+			pryzma$isTerrain = true;
 			injectNormalAndUV1 = false;
 			return ShaderVertexFormats.TERRAIN;
 		} else if (format == DefaultVertexFormat.NEW_ENTITY || format == ShaderVertexFormats.ENTITY) {
 			extending = true;
-			iris$isTerrain = false;
+			pryzma$isTerrain = false;
 			injectNormalAndUV1 = false;
 			return ShaderVertexFormats.ENTITY;
 		} else if (format == DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP || format == ShaderVertexFormats.GLYPH) {
 			extending = true;
-			iris$isTerrain = false;
+			pryzma$isTerrain = false;
 			injectNormalAndUV1 = true;
 			return ShaderVertexFormats.GLYPH;
 		}
@@ -147,7 +147,7 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 	}
 
 	@Inject(method = "endLastVertex", at = @At("HEAD"))
-	private void iris$beforeNext(CallbackInfo ci) {
+	private void pryzma$beforeNext(CallbackInfo ci) {
 		if (this.vertices == 0 || !extending) {
 			return;
 		}
@@ -164,12 +164,12 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 			return;
 		}
 
-		vertexOffsets[iris$vertexCount] = vertexPointer - ((MojangBufferAccessor) buffer).getPointer();
+		vertexOffsets[pryzma$vertexCount] = vertexPointer - ((MojangBufferAccessor) buffer).getPointer();
 
-		iris$vertexCount++;
+		pryzma$vertexCount++;
 
-		if (mode == VertexFormat.Mode.QUADS && iris$vertexCount == 4 || mode == VertexFormat.Mode.TRIANGLES && iris$vertexCount == 3) {
-			fillExtendedData(iris$vertexCount);
+		if (mode == VertexFormat.Mode.QUADS && pryzma$vertexCount == 4 || mode == VertexFormat.Mode.TRIANGLES && pryzma$vertexCount == 3) {
+			fillExtendedData(pryzma$vertexCount);
 		}
 	}
 
@@ -214,7 +214,7 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 
     @Unique
 	private void fillExtendedData(int vertexAmount) {
-		iris$vertexCount = 0;
+		pryzma$vertexCount = 0;
 
 		int stride = format.getVertexSize();
 

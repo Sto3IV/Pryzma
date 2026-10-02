@@ -20,7 +20,7 @@ public class MixinGameRenderer_NightVisionCompat {
 	@Inject(method = "getNightVisionScale", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/world/effect/MobEffectInstance;endsWithin(I)Z"), cancellable = true,
 		require = 0)
-	private static void iris$safecheckNightvisionStrength(LivingEntity livingEntity, float partialTicks,
+	private static void pryzma$safecheckNightvisionStrength(LivingEntity livingEntity, float partialTicks,
 														  CallbackInfoReturnable<Float> cir) {
 		if (livingEntity.getEffect(MobEffects.NIGHT_VISION) == null) {
 			cir.setReturnValue(0.0f);

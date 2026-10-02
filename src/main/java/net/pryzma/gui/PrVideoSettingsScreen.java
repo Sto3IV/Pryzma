@@ -74,7 +74,7 @@ public final class PrVideoSettingsScreen extends PrScreen {
         minecraft.setScreen(new PrSettingsScreen(page, this));
     }
 
-    /** The shader pack screen of the PryzmaShaders port; it returns here. */
+    /** The shader pack screen of the Pryzma Shaders; it returns here. */
     private void openShaders() {
         toChild = true;
         minecraft.setScreen(new ShaderPackScreen(this));

@@ -43,7 +43,7 @@ public class MixinGameRenderer {
 	private boolean renderHand;
 
 	@Inject(method = "getPositionShader", at = @At("HEAD"), cancellable = true)
-	private static void iris$overridePositionShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overridePositionShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (isSky()) {
 			override(ShaderKey.SKY_BASIC, cir);
 		} else if (ShadowRenderer.ACTIVE) {
@@ -54,7 +54,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = "getPositionColorShader", at = @At("HEAD"), cancellable = true)
-	private static void iris$overridePositionColorShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overridePositionColorShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (isSky()) {
 			override(ShaderKey.SKY_BASIC_COLOR, cir);
 		} else if (ShadowRenderer.ACTIVE) {
@@ -65,7 +65,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = "getPositionTexShader", at = @At("HEAD"), cancellable = true)
-	private static void iris$overridePositionTexShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overridePositionTexShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (isSky()) {
 			override(ShaderKey.SKY_TEXTURED, cir);
 		} else if (ShadowRenderer.ACTIVE) {
@@ -76,7 +76,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = {"getPositionTexColorShader"}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overridePositionTexColorShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overridePositionTexColorShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (isSky()) {
 			override(ShaderKey.SKY_TEXTURED_COLOR, cir);
 		} else if (ShadowRenderer.ACTIVE) {
@@ -91,7 +91,7 @@ public class MixinGameRenderer {
 	@Inject(method = {
 		"getParticleShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideParticleShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideParticleShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (isPhase(WorldRenderingPhase.RAIN_SNOW)) {
 			override(ShaderKey.WEATHER, cir);
 		} else if (ShadowRenderer.ACTIVE) {
@@ -102,7 +102,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = "getRendertypeCloudsShader", at = @At("HEAD"), cancellable = true)
-	private static void iris$overridePositionTexColorNormalShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overridePositionTexColorNormalShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_CLOUDS, cir);
 		} else if (shouldOverrideShaders()) {
@@ -111,7 +111,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = "getRendertypeSolidShader", at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideSolidShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideSolidShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			// TODO: Wrong program
 			override(ShaderKey.SHADOW_TERRAIN_CUTOUT, cir);
@@ -126,7 +126,7 @@ public class MixinGameRenderer {
 		"getRendertypeCutoutShader",
 		"getRendertypeCutoutMippedShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideCutoutShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideCutoutShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_TERRAIN_CUTOUT, cir);
 		} else if (isBlockEntities() || isEntities()) {
@@ -141,7 +141,7 @@ public class MixinGameRenderer {
 		"getRendertypeTranslucentMovingBlockShader",
 		"getRendertypeTripwireShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideTranslucentShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideTranslucentShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_TRANSLUCENT, cir);
 		} else if (isBlockEntities() || isEntities()) {
@@ -161,7 +161,7 @@ public class MixinGameRenderer {
 		"getRendertypeEntitySmoothCutoutShader",
 		"getRendertypeArmorCutoutNoCullShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideEntityCutoutShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideEntityCutoutShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			if (isBlockEntities()) {
 				override(ShaderKey.SHADOW_BLOCK, cir);
@@ -186,7 +186,7 @@ public class MixinGameRenderer {
 		"getRendertypeBreezeWindShader",
 		"getRendertypeEntityNoOutlineShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideEntityTranslucentShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideEntityTranslucentShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			if (isBlockEntities()) {
 				override(ShaderKey.SHADOW_BLOCK, cir);
@@ -206,7 +206,7 @@ public class MixinGameRenderer {
 		"getRendertypeEnergySwirlShader",
 		"getRendertypeEntityShadowShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideEnergySwirlShadowShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideEnergySwirlShadowShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_ENTITIES_CUTOUT, cir);
 		} else if (HandRenderer.INSTANCE.isActive()) {
@@ -227,7 +227,7 @@ public class MixinGameRenderer {
 		"getRendertypeEntityGlintShader",
 		"getRendertypeArmorEntityGlintShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideGlintShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideGlintShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (shouldOverrideShaders()) {
 			override(ShaderKey.GLINT, cir);
 		}
@@ -236,7 +236,7 @@ public class MixinGameRenderer {
 	@Inject(method = {
 		"getRendertypeEntitySolidShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideEntitySolidDiffuseShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideEntitySolidDiffuseShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			if (isBlockEntities()) {
 				override(ShaderKey.SHADOW_BLOCK, cir);
@@ -255,7 +255,7 @@ public class MixinGameRenderer {
 	@Inject(method = {
 		"getRendertypeWaterMaskShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideEntitySolidShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideEntitySolidShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_ENTITIES_CUTOUT, cir);
 		} else if (HandRenderer.INSTANCE.isActive()) {
@@ -268,7 +268,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = "getRendertypeBeaconBeamShader", at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideBeaconBeamShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideBeaconBeamShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_BEACON_BEAM, cir);
 		} else if (shouldOverrideShaders()) {
@@ -277,7 +277,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = "getRendertypeEntityAlphaShader", at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideEntityAlphaShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideEntityAlphaShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (!ShadowRenderer.ACTIVE) {
 			override(ShaderKey.ENTITIES_ALPHA, cir);
 		}
@@ -286,7 +286,7 @@ public class MixinGameRenderer {
 	@Inject(method = {
 		"getRendertypeEyesShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideEntityEyesShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideEntityEyesShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_ENTITIES_CUTOUT, cir);
 		} else if (isBlockEntities()) {
@@ -299,7 +299,7 @@ public class MixinGameRenderer {
 	@Inject(method = {
 		"getRendertypeEntityTranslucentEmissiveShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideEntityTranslucentEmissiveShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideEntityTranslucentEmissiveShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			if (isBlockEntities()) {
 				override(ShaderKey.SHADOW_BLOCK, cir);
@@ -316,7 +316,7 @@ public class MixinGameRenderer {
 	@Inject(method = {
 		"getRendertypeLeashShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideLeashShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideLeashShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_LEASH, cir);
 		} else if (shouldOverrideShaders()) {
@@ -327,7 +327,7 @@ public class MixinGameRenderer {
 	@Inject(method = {
 		"getRendertypeLightningShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideLightningShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideLightningShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_LIGHTNING, cir);
 		} else if (shouldOverrideShaders()) {
@@ -339,7 +339,7 @@ public class MixinGameRenderer {
 	@Inject(method = {
 		"getRendertypeCrumblingShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideCrumblingShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideCrumblingShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (shouldOverrideShaders() && !ShadowRenderer.ACTIVE) {
 			override(ShaderKey.CRUMBLING, cir);
 		}
@@ -350,7 +350,7 @@ public class MixinGameRenderer {
 		"getRendertypeTextSeeThroughShader",
 		"getPositionColorTexLightmapShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideTextShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideTextShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_TEXT, cir);
 		} else if (HandRenderer.INSTANCE.isActive()) {
@@ -366,7 +366,7 @@ public class MixinGameRenderer {
 		"getRendertypeTextBackgroundShader",
 		"getRendertypeTextBackgroundSeeThroughShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideTextBackgroundShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideTextBackgroundShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_TEXT_BG, cir);
 		} else {
@@ -378,7 +378,7 @@ public class MixinGameRenderer {
 		"getRendertypeTextIntensityShader",
 		"getRendertypeTextIntensitySeeThroughShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideTextIntensityShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideTextIntensityShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_TEXT_INTENSITY, cir);
 		} else if (HandRenderer.INSTANCE.isActive()) {
@@ -393,7 +393,7 @@ public class MixinGameRenderer {
 	@Inject(method = {
 		"getRendertypeLinesShader"
 	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideLinesShader(CallbackInfoReturnable<ShaderInstance> cir) {
+	private static void pryzma$overrideLinesShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_LINES, cir);
 		} else if (shouldOverrideShaders()) {
@@ -468,7 +468,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = "render", at = @At("HEAD"))
-	private void iris$startFrame(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci) {
+	private void pryzma$startFrame(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci) {
 		// This allows certain functions like float smoothing to function outside a world.
 		CapturedRenderingState.INSTANCE.setRealTickDelta(deltaTracker.getGameTimeDeltaPartialTick(true));
 		SystemTimeUniforms.COUNTER.beginFrame();
@@ -478,7 +478,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = "<init>", at = @At("TAIL"))
-	private void iris$logSystem(Minecraft arg, ItemInHandRenderer arg2, ResourceManager arg3, RenderBuffers arg4, CallbackInfo ci) {
+	private void pryzma$logSystem(Minecraft arg, ItemInHandRenderer arg2, ResourceManager arg3, RenderBuffers arg4, CallbackInfo ci) {
 		PryzmaShaders.logger.info("Hardware information:");
 		PryzmaShaders.logger.info("CPU: " + GlUtil.getCpuInfo());
 		PryzmaShaders.logger.info("GPU: " + GlUtil.getRenderer() + " (Supports OpenGL " + GlUtil.getOpenGLVersion() + ")");
@@ -486,7 +486,7 @@ public class MixinGameRenderer {
 	}
 
 	@Redirect(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderHandsWithItems(FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/player/LocalPlayer;I)V"))
-	private void iris$disableVanillaHandRendering(ItemInHandRenderer itemInHandRenderer, float tickDelta, PoseStack poseStack, BufferSource bufferSource, LocalPlayer localPlayer, int light) {
+	private void pryzma$disableVanillaHandRendering(ItemInHandRenderer itemInHandRenderer, float tickDelta, PoseStack poseStack, BufferSource bufferSource, LocalPlayer localPlayer, int light) {
 		if (PryzmaShaders.isPackInUseQuick()) {
 			return;
 		}
@@ -495,12 +495,12 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = "renderLevel", at = @At("TAIL"))
-	private void iris$runColorSpace(DeltaTracker deltaTracker, CallbackInfo ci) {
+	private void pryzma$runColorSpace(DeltaTracker deltaTracker, CallbackInfo ci) {
 		PryzmaShaders.getPipelineManager().getPipeline().ifPresent(WorldRenderingPipeline::finalizeGameRendering);
 	}
 
 	@Redirect(method = "reloadShaders", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;", remap = false))
-	private ArrayList<Program> iris$reloadGeometryShaders() {
+	private ArrayList<Program> pryzma$reloadGeometryShaders() {
 		ArrayList<Program> programs = Lists.newArrayList();
 		programs.addAll(ShaderProgramTypes.GEOMETRY.getPrograms().values());
 		programs.addAll(ShaderProgramTypes.TESS_CONTROL.getPrograms().values());

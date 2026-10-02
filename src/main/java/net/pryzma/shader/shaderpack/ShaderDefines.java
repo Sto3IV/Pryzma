@@ -22,7 +22,7 @@ public class ShaderDefines {
 		defines.add(new StringPair(key, value));
 	}
 
-	public static ImmutableList<StringPair> createIrisReplacements() {
+	public static ImmutableList<StringPair> createStandardReplacements() {
 		ArrayList<StringPair> s = new ArrayList<>(StandardMacros.createStandardEnvironmentDefines());
 
 		BiomeUniforms.getBiomeMap().forEach((biome, id) -> define(s, "BIOME_" + biome.location().getPath().toUpperCase(Locale.ROOT), String.valueOf(id)));
@@ -37,5 +37,10 @@ public class ShaderDefines {
 		define(s, "PPT_SNOW", "2");
 
 		return ImmutableList.copyOf(s);
+	}
+
+	@Deprecated
+	public static ImmutableList<StringPair> createIrisReplacements() {
+		return createStandardReplacements();
 	}
 }

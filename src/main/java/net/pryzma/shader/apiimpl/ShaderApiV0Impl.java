@@ -40,13 +40,18 @@ public class ShaderApiV0Impl implements ShaderApi {
 	}
 
 	@Override
-	public Object openMainIrisScreenObj(Object parent) {
+	public Object openMainShaderScreenObj(Object parent) {
 		return new ShaderPackScreen((Screen) parent);
 	}
 
 	@Override
+	public Object openMainIrisScreenObj(Object parent) {
+		return openMainShaderScreenObj(parent);
+	}
+
+	@Override
 	public String getMainScreenLanguageKey() {
-		return "options.iris.shaderPackSelection";
+		return "options.pryzma.shaderPackSelection";
 	}
 
 	@Override

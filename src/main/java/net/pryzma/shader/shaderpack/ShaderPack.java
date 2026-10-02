@@ -78,13 +78,13 @@ public class ShaderPack {
 	private final IdMap idMap;
 	private final LanguageMap languageMap;
 	private final EnumMap<TextureStage, Object2ObjectMap<String, CustomTextureData>> customTextureDataMap = new EnumMap<>(TextureStage.class);
-	private final Object2ObjectMap<String, CustomTextureData> irisCustomTextureDataMap = new Object2ObjectOpenHashMap<>();
+	private final Object2ObjectMap<String, CustomTextureData> extendedCustomTextureDataMap = new Object2ObjectOpenHashMap<>();
 	private final CustomTextureData customNoiseTexture;
 	private final ShaderPackOptions shaderPackOptions;
 	private final OptionMenuContainer menuContainer;
 	private final ProfileSet.ProfileResult profile;
 	private final String profileInfo;
-	private final List<ImageInformation> irisCustomImages;
+	private final List<ImageInformation> extendedCustomImages;
 	private final Set<FeatureFlags> activeFeatures;
 	private final Function<AbsolutePackPath, String> sourceProvider;
 	private final ShaderProperties shaderProperties;
@@ -109,7 +109,7 @@ public class ShaderPack {
 		Objects.requireNonNull(root);
 
 		ArrayList<StringPair> envDefines1 = new ArrayList<>(environmentDefines);
-		envDefines1.addAll(ShaderDefines.createIrisReplacements());
+		envDefines1.addAll(ShaderDefines.createStandardReplacements());
 		environmentDefines = ImmutableList.copyOf(envDefines1);
 		ImmutableList.Builder<AbsolutePackPath> starts = ImmutableList.builder();
 		ImmutableList<String> potentialFileNames = ShaderPackSourceNames.POTENTIAL_STARTS;
@@ -214,11 +214,11 @@ public class ShaderPack {
 		}
 
 		if (!activeFeatures.contains(FeatureFlags.SSBO) && !shaderProperties.getBufferObjects().isEmpty()) {
-			throw new IllegalStateException("An SSBO is being used, but the feature flag for SSBO's hasn't been set! Please set either a requirement or check for the SSBO feature using \"iris.features.required/optional = ssbo\".");
+			throw new IllegalStateException("An SSBO is being used, but the feature flag for SSBO's hasn't been set! Please set either a requirement or check for the SSBO feature using \"features.required/optional = ssbo\".");
 		}
 
-		if (!activeFeatures.contains(FeatureFlags.CUSTOM_IMAGES) && !shaderProperties.getIrisCustomImages().isEmpty()) {
-			throw new IllegalStateException("Custom images are being used, but the feature flag for custom images hasn't been set! Please set either a requirement or check for custom images' feature flag using \"iris.features.required/optional = CUSTOM_IMAGES\".");
+		if (!activeFeatures.contains(FeatureFlags.CUSTOM_IMAGES) && !shaderProperties.getExtendedCustomImages().isEmpty()) {
+			throw new IllegalStateException("Custom images are being used, but the feature flag for custom images hasn't been set! Please set either a requirement or check for custom images' feature flag using \"features.required/optional = CUSTOM_IMAGES\".");
 		}
 
 		List<FeatureFlags> invalidFlagList = shaderProperties.getRequiredFeatureFlags().stream().filter(FeatureFlags::isInvalid).map(FeatureFlags::getValue).collect(Collectors.toList());
@@ -226,12 +226,12 @@ public class ShaderPack {
 
 		if (!invalidFeatureFlags.isEmpty()) {
 			if (Minecraft.getInstance().screen instanceof ShaderPackScreen) {
-				MutableComponent component = Component.translatable("iris.unsupported.pack.description", FeatureFlags.getInvalidStatus(invalidFlagList), invalidFeatureFlags.stream()
+				MutableComponent component = Component.translatable("pryzma.unsupported.pack.description", FeatureFlags.getInvalidStatus(invalidFlagList), invalidFeatureFlags.stream()
 					.collect(Collectors.joining(", ", ": ", ".")));
 				if (SystemUtils.IS_OS_MAC) {
-					component = component.append(Component.translatable("iris.unsupported.pack.macos"));
+					component = component.append(Component.translatable("pryzma.unsupported.pack.macos"));
 				}
-				Minecraft.getInstance().setScreen(new FeatureMissingErrorScreen(Minecraft.getInstance().screen, Component.translatable("iris.unsupported.pack"), component));
+				Minecraft.getInstance().setScreen(new FeatureMissingErrorScreen(Minecraft.getInstance().screen, Component.translatable("pryzma.unsupported.pack"), component));
 			}
 			ShaderApi.getInstance().getConfig().setShadersEnabledAndApply(false);
 		}
@@ -348,13 +348,13 @@ public class ShaderPack {
 			customTextureDataMap.put(textureStage, innerCustomTextureDataMap);
 		});
 
-		this.irisCustomImages = shaderProperties.getIrisCustomImages();
+		this.extendedCustomImages = shaderProperties.getExtendedCustomImages();
 
 		this.customUniforms = shaderProperties.getCustomUniforms();
 
-		shaderProperties.getIrisCustomTextures().forEach((name, texture) -> {
+		shaderProperties.getExtendedCustomTextures().forEach((name, texture) -> {
 			try {
-				irisCustomTextureDataMap.put(name, readTexture(root, texture));
+				extendedCustomTextureDataMap.put(name, readTexture(root, texture));
 			} catch (IOException e) {
 				PryzmaShaders.logger.error("Unable to read the custom texture at " + texture.getName(), e);
 			}
@@ -378,7 +378,7 @@ public class ShaderPack {
 		StringReader propertiesReader = new StringReader(processed);
 
 		// Note: ordering of properties is significant
-		// See https://github.com/IrisShaders/PryzmaShaders/issues/1327 and the relevant putIfAbsent calls in
+		// See upstream issue #1327 and the relevant putIfAbsent calls in
 		// BlockMaterialMapping
 		Properties properties = new OrderBackedProperties();
 		try {
@@ -593,12 +593,22 @@ public class ShaderPack {
 		return customTextureDataMap;
 	}
 
-	public List<ImageInformation> getIrisCustomImages() {
-		return irisCustomImages;
+	public List<ImageInformation> getExtendedCustomImages() {
+		return extendedCustomImages;
 	}
 
+	public Object2ObjectMap<String, CustomTextureData> getExtendedCustomTextureDataMap() {
+		return extendedCustomTextureDataMap;
+	}
+
+	@Deprecated
+	public List<ImageInformation> getIrisCustomImages() {
+		return getExtendedCustomImages();
+	}
+
+	@Deprecated
 	public Object2ObjectMap<String, CustomTextureData> getIrisCustomTextureDataMap() {
-		return irisCustomTextureDataMap;
+		return getExtendedCustomTextureDataMap();
 	}
 
 	public CustomTextureData getCustomNoiseTexture() {

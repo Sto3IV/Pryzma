@@ -67,7 +67,7 @@ public class CompositeRenderer {
 	private final Object2ObjectMap<String, TextureAccess> customTextureIds;
 	private final ImmutableSet<Integer> flippedAtLeastOnceFinal;
 	private final CustomUniforms customUniforms;
-	private final Object2ObjectMap<String, TextureAccess> irisCustomTextures;
+	private final Object2ObjectMap<String, TextureAccess> extendedCustomTextures;
 	private final Set<GlImage> customImages;
 	private final TextureStage textureStage;
 	private final WorldRenderingPipeline pipeline;
@@ -77,7 +77,7 @@ public class CompositeRenderer {
 							 TextureAccess noiseTexture, FrameUpdateNotifier updateNotifier,
 							 CenterDepthSampler centerDepthSampler, BufferFlipper bufferFlipper,
 							 Supplier<ShadowRenderTargets> shadowTargetsSupplier, TextureStage textureStage,
-							 Object2ObjectMap<String, TextureAccess> customTextureIds, Object2ObjectMap<String, TextureAccess> irisCustomTextures, Set<GlImage> customImages, ImmutableMap<Integer, Boolean> explicitPreFlips,
+							 Object2ObjectMap<String, TextureAccess> customTextureIds, Object2ObjectMap<String, TextureAccess> extendedCustomTextures, Set<GlImage> customImages, ImmutableMap<Integer, Boolean> explicitPreFlips,
 							 CustomUniforms customUniforms) {
 		this.pipeline = pipeline;
 		this.compositePass = compositePass;
@@ -86,7 +86,7 @@ public class CompositeRenderer {
 		this.renderTargets = renderTargets;
 		this.customTextureIds = customTextureIds;
 		this.customUniforms = customUniforms;
-		this.irisCustomTextures = irisCustomTextures;
+		this.extendedCustomTextures = extendedCustomTextures;
 		this.customImages = customImages;
 		this.textureStage = textureStage;
 
@@ -371,7 +371,7 @@ public class CompositeRenderer {
 		ProgramSamplers.CustomTextureSamplerInterceptor customTextureSamplerInterceptor = ProgramSamplers.customTextureSamplerInterceptor(builder, customTextureIds, flippedAtLeastOnceSnapshot);
 
 		ShaderSamplers.addRenderTargetSamplers(customTextureSamplerInterceptor, () -> flipped, renderTargets, true, pipeline);
-		ShaderSamplers.addCustomTextures(builder, irisCustomTextures);
+		ShaderSamplers.addCustomTextures(builder, extendedCustomTextures);
 		ShaderSamplers.addCustomImages(customTextureSamplerInterceptor, customImages);
 
 		ShaderImages.addRenderTargetImages(builder, () -> flipped, renderTargets);
@@ -427,7 +427,7 @@ public class CompositeRenderer {
 				customUniforms.assignTo(builder);
 
 				ShaderSamplers.addRenderTargetSamplers(customTextureSamplerInterceptor, () -> flipped, renderTargets, true, pipeline);
-				ShaderSamplers.addCustomTextures(builder, irisCustomTextures);
+				ShaderSamplers.addCustomTextures(builder, extendedCustomTextures);
 				ShaderSamplers.addCustomImages(customTextureSamplerInterceptor, customImages);
 
 				ShaderImages.addRenderTargetImages(builder, () -> flipped, renderTargets);

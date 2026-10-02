@@ -21,7 +21,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Optional;
 
 public abstract class BaseOptionElementWidget<T extends OptionMenuElement> extends CommentedElementWidget<T> {
-	protected static final Component SET_TO_DEFAULT = Component.translatable("options.iris.setToDefault").withStyle(ChatFormatting.GREEN);
+	protected static final Component SET_TO_DEFAULT = Component.translatable("options.pryzma.setToDefault").withStyle(ChatFormatting.GREEN);
 	protected static final Component DIVIDER = Component.literal(": ");
 
 	protected MutableComponent unmodifiedLabel;
@@ -78,7 +78,7 @@ public abstract class BaseOptionElementWidget<T extends OptionMenuElement> exten
 	}
 
 	protected final void renderOptionWithValue(GuiGraphics guiGraphics, boolean hovered, float sliderPosition, int sliderWidth) {
-		GuiUtil.bindIrisWidgetsTexture();
+		GuiUtil.bindWidgetsTexture();
 
 		// Draw button background
 		GuiUtil.drawButton(guiGraphics, bounds.position().x(), bounds.position().y(), bounds.width(), bounds.height(), hovered, false);

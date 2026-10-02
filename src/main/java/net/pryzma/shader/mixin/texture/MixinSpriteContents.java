@@ -22,7 +22,7 @@ public class MixinSpriteContents implements SpriteContentsExtension {
 	private SpriteContents.Ticker createdTicker;
 
 	@Redirect(method = "increaseMipLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/MipmapGenerator;generateMipLevels([Lcom/mojang/blaze3d/platform/NativeImage;I)[Lcom/mojang/blaze3d/platform/NativeImage;"))
-	private NativeImage[] iris$redirectMipmapGeneration(NativeImage[] nativeImages, int mipLevel) {
+	private NativeImage[] pryzma$redirectMipmapGeneration(NativeImage[] nativeImages, int mipLevel) {
 		if (this instanceof CustomMipmapGenerator.Provider provider) {
 			CustomMipmapGenerator generator = provider.getMipmapGenerator();
 			if (generator != null) {

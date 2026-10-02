@@ -215,15 +215,15 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 	}
 
 	public class HeaderEntry extends BaseEntry {
-		public static final Component BACK_BUTTON_TEXT = Component.literal("< ").append(Component.translatable("options.iris.back").withStyle(ChatFormatting.ITALIC));
-		public static final MutableComponent RESET_BUTTON_TEXT_INACTIVE = Component.translatable("options.iris.reset").withStyle(ChatFormatting.GRAY);
-		public static final MutableComponent RESET_BUTTON_TEXT_ACTIVE = Component.translatable("options.iris.reset").withStyle(ChatFormatting.YELLOW);
+		public static final Component BACK_BUTTON_TEXT = Component.literal("< ").append(Component.translatable("options.pryzma.back").withStyle(ChatFormatting.ITALIC));
+		public static final MutableComponent RESET_BUTTON_TEXT_INACTIVE = Component.translatable("options.pryzma.reset").withStyle(ChatFormatting.GRAY);
+		public static final MutableComponent RESET_BUTTON_TEXT_ACTIVE = Component.translatable("options.pryzma.reset").withStyle(ChatFormatting.YELLOW);
 
-		public static final MutableComponent RESET_HOLD_SHIFT_TOOLTIP = Component.translatable("options.iris.reset.tooltip.holdShift").withStyle(ChatFormatting.GOLD);
-		public static final MutableComponent RESET_TOOLTIP = Component.translatable("options.iris.reset.tooltip").withStyle(ChatFormatting.RED);
-		public static final MutableComponent IMPORT_TOOLTIP = Component.translatable("options.iris.importSettings.tooltip")
+		public static final MutableComponent RESET_HOLD_SHIFT_TOOLTIP = Component.translatable("options.pryzma.reset.tooltip.holdShift").withStyle(ChatFormatting.GOLD);
+		public static final MutableComponent RESET_TOOLTIP = Component.translatable("options.pryzma.reset.tooltip").withStyle(ChatFormatting.RED);
+		public static final MutableComponent IMPORT_TOOLTIP = Component.translatable("options.pryzma.importSettings.tooltip")
 			.withStyle(style -> style.withColor(TextColor.fromRgb(0x4da6ff)));
-		public static final MutableComponent EXPORT_TOOLTIP = Component.translatable("options.iris.exportSettings.tooltip")
+		public static final MutableComponent EXPORT_TOOLTIP = Component.translatable("options.pryzma.exportSettings.tooltip")
 			.withStyle(style -> style.withColor(TextColor.fromRgb(0xfc7d3d)));
 
 		private static final int MIN_SIDE_BUTTON_WIDTH = 42;
@@ -275,7 +275,7 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 			// Draw header text
 			renderScrollingString(guiGraphics, font, text, x + (int) (entryWidth * 0.5), x + 5, y + 5, ((x + entryWidth) - 10) - utilityButtons.getWidth(), y + 15, 0xFFFFFF);
 
-			GuiUtil.bindIrisWidgetsTexture();
+			GuiUtil.bindWidgetsTexture();
 
 			// Draw back button if present
 			if (this.backButton != null) {
@@ -369,10 +369,10 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 			}
 
 			// Displaying a dialog when the game is full-screened can cause severe issues
-			// https://github.com/IrisShaders/PryzmaShaders/issues/1258
+			// upstream issue #1258
 			if (Minecraft.getInstance().getWindow().isFullscreen()) {
 				this.screen.displayNotification(
-					Component.translatable("options.iris.mustDisableFullscreen")
+					Component.translatable("options.pryzma.mustDisableFullscreen")
 						.withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
 				return false;
 			}
@@ -407,10 +407,10 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 			}
 
 			// Displaying a dialog when the game is full-screened can cause severe issues
-			// https://github.com/IrisShaders/PryzmaShaders/issues/1258
+			// upstream issue #1258
 			if (Minecraft.getInstance().getWindow().isFullscreen()) {
 				this.screen.displayNotification(
-					Component.translatable("options.iris.mustDisableFullscreen")
+					Component.translatable("options.pryzma.mustDisableFullscreen")
 						.withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
 				return false;
 			}

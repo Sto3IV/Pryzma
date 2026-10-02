@@ -82,7 +82,7 @@ import net.pryzma.render.PrF3RenderCache;
  * screen shaders                open the shader pack screen
  * screen pause|options          open the pause menu or the vanilla options screen
  * leave                         save and quit to the title screen
- * irisinfo                      log the pipeline state and its F3 lines (shadow sections, culling)
+ * shaderinfo                    log the pipeline state and its F3 lines (shadow sections, culling)
  * detailblocks                  log every registered block the decorator LOD (Detail Distance) would cull
  * fps &lt;frames&gt;                  log mean and worst frame time over the next frames
  * f3 on|off|charts              show or hide the debug screen, or toggle its FPS chart (F3+2)
@@ -267,12 +267,12 @@ public final class PrSelfTest {
                     throw new IllegalStateException("shader pack " + arg + " did not load");
                 }
             }
-            case "irisinfo" -> {
+            case "shaderinfo" -> {
                 List<String> lines = new ArrayList<>();
                 PryzmaShaders.getPipelineManager().getPipeline().ifPresent(p -> p.addDebugText(lines));
-                LOG.info("PRYZMA-SELFTEST iris pack={} inUse={} fallback={} sections={}", PryzmaShaders.getCurrentPackName(),
+                LOG.info("PRYZMA-SELFTEST shader pack={} inUse={} fallback={} sections={}", PryzmaShaders.getCurrentPackName(),
                         PryzmaShaders.isPackInUseQuick(), PryzmaShaders.isFallback(), mc.levelRenderer.getSectionStatistics());
-                lines.forEach(l -> LOG.info("PRYZMA-SELFTEST iris {}", l));
+                lines.forEach(l -> LOG.info("PRYZMA-SELFTEST shader {}", l));
             }
             case "detailblocks" -> {
                 List<String> detail = new ArrayList<>();

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ShaderForgeHelpers implements ShaderPlatformHelpers {
-	/** PryzmaShaders port version shown next to Pryzma's own. */
+	/** Pryzma Shaders version shown next to Pryzma's own. */
 	public static final String IRIS_BASE_VERSION = "1.8.14";
 	/**
 	 * Key mappings created before mods are constructed ({@code Options.load}); Pryzma hands them to

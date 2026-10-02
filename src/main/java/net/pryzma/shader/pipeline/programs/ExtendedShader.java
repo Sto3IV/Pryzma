@@ -243,7 +243,7 @@ public class ExtendedShader extends ShaderInstance implements ShaderInstanceInte
 	}
 
 	@Override
-	public void iris$createExtraShaders(ResourceProvider factory, String name) {
+	public void pryzma$createExtraShaders(ResourceProvider factory, String name) {
 		createGeometryShader(factory, name);
 		createTessControlShader(factory, name);
 		createTessEvalShader(factory, name);

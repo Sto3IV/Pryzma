@@ -25,7 +25,7 @@ public class MixinOptions_CloudsOverride {
 	private OptionInstance<Integer> renderDistance;
 
 	@Inject(method = "getCloudsType", at = @At("HEAD"), cancellable = true)
-	private void iris$overrideCloudsType(CallbackInfoReturnable<CloudStatus> cir) {
+	private void pryzma$overrideCloudsType(CallbackInfoReturnable<CloudStatus> cir) {
 		// Vanilla does not render clouds on low render distances, we have to mirror that check
 		// when injecting at the head.
 		if (renderDistance.get() < 4) {

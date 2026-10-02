@@ -22,7 +22,7 @@ public abstract class MixinTextureAtlas extends AbstractTexture implements Textu
 	private PBRAtlasHolder pbrHolder;
 
 	@Inject(method = "cycleAnimationFrames()V", at = @At("TAIL"))
-	private void iris$onTailCycleAnimationFrames(CallbackInfo ci) {
+	private void pryzma$onTailCycleAnimationFrames(CallbackInfo ci) {
 		if (pbrHolder != null) {
 			pbrHolder.cycleAnimationFrames();
 		}

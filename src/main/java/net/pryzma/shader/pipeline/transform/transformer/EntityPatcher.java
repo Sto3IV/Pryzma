@@ -51,7 +51,7 @@ public class EntityPatcher {
 				"entityColor = vec4(overlayColor.rgb, 1.0 - overlayColor.a);",
 				"iris_vertexColor = iris_Color;",
 				// Workaround for a shader pack bug:
-				// https://github.com/IrisShaders/PryzmaShaders/issues/1549
+				// upstream issue #1549
 				// Some shader packs incorrectly ignore the alpha value, and assume that rgb
 				// will be zero if there is no hit flash, we try to emulate that here
 				"entityColor.rgb *= float(entityColor.a != 0.0);");

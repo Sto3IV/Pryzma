@@ -13,19 +13,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(TitleScreen.class)
 public class MixinTitleScreen extends Screen {
 	@Unique
-	private static boolean iris$hasFirstInit;
+	private static boolean pryzma$hasFirstInit;
 
 	protected MixinTitleScreen(Component arg) {
 		super(arg);
 	}
 
 	@Inject(method = "init", at = @At("RETURN"))
-	public void iris$firstInit(CallbackInfo ci) {
-		if (!iris$hasFirstInit) {
+	public void pryzma$firstInit(CallbackInfo ci) {
+		if (!pryzma$hasFirstInit) {
 			PryzmaShaders.onLoadingComplete();
 		}
 
-		iris$hasFirstInit = true;
+		pryzma$hasFirstInit = true;
 
 	}
 }

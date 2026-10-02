@@ -69,8 +69,8 @@ public class ShaderProperties {
 	private final Object2ObjectMap<String, ArrayList<BufferBlendInformation>> bufferBlendOverrides = new Object2ObjectOpenHashMap<>();
 	private final EnumMap<TextureStage, Object2ObjectMap<String, TextureDefinition>> customTextures = new EnumMap<>(TextureStage.class);
 	private final Object2ObjectMap<Tri<String, TextureType, TextureStage>, String> customTexturePatching = new Object2ObjectOpenHashMap<>();
-	private final Object2ObjectMap<String, TextureDefinition> irisCustomTextures = new Object2ObjectOpenHashMap<>();
-	private final List<ImageInformation> irisCustomImages = new ArrayList<>();
+	private final Object2ObjectMap<String, TextureDefinition> extendedCustomTextures = new Object2ObjectOpenHashMap<>();
+	private final List<ImageInformation> extendedCustomImages = new ArrayList<>();
 	private final Int2ObjectArrayMap<ShaderStorageInfo> bufferObjects = new Int2ObjectArrayMap<>();
 	private final Object2ObjectMap<String, Object2BooleanMap<String>> explicitFlips = new Object2ObjectOpenHashMap<>();
 	private final Object2ObjectMap<String, String> conditionallyEnabledPrograms = new Object2ObjectOpenHashMap<>();
@@ -460,15 +460,15 @@ public class ShaderProperties {
 					if (parts.length == 6) {
 						// 1D texture handling
 						type = TextureType.TEXTURE_1D;
-						irisCustomTextures.put(newSamplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), 0, 0, PixelFormat.fromString(parts[4]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[5]).orElseThrow(IllegalArgumentException::new)));
+						extendedCustomTextures.put(newSamplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), 0, 0, PixelFormat.fromString(parts[4]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[5]).orElseThrow(IllegalArgumentException::new)));
 					} else if (parts.length == 7) {
 						// 2D texture handling
 						type = TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT));
-						irisCustomTextures.put(newSamplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), 0, PixelFormat.fromString(parts[5]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[6]).orElseThrow(IllegalArgumentException::new)));
+						extendedCustomTextures.put(newSamplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), 0, PixelFormat.fromString(parts[5]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[6]).orElseThrow(IllegalArgumentException::new)));
 					} else if (parts.length == 8) {
 						// 3D texture handling
 						type = TextureType.TEXTURE_3D;
-						irisCustomTextures.put(newSamplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5]), PixelFormat.fromString(parts[6]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[7]).orElseThrow(IllegalArgumentException::new)));
+						extendedCustomTextures.put(newSamplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5]), PixelFormat.fromString(parts[6]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[7]).orElseThrow(IllegalArgumentException::new)));
 					} else {
 						PryzmaShaders.logger.warn("Unknown texture directive for " + key + ": " + value);
 					}
@@ -490,13 +490,13 @@ public class ShaderProperties {
 					// Raw texture handling
 					if (parts.length == 6) {
 						// 1D texture handling
-						irisCustomTextures.put(samplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), 0, 0, PixelFormat.fromString(parts[4]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[5]).orElseThrow(IllegalArgumentException::new)));
+						extendedCustomTextures.put(samplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), 0, 0, PixelFormat.fromString(parts[4]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[5]).orElseThrow(IllegalArgumentException::new)));
 					} else if (parts.length == 7) {
 						// 2D texture handling
-						irisCustomTextures.put(samplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), 0, PixelFormat.fromString(parts[5]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[6]).orElseThrow(IllegalArgumentException::new)));
+						extendedCustomTextures.put(samplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), 0, PixelFormat.fromString(parts[5]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[6]).orElseThrow(IllegalArgumentException::new)));
 					} else if (parts.length == 8) {
 						// 3D texture handling
-						irisCustomTextures.put(samplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5]), PixelFormat.fromString(parts[6]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[7]).orElseThrow(IllegalArgumentException::new)));
+						extendedCustomTextures.put(samplerName, new TextureDefinition.RawDefinition(parts[0], TextureType.valueOf(parts[1].toUpperCase(Locale.ROOT)), InternalTextureFormat.fromString(parts[2]).orElseThrow(IllegalArgumentException::new), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5]), PixelFormat.fromString(parts[6]).orElseThrow(IllegalArgumentException::new), PixelType.fromString(parts[7]).orElseThrow(IllegalArgumentException::new)));
 					} else {
 						PryzmaShaders.logger.warn("Unknown texture directive for " + key + ": " + value);
 					}
@@ -504,14 +504,14 @@ public class ShaderProperties {
 					return;
 				}
 
-				irisCustomTextures.put(samplerName, new TextureDefinition.PNGDefinition(value));
+				extendedCustomTextures.put(samplerName, new TextureDefinition.PNGDefinition(value));
 			});
 
 			handlePassDirective("image.", key, value, (imageName) -> {
 				String[] parts = value.split(" ");
 				String key2 = key.substring(6);
 
-				if (irisCustomImages.size() > 15) {
+				if (extendedCustomImages.size() > 15) {
 					PryzmaShaders.logger.error("Only up to 16 images are allowed, but tried to add another image! " + key);
 					return;
 				}
@@ -563,7 +563,7 @@ public class ShaderProperties {
 					image = new ImageInformation(key2, samplerName, type, format, internalFormat, pixelType, width, height, depth, clear, false, 0, 0);
 				}
 
-				irisCustomImages.add(image);
+				extendedCustomImages.add(image);
 			});
 
 			handleTwoArgDirective("flip.", key, value, (pass, buffer) -> handleBooleanValue(key, value, shouldFlip -> explicitFlips.computeIfAbsent(pass, _pass -> new Object2BooleanOpenHashMap<>())
@@ -600,6 +600,8 @@ public class ShaderProperties {
 
 			handleWhitespacedListDirective(key, value, "iris.features.required", options -> requiredFeatureFlags = options);
 			handleWhitespacedListDirective(key, value, "iris.features.optional", options -> optionalFeatureFlags = options);
+			handleWhitespacedListDirective(key, value, "pryzma.features.required", options -> requiredFeatureFlags = options);
+			handleWhitespacedListDirective(key, value, "pryzma.features.optional", options -> optionalFeatureFlags = options);
 
 			// Defining "sliders" multiple times in the properties file will only result in
 			// the last definition being used, should be tested if behavior matches OptiFine
@@ -923,12 +925,22 @@ public class ShaderProperties {
 		return customTexturePatching;
 	}
 
-	public Object2ObjectMap<String, TextureDefinition> getIrisCustomTextures() {
-		return irisCustomTextures;
+	public Object2ObjectMap<String, TextureDefinition> getExtendedCustomTextures() {
+		return extendedCustomTextures;
 	}
 
+	public List<ImageInformation> getExtendedCustomImages() {
+		return extendedCustomImages;
+	}
+
+	@Deprecated
+	public Object2ObjectMap<String, TextureDefinition> getIrisCustomTextures() {
+		return getExtendedCustomTextures();
+	}
+
+	@Deprecated
 	public List<ImageInformation> getIrisCustomImages() {
-		return irisCustomImages;
+		return getExtendedCustomImages();
 	}
 
 	public Optional<String> getNoiseTexturePath() {

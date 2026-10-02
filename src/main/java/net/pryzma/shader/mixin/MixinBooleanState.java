@@ -22,7 +22,7 @@ public class MixinBooleanState implements BooleanStateExtended {
 	private boolean stateUnknown;
 
 	@Inject(method = "setEnabled", at = @At("HEAD"), cancellable = true)
-	private void iris$setUnknownState(boolean enable, CallbackInfo ci) {
+	private void pryzma$setUnknownState(boolean enable, CallbackInfo ci) {
 		if (stateUnknown) {
 			ci.cancel();
 			this.enabled = enable;

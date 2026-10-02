@@ -41,7 +41,7 @@ public class MixinBlockEntityRenderDispatcher {
 	@ModifyVariable(method = "render", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/world/level/block/entity/BlockEntityType;isValid(Lnet/minecraft/world/level/block/state/BlockState;)Z"),
 		allow = 1, require = 1, argsOnly = true)
-	private MultiBufferSource iris$wrapBufferSource(MultiBufferSource bufferSource, BlockEntity blockEntity) {
+	private MultiBufferSource pryzma$wrapBufferSource(MultiBufferSource bufferSource, BlockEntity blockEntity) {
 		BlockState state = blockEntity.getBlockState();
 
 		Object2IntMap<BlockState> blockStateIds = WorldRenderingSettings.INSTANCE.getBlockStateIds();
@@ -54,12 +54,12 @@ public class MixinBlockEntityRenderDispatcher {
 
 		CapturedRenderingState.INSTANCE.setCurrentBlockEntity(intId);
 
-		return new BufferSourceWrapper(bufferSource, (renderType) -> OuterWrappedRenderType.wrapExactlyOnce("iris:block_entity", renderType, BlockEntityRenderStateShard.INSTANCE));
+		return new BufferSourceWrapper(bufferSource, (renderType) -> OuterWrappedRenderType.wrapExactlyOnce("pryzma:block_entity", renderType, BlockEntityRenderStateShard.INSTANCE));
 	}
 
 
 	@Inject(method = "render", at = @At(value = "INVOKE", target = RUN_REPORTED, shift = At.Shift.AFTER))
-	private void iris$afterRender(BlockEntity blockEntity, float tickDelta, PoseStack matrix,
+	private void pryzma$afterRender(BlockEntity blockEntity, float tickDelta, PoseStack matrix,
 								  MultiBufferSource bufferSource, CallbackInfo ci) {
 		CapturedRenderingState.INSTANCE.setCurrentBlockEntity(0);
 	}

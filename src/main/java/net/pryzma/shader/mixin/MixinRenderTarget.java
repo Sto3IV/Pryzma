@@ -25,14 +25,14 @@ public class MixinRenderTarget implements Blaze3dRenderTargetExt {
 	@Shadow
 	public int frameBufferId;
 	@Unique
-	private int iris$depthBufferVersion;
+	private int pryzma$depthBufferVersion;
 	@Unique
-	private int iris$colorBufferVersion;
+	private int pryzma$colorBufferVersion;
 
 	@Inject(method = "destroyBuffers()V", at = @At("HEAD"))
-	private void iris$onDestroyBuffers(CallbackInfo ci) {
-		iris$depthBufferVersion++;
-		iris$colorBufferVersion++;
+	private void pryzma$onDestroyBuffers(CallbackInfo ci) {
+		pryzma$depthBufferVersion++;
+		pryzma$colorBufferVersion++;
 	}
 
 	@Inject(method = "createBuffers", at = @At(value = "RETURN"))
@@ -43,12 +43,12 @@ public class MixinRenderTarget implements Blaze3dRenderTargetExt {
 	}
 
 	@Override
-	public int iris$getDepthBufferVersion() {
-		return iris$depthBufferVersion;
+	public int pryzma$getDepthBufferVersion() {
+		return pryzma$depthBufferVersion;
 	}
 
 	@Override
-	public int iris$getColorBufferVersion() {
-		return iris$colorBufferVersion;
+	public int pryzma$getColorBufferVersion() {
+		return pryzma$colorBufferVersion;
 	}
 }

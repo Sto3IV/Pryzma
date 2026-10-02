@@ -250,7 +250,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		}
 
 		this.customImages = new HashSet<>();
-		for (ImageInformation information : programSet.getPack().getIrisCustomImages()) {
+		for (ImageInformation information : programSet.getPack().getExtendedCustomImages()) {
 			if (information.isRelative()) {
 				customImages.add(new GlImage.Relative(information.name(), information.samplerName(), information.format(), information.internalTextureFormat(), information.type(), information.clear(), information.relativeWidth(), information.relativeHeight(), main.width, main.height));
 			} else {
@@ -269,7 +269,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		}
 
 
-		this.renderTargets = new RenderTargets(main.width, main.height, depthTextureId, ((Blaze3dRenderTargetExt) main).iris$getDepthBufferVersion(), depthBufferFormat, programSet.getPackDirectives().getRenderTargetDirectives().getRenderTargetSettings(), programSet.getPackDirectives());
+		this.renderTargets = new RenderTargets(main.width, main.height, depthTextureId, ((Blaze3dRenderTargetExt) main).pryzma$getDepthBufferVersion(), depthBufferFormat, programSet.getPackDirectives().getRenderTargetDirectives().getRenderTargetSettings(), programSet.getPackDirectives());
 		this.sunPathRotation = programSet.getPackDirectives().getSunPathRotation();
 
 		PackShadowDirectives shadowDirectives = programSet.getPackDirectives().getShadowDirectives();
@@ -293,7 +293,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		// Don't clobber anything in texture unit 0. It probably won't cause issues, but we're just being cautious here.
 		GlStateManager._activeTexture(GL20C.GL_TEXTURE2);
 
-		customTextureManager = new CustomTextureManager(programSet.getPackDirectives(), programSet.getPack().getCustomTextureDataMap(), programSet.getPack().getIrisCustomTextureDataMap(), programSet.getPack().getCustomNoiseTexture());
+		customTextureManager = new CustomTextureManager(programSet.getPackDirectives(), programSet.getPack().getCustomTextureDataMap(), programSet.getPack().getExtendedCustomTextureDataMap(), programSet.getPack().getCustomNoiseTexture());
 		whitePixel = new NativeImageBackedSingleColorTexture(255, 255, 255, 255);
 
 		GlStateManager._activeTexture(GL20C.GL_TEXTURE0);
@@ -321,32 +321,32 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 
 		this.beginRenderer = new CompositeRenderer(this, CompositePass.BEGIN, programSet.getPackDirectives(), programSet.getComposite(ProgramArrayId.Begin), programSet.getCompute(ProgramArrayId.Begin), renderTargets, shaderStorageBufferHolder,
 			customTextureManager.getNoiseTexture(), updateNotifier, centerDepthSampler, flipper, shadowTargetsSupplier, TextureStage.BEGIN,
-			customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.BEGIN, Object2ObjectMaps.emptyMap()), customTextureManager.getIrisCustomTextures(), customImages,
+			customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.BEGIN, Object2ObjectMaps.emptyMap()), customTextureManager.getExtendedCustomTextures(), customImages,
 			programSet.getPackDirectives().getExplicitFlips("begin_pre"), customUniforms);
 
 		flippedBeforeShadow = flipper.snapshot();
 
 		this.prepareRenderer = new CompositeRenderer(this, CompositePass.PREPARE, programSet.getPackDirectives(), programSet.getComposite(ProgramArrayId.Prepare), programSet.getCompute(ProgramArrayId.Prepare), renderTargets, shaderStorageBufferHolder,
 			customTextureManager.getNoiseTexture(), updateNotifier, centerDepthSampler, flipper, shadowTargetsSupplier, TextureStage.PREPARE,
-			customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.PREPARE, Object2ObjectMaps.emptyMap()), customTextureManager.getIrisCustomTextures(), customImages,
+			customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.PREPARE, Object2ObjectMaps.emptyMap()), customTextureManager.getExtendedCustomTextures(), customImages,
 			programSet.getPackDirectives().getExplicitFlips("prepare_pre"), customUniforms);
 
 		flippedAfterPrepare = flipper.snapshot();
 
 		this.deferredRenderer = new CompositeRenderer(this, CompositePass.DEFERRED, programSet.getPackDirectives(), programSet.getComposite(ProgramArrayId.Deferred), programSet.getCompute(ProgramArrayId.Deferred), renderTargets, shaderStorageBufferHolder,
 			customTextureManager.getNoiseTexture(), updateNotifier, centerDepthSampler, flipper, shadowTargetsSupplier, TextureStage.DEFERRED,
-			customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.DEFERRED, Object2ObjectMaps.emptyMap()), customTextureManager.getIrisCustomTextures(), customImages,
+			customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.DEFERRED, Object2ObjectMaps.emptyMap()), customTextureManager.getExtendedCustomTextures(), customImages,
 			programSet.getPackDirectives().getExplicitFlips("deferred_pre"), customUniforms);
 
 		flippedAfterTranslucent = flipper.snapshot();
 
 		this.compositeRenderer = new CompositeRenderer(this, CompositePass.COMPOSITE, programSet.getPackDirectives(), programSet.getComposite(ProgramArrayId.Composite), programSet.getCompute(ProgramArrayId.Composite), renderTargets, shaderStorageBufferHolder,
 			customTextureManager.getNoiseTexture(), updateNotifier, centerDepthSampler, flipper, shadowTargetsSupplier, TextureStage.COMPOSITE_AND_FINAL,
-			customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.COMPOSITE_AND_FINAL, Object2ObjectMaps.emptyMap()), customTextureManager.getIrisCustomTextures(), customImages,
+			customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.COMPOSITE_AND_FINAL, Object2ObjectMaps.emptyMap()), customTextureManager.getExtendedCustomTextures(), customImages,
 			programSet.getPackDirectives().getExplicitFlips("composite_pre"), customUniforms);
 		this.finalPassRenderer = new FinalPassRenderer(this, programSet, renderTargets, customTextureManager.getNoiseTexture(), shaderStorageBufferHolder, updateNotifier, flipper.snapshot(),
 			centerDepthSampler, shadowTargetsSupplier,
-			customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.COMPOSITE_AND_FINAL, Object2ObjectMaps.emptyMap()), customTextureManager.getIrisCustomTextures(), customImages,
+			customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.COMPOSITE_AND_FINAL, Object2ObjectMaps.emptyMap()), customTextureManager.getExtendedCustomTextures(), customImages,
 			this.compositeRenderer.getFlippedAtLeastOnceFinal(), customUniforms);
 
 		Supplier<ImmutableSet<Integer>> flipped =
@@ -358,7 +358,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 			ProgramSamplers.CustomTextureSamplerInterceptor customTextureSamplerInterceptor = ProgramSamplers.customTextureSamplerInterceptor(builder, customTextureManager.getCustomTextureIdMap().getOrDefault(TextureStage.GBUFFERS_AND_SHADOW, Object2ObjectMaps.emptyMap()));
 
 			ShaderSamplers.addRenderTargetSamplers(customTextureSamplerInterceptor, flipped, renderTargets, false, this);
-			ShaderSamplers.addCustomTextures(builder, customTextureManager.getIrisCustomTextures());
+			ShaderSamplers.addCustomTextures(builder, customTextureManager.getExtendedCustomTextures());
 
 			if (!shouldBindPBR) {
 				shouldBindPBR = ShaderSamplers.hasPBRSamplers(customTextureSamplerInterceptor);
@@ -442,7 +442,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 			this.shadowClearPasses = ClearPassCreator.createShadowClearPasses(shadowRenderTargets, false, shadowDirectives);
 			this.shadowClearPassesFull = ClearPassCreator.createShadowClearPasses(shadowRenderTargets, true, shadowDirectives);
 			this.shadowCompositeRenderer = new ShadowCompositeRenderer(this, programSet.getPackDirectives(), programSet.getComposite(ProgramArrayId.ShadowComposite), programSet.getCompute(ProgramArrayId.ShadowComposite), this.shadowRenderTargets, this.shaderStorageBufferHolder, customTextureManager.getNoiseTexture(), updateNotifier,
-				customTextureManager.getCustomTextureIdMap(TextureStage.SHADOWCOMP), customImages, programSet.getPackDirectives().getExplicitFlips("shadowcomp_pre"), customTextureManager.getIrisCustomTextures(), customUniforms);
+				customTextureManager.getCustomTextureIdMap(TextureStage.SHADOWCOMP), customImages, programSet.getPackDirectives().getExplicitFlips("shadowcomp_pre"), customTextureManager.getExtendedCustomTextures(), customUniforms);
 
 			if (programSet.getPackDirectives().getShadowDirectives().isShadowEnabled().orElse(true)) {
 				this.shadowRenderer = new ShadowRenderer(this, resolver.resolveNullable(ProgramId.ShadowSolid),
@@ -555,7 +555,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 						customTextureManager.getCustomTextureIdMap(textureStage));
 
 				ShaderSamplers.addRenderTargetSamplers(customTextureSamplerInterceptor, flipped, renderTargets, false, this);
-				ShaderSamplers.addCustomTextures(builder, customTextureManager.getIrisCustomTextures());
+				ShaderSamplers.addCustomTextures(builder, customTextureManager.getExtendedCustomTextures());
 				ShaderSamplers.addCustomImages(customTextureSamplerInterceptor, customImages);
 				ShaderImages.addRenderTargetImages(builder, flipped, renderTargets);
 				ShaderImages.addCustomImages(builder, customImages);
@@ -617,7 +617,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 						customTextureManager.getCustomTextureIdMap(textureStage));
 
 				ShaderSamplers.addRenderTargetSamplers(customTextureSamplerInterceptor, flipped, renderTargets, true, this);
-				ShaderSamplers.addCustomTextures(builder, customTextureManager.getIrisCustomTextures());
+				ShaderSamplers.addCustomTextures(builder, customTextureManager.getExtendedCustomTextures());
 				ShaderSamplers.addCompositeSamplers(builder, renderTargets);
 				ShaderSamplers.addCustomImages(customTextureSamplerInterceptor, customImages);
 				ShaderImages.addRenderTargetImages(builder, flipped, renderTargets);
@@ -741,7 +741,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 				customTextureManager.getCustomTextureIdMap().getOrDefault(textureStage, Object2ObjectMaps.emptyMap()));
 
 		ShaderSamplers.addRenderTargetSamplers(samplerHolder, flipped, renderTargets, false, this);
-		ShaderSamplers.addCustomTextures(samplerHolder, customTextureManager.getIrisCustomTextures());
+		ShaderSamplers.addCustomTextures(samplerHolder, customTextureManager.getExtendedCustomTextures());
 		ShaderImages.addRenderTargetImages(images, flipped, renderTargets);
 		ShaderImages.addCustomImages(images, customImages);
 
@@ -921,7 +921,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		int internalFormat = TextureInfoCache.INSTANCE.getInfo(depthTextureId).getInternalFormat();
 		DepthBufferFormat depthBufferFormat = DepthBufferFormat.fromGlEnumOrDefault(internalFormat);
 
-		boolean changed = renderTargets.resizeIfNeeded(((Blaze3dRenderTargetExt) main).iris$getDepthBufferVersion(), depthTextureId, main.width,
+		boolean changed = renderTargets.resizeIfNeeded(((Blaze3dRenderTargetExt) main).pryzma$getDepthBufferVersion(), depthTextureId, main.width,
 			main.height, depthBufferFormat, packDirectives);
 
 		if (changed) {

@@ -158,7 +158,7 @@ public class CompatibilityTransformer {
 		if (parameters.type == PatchShaderType.VERTEX) {
 			if (root.replaceExpressionMatches(t, sildursWaterFract, "fract(worldpos.y + 0.01)")) {
 				PryzmaShaders.logger.warn("Patched fract(worldpos.y + 0.001) to fract(worldpos.y + 0.01) to fix " +
-					"waving water disconnecting from other water blocks; See https://github.com/IrisShaders/PryzmaShaders/issues/509");
+					"waving water disconnecting from other water blocks; See upstream issue #509");
 			}
 		}
 
@@ -562,7 +562,7 @@ public class CompatibilityTransformer {
 
 							boolean isVector = outType.isVector();
 
-							// rename all references of this out declaration to a new name (iris_)
+							// rename all references of this out declaration to a new name (tagPrefix)
 							String newName = tagPrefix + name;
 							prevRoot.identifierIndex.rename(name, newName);
 

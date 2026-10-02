@@ -23,7 +23,7 @@ import java.io.IOException;
 @Mixin(Minecraft.class)
 public class MixinMinecraft_Images {
 	@Inject(method = "<init>", at = @At("TAIL"))
-	private void iris$setupImages(GameConfig arg, CallbackInfo ci) {
+	private void pryzma$setupImages(GameConfig arg, CallbackInfo ci) {
 		if (!ShaderPlatformHelpers.getInstance().isModLoaded("fabric-resource-loader-v0")) {
 			try {
 				Minecraft.getInstance().getTextureManager().register(ResourceLocation.fromNamespaceAndPath("pryzma", "textures/gui/widgets.png"), new NativeImageBackedCustomTexture(new CustomTextureData.PngData(new TextureFilteringData(false, false), IOUtils.toByteArray(PryzmaShaders.class.getResourceAsStream("/assets/pryzma/textures/gui/widgets.png")))));

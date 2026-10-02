@@ -28,7 +28,7 @@ public class ShaderConfig {
 	/** Pryzma's shader settings file in the config directory. */
 	public static final String FILE_NAME = "pryzma-shaders.properties";
 	private static final String COMMENT =
-		"This file stores configuration options for Pryzma shaders (PryzmaShaders port), such as the currently active shaderpack";
+		"This file stores configuration options for Pryzma shaders (Pryzma Shaders), such as the currently active shaderpack";
 	private final Path propertiesPath;
 	private final Path excludedPath;
 	/**
@@ -82,16 +82,16 @@ public class ShaderConfig {
 	}
 
 	/**
-	 * First start without a settings file: the selection made for PryzmaShaders ({@code config/iris.properties}) or for
+	 * First start without a settings file: the selection made for Pryzma ({@code config/pryzma-shaders.properties}) or for
 	 * OptiFine and Pryzma's previous engine ({@code optionsshaders.txt}, {@code OFF} meaning none) carries over.
 	 */
 	private void importLegacySelection() {
-		Path iris = propertiesPath.resolveSibling("iris.properties");
+		Path legacyConfig = propertiesPath.resolveSibling("iris.properties");
 		Path optifine = ShaderPlatformHelpers.getInstance().getGameDir().resolve("optionsshaders.txt");
 		try {
-			if (Files.exists(iris)) {
-				Files.copy(iris, propertiesPath);
-				PryzmaShaders.logger.info("Imported shader settings from " + iris);
+			if (Files.exists(legacyConfig)) {
+				Files.copy(legacyConfig, propertiesPath);
+				PryzmaShaders.logger.info("Imported shader settings from " + legacyConfig.getFileName());
 			} else if (Files.exists(optifine)) {
 				Properties legacy = new Properties();
 				try (InputStream is = Files.newInputStream(optifine)) {

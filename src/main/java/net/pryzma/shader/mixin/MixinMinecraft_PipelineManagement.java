@@ -17,7 +17,7 @@ public class MixinMinecraft_PipelineManagement {
 	 * Should run before the Minecraft.level field is updated after disconnecting from a server or leaving a singleplayer world
 	 */
 	@Inject(method = "clearClientLevel", at = @At("HEAD"))
-	public void iris$trackLastDimensionOnLeave(Screen arg, CallbackInfo ci) {
+	public void pryzma$trackLastDimensionOnLeave(Screen arg, CallbackInfo ci) {
 		PryzmaShaders.lastDimension = PryzmaShaders.getCurrentDimension();
 	}
 
@@ -26,7 +26,7 @@ public class MixinMinecraft_PipelineManagement {
 	 * NB: Not on leave, another inject is used for that
 	 */
 	@Inject(method = "setLevel", at = @At("HEAD"))
-	private void iris$trackLastDimensionOnLevelChange(ClientLevel clientLevel, ReceivingLevelScreen.Reason reason, CallbackInfo ci) {
+	private void pryzma$trackLastDimensionOnLevelChange(ClientLevel clientLevel, ReceivingLevelScreen.Reason reason, CallbackInfo ci) {
 		PryzmaShaders.lastDimension = PryzmaShaders.getCurrentDimension();
 	}
 
@@ -42,10 +42,10 @@ public class MixinMinecraft_PipelineManagement {
 	 * then PryzmaShaders will switch on its pipeline, then code will assume that the extended vertex format
 	 * is used everywhere.
 	 * <p>
-	 * See: <a href="https://github.com/IrisShaders/PryzmaShaders/issues/1330">Issue 1330</a>
+	 * See: <a href="upstream issue #1330">Issue 1330</a>
 	 */
 	@Inject(method = "updateLevelInEngines", at = @At("HEAD"))
-	private void iris$resetPipeline(@Nullable ClientLevel level, CallbackInfo ci) {
+	private void pryzma$resetPipeline(@Nullable ClientLevel level, CallbackInfo ci) {
 		if (PryzmaShaders.getCurrentDimension() != PryzmaShaders.lastDimension) {
 			PryzmaShaders.logger.info("Reloading pipeline on dimension change: " + PryzmaShaders.lastDimension + " => " + PryzmaShaders.getCurrentDimension());
 			// Destroy pipelines when changing dimensions.

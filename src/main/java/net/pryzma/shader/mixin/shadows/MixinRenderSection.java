@@ -17,12 +17,12 @@ public class MixinRenderSection {
 	public int index;
 
 	@Inject(method = "setCompiled", at = @At("TAIL"))
-	private void iris$indexCompiled(SectionRenderDispatcher.CompiledSection compiled, CallbackInfo ci) {
+	private void pryzma$indexCompiled(SectionRenderDispatcher.CompiledSection compiled, CallbackInfo ci) {
 		ShadowSectionIndex.update(index, compiled);
 	}
 
 	@Inject(method = "reset", at = @At("TAIL"))
-	private void iris$indexReset(CallbackInfo ci) {
+	private void pryzma$indexReset(CallbackInfo ci) {
 		ShadowSectionIndex.update(index, SectionRenderDispatcher.CompiledSection.UNCOMPILED);
 	}
 }

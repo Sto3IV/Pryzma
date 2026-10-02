@@ -19,7 +19,7 @@ public class MixinStationaryItemParticle {
 	private boolean isOpaque;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	private void iris$resolveTranslucency(ClientLevel clientLevel, double d, double e, double f, BlockState blockState, CallbackInfo ci) {
+	private void pryzma$resolveTranslucency(ClientLevel clientLevel, double d, double e, double f, BlockState blockState, CallbackInfo ci) {
 		RenderType type = ItemBlockRenderTypes.getChunkRenderType(blockState);
 
 		if (type == RenderType.solid() || type == RenderType.cutout() || type == RenderType.cutoutMipped()) {
@@ -28,7 +28,7 @@ public class MixinStationaryItemParticle {
 	}
 
 	@Inject(method = "getRenderType", at = @At("HEAD"), cancellable = true)
-	private void iris$overrideParticleRenderType(CallbackInfoReturnable<ParticleRenderType> cir) {
+	private void pryzma$overrideParticleRenderType(CallbackInfoReturnable<ParticleRenderType> cir) {
 		if (isOpaque) {
 			cir.setReturnValue(ParticleRenderType.TERRAIN_SHEET);
 		}

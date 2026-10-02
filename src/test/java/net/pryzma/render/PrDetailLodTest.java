@@ -30,7 +30,7 @@ import net.pryzma.detail.PrDeferredDetailQueue;
 class PrDetailLodTest {
     private static final String SECTION_COMPILER = "net/minecraft/client/renderer/chunk/SectionCompiler";
     private static final String COMPILER_MIXIN = "net/pryzma/mixin/SectionCompilerRegionMixin";
-    private static final String IRIS_COMPILER_MIXIN = "net/pryzma/shader/mixin/vertices/block_rendering/MixinSectionCompiler";
+    private static final String SHADER_COMPILER_MIXIN = "net/pryzma/shader/mixin/vertices/block_rendering/MixinSectionCompiler";
     private static final String BLOCK_CONTEXT = "net/pryzma/shader/vertices/BlockContext";
     private static final String LOCAL = "Lcom/llamalad7/mixinextras/sugar/Local;";
 
@@ -107,11 +107,11 @@ class PrDetailLodTest {
 
     /** S2: the replay must carry the same mc_Entity / at_midBlock as PryzmaShaders' in-order path, so both go through one helper. */
     @Test
-    void replayAndIrisUseOneBlockContext() throws IOException {
+    void replayAndPryzmaUseOneBlockContext() throws IOException {
         assertTrue(calls(read(COMPILER_MIXIN), null, BLOCK_CONTEXT, "begin"), "the replay begins PryzmaShaders' block context");
         assertTrue(!calls(read(COMPILER_MIXIN), null, "net/pryzma/shader/vertices/BlockSensitiveBufferBuilder", "beginBlock"),
                 "the replay must not hand-roll beginBlock");
-        assertTrue(calls(read(IRIS_COMPILER_MIXIN), "iris$blockContext", BLOCK_CONTEXT, "begin"), "PryzmaShaders' wrapper uses the same helper");
+        assertTrue(calls(read(SHADER_COMPILER_MIXIN), "pryzma$blockContext", BLOCK_CONTEXT, "begin"), "PryzmaShaders' wrapper uses the same helper");
     }
 
     @Test

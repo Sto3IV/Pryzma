@@ -12,7 +12,7 @@ import java.util.Objects;
 import static net.pryzma.shader.gl.uniform.UniformUpdateFrequency.PER_FRAME;
 
 /**
- * @see <a href="https://github.com/IrisShaders/ShaderDoc/blob/master/uniforms.md#celestial-bodies">Uniforms: Celestial bodies</a>
+ * @see <a href="Shader uniform documentation (celestial-bodies)">Uniforms: Celestial bodies</a>
  */
 public final class CelestialUniforms {
 	private final float sunPathRotation;

@@ -106,7 +106,7 @@ public class IdMap {
 		warnMissingBackslashInPropertiesFile(processed, name);
 
 		// Note: ordering of properties is significant
-		// See https://github.com/IrisShaders/PryzmaShaders/issues/1327 and the relevant putIfAbsent calls in
+		// See upstream issue #1327 and the relevant putIfAbsent calls in
 		// BlockMaterialMapping
 		Properties properties = new OrderBackedProperties();
 		try {

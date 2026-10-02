@@ -41,7 +41,7 @@ public class LegacyIdMap {
 		addMany(blockIdMap, 35, COLORS, color -> block(color + "_wool"));
 
 		// NB: Use the "still" IDs for water and lava, since some shader packs don't properly support the "flowing"
-		// versions: https://github.com/IrisShaders/PryzmaShaders/issues/1462
+		// versions: upstream issue #1462
 		add(blockIdMap, 9, block("water"));
 		add(blockIdMap, 11, block("lava"));
 		add(blockIdMap, 79, block("ice"));

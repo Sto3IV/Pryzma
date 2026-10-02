@@ -5,5 +5,5 @@ public interface ShadowRenderRegion {
 
 	void swapToShadowRenderList();
 
-	void iris$forceClearAllBatches();
+	void pryzma$forceClearAllBatches();
 }

@@ -22,30 +22,30 @@ public enum FeatureFlags {
 	SSBO(() -> true, ShaderRenderSystem::supportsSSBO),
 	UNKNOWN(() -> false, () -> false);
 
-	private final BooleanSupplier irisRequirement;
+	private final BooleanSupplier pipelineRequirement;
 	private final BooleanSupplier hardwareRequirement;
 
-	FeatureFlags(BooleanSupplier irisRequirement, BooleanSupplier hardwareRequirement) {
-		this.irisRequirement = irisRequirement;
+	FeatureFlags(BooleanSupplier pipelineRequirement, BooleanSupplier hardwareRequirement) {
+		this.pipelineRequirement = pipelineRequirement;
 		this.hardwareRequirement = hardwareRequirement;
 	}
 
 	public static String getInvalidStatus(List<FeatureFlags> invalidFeatureFlags) {
-		boolean unsupportedHardware = false, unsupportedIris = false;
+		boolean unsupportedHardware = false, unsupportedPipeline = false;
 		FeatureFlags[] flags = invalidFeatureFlags.toArray(new FeatureFlags[0]);
 		for (FeatureFlags flag : flags) {
-			unsupportedIris |= !flag.irisRequirement.getAsBoolean();
+			unsupportedPipeline |= !flag.pipelineRequirement.getAsBoolean();
 			unsupportedHardware |= !flag.hardwareRequirement.getAsBoolean();
 		}
 
-		if (unsupportedIris) {
+		if (unsupportedPipeline) {
 			if (unsupportedHardware) {
-				return I18n.get("iris.unsupported.irisorpc");
+				return I18n.get("pryzma.unsupported.pipelineorpc");
 			}
 
-			return I18n.get("iris.unsupported.iris");
+			return I18n.get("pryzma.unsupported.pipeline");
 		} else if (unsupportedHardware) {
-			return I18n.get("iris.unsupported.pc");
+			return I18n.get("pryzma.unsupported.pc");
 		} else {
 			return null;
 		}
@@ -77,6 +77,6 @@ public enum FeatureFlags {
 	}
 
 	public boolean isUsable() {
-		return irisRequirement.getAsBoolean() && hardwareRequirement.getAsBoolean();
+		return pipelineRequirement.getAsBoolean() && hardwareRequirement.getAsBoolean();
 	}
 }

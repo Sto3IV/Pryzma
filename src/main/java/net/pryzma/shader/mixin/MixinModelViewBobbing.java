@@ -53,14 +53,14 @@ public abstract class MixinModelViewBobbing {
 	protected abstract void bobHurt(PoseStack pGameRenderer0, float pFloat1);
 
 	@Inject(method = "renderLevel", at = @At("HEAD"))
-	private void iris$saveShadersOn(DeltaTracker deltaTracker, CallbackInfo ci) {
+	private void pryzma$saveShadersOn(DeltaTracker deltaTracker, CallbackInfo ci) {
 		areShadersOn = PryzmaShaders.isPackInUseQuick();
 	}
 
 	@ModifyArg(method = "renderLevel", index = 0,
 		at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/client/renderer/GameRenderer;bobHurt(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))
-	private PoseStack iris$separateViewBobbing(PoseStack stack) {
+	private PoseStack pryzma$separateViewBobbing(PoseStack stack) {
 		if (!areShadersOn) return stack;
 
 		stack.pushPose();
@@ -72,7 +72,7 @@ public abstract class MixinModelViewBobbing {
 	@Redirect(method = "renderLevel",
 		at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))
-	private void iris$stopBobbing(GameRenderer instance, PoseStack pGameRenderer0, float pFloat1) {
+	private void pryzma$stopBobbing(GameRenderer instance, PoseStack pGameRenderer0, float pFloat1) {
 		if (!areShadersOn) this.bobView(pGameRenderer0, pFloat1);
 	}
 
@@ -80,7 +80,7 @@ public abstract class MixinModelViewBobbing {
 	@Redirect(method = "renderLevel",
 		at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/client/renderer/GameRenderer;bobHurt(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))
-	private void iris$saveBobbing(GameRenderer instance, PoseStack pGameRenderer0, float pFloat1) {
+	private void pryzma$saveBobbing(GameRenderer instance, PoseStack pGameRenderer0, float pFloat1) {
 		if (!areShadersOn) this.bobHurt(pGameRenderer0, pFloat1);
 	}
 
@@ -88,14 +88,14 @@ public abstract class MixinModelViewBobbing {
 	@Redirect(method = "renderLevel",
 		at = @At(value = "INVOKE",
 			target = "Ljava/lang/Double;floatValue()F"))
-	private float iris$disableConfusionWithShaders(Double instance) {
+	private float pryzma$disableConfusionWithShaders(Double instance) {
 		return areShadersOn ? 0.0f : instance.floatValue();
 	}
 
 	@Redirect(method = "renderLevel",
 		at = @At(value = "INVOKE",
 			target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false))
-	private Matrix4f iris$applyBobbingToModelView(Matrix4f instance, Quaternionfc quat, DeltaTracker deltaTracker) {
+	private Matrix4f pryzma$applyBobbingToModelView(Matrix4f instance, Quaternionfc quat, DeltaTracker deltaTracker) {
 		if (!areShadersOn) {
 			instance.rotation(quat);
 

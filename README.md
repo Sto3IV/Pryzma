@@ -18,7 +18,7 @@ It revives the rich heritage of classic and modern resource packs — connected 
 ## ✦ What's New in v2.1.1
 
 * **🌐 Complete 40-Language Localization Sync:**
-  Full multi-language coverage across all 39 supported language files (`ru_ru`, `zh_cn`, `ja_jp`, `de_de`, `es_es`, `fr_fr`, etc.). Every UI string, tooltips, and Iris/Pryzma setting are 100% synchronized and parity-validated against vanilla and OptiFine conventions.
+  Full multi-language coverage across all 39 supported language files (`ru_ru`, `zh_cn`, `ja_jp`, `de_de`, `es_es`, `fr_fr`, etc.). Every UI string, tooltips, and Pryzma setting are 100% synchronized and parity-validated against vanilla and OptiFine conventions.
 * **⚡ 1% Low FPS & Frametime Optimization:**
   Optimized `SectionCompilerRegion` block state slices, chunk meshing allocation profiles, and memory footprint to eliminate micro-stutters and drastically stabilize 1% low frametimes under heavy shader loads.
 * **⚡ Zero-Stall VboRegion & Lazy Compaction (Phase 1):**
@@ -73,7 +73,7 @@ Why juggle dozens of conflicting mods with fragmented configs?
 
 | Feature | Vanilla 1.21.1 | The Fragmented Mod Salad (15+ Mods) | Pryzma (NeoForge 1.21.1) |
 | :--- | :---: | :--- | :---: |
-| **Shaderpack Pipeline** (BSL, Complementary, Nostalgia) | ❌ No | ⚠️ Requires `Iris` / `Oculus` | ✅ **Built-in Native Pipeline** |
+| **Shaderpack Pipeline** (BSL, Complementary, Nostalgia) | ❌ No | ⚠️ Requires `Pryzma Shaders` / `Oculus` | ✅ **Built-in Native Pipeline** |
 | **OptiFine Format** (`optifine/` folder) | ❌ No | ⚠️ Fragmented across 8+ separate mods | ✅ **100% Native Drop-in** |
 | **Legacy MCPatcher Format** (`mcpatcher/` folder) | ❌ No | ❌ **Unsupported** *(requires manual conversion)* | ✅ **Native Runtime Aliasing** |
 | **Connected Textures (CTM)** | ❌ No | ⚠️ Requires `Continuity` or `Fusion` | ✅ **Native Full-Suite CTM** |
@@ -133,7 +133,7 @@ To run the automated verification test suite:
 Pryzma is distributed under a composite open-source license (see [LICENSE](LICENSE)):
 
 * **Pryzma Core & Optimizations:** Licensed under the **MIT License**. Copyright (c) 2026 Sto3IV & Ranni.
-* **Shaderpack Pipeline (`net.pryzma.iris`):** Embedded optimized fork of [Iris](https://github.com/IrisShaders/Iris) 1.8.14, licensed under the **GNU LGPL-3.0** (`META-INF/LICENSE-IRIS`, `META-INF/NOTICE-IRIS`). Copyright (c) 2020-2024 Iris Contributors.
+* **Shaderpack Pipeline (`net.pryzma.iris`):** Embedded optimized fork of [Pryzma Shaders](https://github.com/Pryzma ShadersShaders/Pryzma Shaders) 1.8.14, licensed under the **GNU LGPL-3.0** (`META-INF/LICENSE-IRIS`, `META-INF/NOTICE-IRIS`). Copyright (c) 2020-2024 Pryzma Shaders Contributors.
 * **glsl-transformer:** Bundled as a nested Jar-in-Jar under the **GNU AGPL-3.0**. Copyright (c) douira.
 * **jcpp & ithaka-digraph:** Licensed under the **Apache License 2.0**.
 

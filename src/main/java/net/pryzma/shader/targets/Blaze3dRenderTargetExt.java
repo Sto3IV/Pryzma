@@ -1,7 +1,7 @@
 package net.pryzma.shader.targets;
 
 public interface Blaze3dRenderTargetExt {
-	int iris$getDepthBufferVersion();
+	int pryzma$getDepthBufferVersion();
 
-	int iris$getColorBufferVersion();
+	int pryzma$getColorBufferVersion();
 }

@@ -28,7 +28,7 @@ public class VanillaTransformer {
 
 		if (parameters.type.glShaderType == ShaderType.VERTEX) {
 			// Alias of gl_MultiTexCoord1 on 1.15+ for OptiFine
-			// See https://github.com/IrisShaders/PryzmaShaders/issues/1149
+			// See upstream issue #1149
 			root.rename("gl_MultiTexCoord2", "gl_MultiTexCoord1");
 
 			if (parameters.inputs.hasTex()) {
@@ -86,10 +86,10 @@ public class VanillaTransformer {
 		} else if (parameters.inputs.isGlint()) {
 			tree.parseAndInjectNode(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
 				"uniform float iris_GlintAlpha;");
-			// iris_ColorModulator should be applied regardless of the alpha test state.
+			// Color modulator should be applied regardless of the alpha test state.
 			root.replaceReferenceExpressions(t, "gl_Color", "vec4(iris_ColorModulator.rgb, iris_ColorModulator.a * iris_GlintAlpha)");
 		} else {
-			// iris_ColorModulator should be applied regardless of the alpha test state.
+			// Color modulator should be applied regardless of the alpha test state.
 			root.rename("gl_Color", "iris_ColorModulator");
 		}
 
