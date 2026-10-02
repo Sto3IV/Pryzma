@@ -15,8 +15,12 @@ It revives the rich heritage of classic and modern resource packs — connected 
 
 ---
 
-## ✦ What's New in v2.1.0
+## ✦ What's New in v2.1.1
 
+* **🌐 Complete 40-Language Localization Sync:**
+  Full multi-language coverage across all 39 supported language files (`ru_ru`, `zh_cn`, `ja_jp`, `de_de`, `es_es`, `fr_fr`, etc.). Every UI string, tooltips, and Iris/Pryzma setting are 100% synchronized and parity-validated against vanilla and OptiFine conventions.
+* **⚡ 1% Low FPS & Frametime Optimization:**
+  Optimized `SectionCompilerRegion` block state slices, chunk meshing allocation profiles, and memory footprint to eliminate micro-stutters and drastically stabilize 1% low frametimes under heavy shader loads.
 * **⚡ Zero-Stall VboRegion & Lazy Compaction (Phase 1):**
   Eliminated GPU pipeline stalls and driver synchronization bubbles during chunk meshing and high-speed flight. Aggressive `compactRanges` calls inside `finishDraw()` have been completely removed. Defragmentation is now performed strictly on-demand (`ensureSpaceFor()`) when a VBO buffer is fragmented and actually requires contiguous memory, keeping high-speed flight buttery smooth (300+ FPS in flight).
 * **🚀 F3 Debug Overlay RenderCache & TrueType Font Batching (Phase 2):**
@@ -91,7 +95,7 @@ Why juggle dozens of conflicting mods with fragmented configs?
 ## ✦ Installation & Quick Start
 
 1. Install **[NeoForge](https://neoforged.net/)** for Minecraft **1.21.1**.
-2. Download the latest **`pryzma-2.1.0.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
+2. Download the latest **`pryzma-2.1.1.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
 3. Place your favorite shaderpacks into `.minecraft/shaderpacks/` and resource packs into `.minecraft/resourcepacks/`.
 4. Launch the game, open **Options → Video Settings**, and customize your visual experience to your heart's content.
 

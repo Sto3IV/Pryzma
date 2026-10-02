@@ -38,7 +38,7 @@ public class IrisForgeHelpers implements IrisPlatformHelpers {
 		var modFile = list != null ? list.getModFileById(Pryzma.MODID) : null;
 		String ver = (modFile != null && !modFile.getMods().isEmpty())
 				? modFile.getMods().get(0).getVersion().toString()
-				: "2.1.0";
+				: "2.1.1";
 		return ver + " (Iris " + IRIS_BASE_VERSION + ")";
 	}
 

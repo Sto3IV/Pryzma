@@ -67,5 +67,11 @@
   "label.iris.true": "Вкл",
   "label.iris.false": "Выкл",
   "modmenu.summaryTranslation.iris": "Современный графический мод для загрузки существующих наборов шейдеров Optifine.",
-  "modmenu.descriptionTranslation.iris": "Современный графический мод для Minecraft, предназначенный для загрузки существующих наборов шейдеров формата Optifine."
+  "modmenu.descriptionTranslation.iris": "Современный графический мод для Minecraft, предназначенный для загрузки существующих наборов шейдеров формата Optifine.",
+  "iris.shaders.debug.restartNoDebug": "Отладка шейдеров включена; отладка OpenGL не поддерживается на NeoForge.",
+  "iris.load.failure.shader": "Не удалось загрузить шейдерпак! Пожалуйста, сообщите об ошибке разработчику шейдера. ",
+  "iris.load.failure.generic": "Iris столкнулся с проблемой при загрузке шейдера; пожалуйста, сообщите об этом разработчикам Iris. ",
+  "iris.keybind.wireframe": "Каркасный режим (только в одиночной игре)",
+  "options.iris.colorSpace": "Цветовое пространство",
+  "options.iris.colorSpace.sodium_tooltip": "Цветовое пространство для преобразования изображения экрана. Работает поверх шейдерпаков. Если не уверены, используйте sRGB."
 }
