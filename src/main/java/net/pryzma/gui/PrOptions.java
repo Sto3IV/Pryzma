@@ -315,6 +315,16 @@ public final class PrOptions {
                     net.pryzma.render.PrEntityCulling.reset();
                 }
             });
+    /** Crossing 0 changes how sections are meshed, so they are rebuilt; other steps only move the draw cut. */
+    public static final PrOption.Cycle DETAIL_DISTANCE = cycle("pr.options.DETAIL_DISTANCE",
+            () -> PryzmaConfig.prDetailDistance == 0 ? off() : PryzmaConfig.prDetailDistance + "m",
+            dir -> {
+                int old = PryzmaConfig.prDetailDistance;
+                PryzmaConfig.prDetailDistance = nextValue(old, PryzmaConfig.DETAIL_DISTANCE_VALUES);
+                if ((old == 0) != (PryzmaConfig.prDetailDistance == 0)) {
+                    allChanged();
+                }
+            });
 
     // ------------------------------------------------------------------ other
 

@@ -20,4 +20,7 @@ public interface IPrVertexBuffer {
     void pryzma$setRegionSlot(int layer, long key);
 
     boolean pryzma$isRegionManaged();
+
+    /** Marks whether this buffer is currently beyond DETAIL_DISTANCE from the camera. */
+    void pryzma$setFar(boolean far);
 }

@@ -9,6 +9,7 @@ import net.pryzma.util.LinkedList;
 public class VboRange {
     private int position = -1;
     private int size;
+    private int coreSize = -1;
     private final LinkedList.Node<VboRange> node = new LinkedList.Node<>(this);
 
     public int getPosition() {
@@ -17,6 +18,14 @@ public class VboRange {
 
     public int getSize() {
         return size;
+    }
+
+    public int getCoreSize() {
+        return coreSize;
+    }
+
+    public void setCoreSize(int coreSize) {
+        this.coreSize = coreSize;
     }
 
     public int getPositionNext() {

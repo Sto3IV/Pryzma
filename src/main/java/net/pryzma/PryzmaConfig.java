@@ -71,6 +71,9 @@ public final class PryzmaConfig {
     public static boolean prEmissiveTextures = true;
     public static boolean prFastMath = false;
     public static boolean prFastRender = false;
+    /** Phase B4 decorator LOD: radius in blocks beyond which decorators are not drawn; 0 = off. */
+    public static int prDetailDistance = 0;
+    public static final int[] DETAIL_DISTANCE_VALUES = {0, 48, 64, 96, 128};
     public static boolean prDynamicFov = true;
     public static boolean prAlternateBlocks = true;
     public static int prDynamicLights = 3;
@@ -277,6 +280,7 @@ public final class PryzmaConfig {
         prShowGlErrors = bool(v, "prShowGlErrors", prShowGlErrors);
         prFastMath = bool(v, "prFastMath", prFastMath);
         prFastRender = bool(v, "prFastRender", prFastRender);
+        prDetailDistance = oneOf(v, "prDetailDistance", prDetailDistance, DETAIL_DISTANCE_VALUES);
         if (v.containsKey("prChatBackground")) {
             prChatBackground = parseInt(v.get("prChatBackground"), prChatBackground);
         }
@@ -407,6 +411,7 @@ public final class PryzmaConfig {
         m.put("prShowGlErrors", str(prShowGlErrors));
         m.put("prFastMath", str(prFastMath));
         m.put("prFastRender", str(prFastRender));
+        m.put("prDetailDistance", str(prDetailDistance));
         m.put("prChatBackground", str(prChatBackground));
         m.put("prChatShadow", str(prChatShadow));
         m.put("prTelemetry", str(prTelemetry));
@@ -450,6 +455,7 @@ public final class PryzmaConfig {
         prRenderRegions = true;
         prFastMath = false;
         prFastRender = false;
+        prDetailDistance = 0;
         prDynamicFov = true;
         prAlternateBlocks = true;
         prDynamicLights = 3;

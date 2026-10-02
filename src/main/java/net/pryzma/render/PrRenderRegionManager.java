@@ -119,12 +119,16 @@ public final class PrRenderRegionManager {
         }
     }
 
-    /** VertexBuffer.draw during a layer pass: the range joins its region's multi-draw. */
-    public static void queue(VboRegion region, VertexFormat.Mode mode, VboRange range) {
-        if (!region.hasPendingDraws()) {
+    /**
+     * VertexBuffer.draw during a layer pass: the range joins its region's multi-draw. The region is listed
+     * once, when its first command is queued; a far range without a core queues none and lists nothing.
+     */
+    public static void queue(VboRegion region, VertexFormat.Mode mode, VboRange range, boolean far) {
+        boolean idle = !region.hasPendingDraws();
+        region.drawArrays(mode, range, far);
+        if (idle && region.hasPendingDraws()) {
             PENDING.add(region);
         }
-        region.drawArrays(mode, range);
     }
 
     /** End of renderSectionLayer's section loop: one ChunkOffset upload and one multi-draw per region. */

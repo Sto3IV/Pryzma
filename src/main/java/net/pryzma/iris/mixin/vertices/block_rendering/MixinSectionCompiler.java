@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.pryzma.iris.shaderpack.materialmap.WorldRenderingSettings;
+import net.pryzma.iris.vertices.BlockContext;
 import net.pryzma.iris.vertices.BlockSensitiveBufferBuilder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -58,13 +59,11 @@ public class MixinSectionCompiler {
 	private void iris$blockContext(BlockRenderDispatcher dispatcher, BlockState state, BlockPos pos, BlockAndTintGetter level, PoseStack pose,
 								   VertexConsumer consumer, boolean checkSides, RandomSource random, ModelData modelData, RenderType renderType,
 								   Operation<Void> original) {
-		Object2IntMap<BlockState> ids = iris$ids(consumer);
-		if (ids == null) {
+		BlockSensitiveBufferBuilder builder = BlockContext.begin(consumer, state, pos);
+		if (builder == null) {
 			original.call(dispatcher, state, pos, level, pose, consumer, checkSides, random, modelData, renderType);
 			return;
 		}
-		BlockSensitiveBufferBuilder builder = (BlockSensitiveBufferBuilder) consumer;
-		builder.beginBlock(ids.getInt(state), (byte) 0, (byte) state.getLightEmission(), pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
 		try {
 			original.call(dispatcher, state, pos, level, pose, consumer, checkSides, random, modelData, renderType);
 		} finally {

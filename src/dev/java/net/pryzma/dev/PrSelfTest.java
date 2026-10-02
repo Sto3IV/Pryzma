@@ -25,12 +25,16 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
@@ -38,6 +42,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.pryzma.PryzmaConfig;
+import net.pryzma.detail.PrDetailClassifier;
 import net.pryzma.gui.PrZoom;
 import net.pryzma.iris.Iris;
 import net.pryzma.iris.gui.screen.ShaderPackScreen;
@@ -78,6 +83,7 @@ import net.pryzma.render.PrF3RenderCache;
  * screen pause|options          open the pause menu or the vanilla options screen
  * leave                         save and quit to the title screen
  * irisinfo                      log the pipeline state and its F3 lines (shadow sections, culling)
+ * detailblocks                  log every registered block the decorator LOD (Detail Distance) would cull
  * fps &lt;frames&gt;                  log mean and worst frame time over the next frames
  * f3 on|off|charts              show or hide the debug screen, or toggle its FPS chart (F3+2)
  * f3cache &lt;frames&gt;              log how many of the next frames replayed the F3 text, and its builds per second
@@ -267,6 +273,22 @@ public final class PrSelfTest {
                 LOG.info("PRYZMA-SELFTEST iris pack={} inUse={} fallback={} sections={}", Iris.getCurrentPackName(),
                         Iris.isPackInUseQuick(), Iris.isFallback(), mc.levelRenderer.getSectionStatistics());
                 lines.forEach(l -> LOG.info("PRYZMA-SELFTEST iris {}", l));
+            }
+            case "detailblocks" -> {
+                List<String> detail = new ArrayList<>();
+                for (Block block : BuiltInRegistries.BLOCK) {
+                    int states = 0, culled = 0;
+                    for (BlockState state : block.getStateDefinition().getPossibleStates()) {
+                        states++;
+                        if (PrDetailClassifier.isDetail(state, mc.level, BlockPos.ZERO)) {
+                            culled++;
+                        }
+                    }
+                    if (culled > 0) {
+                        detail.add(BuiltInRegistries.BLOCK.getKey(block) + (culled < states ? "[" + culled + "/" + states + "]" : ""));
+                    }
+                }
+                LOG.info("PRYZMA-SELFTEST detail blocks {}: {}", detail.size(), String.join(" ", detail));
             }
             case "fps" -> {
                 fpsFrames = Integer.parseInt(a[1]);

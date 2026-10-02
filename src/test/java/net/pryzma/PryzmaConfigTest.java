@@ -25,4 +25,19 @@ class PryzmaConfigTest {
             PryzmaConfig.prRemoveRealms = saved;
         }
     }
+
+    @Test
+    void detailDistanceIsOffByDefaultAndAcceptsOnlyItsSteps() {
+        int saved = PryzmaConfig.prDetailDistance;
+        try {
+            assertEquals(0, saved, "B4 ships off");
+            PryzmaConfig.apply(Map.of("prDetailDistance", "64"));
+            assertEquals(64, PryzmaConfig.prDetailDistance);
+            assertEquals("64", PryzmaConfig.snapshot().get("prDetailDistance"));
+            PryzmaConfig.apply(Map.of("prDetailDistance", "50"));
+            assertEquals(0, PryzmaConfig.prDetailDistance, "an unknown value falls back to off");
+        } finally {
+            PryzmaConfig.prDetailDistance = saved;
+        }
+    }
 }

@@ -213,9 +213,14 @@ public class VboRegion {
 
     /**
      * Queues {@code range} for the next {@link #finishDraw}. The offset is stored in indices of the
-     * sequential index buffer and scaled to bytes once that buffer's index type is known.
+     * sequential index buffer and scaled to bytes once that buffer's index type is known. A range beyond
+     * the detail distance ({@code far}) queues only its core, and nothing when its core is empty.
      */
-    public void drawArrays(VertexFormat.Mode mode, VboRange range) {
+    public void drawArrays(VertexFormat.Mode mode, VboRange range, boolean far) {
+        int size = drawSize(range, far);
+        if (size <= 0) {
+            return;
+        }
         if (drawMode != mode) {
             if (hasPendingDraws()) {
                 throw new IllegalArgumentException("Mixed region draw modes: " + drawMode + " != " + mode);
@@ -226,7 +231,13 @@ public class VboRegion {
             growDrawBuffers();
         }
         bufferIndexVertex.put(mode.indexCount(range.getPosition()));
-        bufferCountVertex.put(mode.indexCount(range.getSize()));
+        bufferCountVertex.put(mode.indexCount(size));
+    }
+
+    /** Phase B4: the vertices of {@code range} to draw, its {@code [core | decorators]} prefix when far and split. */
+    static int drawSize(VboRange range, boolean far) {
+        int core = range.getCoreSize();
+        return far && core >= 0 ? core : range.getSize();
     }
 
     /** Draw commands are bounded by the ranges in the region, not by its vertex capacity. */

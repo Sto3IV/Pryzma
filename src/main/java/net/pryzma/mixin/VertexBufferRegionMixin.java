@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -14,6 +15,7 @@ import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.pryzma.render.IPrMeshData;
 import net.pryzma.render.IPrVertexBuffer;
 import net.pryzma.render.PrRenderRegionManager;
 import net.pryzma.render.VboRange;
@@ -23,6 +25,7 @@ import net.pryzma.render.VboRegion;
  * Render Regions, buffer side: a region-managed section buffer deletes its own VBO, IBO and VAO,
  * uploads into the {@link VboRegion} of its region and queues its draws there. Every other buffer
  * keeps vanilla's path; each handler tests one field for it and stays small enough to inline.
+ * Also integrates Phase B4: Decorator LOD Truncation across both region-managed and vanilla buffers.
  */
 @Mixin(VertexBuffer.class)
 abstract class VertexBufferRegionMixin implements IPrVertexBuffer {
@@ -37,9 +40,16 @@ abstract class VertexBufferRegionMixin implements IPrVertexBuffer {
     @Unique private long pryzma$regionKey;
     @Unique private VboRegion pryzma$region;
     @Unique private VboRange pryzma$range;
+    @Unique private boolean pryzma$isFar;
+    @Unique private int pryzma$coreVertices = -1;
 
     @Shadow
     public abstract void close();
+
+    @Override
+    public void pryzma$setFar(boolean far) {
+        this.pryzma$isFar = far;
+    }
 
     @Override
     public void pryzma$setRegionSlot(int layer, long key) {
@@ -84,6 +94,7 @@ abstract class VertexBufferRegionMixin implements IPrVertexBuffer {
 
     @Inject(method = "upload", at = @At("HEAD"), cancellable = true)
     private void prRegionUpload(MeshData meshData, CallbackInfo ci) {
+        this.pryzma$coreVertices = ((IPrMeshData) (Object) meshData).pryzma$getCoreVertices();
         if (pryzma$layer >= 0) {
             pryzma$uploadToRegion(meshData);
             ci.cancel();
@@ -96,7 +107,21 @@ abstract class VertexBufferRegionMixin implements IPrVertexBuffer {
         if (pryzma$layer >= 0) {
             pryzma$queueDraw();
             ci.cancel();
+        } else if (this.pryzma$isFar && this.pryzma$coreVertices == 0) {
+            ci.cancel();
         }
+    }
+
+    /**
+     * Phase B4 without regions: a far section draws only its core, the first indices of a sequential index
+     * buffer. Sorted (translucent) meshes never carry a core, so their sorted indices are never cut.
+     */
+    @ModifyArg(method = "draw", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;drawElements(III)V"), index = 1)
+    private int prVanillaTruncateDraw(int count) {
+        if (this.pryzma$isFar && this.pryzma$coreVertices > 0) {
+            return mode.indexCount(this.pryzma$coreVertices);
+        }
+        return count;
     }
 
     /** No VAO of its own to bind. */
@@ -132,6 +157,8 @@ abstract class VertexBufferRegionMixin implements IPrVertexBuffer {
             pryzma$layer = -1;
             pryzma$range = null;
         }
+        this.pryzma$coreVertices = -1;
+        this.pryzma$isFar = false;
     }
 
     @Unique
@@ -152,6 +179,7 @@ abstract class VertexBufferRegionMixin implements IPrVertexBuffer {
             if (pryzma$range == null) {
                 pryzma$range = new VboRange();
             }
+            pryzma$range.setCoreSize(this.pryzma$coreVertices);
             region.bufferData(meshData.vertexBuffer(), pryzma$range);
         } finally {
             meshData.close();
@@ -163,7 +191,7 @@ abstract class VertexBufferRegionMixin implements IPrVertexBuffer {
         VboRegion region = pryzma$region;
         VboRange range = pryzma$range;
         if (region != null && range != null && range.getPosition() >= 0 && !region.isDeleted()) {
-            PrRenderRegionManager.queue(region, mode, range);
+            PrRenderRegionManager.queue(region, mode, range, pryzma$isFar);
         }
     }
 }
