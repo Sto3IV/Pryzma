@@ -75,7 +75,7 @@ Pryzma bundles the following third-party components under their respective licen
   Copyright (c) 2012 Odysseus Software GmbH.
 
 ================================================================================
-4. VOLUNTARY SPONSORSHIPS, DONATIONS & HARDWARE TESTBED FUND
+4. VOLUNTARY SPONSORSHIPS & DONATIONS
 ================================================================================
 
 Pryzma is 100% free, offline, and telemetry-free software. There are no paywalls,
@@ -86,11 +86,8 @@ Voluntary sponsorships and donations directed to the project maintainers
 are purely voluntary gifts without goods, services, priority, or additional license
 rights attached.
 
-Contributions are primarily allocated towards project maintenance and our dedicated
-hardware development fund — specifically acquiring high-throughput modern GPU testing
-hardware (such as next-generation NVIDIA GeForce RTX 50-series architectures,
-specifically the RTX 5090 testbed) to profile, benchmark, and optimize complex GLSL
-shaderpacks, compute shaders, and ray-tracing workloads for the entire community.
+Contributions directly support ongoing project maintenance, testing across diverse
+hardware environments, and ensuring long-term stability for the entire community.
 
 Sponsorship channels:
 - GitHub Sponsors: https://github.com/sponsors/Sto3IV
