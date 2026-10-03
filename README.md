@@ -1,150 +1,115 @@
-# Pryzma ✨
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/pryzma_variant_2A_aero_clean_421cca99.jpg" width="600" alt="Pryzma Logo">
+<br>
+  <a href="https://github.com/Sto3IV/Pryzma">
+      <img src="https://img.shields.io/badge/Minecraft-1.21.1-10b981?style=flat&logo=minecraft&logoColor=ffffff&labelColor=16181c" alt="Minecraft 1.21.1">
+  </a>
+  <a href="https://neoforged.net/">
+      <img src="https://img.shields.io/badge/NeoForge-21.1.250+-f59e0b?style=flat&logo=neoforge&logoColor=ffffff&labelColor=16181c" alt="NeoForge">
+  </a>
+  <a href="https://modrinth.com/mod/pryzma">
+      <img src="https://img.shields.io/badge/Modrinth-Available-00af5c?style=flat&logo=modrinth&logoColor=ffffff&labelColor=16181c" alt="Modrinth">
+  </a>
+  <a href="https://curseforge.com/minecraft/mc-mods/pryzma">
+      <img src="https://img.shields.io/badge/CurseForge-Available-f16436?style=flat&logo=curseforge&logoColor=ffffff&labelColor=16181c" alt="CurseForge">
+  </a>
+  <a href="https://github.com/Sto3IV/Pryzma">
+      <img src="https://img.shields.io/badge/Tests-194%20Passing-6366f1?style=flat&logo=githubactions&logoColor=ffffff&labelColor=16181c" alt="194 Passing Tests">
+  </a>
+</p>
+<!-- I apologize for the HTML but it looks so pretty :) -->
 
-> *A single crystal to disperse the shadows. The complete visual soul of modern Minecraft.*
+About
+=====
 
-[![Platform](https://img.shields.io/badge/Platform-NeoForge%201.21.1-orange.svg)](https://neoforged.net/)
-[![Java](https://img.shields.io/badge/Java-21%2B-blue.svg)](https://adoptium.net/)
-[![License](https://img.shields.io/badge/License-LGPL--3.0%20%2F%20MIT-green.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/Sto3IV/Pryzma?color=purple)](https://github.com/Sto3IV/Pryzma/releases)
+**Pryzma** is an all-in-one visual engine, autonomous GLSL shader pipeline, and graphics optimization mod for [NeoForge 1.21.1](https://neoforged.net/).
 
-**Pryzma** is an all-in-one graphics optimization, shader pack pipeline, and visual fidelity mod for **Minecraft 1.21.1 (NeoForge)**. 
+It was born out of a simple, personal desire: my partner and I wanted to play on a private server while keeping the breathtaking visual fidelity of our treasured 10-year-old texture packs (from the classic OptiFine and MCPatcher era) without wrestling with broken configs or endless format conversions.
 
-It revives the rich heritage of classic and modern resource packs — connected textures, custom item models, dynamic skies, animated lightmaps, and real-time shaders — without forcing you to assemble a fragile puzzle of 15+ different mods.
+Pryzma restores the full beauty of classic resource packs — connected textures, custom item models, dynamic skies, animated lightmaps, and real-time shaders — in **one single, elegant JAR**. No mod salad. No conflicting loaders. Just drop it in and play.
 
-**One single JAR. Zero extra loaders. Pure aesthetic harmony.**
+Installation
+============
 
----
+1. Install [NeoForge 1.21.1](https://neoforged.net/) (build 21.1.250 or newer recommended).
+2. Download the latest release of **Pryzma** from our [Modrinth](https://modrinth.com/mod/pryzma) or [CurseForge](https://curseforge.com/minecraft/mc-mods/pryzma) page.
+3. Place `pryzma-2.1.2.jar` into your `.minecraft/mods/` directory.
+4. Drop your favorite resource packs and shaderpacks into their respective folders, and enjoy!
 
-## ✦ What's New in v2.1.2
+Screenshots
+===========
 
-* **🎨 Native Vanilla Widget Overhaul for Shader Pack Screen:**
-  Completely modernized the Shader Pack Screen (`ShaderPackScreen`) with 100% vanilla widget architecture. The shaders toggle and pinned rows now wrap native vanilla `Button` components using standard GUI sprite atlasing (`widget/button`), full keyboard accessibility (<kbd>Space</kbd>/<kbd>Enter</kbd>), and vanilla sound effects. Eliminated legacy selection glitches and rogue black background frames.
-* **🛡️ Full CurseForge-Compliance Brand & Metadata Alignment:**
-  Completed full internal purification of all third-party comments, javadoc annotations, and mixin prefixes (`pryzma$`) across the entire shader pipeline and render shards. Preserves 100% shaderpack GLSL interface contracts while delivering a clean, compliant codebase.
-* **🌐 Complete 40-Language Localization Sync:**
-  Full multi-language coverage across all 39 supported language files (`ru_ru`, `zh_cn`, `ja_jp`, `de_de`, `es_es`, `fr_fr`, etc.). Every UI string, tooltips, and Pryzma setting are 100% synchronized and parity-validated against vanilla and OptiFine conventions.
-* **⚡ 1% Low FPS & Frametime Optimization:**
-  Optimized `SectionCompilerRegion` block state slices, chunk meshing allocation profiles, and memory footprint to eliminate micro-stutters and drastically stabilize 1% low frametimes under heavy shader loads.
-* **⚡ Zero-Stall VboRegion & Lazy Compaction (Phase 1):**
-  Eliminated GPU pipeline stalls and driver synchronization bubbles during chunk meshing and high-speed flight. Aggressive `compactRanges` calls inside `finishDraw()` have been completely removed. Defragmentation is now performed strictly on-demand (`ensureSpaceFor()`) when a VBO buffer is fragmented and actually requires contiguous memory, keeping high-speed flight buttery smooth (300+ FPS in flight).
-* **🚀 F3 Debug Overlay RenderCache & TrueType Font Batching (Phase 2):**
-  Restored high framerates with the F3 debug screen open (recovering from ~430/580 FPS up to **1808 FPS**!). Debug overlay text refreshes 10 times a second (100 ms TTL) from vertex buffers cached directly in GPU memory (`VertexBuffer(DYNAMIC)`). Replay frames completely bypass terrain 3D noise router evaluations (`addDebugScreenInfo`), block/liquid voxel raycasts, and ~80 string allocations per frame. Custom TrueType fonts with high oversampling are consolidated into single GPU draw calls per page instead of issuing a separate draw call per character. Dynamic FPS, network, and profiler charts continue updating every frame.
-* **🖥️ OpenGL & GPU Hardware Profile String on Shaders Screen:**
-  Restored the classic OptiFine profile string (`OpenGL: <version>, <vendor>, <renderer>`) centered above the bottom button row on the Shaders screen (`ShaderPackScreen`), with cached GL queries, layout auto-scaling, and scissor margin protection against UI clipping.
-* **🚫 "Remove Realms" Option & Title Screen Compaction:**
-  Removes the commercial Minecraft Realms button and background notifications from the title screen. Intelligently promotes NeoForge's `Mods` button into the freed second row and restores the bottom navigation buttons up by 22 px to native vanilla proportions. Configurable in **Video Settings → Other → Remove Realms** (ON by default) with native translations across all 40 languages.
+![Breathtaking Shaders with Celestial Skies](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/2026-09-19_10.18.35.png)
 
----
+![Seamless Connected Textures and Warm Evening Atmosphere](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/2026-09-19_10.18.39.png)
 
-## ✦ The Magic Within
+![Real-Time Dynamic Handheld Lighting and Classic HUD Ergonomics](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/2026-10-02_22.06.43.png)
 
-### 🌌 Shaders, Built In
-Drop your favorite shaderpacks (*Complementary, BSL, Nostalgia, Photon, AstraLex*) directly into `shaderpacks/`.
-* **High-Performance Built-in Pipeline:** native support for shadow maps, `shadowcomp`, composite and deferred passes, compute shaders, custom images and uniforms, PBR textures.
-* **No external shader mods required:** terrain renders on Pryzma's own chunk path, with block ids and light emission for the shader pack and render-region multi-draw in both the main and the shadow pass.
-* **Zero Overhead Chunk Routing:** the shadow pass collects its sections directly, without rebuilding the occlusion graph every frame, and redundant framebuffer and program binds are skipped.
-* **In-Game Customization:** built-in shader pack screen and option menus (**Video Settings → Shaders**, or `O`); `R` reloads, `K` toggles.
+Feature Matrix
+==============
 
-### 🎨 Your Resource Packs, Exactly as Intended
-Pryzma provides 100% native drop-in support for both modern OptiFine formats and classic legacy MCPatcher packs:
-* **Connected Textures (CTM):** Seamless panoramic glass, sandstone, and bookshelves.
-* **Custom Item Textures (CIT):** Weapons, armor, and tools transform based on anvil names, enchantments, and NBT tags.
-* **Custom Entity Models (CEM) & Random Mobs:** Unique creature variants, skeletal animations, and biome-specific skins.
-* **Celestial Domes & Colormaps:** Multi-layered rotating skyboxes, custom nebulas, and lush, smoothly blended biome palettes.
-* **Custom Lightmaps:** Atmospheric, flicker-free night and cave lighting with GUI isolation.
-* **Better Grass & Better Snow:** Luscious full-sided grass and snow gently settling under fences and stairs.
+| Feature | Vanilla | Fragmented Setup | Pryzma |
+| :--- | :---: | :---: | :---: |
+| **Shaders (GLSL)** | ❌ None | ⚠️ Extra loaders | ✅ Built-in Native |
+| **OptiFine Packs** | ❌ None | ⚠️ 8+ separate mods | ✅ 100% Native |
+| **MCPatcher Format** | ❌ None | ❌ Unsupported | ✅ Auto-Aliasing |
+| **Connected Textures (CTM)** | ❌ None | ⚠️ Continuity / Fusion | ✅ Native Full CTM |
+| **Custom Items (CIT)** | ❌ None | ⚠️ CIT Resewn | ✅ Native Full CIT |
+| **Custom Entity Models (CEM)**| ❌ None | ⚠️ EMF | ✅ Native CEM |
+| **Random & Biome Mobs** | ❌ None | ⚠️ ETF | ✅ Native Random Mobs |
+| **Custom Skies & Domes** | ❌ Vanilla | ⚠️ Skyboxes Mod | ✅ Native Multi-Layer |
+| **Custom Biome Colormaps** | ❌ Static | ⚠️ Polytone | ✅ Native Colormaps |
+| **Custom Lightmaps** | ❌ Static | ⚠️ Polytone (partial) | ✅ Native Dynamic |
+| **Handheld Dynamic Lights** | ❌ None | ⚠️ LambDynamicLights | ✅ Native (Zero Lag) |
+| **Cinematic Smooth Zoom** | ⚠️ Spyglass | ⚠️ Zoomify | ✅ Native ('C' Key) |
+| **Better Grass & Snow** | ❌ None | ⚠️ 2 separate mods | ✅ Native Options |
+| **Fast Paintings** | ❌ Laggy | ⚠️ FastPaintings | ✅ Native Batched |
+| **Clean Menus & No Realms** | ❌ Cluttered | ⚠️ Separate tweaks | ✅ Native Setting |
+| **Multithread Meshing** | ⚠️ Basic | ✅ External renderer | ✅ Native Worker Pool |
+| **Zero-Stall VBO Compaction** | ❌ Freezes | ⚠️ Stutter-prone | ✅ Native On-Demand |
+| **Hardware F3 RenderCache** | ❌ FPS Drop | ❌ CPU Overhead | ✅ 1800+ FPS Cache |
+| **Total JARs Needed** | **0** | **15–20+ JARs** | **1 Single JAR** |
+| **Architecture** | Baseline | Competing mixins | **Clean Monolith** |
 
-### 💡 Real-Time Dynamic Lighting
-Delve into the deepest subterranean caverns. Torches, lanterns, campfires, and glowing items in your hands or on the ground illuminate your path smoothly and naturally in real time — with **zero chunk re-meshing lag** via a lock-free snapshot architecture.
+Building from Source
+====================
 
-### ⚡ Fluid Performance & Multi-Threaded Pacing
-Soar across mountains and oceans without hitching or micro-stutters:
-* Dedicated background thread pool dynamically scaled to your CPU cores.
-* Even frame delivery and intelligent tick-to-render pacing (`Smooth World`).
-* Elimination of Windows thread scheduler `Thread.yield()` penalties.
-* Smart foliage culling to keep dense forests running at high framerates.
-
-### 🔍 Quality of Life & Classic Ergonomics
-* **Smooth Cinematic Zoom:** Bound to `C` by default (fully rebindable).
-* **Enhanced F3 Debug Overlay:** Restored comprehensive statistics (min FPS, chunk updates, VRAM allocations, GPU usage). Its text refreshes ten times a second from buffers kept on the GPU, as in OptiFine, so an open F3 no longer costs framerate, even with TrueType font packs; the charts still update every frame.
-* **Granular Control:** Fine-tune clouds, fog, stars, particles, and details in familiar, beautifully organized menus.
-
----
-
-## ✦ Feature Comparison Matrix
-
-Why juggle dozens of conflicting mods with fragmented configs?
-
-| Feature | Vanilla 1.21.1 | The Fragmented Mod Salad (15+ Mods) | Pryzma (NeoForge 1.21.1) |
-| :--- | :---: | :--- | :---: |
-| **Shaderpack Pipeline** (BSL, Complementary, Nostalgia) | ❌ No | ⚠️ Requires `Pryzma Shaders` / `Oculus` | ✅ **Built-in Native Pipeline** |
-| **OptiFine Format** (`optifine/` folder) | ❌ No | ⚠️ Fragmented across 8+ separate mods | ✅ **100% Native Drop-in** |
-| **Legacy MCPatcher Format** (`mcpatcher/` folder) | ❌ No | ❌ **Unsupported** *(requires manual conversion)* | ✅ **Native Runtime Aliasing** |
-| **Connected Textures (CTM)** | ❌ No | ⚠️ Requires `Continuity` or `Fusion` | ✅ **Native Full-Suite CTM** |
-| **Custom Item Textures (CIT)** | ❌ No | ⚠️ Requires `CIT Resewn` | ✅ **Native Full NBT Matcher** |
-| **Custom Entity Models & Textures (CEM/ETF)** | ❌ No | ⚠️ Requires `EMF` + `ETF` | ✅ **Native CEM & Random Mobs** |
-| **Custom Skies & Celestial Domes** | ❌ Vanilla Sky | ⚠️ Requires `NeoforgeSkyboxes` | ✅ **Native Multi-Layer Skyboxes** |
-| **Custom Colormaps & Lightmaps** | ❌ Static | ⚠️ Requires `Polytone` | ✅ **Native Smooth Lighting & Colors** |
-| **Real-Time Dynamic Lights** | ❌ No | ⚠️ Requires `LambDynamicLights` | ✅ **Native (Zero Re-meshing Lag)** |
-| **Better Grass & Better Snow** | ❌ No | ⚠️ Requires `BetterGrassify` + `Snow Real Magic` | ✅ **Native Integrated Toggles** |
-| **Cinematic Smooth Zoom** | ⚠️ Spyglass Only | ⚠️ Requires `Zoomify` or `Just Zoom` | ✅ **Native ('C' Key)** |
-| **Fast Paintings Optimization** | ❌ Multi-quad Lag | ⚠️ Requires `FastPaintings` | ✅ **Native Consolidated Meshes** |
-| **Remove Realms & Compact Menu** | ❌ Commercial Clutter | ⚠️ Requires separate tweak mod | ✅ **Native Toggle (Settings → Other)** |
-| **Multithreaded Chunk Meshing** | ⚠️ Basic Sync | ✅ External renderers | ✅ **Native Dedicated Worker Pool** |
-| **Number of JAR Files Required** | **0** | **15–20+ separate individual mods** | **ONE. SINGLE. JAR.** |
-| **Architecture & Compatibility** | Baseline | Complex web of competing mixins | **Clean Sponge Mixin Monolith** |
-
----
-
-## ✦ Installation & Quick Start
-
-1. Install **[NeoForge](https://neoforged.net/)** for Minecraft **1.21.1**.
-2. Download the latest **`pryzma-2.1.2.jar`** from [Releases](https://github.com/Sto3IV/Pryzma/releases) and place it into your `.minecraft/mods/` folder.
-3. Place your favorite shaderpacks into `.minecraft/shaderpacks/` and resource packs into `.minecraft/resourcepacks/`.
-4. Launch the game, open **Options → Video Settings**, and customize your visual experience to your heart's content.
-
-> [!TIP]
-> **Recommended JVM Setup (Java 21):**
-> For maximum smoothness during fast flight and heavy shader workloads, we recommend allocating **6 to 8 GB of RAM** with the modern generational Z garbage collector:
-> ```text
-> -XX:+UseZGC -XX:+ZGenerational -XX:+AlwaysPreTouch
-> ```
-
----
-
-## ✦ Building from Source
-
-Pryzma is built with standard Gradle.
+Pryzma builds with Gradle and requires Java 21 LTS:
 
 ```bash
+# Clone the repository
 git clone https://github.com/Sto3IV/Pryzma.git
 cd Pryzma
+
+# Run the full 194-test verification suite
+./gradlew test
+
+# Compile and package release JAR
 ./gradlew build
 ```
-*(On Windows, use `gradlew.bat build`)*
 
-The output JAR will be generated in `build/libs/`.
+The compiled mod JAR will be located at `build/libs/pryzma-2.1.2.jar`.
 
-To run the automated verification test suite:
-```bash
-./gradlew test --rerun
-```
+Support & Philosophy
+====================
+
+Think of Pryzma as a **warm, quiet campfire**. We are not a commercial live-service studio, and **we will not be taking feature requests for the foreseeable future.** Our priority is strictly on long-term stability and keeping what is already here rock-solid.
+
+If you encounter a genuine bug or a broken texture, please feel free to open a ticket on our [GitHub Issue Tracker](https://github.com/Sto3IV/Pryzma/issues). Please keep in mind that we both work real full-time jobs, but we quietly review issues during our free weekends.
+
+Modpacks
+========
+
+Pryzma can be used freely in any public or private modpack without requiring special permission. 100% offline, privacy-first, zero telemetry.
+
+Licensing
+=========
+
+Pryzma is released under an open-source composite license:
+* **Pryzma Core, Emulation & Optimizations:** [MIT License](LICENSE)
+* **Native GLSL Shader Pipeline (`net.pryzma.shader`):** GNU LGPL-3.0-only
 
 ---
-
-## ✦ License & Attribution
-
-Pryzma is distributed under a composite open-source license (see [LICENSE](LICENSE)):
-
-* **Pryzma Core & Optimizations:** Licensed under the **MIT License**. Copyright (c) 2026 Sto3IV & Ranni.
-* **Shaderpack Pipeline (`net.pryzma.iris`):** Embedded optimized fork of [Pryzma Shaders](https://github.com/Pryzma ShadersShaders/Pryzma Shaders) 1.8.14, licensed under the **GNU LGPL-3.0** (`META-INF/LICENSE-IRIS`, `META-INF/NOTICE-IRIS`). Copyright (c) 2020-2024 Pryzma Shaders Contributors.
-* **glsl-transformer:** Bundled as a nested Jar-in-Jar under the **GNU AGPL-3.0**. Copyright (c) douira.
-* **jcpp & ithaka-digraph:** Licensed under the **Apache License 2.0**.
-
-In compliance with LGPL-3.0 and AGPL-3.0, full source code and modifications are publicly available in this repository.
-
----
-
 <p align="center">
-  <sub>Crafted with quiet devotion by <b>Sto3IV & Ranni</b></sub>
+  <sub>Crafted with devotion by a couple who just missed their old Minecraft worlds. ♥</sub>
 </p>
