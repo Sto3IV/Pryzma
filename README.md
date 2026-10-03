@@ -87,6 +87,18 @@ Think of Pryzma as a **warm, quiet campfire**. We are not a commercial live-serv
 
 If you encounter a genuine bug or a broken texture, please feel free to open a ticket on our [GitHub Issue Tracker](https://github.com/Sto3IV/Pryzma/issues). Please keep in mind that we both work real full-time jobs, but we quietly review issues during our free weekends.
 
+Sponsorship & Hardware Testbed
+===============================
+
+Pryzma is 100% free, offline, and telemetry-free. There are no paywalled features, locked builds, or artificial tiers.
+
+However, continuous shader profiling, compute pass benchmarking, and zero-stall VBO optimization across modern graphics architectures require dedicated hardware testing infrastructure. Voluntary community sponsorships directly support project maintenance and our hardware development fund — specifically acquiring high-throughput next-generation GPU testing equipment (targeting the GeForce RTX 5090 testbed) to profile and validate heavy shaderpacks, ray-tracing workloads, and extreme frame pacing for everyone.
+
+If Pryzma brought back your beloved worlds and you would like to support our quiet campfire:
+* **GitHub Sponsors:** [Sponsor @Sto3IV](https://github.com/sponsors/Sto3IV)
+* **Boosty:** [Support on Boosty](https://boosty.to/sto3iv)
+* **Ko-fi:** [Support on Ko-fi](https://ko-fi.com/sto3iv)
+
 Modpacks
 ========
 
