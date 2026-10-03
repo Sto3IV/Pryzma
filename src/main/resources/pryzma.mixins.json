@@ -49,6 +49,7 @@
     "ModelBlockRendererMixin",
     "NativeImageMixin",
     "OptionsCloudsMixin",
+    "OptionsScreenMixin",
     "OptionsSubScreenAccessor",
     "PaintingRendererMixin",
     "ParticleEngineMixin",

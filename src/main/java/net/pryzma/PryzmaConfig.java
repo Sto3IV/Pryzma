@@ -108,6 +108,8 @@ public final class PryzmaConfig {
     public static boolean prFastPaintings = false;
     /** Removes the Minecraft Realms button and notifications from TitleScreen, restoring compact vanilla 3-row layout. */
     public static boolean prRemoveRealms = true;
+    /** Shows "Telemetry Data" and "Credits &amp; Attribution" in the options menu. False = compact 4-row grid. */
+    public static boolean prTelemetryAttribution = false;
 
     public static boolean prQuickInfo = false;
     public static int prQuickInfoFps = VALUE_FULL;
@@ -289,6 +291,7 @@ public final class PryzmaConfig {
         prFeedbackButtons = bool(v, "prFeedbackButtons", prFeedbackButtons);
         prFastPaintings = bool(v, "prFastPaintings", prFastPaintings);
         prRemoveRealms = bool(v, "prRemoveRealms", prRemoveRealms);
+        prTelemetryAttribution = bool(v, "prTelemetryAttribution", prTelemetryAttribution);
         prHeldItemTooltips = bool(v, "prHeldItemTooltips", prHeldItemTooltips);
 
         prQuickInfo = bool(v, "prQuickInfo", prQuickInfo);
@@ -346,6 +349,7 @@ public final class PryzmaConfig {
         m.put("prFastPaintings", str(prFastPaintings));
         m.put("prFeedbackButtons", str(prFeedbackButtons));
         m.put("prRemoveRealms", str(prRemoveRealms));
+        m.put("prTelemetryAttribution", str(prTelemetryAttribution));
         m.put("prFogType", str(prFogType));
         m.put("prFogStart", Float.toString(prFogStart));
         m.put("prMipmapType", str(prMipmapType));
@@ -443,6 +447,7 @@ public final class PryzmaConfig {
         prFastPaintings = false;
         prFeedbackButtons = false;
         prRemoveRealms = true;
+        prTelemetryAttribution = false;
         prFogType = 2;
         prFogStart = 0.8F;
         prMipmapType = 0;

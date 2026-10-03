@@ -376,6 +376,9 @@ public final class PrOptions {
     /** Toggles removing the Minecraft Realms button and background notifications from TitleScreen. */
     public static final PrOption.Cycle REMOVE_REALMS = bool("pr.options.REMOVE_REALMS",
             () -> PryzmaConfig.prRemoveRealms, v -> PryzmaConfig.prRemoveRealms = v);
+    /** Toggles the "Telemetry Data" and "Credits &amp; Attribution" buttons of the options menu. */
+    public static final PrOption.Cycle TELEMETRY_ATTRIBUTION = bool("pr.options.TELEMETRY_ATTRIBUTION",
+            () -> PryzmaConfig.prTelemetryAttribution, v -> PryzmaConfig.prTelemetryAttribution = v);
 
     // ------------------------------------------------------------------ quick info
 

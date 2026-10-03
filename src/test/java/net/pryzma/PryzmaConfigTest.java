@@ -27,6 +27,23 @@ class PryzmaConfigTest {
     }
 
     @Test
+    void telemetryAttributionDefaultsOffAndRoundTripsThroughTheOptionsFile() {
+        boolean saved = PryzmaConfig.prTelemetryAttribution;
+        try {
+            assertFalse(saved, "Telemetry & Attribution buttons are hidden by default");
+            PryzmaConfig.apply(Map.of("prTelemetryAttribution", "true"));
+            assertTrue(PryzmaConfig.prTelemetryAttribution);
+            assertEquals("true", PryzmaConfig.snapshot().get("prTelemetryAttribution"));
+            PryzmaConfig.apply(Map.of());
+            assertTrue(PryzmaConfig.prTelemetryAttribution, "a file without the key keeps the current value");
+            PryzmaConfig.apply(Map.of("prTelemetryAttribution", "false"));
+            assertEquals("false", PryzmaConfig.snapshot().get("prTelemetryAttribution"));
+        } finally {
+            PryzmaConfig.prTelemetryAttribution = saved;
+        }
+    }
+
+    @Test
     void detailDistanceIsOffByDefaultAndAcceptsOnlyItsSteps() {
         int saved = PryzmaConfig.prDetailDistance;
         try {

@@ -104,8 +104,8 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.WEATHER, PrOptions.TIME,
                         vanilla("options.fullscreen", o.fullscreen()), PrOptions.AUTOSAVE_TICKS,
                         PrOptions.SCREENSHOT_SIZE, PrOptions.SHOW_GL_ERRORS,
-                        PrOptions.FEEDBACK_BUTTONS, PrOptions.REMOVE_REALMS);
-                addOption(vanilla("options.fullscreen.resolution", fullscreenResolution()), cellX(12), cellY(12), 310);
+                        PrOptions.FEEDBACK_BUTTONS, PrOptions.REMOVE_REALMS,
+                        PrOptions.TELEMETRY_ATTRIBUTION, vanilla("options.fullscreen.resolution", fullscreenResolution()));
                 addRenderableWidget(new PrButton(210, width / 2 - 100, bottomY() - 44, 200,
                         Component.translatable("pr.options.other.reset"), b -> confirmReset()));
                 addRenderableWidget(new PrButton(200, width / 2 - 100, bottomY(), 200, CommonComponents.GUI_DONE, b -> {
@@ -195,7 +195,7 @@ final class PrSettingsScreen extends PrScreen {
         minecraft.delayTextureReload();
     }
 
-    /** Vanilla's fullscreen resolution slider, which 1.x placed across both columns of Other. */
+    /** Vanilla's fullscreen resolution slider, a regular grid cell of Other (1.x spanned both columns). */
     private OptionInstance<Integer> fullscreenResolution() {
         Window window = minecraft.getWindow();
         Monitor monitor = window.findBestMonitor();
