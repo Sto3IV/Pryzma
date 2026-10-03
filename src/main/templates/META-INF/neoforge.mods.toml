@@ -40,7 +40,31 @@ file="META-INF/accesstransformer.cfg"
     ordering="NONE"
     side="CLIENT"
 
-# Native shader pack pipeline: conflicting standalone mods are disabled.
+# Built-in rendering engine and shader pipeline: conflicting standalone mods are declared incompatible.
+[[dependencies.${mod_id}]]
+    modId="sodium"
+    type="incompatible"
+    reason="Pryzma includes an integrated rendering and shader engine. Remove standalone Sodium."
+    versionRange="[0,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="embeddium"
+    type="incompatible"
+    reason="Pryzma includes an integrated rendering and shader engine. Remove standalone Embeddium."
+    versionRange="[0,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="rubidium"
+    type="incompatible"
+    reason="Pryzma includes an integrated rendering and shader engine. Remove standalone Rubidium."
+    versionRange="[0,)"
+    ordering="NONE"
+    side="CLIENT"
+
 [[dependencies.${mod_id}]]
     modId="iris"
     type="incompatible"
