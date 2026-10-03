@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/pryzma_variant_2A_aero_clean_421cca99.jpg" width="600" alt="Pryzma Logo">
+  <img src="https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/pryzma_8bit.png" width="280" alt="Pryzma Logo">
 <br>
   <a href="https://github.com/Sto3IV/Pryzma">
       <img src="https://img.shields.io/badge/Minecraft-1.21.1-10b981?style=flat&logo=minecraft&logoColor=ffffff&labelColor=16181c" alt="Minecraft 1.21.1">
