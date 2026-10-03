@@ -87,15 +87,15 @@ Think of Pryzma as a **warm, quiet campfire**. We are not a commercial live-serv
 
 If you encounter a genuine bug or a broken texture, please feel free to open a ticket on our [GitHub Issue Tracker](https://github.com/Sto3IV/Pryzma/issues). Please keep in mind that we both work real full-time jobs, but we quietly review issues during our free weekends.
 
-Support & Donations
-===================
+A Warm Cup of Tea
+=================
 
 Pryzma is 100% free, offline, and telemetry-free. There are no paywalled features, locked builds, or artificial tiers.
 
-If Pryzma brought back your beloved worlds and you would like to support our quiet campfire, voluntary donations are warmly appreciated. They directly help with ongoing maintenance, testing across different setups, and keeping this fire burning steadily:
+Both of us have regular full-time jobs, and we never expect anything in return. But if Pryzma brought back a spark of that warm, timeless magic to your worlds and you'd simply like to say thank you or treat us to a hot cup of tea for our quiet weekend evenings, you are more than welcome to leave a small tip:
 * **GitHub Sponsors:** [Sponsor @Sto3IV](https://github.com/sponsors/Sto3IV)
-* **Boosty:** [Support on Boosty](https://boosty.to/sto3iv)
-* **Ko-fi:** [Support on Ko-fi](https://ko-fi.com/sto3iv)
+* **Boosty:** [Tip on Boosty](https://boosty.to/sto3iv)
+* **Ko-fi:** [Buy a Tea on Ko-fi](https://ko-fi.com/sto3iv)
 
 Modpacks
 ========
