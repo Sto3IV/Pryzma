@@ -23,7 +23,7 @@ Installation
 
 1. Install [NeoForge 1.21.1](https://neoforged.net/) (build 21.1.250 or newer recommended).
 2. Download the latest release of **Pryzma** from our [Modrinth](https://modrinth.com/mod/pryzma) or [CurseForge](https://curseforge.com/minecraft/mc-mods/pryzma) page.
-3. Place `pryzma-2.1.3.jar` into your `.minecraft/mods/` directory.
+3. Place `pryzma-2.1.4.jar` into your `.minecraft/mods/` directory.
 4. Drop your favorite resource packs and shaderpacks into their respective folders, and enjoy!
 
 Screenshots
@@ -78,7 +78,7 @@ cd Pryzma
 ./gradlew build
 ```
 
-The compiled mod JAR will be located at `build/libs/pryzma-2.1.3.jar`.
+The compiled mod JAR will be located at `build/libs/pryzma-2.1.4.jar`.
 
 Support & Philosophy
 ====================

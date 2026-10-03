@@ -38,7 +38,7 @@ public class ShaderForgeHelpers implements ShaderPlatformHelpers {
 		var modFile = list != null ? list.getModFileById(Pryzma.MODID) : null;
 		String ver = (modFile != null && !modFile.getMods().isEmpty())
 				? modFile.getMods().get(0).getVersion().toString()
-				: "2.1.3";
+				: "2.1.4";
 		return ver + " (PryzmaShaders " + IRIS_BASE_VERSION + ")";
 	}
 
