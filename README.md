@@ -1,21 +1,11 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/pryzma_8bit.png" width="280" alt="Pryzma Logo">
 <br>
-  <a href="https://github.com/Sto3IV/Pryzma">
-      <img src="https://img.shields.io/badge/Minecraft-1.21.1-10b981?style=flat&logo=minecraft&logoColor=ffffff&labelColor=16181c" alt="Minecraft 1.21.1">
-  </a>
-  <a href="https://neoforged.net/">
-      <img src="https://img.shields.io/badge/NeoForge-21.1.250+-f59e0b?style=flat&logo=neoforge&logoColor=ffffff&labelColor=16181c" alt="NeoForge">
-  </a>
-  <a href="https://modrinth.com/mod/pryzma">
-      <img src="https://img.shields.io/badge/Modrinth-Available-00af5c?style=flat&logo=modrinth&logoColor=ffffff&labelColor=16181c" alt="Modrinth">
-  </a>
-  <a href="https://curseforge.com/minecraft/mc-mods/pryzma">
-      <img src="https://img.shields.io/badge/CurseForge-Available-f16436?style=flat&logo=curseforge&logoColor=ffffff&labelColor=16181c" alt="CurseForge">
-  </a>
-  <a href="https://github.com/Sto3IV/Pryzma">
-      <img src="https://img.shields.io/badge/Tests-194%20Passing-6366f1?style=flat&logo=githubactions&logoColor=ffffff&labelColor=16181c" alt="194 Passing Tests">
-  </a>
+  <a href="https://github.com/Sto3IV/Pryzma"><img src="https://img.shields.io/badge/Minecraft-1.21.1-10b981?style=flat&logo=minecraft&logoColor=ffffff&labelColor=16181c" alt="Minecraft 1.21.1"></a>
+  <a href="https://neoforged.net/"><img src="https://img.shields.io/badge/NeoForge-21.1.250+-f59e0b?style=flat&logo=neoforge&logoColor=ffffff&labelColor=16181c" alt="NeoForge"></a>
+  <a href="https://modrinth.com/mod/pryzma"><img src="https://img.shields.io/badge/Modrinth-Available-00af5c?style=flat&logo=modrinth&logoColor=ffffff&labelColor=16181c" alt="Modrinth"></a>
+  <a href="https://curseforge.com/minecraft/mc-mods/pryzma"><img src="https://img.shields.io/badge/CurseForge-Available-f16436?style=flat&logo=curseforge&logoColor=ffffff&labelColor=16181c" alt="CurseForge"></a>
+  <a href="https://github.com/Sto3IV/Pryzma"><img src="https://img.shields.io/badge/Tests-194%20Passing-6366f1?style=flat&logo=githubactions&logoColor=ffffff&labelColor=16181c" alt="194 Passing Tests"></a>
 </p>
 <!-- I apologize for the HTML but it looks so pretty :) -->
 
