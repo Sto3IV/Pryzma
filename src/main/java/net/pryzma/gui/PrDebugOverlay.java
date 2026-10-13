@@ -14,6 +14,7 @@ import net.pryzma.Pryzma;
 import net.pryzma.PryzmaConfig;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.light.PrDynamicLights;
+import net.pryzma.lod.PryzmaLod;
 import net.pryzma.mixin.TextureAtlasAccessor;
 import net.pryzma.perf.PrDebugTracker;
 import net.pryzma.render.PrAnimations;
@@ -54,6 +55,19 @@ public final class PrDebugOverlay {
                     .getAtlas(InventoryMenu.BLOCK_ATLAS)).prGetAnimatedTextures();
             lines.set(i, lines.get(i) + animations(PryzmaConfig.prSmartAnimations, PrAnimations.countRunning(tickers), tickers.size()));
         }
+        insertAfterCounts(lines, PryzmaLod.debugLine());
+    }
+
+    /** Places {@code line} under the particle line (else the entity line, else at the end); nothing when it is null. */
+    static void insertAfterCounts(List<String> lines, String line) {
+        if (line == null) {
+            return;
+        }
+        int at = find(lines, "P: ");
+        if (at < 0) {
+            at = find(lines, "E: ");
+        }
+        lines.add(at >= 0 ? at + 1 : lines.size(), line);
     }
 
     /** DebugScreenOverlay.getSystemInformation, the right column. */
@@ -133,7 +147,7 @@ public final class PrDebugOverlay {
         }
     }
 
-    /** "Pryzma_1.21.1_2.1.4", the 1.x version format. */
+    /** "Pryzma_1.21.1_2.2.1", the 1.x version format. */
     private static String version() {
         if (pryzmaVersion == null) {
             pryzmaVersion = "Pryzma_" + SharedConstants.getCurrentVersion().getName() + "_" + ModList.get()

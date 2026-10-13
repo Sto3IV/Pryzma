@@ -13,9 +13,13 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.pryzma.command.PrCommands;
+import net.pryzma.world.PrPregenTask;
 import net.pryzma.core.PrReloadListener;
 import net.pryzma.core.expr.PrExprEnv;
 import net.pryzma.entity.PrEntityInfos;
@@ -28,9 +32,12 @@ import net.pryzma.gui.PrZoom;
 import net.pryzma.shader.platform.ShaderForgeHelpers;
 import net.pryzma.item.PrCitModels;
 import net.pryzma.item.PrCitSpriteSource;
+import net.pryzma.lod.PryzmaLod;
 import net.pryzma.mixin.OptionsSubScreenAccessor;
 import net.pryzma.perf.PrDebugTracker;
 import net.pryzma.perf.PrServerPriority;
+import net.pryzma.render.PrBetterGrass;
+import net.pryzma.render.PrBetterSnow;
 import net.pryzma.render.PrRenderHooks;
 import net.pryzma.render.PrSmartLeaves;
 import net.pryzma.world.PrWorldControl;
@@ -50,6 +57,10 @@ public final class PryzmaClient {
         modBus.addListener(ModelEvent.ModifyBakingResult.class, PryzmaCtm::onModifyBakingResult);
         modBus.addListener(ModelEvent.ModifyBakingResult.class, PrSmartLeaves::onModifyBakingResult);
         modBus.addListener(ModelEvent.ModifyBakingResult.class, PrCitModels::onModifyBakingResult);
+        modBus.addListener(ModelEvent.ModifyBakingResult.class, event -> {
+            PrBetterGrass.clearCaches();
+            PrBetterSnow.clearCaches();
+        });
         modBus.addListener(ModelEvent.BakingCompleted.class, PrCitModels::onBakingCompleted);
         modBus.addListener(RegisterKeyMappingsEvent.class, PrZoom::onRegisterKeys);
         modBus.addListener(RegisterKeyMappingsEvent.class, event -> {
@@ -76,6 +87,9 @@ public final class PryzmaClient {
                 PrEntityInfos.recordSpawn(event.getEntity(), event.getLevel());
             }
         });
+        PryzmaLod.register(modBus, gameBus);
+        gameBus.addListener(RegisterCommandsEvent.class, PrCommands::onRegisterCommands);
+        gameBus.addListener(ServerStoppingEvent.class, event -> PrPregenTask.stopAll());
     }
 
     /** The vanilla video settings are replaced by the Pryzma screen, which returns to the same parent. */

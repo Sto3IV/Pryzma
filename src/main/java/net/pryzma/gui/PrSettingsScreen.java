@@ -19,6 +19,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.pryzma.PryzmaConfig;
+import net.pryzma.lod.PryzmaLod;
 
 /** The six Pryzma 1.x settings pages, each with its own grid and bottom row. */
 final class PrSettingsScreen extends PrScreen {
@@ -28,7 +29,8 @@ final class PrSettingsScreen extends PrScreen {
         ANIMATIONS("pr.options.animationsTitle"),
         PERFORMANCE("pr.options.performanceTitle"),
         OTHER("pr.options.otherTitle"),
-        QUICK_INFO("pr.options.quickInfoTitle");
+        QUICK_INFO("pr.options.quickInfoTitle"),
+        FARLANDS("pr.options.farlandsTitle");
 
         final String title;
 
@@ -55,10 +57,19 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.SUN_MOON, PrOptions.SHOW_CAPES,
                         PrOptions.FOG_FANCY, PrOptions.FOG_START,
                         vanilla("options.viewBobbing", o.bobView()), PrOptions.HELD_ITEM_TOOLTIPS,
-                        vanilla("options.autosaveIndicator", o.showAutosaveIndicator()), PrOptions.SWAMP_COLORS,
-                        PrOptions.VIGNETTE, PrOptions.ALTERNATE_BLOCKS,
+                        PrOptions.VIGNETTE, PrOptions.SWAMP_COLORS,
+                        PrOptions.DETAIL_DISTANCE, PrOptions.ALTERNATE_BLOCKS,
                         vanilla("options.entityDistanceScaling", o.entityDistanceScaling()),
                         vanilla("options.biomeBlendRadius", o.biomeBlendRadius()));
+                int left = width / 2 - 155;
+                addRenderableWidget(new PrButton(215, left, bottomY(), 150,
+                        Component.translatable("pr.options.farlandsOptions"),
+                        b -> minecraft.setScreen(new PrSettingsScreen(Page.FARLANDS, this))));
+                done(width / 2 + 5, 150);
+                onOptionsChanged();
+            }
+            case FARLANDS -> {
+                grid(PrOptions.FARLANDS_DISTANCE, PrOptions.FARLANDS_FOG);
                 done(width / 2 - 100, 200);
             }
             case QUALITY -> {
@@ -94,8 +105,7 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.SMART_ANIMATIONS, PrOptions.FAST_MATH,
                         PrOptions.SMOOTH_FPS, PrOptions.SMOOTH_WORLD,
                         PrOptions.CHUNK_UPDATES, vanilla("options.prioritizeChunkUpdates", o.prioritizeChunkUpdates()),
-                        PrOptions.FAST_PAINTINGS, PrOptions.ENTITY_CULLING,
-                        PrOptions.DETAIL_DISTANCE, null);
+                        PrOptions.FAST_PAINTINGS, PrOptions.ENTITY_CULLING);
                 done(width / 2 - 100, 200);
             }
             case OTHER -> {
@@ -105,10 +115,11 @@ final class PrSettingsScreen extends PrScreen {
                         vanilla("options.fullscreen", o.fullscreen()), PrOptions.AUTOSAVE_TICKS,
                         PrOptions.SCREENSHOT_SIZE, PrOptions.SHOW_GL_ERRORS,
                         PrOptions.FEEDBACK_BUTTONS, PrOptions.REMOVE_REALMS,
-                        PrOptions.TELEMETRY_ATTRIBUTION, vanilla("options.fullscreen.resolution", fullscreenResolution()));
-                addRenderableWidget(new PrButton(210, width / 2 - 100, bottomY() - 44, 200,
+                        PrOptions.TELEMETRY_ATTRIBUTION, vanilla("options.fullscreen.resolution", fullscreenResolution()),
+                        vanilla("options.autosaveIndicator", o.showAutosaveIndicator()), null);
+                addRenderableWidget(new PrButton(210, width / 2 - 155, bottomY(), 150,
                         Component.translatable("pr.options.other.reset"), b -> confirmReset()));
-                addRenderableWidget(new PrButton(200, width / 2 - 100, bottomY(), 200, CommonComponents.GUI_DONE, b -> {
+                addRenderableWidget(new PrButton(200, width / 2 + 5, bottomY(), 150, CommonComponents.GUI_DONE, b -> {
                     minecraft.getWindow().changeFullscreenVideoMode();
                     onClose();
                 }));
@@ -147,9 +158,32 @@ final class PrSettingsScreen extends PrScreen {
         done(width / 2 + 5, 150);
     }
 
-    /** Quick Info: the detail options only take effect, and only respond, while Quick Info is on. */
+    /** Quick Info and Details: dependent options only respond when their master option allows it. */
     @Override
     void onOptionsChanged() {
+        if (page == Page.DETAILS) {
+            boolean farlandsOn = PryzmaConfig.prFarlandsDistance > 0;
+            for (AbstractWidget w : widgets()) {
+                if (w instanceof PrOptionButton b) {
+                    if (b.option() == PrOptions.FOG_FANCY) {
+                        b.active = !farlandsOn;
+                        if (farlandsOn) {
+                            b.setMessage(Component.translatable("pr.options.FOG_FANCY")
+                                    .append(": ")
+                                    .append(CommonComponents.OPTION_OFF)
+                                    .append(" [")
+                                    .append(Component.translatable("pr.options.locked"))
+                                    .append("]"));
+                        } else {
+                            b.refresh();
+                        }
+                    } else if (b.option() == PrOptions.FOG_START) {
+                        b.active = !farlandsOn;
+                    }
+                }
+            }
+            return;
+        }
         if (page != Page.QUICK_INFO) {
             return;
         }
@@ -190,6 +224,8 @@ final class PrSettingsScreen extends PrScreen {
         o.prioritizeChunkUpdates().set(PrioritizeChunkUpdates.NONE);
         o.biomeBlendRadius().set(2);
         PryzmaConfig.resetToDefaults();
+        // Farlands LOD resets to Off: free its data and rebuild a shader pack built with its Distant Horizons contract.
+        PryzmaLod.onSettingsChanged();
         o.save();
         PryzmaConfig.save();
         minecraft.delayTextureReload();
@@ -218,5 +254,13 @@ final class PrSettingsScreen extends PrScreen {
                         window.setPreferredFullscreenVideoMode(mode);
                     }
                 });
+    }
+
+    @Override
+    public void onClose() {
+        if (page == Page.OTHER) {
+            minecraft.getWindow().changeFullscreenVideoMode();
+        }
+        super.onClose();
     }
 }

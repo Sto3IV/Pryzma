@@ -38,8 +38,8 @@ class PrDebugOverlayTest {
 
     @Test
     void versionDebugReadsAs1x() {
-        assertEquals("DL: 7, Pryzma_1.21.1_2.1.4", PrDebugOverlay.versionDebug(7, "Pryzma_1.21.1_2.1.4", null));
-        assertEquals("Pryzma_1.21.1_2.1.4, BSL_v8.2.09.zip", PrDebugOverlay.versionDebug(-1, "Pryzma_1.21.1_2.1.4", "BSL_v8.2.09.zip"));
+        assertEquals("DL: 7, Pryzma_1.21.1_2.2.1", PrDebugOverlay.versionDebug(7, "Pryzma_1.21.1_2.2.1", null));
+        assertEquals("Pryzma_1.21.1_2.2.1, BSL_v8.2.09.zip", PrDebugOverlay.versionDebug(-1, "Pryzma_1.21.1_2.2.1", "BSL_v8.2.09.zip"));
     }
 
     @Test
@@ -84,6 +84,24 @@ class PrDebugOverlayTest {
                 "Native: 1/2+3MB", "GPU: 4+5MB", "", "CPU: 24x AMD Ryzen 9 5900X"), right);
         PrDebugOverlay.insertMemory(right, "Native: 9/9+9MB", "GPU: 9+9MB");
         assertEquals(8, right.size());
+    }
+
+    @Test
+    void farlandsLineGoesUnderTheCountsAndOnlyWhenOn() {
+        List<String> left = new ArrayList<>(List.of("Minecraft 1.21.1 (1.21.1/pryzma)", "60 fps T: 60 B: 2", "C: 1/2 D: 12",
+                "E: 3/4, B: 0", "P: 5. T: 6, A: 1", "Chunks[C] W: 7"));
+        PrDebugOverlay.insertAfterCounts(left, null);
+        assertEquals(6, left.size(), "off: no line");
+        PrDebugOverlay.insertAfterCounts(left, "Farlands: 64 chunks, idle");
+        assertEquals("Farlands: 64 chunks, idle", left.get(5));
+        assertEquals("Chunks[C] W: 7", left.get(6));
+
+        List<String> noParticles = new ArrayList<>(List.of("E: 1/2", "x"));
+        PrDebugOverlay.insertAfterCounts(noParticles, "F");
+        assertEquals(List.of("E: 1/2", "F", "x"), noParticles);
+        List<String> neither = new ArrayList<>(List.of("a"));
+        PrDebugOverlay.insertAfterCounts(neither, "F");
+        assertEquals(List.of("a", "F"), neither);
     }
 
     /** DebugScreenOverlayMixin and TextureAtlasAccessor: a missing member fails silently or at world load. */

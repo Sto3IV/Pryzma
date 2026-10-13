@@ -2,6 +2,7 @@ package net.pryzma.gui;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.pryzma.PryzmaConfig;
 
 /** Cycling option button: click steps forward (Shift: backward), the wheel steps like vanilla's. */
 final class PrOptionButton extends Button implements PrOptionControl {
@@ -40,6 +41,14 @@ final class PrOptionButton extends Button implements PrOptionControl {
 
     @Override
     public String tooltipKey() {
+        if (PryzmaConfig.prFarlandsDistance > 0) {
+            if (option == PrOptions.FOG_FANCY) {
+                return "pr.options.fog.locked";
+            }
+            if (option == PrOptions.FOG_START) {
+                return "pr.options.fogStart.locked";
+            }
+        }
         return option.key();
     }
 

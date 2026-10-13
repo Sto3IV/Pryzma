@@ -44,6 +44,27 @@ class PryzmaConfigTest {
     }
 
     @Test
+    void farlandsDistanceIsOffByDefaultAndAcceptsOnlyItsSteps() {
+        int saved = PryzmaConfig.prFarlandsDistance;
+        try {
+            assertEquals(0, saved, "Farlands LOD ships off");
+            for (int step : PryzmaConfig.FARLANDS_DISTANCE_VALUES) {
+                PryzmaConfig.apply(Map.of("prFarlandsDistance", Integer.toString(step)));
+                assertEquals(step, PryzmaConfig.prFarlandsDistance);
+                assertEquals(Integer.toString(step), PryzmaConfig.snapshot().get("prFarlandsDistance"));
+            }
+            PryzmaConfig.apply(Map.of());
+            assertEquals(1024, PryzmaConfig.prFarlandsDistance, "a file without the key keeps the current value");
+            PryzmaConfig.apply(Map.of("prFarlandsDistance", "100"));
+            assertEquals(0, PryzmaConfig.prFarlandsDistance, "an unknown value falls back to off");
+            PryzmaConfig.apply(Map.of("prFarlandsDistance", "far"));
+            assertEquals(0, PryzmaConfig.prFarlandsDistance, "so does garbage");
+        } finally {
+            PryzmaConfig.prFarlandsDistance = saved;
+        }
+    }
+
+    @Test
     void detailDistanceIsOffByDefaultAndAcceptsOnlyItsSteps() {
         int saved = PryzmaConfig.prDetailDistance;
         try {
@@ -55,6 +76,77 @@ class PryzmaConfigTest {
             assertEquals(0, PryzmaConfig.prDetailDistance, "an unknown value falls back to off");
         } finally {
             PryzmaConfig.prDetailDistance = saved;
+        }
+    }
+
+    @Test
+    void fogTypeAcceptsFastFancyOffAndHasHelpers() {
+        int saved = PryzmaConfig.prFogType;
+        try {
+            PryzmaConfig.apply(Map.of("prFogType", "1"));
+            assertEquals(1, PryzmaConfig.prFogType);
+            assertTrue(PryzmaConfig.isFogFast());
+            assertFalse(PryzmaConfig.isFogFancy());
+            assertFalse(PryzmaConfig.isFogOff());
+
+            PryzmaConfig.apply(Map.of("prFogType", "2"));
+            assertEquals(2, PryzmaConfig.prFogType);
+            assertFalse(PryzmaConfig.isFogFast());
+            assertTrue(PryzmaConfig.isFogFancy());
+            assertFalse(PryzmaConfig.isFogOff());
+
+            PryzmaConfig.apply(Map.of("prFogType", "3"));
+            assertEquals(3, PryzmaConfig.prFogType);
+            assertFalse(PryzmaConfig.isFogFast());
+            assertFalse(PryzmaConfig.isFogFancy());
+            assertTrue(PryzmaConfig.isFogOff());
+
+            // Clamps outside 1..3
+            PryzmaConfig.apply(Map.of("prFogType", "0"));
+            assertEquals(1, PryzmaConfig.prFogType);
+            PryzmaConfig.apply(Map.of("prFogType", "4"));
+            assertEquals(3, PryzmaConfig.prFogType);
+        } finally {
+            PryzmaConfig.prFogType = saved;
+        }
+    }
+
+    @Test
+    void farlandsFogAcceptsFastFancyOffAndLegacyBooleans() {
+        int saved = PryzmaConfig.prFarlandsFog;
+        try {
+            assertEquals(2, saved, "Farlands Fog defaults to 2 (Fancy)");
+            PryzmaConfig.apply(Map.of("prFarlandsFog", "1"));
+            assertEquals(1, PryzmaConfig.prFarlandsFog);
+            assertTrue(PryzmaConfig.isFarlandsFogFast());
+            assertFalse(PryzmaConfig.isFarlandsFogFancy());
+            assertFalse(PryzmaConfig.isFarlandsFogOff());
+
+            PryzmaConfig.apply(Map.of("prFarlandsFog", "2"));
+            assertEquals(2, PryzmaConfig.prFarlandsFog);
+            assertFalse(PryzmaConfig.isFarlandsFogFast());
+            assertTrue(PryzmaConfig.isFarlandsFogFancy());
+            assertFalse(PryzmaConfig.isFarlandsFogOff());
+
+            PryzmaConfig.apply(Map.of("prFarlandsFog", "3"));
+            assertEquals(3, PryzmaConfig.prFarlandsFog);
+            assertFalse(PryzmaConfig.isFarlandsFogFast());
+            assertFalse(PryzmaConfig.isFarlandsFogFancy());
+            assertTrue(PryzmaConfig.isFarlandsFogOff());
+
+            // Legacy boolean string backward compatibility
+            PryzmaConfig.apply(Map.of("prFarlandsFog", "true"));
+            assertEquals(2, PryzmaConfig.prFarlandsFog);
+            PryzmaConfig.apply(Map.of("prFarlandsFog", "false"));
+            assertEquals(3, PryzmaConfig.prFarlandsFog);
+
+            // Clamping
+            PryzmaConfig.apply(Map.of("prFarlandsFog", "0"));
+            assertEquals(1, PryzmaConfig.prFarlandsFog);
+            PryzmaConfig.apply(Map.of("prFarlandsFog", "9"));
+            assertEquals(3, PryzmaConfig.prFarlandsFog);
+        } finally {
+            PryzmaConfig.prFarlandsFog = saved;
         }
     }
 }

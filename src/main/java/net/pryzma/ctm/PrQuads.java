@@ -15,7 +15,7 @@ import net.minecraft.core.Direction;
 import net.neoforged.neoforge.client.model.IQuadTransformer;
 
 /** Quad copies with another sprite, full-face quads for overlays, and quad shape tests. */
-final class PrQuads {
+public final class PrQuads {
     private static final int STRIDE = IQuadTransformer.STRIDE;
     private static final int POS = IQuadTransformer.POSITION;
     private static final int UV = IQuadTransformer.UV0;
@@ -28,13 +28,13 @@ final class PrQuads {
     private PrQuads() {
     }
 
-    static void clearCaches() {
+    public static void clearCaches() {
         REMAPPED.clear();
         FULL.clear();
     }
 
     /** {@code quad} with its texture coordinates moved from its own sprite onto {@code sprite}. Cached. */
-    static BakedQuad remap(BakedQuad quad, TextureAtlasSprite sprite) {
+    public static BakedQuad remap(BakedQuad quad, TextureAtlasSprite sprite) {
         if (quad.getSprite() == sprite) {
             return quad;
         }
@@ -54,7 +54,7 @@ final class PrQuads {
     }
 
     /** A full block face with {@code sprite}, culled like a normal face. Cached per face and sprite. */
-    static BakedQuad fullFace(Direction face, TextureAtlasSprite sprite, int tintIndex) {
+    public static BakedQuad fullFace(Direction face, TextureAtlasSprite sprite, int tintIndex) {
         BakedQuad[] faces = FULL.computeIfAbsent(sprite, s -> new BakedQuad[12]);
         int slot = face.get3DDataValue() + (tintIndex >= 0 ? 6 : 0);
         BakedQuad quad = faces[slot];
@@ -68,8 +68,19 @@ final class PrQuads {
         return quad;
     }
 
+    /** A block face with {@code sprite} up to {@code yMax} height (e.g. 15.0F for dirt path). */
+    public static BakedQuad faceQuad(Direction face, TextureAtlasSprite sprite, int tintIndex, float yMax) {
+        if (yMax >= 15.99F) {
+            return fullFace(face, sprite, tintIndex);
+        }
+        BlockElementFace element = new BlockElementFace(face, tintIndex >= 0 ? tintIndex : -1, "#all",
+                new BlockFaceUV(new float[] {0.0F, 16.0F - yMax, 16.0F, 16.0F}, 0));
+        return BAKERY.bakeQuad(new Vector3f(0.0F, 0.0F, 0.0F), new Vector3f(16.0F, yMax, 16.0F), element, sprite, face,
+                BlockModelRotation.X0_Y0, null, true);
+    }
+
     /** {@code quad} with {@code rgb} multiplied into its vertex colours and no tint index. */
-    static BakedQuad withColor(BakedQuad quad, int rgb) {
+    public static BakedQuad withColor(BakedQuad quad, int rgb) {
         int[] data = quad.getVertices().clone();
         int r = rgb >> 16 & 0xFF;
         int g = rgb >> 8 & 0xFF;
@@ -85,20 +96,20 @@ final class PrQuads {
         return new BakedQuad(data, -1, quad.getDirection(), quad.getSprite(), quad.isShade(), quad.hasAmbientOcclusion());
     }
 
-    static float x(BakedQuad q, int v) {
+    public static float x(BakedQuad q, int v) {
         return Float.intBitsToFloat(q.getVertices()[v * STRIDE + POS]);
     }
 
-    static float y(BakedQuad q, int v) {
+    public static float y(BakedQuad q, int v) {
         return Float.intBitsToFloat(q.getVertices()[v * STRIDE + POS + 1]);
     }
 
-    static float z(BakedQuad q, int v) {
+    public static float z(BakedQuad q, int v) {
         return Float.intBitsToFloat(q.getVertices()[v * STRIDE + POS + 2]);
     }
 
     /** The quad lies on its block face plane (e.g. y == 1 for UP). */
-    static boolean isFaceQuad(BakedQuad q) {
+    public static boolean isFaceQuad(BakedQuad q) {
         Direction d = q.getDirection();
         float plane = d.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1.0F : 0.0F;
         for (int v = 0; v < 4; v++) {
@@ -115,7 +126,7 @@ final class PrQuads {
     }
 
     /** The quad covers its whole block face. */
-    static boolean isFullQuad(BakedQuad q) {
+    public static boolean isFullQuad(BakedQuad q) {
         if (!isFaceQuad(q)) {
             return false;
         }
@@ -135,11 +146,11 @@ final class PrQuads {
         return minA < 1.0E-4F && maxA > 1.0F - 1.0E-4F && minB < 1.0E-4F && maxB > 1.0F - 1.0E-4F;
     }
 
-    static float midX(BakedQuad q) {
+    public static float midX(BakedQuad q) {
         return (x(q, 0) + x(q, 1) + x(q, 2) + x(q, 3)) / 4.0F;
     }
 
-    static float midZ(BakedQuad q) {
+    public static float midZ(BakedQuad q) {
         return (z(q, 0) + z(q, 1) + z(q, 2) + z(q, 3)) / 4.0F;
     }
 }

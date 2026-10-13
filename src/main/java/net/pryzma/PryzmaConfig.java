@@ -74,6 +74,11 @@ public final class PryzmaConfig {
     /** Phase B4 decorator LOD: radius in blocks beyond which decorators are not drawn; 0 = off. */
     public static int prDetailDistance = 0;
     public static final int[] DETAIL_DISTANCE_VALUES = {0, 48, 64, 96, 128};
+    /** Farlands LOD: radius in chunks of the native distant terrain drawn beyond the render distance; 0 = off. */
+    public static int prFarlandsDistance = 0;
+    public static final int[] FARLANDS_DISTANCE_VALUES = {0, 32, 64, 96, 128, 192, 256, 384, 512, 768, 1024};
+    /** Farlands Fog mode: 1 = Fast (dense edge fog), 2 = Fancy (gradient from render distance), 3 = OFF. */
+    public static int prFarlandsFog = 2;
     public static boolean prDynamicFov = true;
     public static boolean prAlternateBlocks = true;
     public static int prDynamicLights = 3;
@@ -154,12 +159,36 @@ public final class PryzmaConfig {
         return prBetterGrass != 3;
     }
 
+    public static boolean isBetterGrassFast() {
+        return prBetterGrass == 1;
+    }
+
     public static boolean isBetterGrassFancy() {
         return prBetterGrass == 2;
     }
 
     public static boolean isFogOff() {
         return prFogType == 3;
+    }
+
+    public static boolean isFogFast() {
+        return prFogType == 1;
+    }
+
+    public static boolean isFogFancy() {
+        return prFogType == 2;
+    }
+
+    public static boolean isFarlandsFogOff() {
+        return prFarlandsFog == 3;
+    }
+
+    public static boolean isFarlandsFogFast() {
+        return prFarlandsFog == 1;
+    }
+
+    public static boolean isFarlandsFogFancy() {
+        return prFarlandsFog == 2;
     }
 
     // ---------------------------------------------------------------- persistence
@@ -214,7 +243,7 @@ public final class PryzmaConfig {
 
     /** Applies parsed {@code key -> value} pairs with the 1.x clamping rules. Unknown keys are ignored. */
     static void apply(Map<String, String> v) {
-        prFogType = clampInt(v, "prFogType", prFogType, 2, 3);
+        prFogType = clampInt(v, "prFogType", prFogType, 1, 3);
         if (v.containsKey("prFogStart")) {
             float f = parseFloat(v.get("prFogStart"), prFogStart);
             prFogStart = f < 0.2F ? 0.2F : f > 0.81F ? 0.8F : f;
@@ -283,6 +312,17 @@ public final class PryzmaConfig {
         prFastMath = bool(v, "prFastMath", prFastMath);
         prFastRender = bool(v, "prFastRender", prFastRender);
         prDetailDistance = oneOf(v, "prDetailDistance", prDetailDistance, DETAIL_DISTANCE_VALUES);
+        prFarlandsDistance = oneOf(v, "prFarlandsDistance", prFarlandsDistance, FARLANDS_DISTANCE_VALUES);
+        if (v.containsKey("prFarlandsFog")) {
+            String f = v.get("prFarlandsFog");
+            if ("true".equalsIgnoreCase(f)) {
+                prFarlandsFog = 2;
+            } else if ("false".equalsIgnoreCase(f)) {
+                prFarlandsFog = 3;
+            } else {
+                prFarlandsFog = clampInt(v, "prFarlandsFog", prFarlandsFog, 1, 3);
+            }
+        }
         if (v.containsKey("prChatBackground")) {
             prChatBackground = parseInt(v.get("prChatBackground"), prChatBackground);
         }
@@ -416,6 +456,8 @@ public final class PryzmaConfig {
         m.put("prFastMath", str(prFastMath));
         m.put("prFastRender", str(prFastRender));
         m.put("prDetailDistance", str(prDetailDistance));
+        m.put("prFarlandsDistance", str(prFarlandsDistance));
+        m.put("prFarlandsFog", str(prFarlandsFog));
         m.put("prChatBackground", str(prChatBackground));
         m.put("prChatShadow", str(prChatShadow));
         m.put("prTelemetry", str(prTelemetry));
@@ -461,6 +503,8 @@ public final class PryzmaConfig {
         prFastMath = false;
         prFastRender = false;
         prDetailDistance = 0;
+        prFarlandsDistance = 0;
+        prFarlandsFog = 2;
         prDynamicFov = true;
         prAlternateBlocks = true;
         prDynamicLights = 3;

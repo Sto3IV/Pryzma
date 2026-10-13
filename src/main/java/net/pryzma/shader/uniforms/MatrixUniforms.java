@@ -1,6 +1,7 @@
 package net.pryzma.shader.uniforms;
 
 import net.minecraft.client.Minecraft;
+import net.pryzma.lod.LodShaderSupport;
 import net.pryzma.shader.gl.uniform.UniformHolder;
 import net.pryzma.shader.shaderpack.properties.PackDirectives;
 import net.pryzma.shader.shadows.ShadowMatrices;
@@ -20,8 +21,9 @@ public final class MatrixUniforms {
 	public static void addMatrixUniforms(UniformHolder uniforms, PackDirectives directives) {
 		addMatrix(uniforms, "ModelView", CapturedRenderingState.INSTANCE::getGbufferModelView);
 		addMatrix(uniforms, "Projection", CapturedRenderingState.INSTANCE::getGbufferProjection);
-		// Without Distant Horizons its projection is the gbuffer projection.
-		addDHMatrix(uniforms, "Projection", CapturedRenderingState.INSTANCE::getGbufferProjection);
+		// The Farlands LOD pass's projection while its option is on; without it, the gbuffer projection.
+		addDHMatrix(uniforms, "Projection", LodShaderSupport.isEnabled() ? LodShaderSupport::projection
+			: CapturedRenderingState.INSTANCE::getGbufferProjection);
 		addShadowMatrix(uniforms, "ModelView", () ->
 			new Matrix4f(ShadowRenderer.createShadowModelView(directives.getSunPathRotation(), directives.getShadowDirectives().getIntervalSize(),
 				Mth.equal(directives.getShadowDirectives().getNearPlane(), -1.0f) ? -renderDistanceBlocks() : directives.getShadowDirectives().getNearPlane(),

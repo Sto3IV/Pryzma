@@ -8,6 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
+import net.pryzma.lod.LodShaderSupport;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.features.FeatureFlags;
 import net.pryzma.shader.gl.GLDebug;
@@ -202,6 +203,9 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 	private GlFramebuffer defaultFB;
 	private GlFramebuffer defaultFBAlt;
 	private GlFramebuffer defaultFBShadow;
+	/** The Farlands LOD's part of this pipeline; null while the Farlands option is off (the pipeline is then untouched). */
+	@Nullable
+	private final LodShaderSupport farlands;
 
 	public ShadedWorldRenderingPipeline(ProgramSet programSet) {
 		ShaderPrinter.resetPrintState();
@@ -518,6 +522,8 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 
 		defaultFB = flippedAfterPrepare.contains(defaultTex) ? renderTargets.createFramebufferWritingToAlt(new int[] { defaultTex }) : renderTargets.createFramebufferWritingToMain(new int[] { defaultTex });
 		defaultFBAlt = flippedAfterTranslucent.contains(defaultTex) ? renderTargets.createFramebufferWritingToAlt(new int[] { defaultTex }) : renderTargets.createFramebufferWritingToMain(new int[] { defaultTex });
+
+		this.farlands = LodShaderSupport.createFor(this);
 	}
 
 	private ComputeProgram[] createShadowComputes(ComputeSource[] compute, ProgramSet programSet) {
@@ -969,6 +975,10 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 			clearPass.execute(fogColor);
 		}
 
+		if (farlands != null) {
+			farlands.beginFrame();
+		}
+
 		GLDebug.popGroup();
 
 		// Make sure to switch back to the main framebuffer. If we forget to do this then our alt buffers might be
@@ -1201,6 +1211,10 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 	public void destroy() {
 		destroyed = true;
 
+		if (farlands != null) {
+			farlands.destroy();
+		}
+
 		destroyShaders();
 
 		// Unbind all textures
@@ -1310,6 +1324,34 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 	public GlFramebuffer createDHFramebuffer(ProgramSource sources, boolean trans) {
 		return renderTargets.createDHFramebuffer(trans ? flippedAfterTranslucent : flippedAfterPrepare,
 			sources.getDirectives().getDrawBuffers());
+	}
+
+	/** A G-buffer framebuffer for {@code sources}' draw buffers with the main depth, as its gbuffers program writes. */
+	public GlFramebuffer createGbufferFramebuffer(ProgramSource sources, boolean trans) {
+		return renderTargets.createGbufferFramebuffer(trans ? flippedAfterTranslucent : flippedAfterPrepare,
+			sources.getDirectives().getDrawBuffers());
+	}
+
+	/** The program the pack provides for {@code id}, through the pack's fallback chain. */
+	public Optional<ProgramSource> resolveProgram(ProgramId id) {
+		return resolver.resolve(id);
+	}
+
+	/** Points the normals and specular samplers at the neutral maps of an untextured surface. */
+	public void useNeutralPbrTextures() {
+		onSetShaderTexture(whitePixel.getId());
+	}
+
+	/** The Farlands LOD's part of this pipeline, null while the option is off. */
+	@Nullable
+	public LodShaderSupport getFarlands() {
+		return farlands;
+	}
+
+	/** {@code dhDepthTex0} ({@code noWater} false) or {@code dhDepthTex1}: the Farlands LOD's depths, 0 without Farlands. */
+	public int farlandsDepthTexture(boolean noWater) {
+		LodShaderSupport support = farlands;
+		return support == null ? 0 : support.depthTexture(noWater);
 	}
 
 	public ImmutableSet<Integer> getFlippedBeforeShadow() {
