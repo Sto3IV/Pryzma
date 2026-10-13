@@ -44,6 +44,7 @@ import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.pryzma.PryzmaConfig;
 import net.pryzma.detail.PrDetailClassifier;
 import net.pryzma.gui.PrZoom;
+import net.pryzma.lod.PryzmaLod;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.gui.screen.ShaderPackScreen;
 import net.pryzma.render.PrF3RenderCache;
@@ -83,6 +84,7 @@ import net.pryzma.render.PrF3RenderCache;
  * screen pause|options          open the pause menu or the vanilla options screen
  * leave                         save and quit to the title screen
  * shaderinfo                    log the pipeline state and its F3 lines (shadow sections, culling)
+ * farlands                      log the Farlands LOD's F3 line (data, sectors drawn, quads, shader-pack mode)
  * detailblocks                  log every registered block the decorator LOD (Detail Distance) would cull
  * fps &lt;frames&gt;                  log mean and worst frame time over the next frames
  * f3 on|off|charts              show or hide the debug screen, or toggle its FPS chart (F3+2)
@@ -267,6 +269,7 @@ public final class PrSelfTest {
                     throw new IllegalStateException("shader pack " + arg + " did not load");
                 }
             }
+            case "farlands" -> LOG.info("PRYZMA-SELFTEST farlands {}", PryzmaLod.debugLine());
             case "shaderinfo" -> {
                 List<String> lines = new ArrayList<>();
                 PryzmaShaders.getPipelineManager().getPipeline().ifPresent(p -> p.addDebugText(lines));

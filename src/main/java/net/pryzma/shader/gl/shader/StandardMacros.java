@@ -3,6 +3,7 @@ package net.pryzma.shader.gl.shader;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.GlUtil;
+import net.pryzma.lod.LodShaderSupport;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.helpers.StringPair;
 import net.pryzma.shader.pathways.HandRenderer;
@@ -57,6 +58,10 @@ public class StandardMacros {
 		define(standardDefines, "IRIS_HAS_TRANSLUCENCY_SORTING");
 		define(standardDefines, "IRIS_TAG_SUPPORT", "2");
 
+		// The Farlands LOD renders through the Distant Horizons contract (dh_* programs, dhDepthTex, dh* uniforms).
+		if (LodShaderSupport.isEnabled()) {
+			define(standardDefines, "DISTANT_HORIZONS");
+		}
 
 		if (ShaderPlatformHelpers.getInstance().isModLoaded("continuity")) {
 			define(standardDefines, "IRIS_HAS_CONNECTED_TEXTURES");

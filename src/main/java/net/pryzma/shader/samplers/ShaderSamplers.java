@@ -3,12 +3,14 @@ package net.pryzma.shader.samplers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import net.pryzma.lod.LodShaderSupport;
 import net.pryzma.shader.gl.image.GlImage;
 import net.pryzma.shader.gl.sampler.GlSampler;
 import net.pryzma.shader.gl.sampler.SamplerHolder;
 import net.pryzma.shader.gl.state.StateUpdateNotifiers;
 import net.pryzma.shader.gl.texture.TextureAccess;
 import net.pryzma.shader.gl.texture.TextureType;
+import net.pryzma.shader.pipeline.ShadedWorldRenderingPipeline;
 import net.pryzma.shader.pipeline.WorldRenderingPipeline;
 import net.pryzma.shader.shaderpack.properties.PackRenderTargetDirectives;
 import net.pryzma.shader.shaderpack.properties.PackShadowDirectives;
@@ -92,9 +94,15 @@ public class ShaderSamplers {
 			}
 		}
 
-		// Distant Horizons is not supported: packs that sample its depth unconditionally read no texture.
-		samplers.addDynamicSampler(TextureType.TEXTURE_2D, () -> 0, null, "dhDepthTex", "dhDepthTex0");
-		samplers.addDynamicSampler(TextureType.TEXTURE_2D, () -> 0, null, "dhDepthTex1");
+		// Distant Horizons depths: the Farlands LOD's while its option is on (the pack then sees DISTANT_HORIZONS),
+		// no texture otherwise. Programs are rebuilt when the option changes, so the choice is made once here.
+		if (LodShaderSupport.isEnabled() && pipeline instanceof ShadedWorldRenderingPipeline shaded) {
+			samplers.addDynamicSampler(TextureType.TEXTURE_2D, () -> shaded.farlandsDepthTexture(false), null, "dhDepthTex", "dhDepthTex0");
+			samplers.addDynamicSampler(TextureType.TEXTURE_2D, () -> shaded.farlandsDepthTexture(true), null, "dhDepthTex1");
+		} else {
+			samplers.addDynamicSampler(TextureType.TEXTURE_2D, () -> 0, null, "dhDepthTex", "dhDepthTex0");
+			samplers.addDynamicSampler(TextureType.TEXTURE_2D, () -> 0, null, "dhDepthTex1");
+		}
 	}
 
 	public static void addNoiseSampler(SamplerHolder samplers, TextureAccess sampler) {

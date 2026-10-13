@@ -15,8 +15,11 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.pryzma.PryzmaConfig;
+import net.pryzma.lod.PryzmaLod;
 import net.pryzma.perf.PrChunkWorkers;
 import net.pryzma.perf.PrServerPriority;
+import net.pryzma.render.PrBetterGrass;
+import net.pryzma.render.PrBetterSnow;
 
 /**
  * Every Pryzma option of the video settings, with the cycle order and labels of Pryzma 1.x
@@ -100,7 +103,7 @@ public final class PrOptions {
                 case 2 -> fancy();
                 default -> off();
             },
-            dir -> PryzmaConfig.prFogType = PryzmaConfig.prFogType == 2 ? 3 : 2);
+            dir -> PryzmaConfig.prFogType = (PryzmaConfig.prFogType % 3) + 1);
     public static final PrOption.Cycle FOG_START = cycle("pr.options.FOG_START",
             () -> Float.toString(PryzmaConfig.prFogStart),
             dir -> {
@@ -177,11 +180,13 @@ public final class PrOptions {
             },
             dir -> {
                 PryzmaConfig.prBetterGrass = PryzmaConfig.prBetterGrass + 1 > 3 ? 1 : PryzmaConfig.prBetterGrass + 1;
+                PrBetterGrass.clearCaches();
                 allChanged();
             });
     public static final PrOption.Cycle BETTER_SNOW = bool("pr.options.BETTER_SNOW",
             () -> PryzmaConfig.prBetterSnow, v -> {
                 PryzmaConfig.prBetterSnow = v;
+                PrBetterSnow.clearCaches();
                 allChanged();
             });
     public static final PrOption.Cycle CUSTOM_FONTS = bool("pr.options.CUSTOM_FONTS",
@@ -316,29 +321,55 @@ public final class PrOptions {
                 }
             });
     /** Crossing 0 changes how sections are meshed, so they are rebuilt; other steps only move the draw cut. */
-    public static final PrOption.Cycle DETAIL_DISTANCE = cycle("pr.options.DETAIL_DISTANCE",
-            () -> PryzmaConfig.prDetailDistance == 0 ? off() : PryzmaConfig.prDetailDistance + "m",
-            dir -> {
+    public static final PrOption.Slider DETAIL_DISTANCE = steppedSlider("pr.options.DETAIL_DISTANCE",
+            PryzmaConfig.DETAIL_DISTANCE_VALUES,
+            () -> PryzmaConfig.prDetailDistance,
+            v -> {
                 int old = PryzmaConfig.prDetailDistance;
-                PryzmaConfig.prDetailDistance = nextValue(old, PryzmaConfig.DETAIL_DISTANCE_VALUES);
-                if ((old == 0) != (PryzmaConfig.prDetailDistance == 0)) {
+                PryzmaConfig.prDetailDistance = v;
+                if ((old == 0) != (v == 0)) {
                     allChanged();
                 }
-            });
+            },
+            v -> v == 0 ? off() : v + "m");
+    /** Farlands LOD radius: Off, 32..1024 chunks. The LOD starts or stops on the next tick. */
+    public static final PrOption.Slider FARLANDS_DISTANCE = steppedSlider("pr.options.FARLANDS_DISTANCE",
+            PryzmaConfig.FARLANDS_DISTANCE_VALUES,
+            () -> PryzmaConfig.prFarlandsDistance,
+            v -> {
+                PryzmaConfig.prFarlandsDistance = v;
+                PryzmaLod.onSettingsChanged();
+            },
+            v -> v == 0 ? off() : I18n.get("options.chunks", v));
+    /** Farlands Fog: Fast (dense edge fog), Fancy (smooth gradient across LOD), OFF. */
+    public static final PrOption.Cycle FARLANDS_FOG = cycle("pr.options.FARLANDS_FOG",
+            () -> switch (PryzmaConfig.prFarlandsFog) {
+                case 1 -> fast();
+                case 2 -> fancy();
+                default -> off();
+            },
+            dir -> PryzmaConfig.prFarlandsFog = (PryzmaConfig.prFarlandsFog % 3) + 1);
 
     // ------------------------------------------------------------------ other
 
     public static final PrOption.Cycle LAGOMETER = bool("pr.options.LAGOMETER", () -> PryzmaConfig.prLagometer, v -> {
         PryzmaConfig.prLagometer = v;
+        // One way. Turning the option off leaves a chart the player opened with F3+2.
+        if (!v) {
+            return;
+        }
         var debug = Minecraft.getInstance().getDebugOverlay();
-        if (debug.showDebugScreen() && debug.showFpsCharts() != v) {
+        if (debug.showDebugScreen() && !debug.showFpsCharts()) {
             debug.toggleFpsCharts();
         }
     });
     public static final PrOption.Cycle PROFILER = bool("pr.options.PROFILER", () -> PryzmaConfig.prProfiler, v -> {
         PryzmaConfig.prProfiler = v;
+        if (!v) {
+            return;
+        }
         var debug = Minecraft.getInstance().getDebugOverlay();
-        if (debug.showDebugScreen() && debug.showProfilerChart() != v) {
+        if (debug.showDebugScreen() && !debug.showProfilerChart()) {
             debug.toggleProfilerChart();
         }
     });
@@ -493,6 +524,12 @@ public final class PrOptions {
     static int nextValue(int value, int[] values) {
         int index = indexOf(value, values);
         return index < 0 ? values[0] : values[(index + 1) % values.length];
+    }
+
+    /** The value {@code direction} steps from {@code value} in {@code values}, wrapping; an unknown value restarts at the first. */
+    static int stepValue(int value, int[] values, int direction) {
+        int index = indexOf(value, values);
+        return index < 0 ? values[0] : values[Math.floorMod(index + direction, values.length)];
     }
 
     static int indexOf(int value, int[] values) {

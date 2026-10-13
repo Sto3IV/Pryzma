@@ -6,7 +6,6 @@ import io.github.douira.glsl_transformer.ast.query.Root;
 import io.github.douira.glsl_transformer.ast.transform.ASTInjectionPoint;
 import io.github.douira.glsl_transformer.ast.transform.ASTParser;
 import io.github.douira.glsl_transformer.util.Type;
-import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.gl.shader.ShaderType;
 import net.pryzma.shader.pipeline.transform.parameter.Parameters;
 
@@ -62,8 +61,6 @@ public class DHTerrainTransformer {
 		tree.parseAndInjectNode(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
 			"uniform mat4 iris_ProjectionMatrixInverse;");
 
-		PryzmaShaders.logger.warn("Type is " + parameters.type);
-
 		// TODO: All of the transformed variants of the input matrices, preferably
 		// computed on the CPU side...
 		root.rename("gl_ModelViewMatrix", "iris_ModelViewMatrix");
@@ -97,7 +94,27 @@ public class DHTerrainTransformer {
 		root.replaceReferenceExpressions(t, "gl_ModelViewProjectionMatrix",
 			"(iris_ProjectionMatrix * iris_ModelViewMatrix)");
 
+		if (parameters.type.glShaderType == ShaderType.FRAGMENT) {
+			injectLodClip(t, tree);
+		}
+
 		CommonTransformer.applyIntelHd4000Workaround(root);
+	}
+
+	/**
+	 * Farlands LOD: fragments horizontally closer to the camera than {@code pryzma_LodClip} lie where vanilla terrain
+	 * is drawn and are discarded. The position comes from {@code gl_FragCoord} and the inverse matrices of the pass,
+	 * so the cut works whatever stages (geometry, tessellation) the program has. A clip of 0 (the uniform's default)
+	 * discards nothing.
+	 */
+	public static void injectLodClip(ASTParser t, TranslationUnit tree) {
+		tree.parseAndInjectNodes(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
+			"uniform float pryzma_LodClip;",
+			"uniform vec2 pryzma_LodInvViewport;");
+		tree.prependMainFunctionBody(t,
+			"vec4 pryzma_lodPos = iris_ProjectionMatrixInverse * vec4(gl_FragCoord.xy * pryzma_LodInvViewport * 2.0 - 1.0, gl_FragCoord.z * 2.0 - 1.0, 1.0);",
+			"pryzma_lodPos = iris_ModelViewMatrixInverse * (pryzma_lodPos / pryzma_lodPos.w);",
+			"if (dot(pryzma_lodPos.xz, pryzma_lodPos.xz) < pryzma_LodClip * pryzma_LodClip) discard;");
 	}
 
 	public static void injectVertInit(

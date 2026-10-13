@@ -108,7 +108,7 @@ public final class PrRenderHooks {
         event.setCanceled(true);
     }
 
-    private static boolean isClearAir(Camera camera) {
+    public static boolean isClearAir(Camera camera) {
         Minecraft mc = Minecraft.getInstance();
         if (camera.getEntity() instanceof LivingEntity living
                 && (living.hasEffect(MobEffects.BLINDNESS) || living.hasEffect(MobEffects.DARKNESS))) {

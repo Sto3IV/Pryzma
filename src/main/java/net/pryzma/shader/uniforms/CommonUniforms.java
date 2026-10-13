@@ -2,6 +2,7 @@ package net.pryzma.shader.uniforms;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.pryzma.lod.LodShaderSupport;
 import net.pryzma.shader.gl.state.FogMode;
 import net.pryzma.shader.gl.state.StateUpdateNotifiers;
 import net.pryzma.shader.gl.uniform.DynamicUniformHolder;
@@ -163,11 +164,20 @@ public final class CommonUniforms {
 			})
 			.uniform1f(PER_TICK, "rainStrength", CommonUniforms::getRainStrength)
 			.uniform1f(PER_TICK, "wetness", new SmoothedFloat(directives.getWetnessHalfLife(), directives.getDrynessHalfLife(), CommonUniforms::getRainStrength, updateNotifier))
-			.uniform3d(PER_FRAME, "skyColor", CommonUniforms::getSkyColor)
+			.uniform3d(PER_FRAME, "skyColor", CommonUniforms::getSkyColor);
+		if (LodShaderSupport.isEnabled()) {
+			// The Farlands LOD fills the Distant Horizons contract: its pass, in blocks.
+			uniforms
+				.uniform1f(PER_FRAME, "dhFarPlane", LodShaderSupport::farPlane)
+				.uniform1f(PER_FRAME, "dhNearPlane", LodShaderSupport::nearPlane)
+				.uniform1i(PER_FRAME, "dhRenderDistance", LodShaderSupport::renderDistance);
+		} else {
 			// Distant Horizons values as PryzmaShaders reports them while DH is absent.
-			.uniform1f(ONCE, "dhFarPlane", () -> 0.01f)
-			.uniform1f(ONCE, "dhNearPlane", () -> 0.01f)
-			.uniform1i(PER_FRAME, "dhRenderDistance", () -> client.options.getEffectiveRenderDistance());
+			uniforms
+				.uniform1f(ONCE, "dhFarPlane", () -> 0.01f)
+				.uniform1f(ONCE, "dhNearPlane", () -> 0.01f)
+				.uniform1i(PER_FRAME, "dhRenderDistance", () -> client.options.getEffectiveRenderDistance());
+		}
 	}
 
 	private static boolean isOnGround() {
