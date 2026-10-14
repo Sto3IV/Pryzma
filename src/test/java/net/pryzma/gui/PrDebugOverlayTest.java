@@ -14,6 +14,7 @@ import net.pryzma.PryzmaConfig;
 import net.pryzma.render.PrAnimations;
 
 class PrDebugOverlayTest {
+
     @Test
     void fpsLineReadsAs1x() {
         assertEquals("1449/240 fps (35 updates) T: inf fancy B: 2 GPU: 69%",
@@ -38,8 +39,8 @@ class PrDebugOverlayTest {
 
     @Test
     void versionDebugReadsAs1x() {
-        assertEquals("DL: 7, Pryzma_1.21.1_2.2.1", PrDebugOverlay.versionDebug(7, "Pryzma_1.21.1_2.2.1", null));
-        assertEquals("Pryzma_1.21.1_2.2.1, BSL_v8.2.09.zip", PrDebugOverlay.versionDebug(-1, "Pryzma_1.21.1_2.2.1", "BSL_v8.2.09.zip"));
+        assertEquals("DL: 7, Pryzma_1.21.1_2.2.2", PrDebugOverlay.versionDebug(7, "Pryzma_1.21.1_2.2.2", null));
+        assertEquals("Pryzma_1.21.1_2.2.2, BSL_v8.2.09.zip", PrDebugOverlay.versionDebug(-1, "Pryzma_1.21.1_2.2.2", "BSL_v8.2.09.zip"));
     }
 
     @Test

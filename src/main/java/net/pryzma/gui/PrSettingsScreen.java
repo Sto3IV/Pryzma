@@ -179,6 +179,14 @@ final class PrSettingsScreen extends PrScreen {
                         }
                     } else if (b.option() == PrOptions.FOG_START) {
                         b.active = !farlandsOn;
+                        if (farlandsOn) {
+                            b.setMessage(Component.translatable("pr.options.FOG_START")
+                                    .append(": [")
+                                    .append(Component.translatable("pr.options.locked"))
+                                    .append("]"));
+                        } else {
+                            b.refresh();
+                        }
                     }
                 }
             }
