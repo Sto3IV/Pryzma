@@ -147,7 +147,7 @@ public final class PrDebugOverlay {
         }
     }
 
-    /** "Pryzma_1.21.1_2.2.1", the 1.x version format. */
+    /** "Pryzma_1.21.1_2.2.2", the 1.x version format. */
     private static String version() {
         if (pryzmaVersion == null) {
             pryzmaVersion = "Pryzma_" + SharedConstants.getCurrentVersion().getName() + "_" + ModList.get()

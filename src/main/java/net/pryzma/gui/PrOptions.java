@@ -20,6 +20,7 @@ import net.pryzma.perf.PrChunkWorkers;
 import net.pryzma.perf.PrServerPriority;
 import net.pryzma.render.PrBetterGrass;
 import net.pryzma.render.PrBetterSnow;
+import net.pryzma.render.PrFontUtils;
 
 /**
  * Every Pryzma option of the video settings, with the cycle order and labels of Pryzma 1.x
@@ -190,7 +191,10 @@ public final class PrOptions {
                 allChanged();
             });
     public static final PrOption.Cycle CUSTOM_FONTS = bool("pr.options.CUSTOM_FONTS",
-            () -> PryzmaConfig.prCustomFonts, v -> PryzmaConfig.prCustomFonts = v);
+            () -> PryzmaConfig.prCustomFonts, v -> {
+                PryzmaConfig.prCustomFonts = v;
+                PrFontUtils.reloadFonts();
+            });
     public static final PrOption.Cycle CUSTOM_COLORS = bool("pr.options.CUSTOM_COLORS",
             () -> PryzmaConfig.prCustomColors, v -> {
                 PryzmaConfig.prCustomColors = v;
