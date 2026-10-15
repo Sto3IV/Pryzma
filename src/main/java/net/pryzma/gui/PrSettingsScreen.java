@@ -84,6 +84,7 @@ final class PrSettingsScreen extends PrScreen {
                         vanilla("options.screenEffectScale", o.screenEffectScale()),
                         vanilla("options.fovEffectScale", o.fovEffectScale()));
                 done(width / 2 - 100, 200);
+                onOptionsChanged();
             }
             case ANIMATIONS -> {
                 grid(PrOptions.ANIMATED_WATER, PrOptions.ANIMATED_LAVA,
@@ -187,6 +188,23 @@ final class PrSettingsScreen extends PrScreen {
                         } else {
                             b.refresh();
                         }
+                    }
+                }
+            }
+            return;
+        }
+        if (page == Page.QUALITY) {
+            boolean mipmapsOff = minecraft.options.mipmapLevels().get() == 0;
+            for (AbstractWidget w : widgets()) {
+                if (w instanceof PrOptionButton b && b.option() == PrOptions.MIPMAP_TYPE) {
+                    b.active = !mipmapsOff;
+                    if (mipmapsOff) {
+                        b.setMessage(Component.translatable("pr.options.MIPMAP_TYPE")
+                                .append(": [")
+                                .append(Component.translatable("pr.options.locked"))
+                                .append("]"));
+                    } else {
+                        b.refresh();
                     }
                 }
             }

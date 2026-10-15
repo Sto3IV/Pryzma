@@ -2022,6 +2022,7 @@ class PryzmaModTest {
             assertTrue(keys.contains("pr.options.SMOOTH_FPS.tooltip.1"), "SMOOTH_FPS tooltip missing in " + lang);
             assertTrue(keys.contains("pr.options.LAZY_CHUNK_LOADING.tooltip.1"), "LAZY_CHUNK_LOADING tooltip missing in " + lang);
             assertTrue(keys.contains("pr.options.MIPMAP_TYPE"), "MIPMAP_TYPE missing in " + lang);
+            assertTrue(keys.contains("pr.options.mipmapType.locked.tooltip.1"), "mipmapType.locked tooltip missing in " + lang);
             assertTrue(keys.contains("pr.options.AF_LEVEL"), "AF_LEVEL missing in " + lang);
             assertTrue(keys.contains("pr.options.QUICK_INFO"), "QUICK_INFO missing in " + lang);
             assertTrue(keys.contains("pr.options.QUICK_INFO_FPS"), "QUICK_INFO_FPS missing in " + lang);
