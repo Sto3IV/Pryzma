@@ -26,6 +26,7 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 import net.pryzma.PryzmaConfig;
 import net.pryzma.render.PrBetterGrass;
 import net.pryzma.render.PrBetterSnow;
+import net.pryzma.render.PrNaturalTextures;
 
 /**
  * Alternate Blocks modifier, Better Grass quad replacement, and Better Snow auxiliary tessellation.
@@ -121,12 +122,16 @@ abstract class ModelBlockRendererMixin {
             }
             return original.call(model, state, direction, random, modelData, renderType);
         }
+        List<BakedQuad> quads = null;
         if (direction != null && direction.getAxis().isHorizontal() && PryzmaConfig.isBetterGrass()) {
-            List<BakedQuad> custom = PrBetterGrass.getFaceQuads(model, state, direction, random, modelData, renderType);
-            if (custom != null) {
-                return custom;
-            }
+            quads = PrBetterGrass.getFaceQuads(model, state, direction, random, modelData, renderType);
         }
-        return original.call(model, state, direction, random, modelData, renderType);
+        if (quads == null) {
+            quads = original.call(model, state, direction, random, modelData, renderType);
+        }
+        if (PryzmaConfig.prNaturalTextures) {
+            quads = PrNaturalTextures.processQuads(state, PrBetterGrass.getCurrentPos(), direction, quads);
+        }
+        return quads;
     }
 }
