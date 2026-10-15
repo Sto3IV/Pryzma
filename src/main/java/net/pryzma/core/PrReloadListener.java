@@ -45,6 +45,7 @@ public final class PrReloadListener extends SimplePreparableReloadListener<PrRel
         PryzmaSky.apply(prepared.sky());
         PrEntityTextures.apply(prepared.entityTextures());
         PrSmoother.reset();
+        net.pryzma.render.PrNaturalTextures.reload(manager);
         // The font's atlas pages are rebuilt: the cached F3 vertices point into the old ones.
         PrF3RenderCache.invalidate();
     }

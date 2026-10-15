@@ -60,6 +60,7 @@ public final class PryzmaClient {
         modBus.addListener(ModelEvent.ModifyBakingResult.class, event -> {
             PrBetterGrass.clearCaches();
             PrBetterSnow.clearCaches();
+            net.pryzma.render.PrNaturalTextures.clearCaches();
         });
         modBus.addListener(ModelEvent.BakingCompleted.class, PrCitModels::onBakingCompleted);
         modBus.addListener(RegisterKeyMappingsEvent.class, PrZoom::onRegisterKeys);
