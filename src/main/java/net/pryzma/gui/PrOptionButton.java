@@ -1,5 +1,6 @@
 package net.pryzma.gui;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.pryzma.PryzmaConfig;
@@ -48,6 +49,9 @@ final class PrOptionButton extends Button implements PrOptionControl {
             if (option == PrOptions.FOG_START) {
                 return "pr.options.fogStart.locked";
             }
+        }
+        if (option == PrOptions.MIPMAP_TYPE && Minecraft.getInstance().options.mipmapLevels().get() == 0) {
+            return "pr.options.mipmapType.locked";
         }
         return option.key();
     }
