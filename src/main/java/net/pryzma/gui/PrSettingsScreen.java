@@ -206,6 +206,16 @@ final class PrSettingsScreen extends PrScreen {
                     } else {
                         b.refresh();
                     }
+                } else if (w instanceof PrOptionSlider s && s.option() == PrOptions.AF_LEVEL) {
+                    s.active = !mipmapsOff;
+                    if (mipmapsOff) {
+                        s.setMessage(Component.translatable("pr.options.AF_LEVEL")
+                                .append(": [")
+                                .append(Component.translatable("pr.options.locked"))
+                                .append("]"));
+                    } else {
+                        s.refresh();
+                    }
                 }
             }
             return;

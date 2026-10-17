@@ -2024,6 +2024,7 @@ class PryzmaModTest {
             assertTrue(keys.contains("pr.options.MIPMAP_TYPE"), "MIPMAP_TYPE missing in " + lang);
             assertTrue(keys.contains("pr.options.mipmapType.locked.tooltip.1"), "mipmapType.locked tooltip missing in " + lang);
             assertTrue(keys.contains("pr.options.AF_LEVEL"), "AF_LEVEL missing in " + lang);
+            assertTrue(keys.contains("pr.options.afLevel.locked.tooltip.1"), "afLevel.locked tooltip missing in " + lang);
             assertTrue(keys.contains("pr.options.QUICK_INFO"), "QUICK_INFO missing in " + lang);
             assertTrue(keys.contains("pr.options.QUICK_INFO_FPS"), "QUICK_INFO_FPS missing in " + lang);
             assertTrue(keys.contains("pr.options.FEEDBACK_BUTTONS"), "FEEDBACK_BUTTONS missing in " + lang);
