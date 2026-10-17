@@ -1,6 +1,5 @@
 {
   "options.biomeBlendRadius.tooltip.1": "Smooths the colour transition between biomes",
-  "pr.options.AA_LEVEL.tooltip.5": "sharp colour transitions.",
   "pr.options.AF_LEVEL": "Anisotropic Filtering",
   "pr.options.AF_LEVEL.tooltip.1": "Anisotropic Filtering",
   "pr.options.AF_LEVEL.tooltip.2": "  OFF - (default) standard texture detail (faster)",

@@ -343,15 +343,6 @@ pr.options.MIPMAP_TYPE.tooltip.5=  Bilinear - bilinear filtering in nearest mip 
 pr.options.MIPMAP_TYPE.tooltip.6=  Trilinear - bilinear in mips + linear between mips (smoothest)
 
 
-pr.options.AA_LEVEL=Antialiasing
-pr.options.AA_LEVEL.tooltip.1=Antialiasing
-pr.options.AA_LEVEL.tooltip.2= OFF - (default) no antialiasing (faster)
-pr.options.AA_LEVEL.tooltip.3= 2-16 - antialiased lines and edges (slower)
-pr.options.AA_LEVEL.tooltip.4=The Antialiasing smooths jagged lines and 
-pr.options.AA_LEVEL.tooltip.5=sharp color transitions.
-pr.options.AA_LEVEL.tooltip.6=When enabled it may substantially decrease the FPS.
-pr.options.AA_LEVEL.tooltip.7=Not all levels are supported by all graphics cards.
-pr.options.AA_LEVEL.tooltip.8=Effective after a RESTART!
 
 pr.options.AF_LEVEL=Anisotropic Filtering
 pr.options.AF_LEVEL.tooltip.1=Anisotropic Filtering

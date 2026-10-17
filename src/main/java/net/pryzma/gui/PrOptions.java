@@ -32,7 +32,6 @@ public final class PrOptions {
     private static final int[] QUICK_COMPACT_FULL_DETAILED = {PryzmaConfig.VALUE_COMPACT, PryzmaConfig.VALUE_FULL, PryzmaConfig.VALUE_DETAILED};
     private static final String[] KEYS_DYNAMIC_LIGHTS = {"options.off", "options.graphics.fast", "options.graphics.fancy"};
     private static final int[] AF_VALUES = {1, 2, 4, 8, 16};
-    private static final int[] AA_VALUES = {0, 2, 4, 6, 8, 12, 16};
     private static final int AUTOSAVE_STEP = 900;
 
     private PrOptions() {
@@ -158,11 +157,6 @@ public final class PrOptions {
     public static final PrOption.Slider AF_LEVEL = steppedSlider("pr.options.AF_LEVEL", AF_VALUES,
             () -> PryzmaConfig.prAfLevel, v -> PryzmaConfig.prAfLevel = v,
             v -> v == 1 ? off() : Integer.toString(v));
-    /** Stored for restart like 1.x; the label says so whenever it differs from the running level. */
-    public static final PrOption.Slider AA_LEVEL = steppedSlider("pr.options.AA_LEVEL", AA_VALUES,
-            () -> PryzmaConfig.prAaLevel, v -> PryzmaConfig.prAaLevel = v,
-            v -> (v == 0 ? off() : Integer.toString(v))
-                    + (v != PryzmaConfig.startupAaLevel() ? " (" + I18n.get("pr.general.restart") + ")" : ""));
     public static final PrOption.Cycle EMISSIVE_TEXTURES = bool("pr.options.EMISSIVE_TEXTURES",
             () -> PryzmaConfig.prEmissiveTextures, v -> {
                 PryzmaConfig.prEmissiveTextures = v;

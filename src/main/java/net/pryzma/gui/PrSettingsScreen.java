@@ -74,7 +74,7 @@ final class PrSettingsScreen extends PrScreen {
             }
             case QUALITY -> {
                 grid(PrOptions.MIPMAP_LEVELS, PrOptions.MIPMAP_TYPE,
-                        PrOptions.AF_LEVEL, PrOptions.AA_LEVEL,
+                        wide(PrOptions.AF_LEVEL), null,
                         PrOptions.EMISSIVE_TEXTURES, PrOptions.RANDOM_ENTITIES,
                         PrOptions.BETTER_GRASS, PrOptions.BETTER_SNOW,
                         PrOptions.CUSTOM_FONTS, PrOptions.CUSTOM_COLORS,

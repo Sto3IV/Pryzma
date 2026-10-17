@@ -352,15 +352,6 @@ pr.options.MIPMAP_TYPE.tooltip.5=  Билинейная - билинейная �
 pr.options.MIPMAP_TYPE.tooltip.6=  Трилинейная - билинейная в уровнях + линейная между (плавнее)
 
 
-pr.options.AA_LEVEL=Сглаживание
-pr.options.AA_LEVEL.tooltip.1=Сглаживание
-pr.options.AA_LEVEL.tooltip.2= §oВыкл§r - сглаживание отключено (быстрее)
-pr.options.AA_LEVEL.tooltip.3= 2-16 - сглаживание линий и краёв (медленнее)
-pr.options.AA_LEVEL.tooltip.4=Сглаживает неровные линии и цветовые переходы.
-pr.options.AA_LEVEL.tooltip.5=Может существенно понизить производительность.
-pr.options.AA_LEVEL.tooltip.6=Не все видеокарты поддерживают все уровни
-pr.options.AA_LEVEL.tooltip.7=сглаживания.
-pr.options.AA_LEVEL.tooltip.8=⟲ Изменения вступят в силу только после ПЕРЕЗАПУСКА!
 
 pr.options.AF_LEVEL=Анизотропная фильтрация
 pr.options.AF_LEVEL.tooltip.1=Анизотропная фильтрация
