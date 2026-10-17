@@ -98,6 +98,16 @@ public final class PrRenderHooks {
         if (event.getMode() != FogRenderer.FogMode.FOG_TERRAIN || event.getType() != FogType.NONE || !isClearAir(event.getCamera())) {
             return;
         }
+        if (PryzmaConfig.prFarlandsDistance > 0 && net.pryzma.lod.PryzmaLod.isRunning()) {
+            Minecraft mc = Minecraft.getInstance();
+            int vanillaBlocks = mc.options.getEffectiveRenderDistance() << 4;
+            int radiusBlocks = PryzmaConfig.prFarlandsDistance << 4;
+            float[] fog = net.pryzma.lod.LodMath.farlandsFogRange(vanillaBlocks, radiusBlocks, PryzmaConfig.prFarlandsFog);
+            event.setNearPlaneDistance(fog[0]);
+            event.setFarPlaneDistance(fog[1]);
+            event.setCanceled(true);
+            return;
+        }
         float far = event.getFarPlaneDistance();
         if (PryzmaConfig.isFogOff()) {
             event.setNearPlaneDistance(far * 16.0F);

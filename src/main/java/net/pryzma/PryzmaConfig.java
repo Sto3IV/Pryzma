@@ -166,15 +166,15 @@ public final class PryzmaConfig {
     }
 
     public static boolean isFogOff() {
-        return prFogType == 3;
+        return prFarlandsDistance > 0 || prFogType == 3;
     }
 
     public static boolean isFogFast() {
-        return prFogType == 1;
+        return prFarlandsDistance <= 0 && prFogType == 1;
     }
 
     public static boolean isFogFancy() {
-        return prFogType == 2;
+        return prFarlandsDistance <= 0 && prFogType == 2;
     }
 
     public static boolean isFarlandsFogOff() {

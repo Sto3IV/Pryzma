@@ -10,6 +10,7 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import net.minecraft.client.CloudStatus;
+import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.resources.language.I18n;
@@ -76,9 +77,33 @@ public final class PrOptions {
 
     public static final PrOption.Cycle CLOUDS = cycle("pr.options.CLOUDS",
             () -> defaultFastFancyOff(PryzmaConfig.prClouds),
-            dir -> PryzmaConfig.prClouds = PryzmaConfig.prClouds + 1 > 3 ? 0 : PryzmaConfig.prClouds + 1);
+            dir -> {
+                PryzmaConfig.prClouds = PryzmaConfig.prClouds + 1 > 3 ? 0 : PryzmaConfig.prClouds + 1;
+                syncVanillaClouds();
+            });
     public static final PrOption.Slider CLOUD_HEIGHT = unitSlider("pr.options.CLOUD_HEIGHT", false,
-            () -> PryzmaConfig.prCloudsHeight, v -> PryzmaConfig.prCloudsHeight = v);
+            () -> PryzmaConfig.prCloudsHeight, v -> {
+                if (isCloudsOff()) {
+                    return;
+                }
+                PryzmaConfig.prCloudsHeight = v;
+            });
+
+    public static void syncVanillaClouds() {
+        try {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc != null && mc.options != null) {
+                CloudStatus status = switch (PryzmaConfig.prClouds) {
+                    case 1 -> CloudStatus.FAST;
+                    case 2 -> CloudStatus.FANCY;
+                    case 3 -> CloudStatus.OFF;
+                    default -> mc.options.graphicsMode().get() == GraphicsStatus.FAST ? CloudStatus.FAST : CloudStatus.FANCY;
+                };
+                mc.options.cloudStatus().set(status);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
 
     public static boolean isCloudsOff() {
         if (PryzmaConfig.prClouds == 3) {
@@ -88,7 +113,7 @@ public final class PrOptions {
             try {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc != null && mc.options != null) {
-                    return mc.options.getCloudsType() == CloudStatus.OFF;
+                    return mc.options.getEffectiveRenderDistance() < 4;
                 }
             } catch (Throwable ignored) {
             }
@@ -115,15 +140,28 @@ public final class PrOptions {
     public static final PrOption.Cycle SHOW_CAPES = bool("pr.options.SHOW_CAPES",
             () -> PryzmaConfig.prShowCapes, v -> PryzmaConfig.prShowCapes = v);
     public static final PrOption.Cycle FOG_FANCY = cycle("pr.options.FOG_FANCY",
-            () -> switch (PryzmaConfig.prFogType) {
-                case 1 -> fast();
-                case 2 -> fancy();
-                default -> off();
+            () -> {
+                if (PryzmaConfig.prFarlandsDistance > 0) {
+                    return off();
+                }
+                return switch (PryzmaConfig.prFogType) {
+                    case 1 -> fast();
+                    case 2 -> fancy();
+                    default -> off();
+                };
             },
-            dir -> PryzmaConfig.prFogType = (PryzmaConfig.prFogType % 3) + 1);
+            dir -> {
+                if (PryzmaConfig.prFarlandsDistance > 0) {
+                    return;
+                }
+                PryzmaConfig.prFogType = (PryzmaConfig.prFogType % 3) + 1;
+            });
     public static final PrOption.Cycle FOG_START = cycle("pr.options.FOG_START",
             () -> Float.toString(PryzmaConfig.prFogStart),
             dir -> {
+                if (PryzmaConfig.prFarlandsDistance > 0) {
+                    return;
+                }
                 PryzmaConfig.prFogStart += 0.2F;
                 if (PryzmaConfig.prFogStart > 0.81F) {
                     PryzmaConfig.prFogStart = 0.2F;
@@ -170,9 +208,19 @@ public final class PrOptions {
                 case 3 -> "pr.options.mipmap.trilinear";
                 default -> "pr.options.mipmap.nearest";
             }),
-            dir -> PryzmaConfig.prMipmapType = PryzmaConfig.prMipmapType + dir & 3);
+            dir -> {
+                if (options().mipmapLevels().get() == 0) {
+                    return;
+                }
+                PryzmaConfig.prMipmapType = PryzmaConfig.prMipmapType + dir & 3;
+            });
     public static final PrOption.Slider AF_LEVEL = steppedSlider("pr.options.AF_LEVEL", AF_VALUES,
-            () -> PryzmaConfig.prAfLevel, v -> PryzmaConfig.prAfLevel = v,
+            () -> PryzmaConfig.prAfLevel, v -> {
+                if (options().mipmapLevels().get() == 0) {
+                    return;
+                }
+                PryzmaConfig.prAfLevel = v;
+            },
             v -> v == 1 ? off() : Integer.toString(v));
     public static final PrOption.Cycle EMISSIVE_TEXTURES = bool("pr.options.EMISSIVE_TEXTURES",
             () -> PryzmaConfig.prEmissiveTextures, v -> {

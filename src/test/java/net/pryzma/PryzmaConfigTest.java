@@ -112,6 +112,26 @@ class PryzmaConfigTest {
     }
 
     @Test
+    void farlandsForcesFogOff() {
+        int savedFog = PryzmaConfig.prFogType;
+        int savedFarlands = PryzmaConfig.prFarlandsDistance;
+        try {
+            PryzmaConfig.prFogType = 2; // Fancy
+            PryzmaConfig.prFarlandsDistance = 0;
+            assertFalse(PryzmaConfig.isFogOff());
+            assertTrue(PryzmaConfig.isFogFancy());
+
+            PryzmaConfig.prFarlandsDistance = 128;
+            assertTrue(PryzmaConfig.isFogOff());
+            assertFalse(PryzmaConfig.isFogFancy());
+            assertFalse(PryzmaConfig.isFogFast());
+        } finally {
+            PryzmaConfig.prFogType = savedFog;
+            PryzmaConfig.prFarlandsDistance = savedFarlands;
+        }
+    }
+
+    @Test
     void farlandsFogAcceptsFastFancyOffAndLegacyBooleans() {
         int saved = PryzmaConfig.prFarlandsFog;
         try {
