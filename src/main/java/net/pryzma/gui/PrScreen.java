@@ -22,6 +22,10 @@ abstract class PrScreen extends Screen {
     record Vanilla(String key, OptionInstance<?> option) {
     }
 
+    /** An option that spans both columns in the grid (width 310). */
+    record Wide(Object option) {
+    }
+
     protected final Screen parent;
     private final PrTooltips tooltips = new PrTooltips(this);
     private final Map<AbstractWidget, String> vanillaKeys = new IdentityHashMap<>();
@@ -33,6 +37,10 @@ abstract class PrScreen extends Screen {
 
     static Vanilla vanilla(String key, OptionInstance<?> option) {
         return new Vanilla(key, option);
+    }
+
+    static Wide wide(Object option) {
+        return new Wide(option);
     }
 
     /** Grid cell {@code i}: two columns 160 apart, rows 21 apart, as every 1.x settings page. */
@@ -53,7 +61,13 @@ abstract class PrScreen extends Screen {
     List<AbstractWidget> grid(Object... entries) {
         List<AbstractWidget> added = new ArrayList<>(entries.length);
         for (int i = 0; i < entries.length; i++) {
-            added.add(entries[i] == null ? null : addOption(entries[i], cellX(i), cellY(i), 150));
+            if (entries[i] == null) {
+                added.add(null);
+            } else if (entries[i] instanceof Wide w) {
+                added.add(addOption(w.option(), cellX(i), cellY(i), 310));
+            } else {
+                added.add(addOption(entries[i], cellX(i), cellY(i), 150));
+            }
         }
         return added;
     }

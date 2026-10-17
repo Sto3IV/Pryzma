@@ -105,10 +105,10 @@ public final class PrDebugOverlay {
         return sb.append(flags).toString();
     }
 
-    /** The 1.x flags: smooth FPS, fast render, anisotropic filtering, antialiasing, render regions, shaders. */
+    /** The 1.x flags: smooth FPS, fast render, anisotropic filtering, render regions, shaders. */
     private static String flags() {
         return (PryzmaConfig.prSmoothFps ? " sf" : "") + (PryzmaConfig.prFastRender ? " fr" : "")
-                + (PryzmaConfig.prAfLevel > 1 ? " af" : "") + (PryzmaConfig.startupAaLevel() > 0 ? " aa" : "")
+                + (PryzmaConfig.prAfLevel > 1 ? " af" : "")
                 + (PryzmaConfig.prRenderRegions ? " rr" : "") + (shaderPack() != null ? " sh" : "");
     }
 

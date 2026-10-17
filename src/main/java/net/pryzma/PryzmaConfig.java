@@ -41,7 +41,6 @@ public final class PryzmaConfig {
     public static boolean prRenderRegions = true;
     public static boolean prSmartAnimations = true;
     public static double prAoLevel = 1.0;
-    public static int prAaLevel = 0;
     public static int prAfLevel = 1;
     public static int prClouds = 0;
     public static double prCloudsHeight = 0.0;
@@ -136,7 +135,6 @@ public final class PryzmaConfig {
     public static boolean prQuickInfoBackground = false;
 
     private static Path gameDir;
-    private static int startupAaLevel;
 
     private PryzmaConfig() {
     }
@@ -193,15 +191,9 @@ public final class PryzmaConfig {
 
     // ---------------------------------------------------------------- persistence
 
-    /** Anti-aliasing level the game started with; a different stored level needs a restart. */
-    public static int startupAaLevel() {
-        return startupAaLevel;
-    }
-
     /** Loads {@code optionspr.txt} from {@code dir}, falling back to the 1.x and OptiFine files. */
     public static void load(Path dir) {
         loadFile(dir);
-        startupAaLevel = prAaLevel;
     }
 
     private static void loadFile(Path dir) {
@@ -286,7 +278,6 @@ public final class PryzmaConfig {
         prVignette = clampInt(v, "prVignette", prVignette, 0, 2);
         prChunkUpdates = clampInt(v, "prChunkUpdates", prChunkUpdates, 1, 5);
         prTime = clampInt(v, "prTime", prTime, 0, 2);
-        prAaLevel = clampInt(v, "prAaLevel", prAaLevel, 0, 16);
         prAfLevel = clampInt(v, "prAfLevel", prAfLevel, 1, 16);
         prProfiler = bool(v, "prProfiler", prProfiler);
         prBetterSnow = bool(v, "prBetterSnow", prBetterSnow);
@@ -430,7 +421,6 @@ public final class PryzmaConfig {
         m.put("prVignette", str(prVignette));
         m.put("prChunkUpdates", str(prChunkUpdates));
         m.put("prTime", str(prTime));
-        m.put("prAaLevel", str(prAaLevel));
         m.put("prAfLevel", str(prAfLevel));
         m.put("prProfiler", str(prProfiler));
         m.put("prBetterSnow", str(prBetterSnow));
@@ -516,7 +506,6 @@ public final class PryzmaConfig {
         prChatShadow = true;
         prTelemetry = 0;
         prAoLevel = 1.0;
-        prAaLevel = 0;
         prAfLevel = 1;
         prClouds = 0;
         prCloudsHeight = 0.0;
