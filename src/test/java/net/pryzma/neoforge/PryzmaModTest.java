@@ -2026,10 +2026,26 @@ class PryzmaModTest {
             assertTrue(keys.contains("pr.options.AF_LEVEL"), "AF_LEVEL missing in " + lang);
             assertTrue(keys.contains("pr.options.afLevel.locked.tooltip.1"), "afLevel.locked tooltip missing in " + lang);
             assertFalse(keys.contains("pr.options.AA_LEVEL"), "AA_LEVEL must be removed in " + lang);
+            assertTrue(keys.contains("pr.options.cloudHeight.locked.tooltip.1"), "cloudHeight.locked tooltip missing in " + lang);
             assertTrue(keys.contains("pr.options.QUICK_INFO"), "QUICK_INFO missing in " + lang);
             assertTrue(keys.contains("pr.options.QUICK_INFO_FPS"), "QUICK_INFO_FPS missing in " + lang);
             assertTrue(keys.contains("pr.options.FEEDBACK_BUTTONS"), "FEEDBACK_BUTTONS missing in " + lang);
             assertTrue(keys.contains("pr.options.FEEDBACK_BUTTONS.tooltip.1"), "FEEDBACK_BUTTONS tooltip missing in " + lang);
+        }
+    }
+
+    @Test
+    void isCloudsOffReflectsPryzmaConfig() {
+        int original = PryzmaConfig.prClouds;
+        try {
+            PryzmaConfig.prClouds = 3;
+            assertTrue(PrOptions.isCloudsOff());
+            PryzmaConfig.prClouds = 1;
+            assertFalse(PrOptions.isCloudsOff());
+            PryzmaConfig.prClouds = 2;
+            assertFalse(PrOptions.isCloudsOff());
+        } finally {
+            PryzmaConfig.prClouds = original;
         }
     }
 

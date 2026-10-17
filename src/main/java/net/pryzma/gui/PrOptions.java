@@ -9,6 +9,7 @@ import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
+import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.resources.language.I18n;
@@ -78,6 +79,22 @@ public final class PrOptions {
             dir -> PryzmaConfig.prClouds = PryzmaConfig.prClouds + 1 > 3 ? 0 : PryzmaConfig.prClouds + 1);
     public static final PrOption.Slider CLOUD_HEIGHT = unitSlider("pr.options.CLOUD_HEIGHT", false,
             () -> PryzmaConfig.prCloudsHeight, v -> PryzmaConfig.prCloudsHeight = v);
+
+    public static boolean isCloudsOff() {
+        if (PryzmaConfig.prClouds == 3) {
+            return true;
+        }
+        if (PryzmaConfig.prClouds == 0) {
+            try {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc != null && mc.options != null) {
+                    return mc.options.getCloudsType() == CloudStatus.OFF;
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        return false;
+    }
     public static final PrOption.Cycle TREES = cycle("pr.options.TREES",
             () -> switch (PryzmaConfig.prTrees) {
                 case 1 -> fast();
