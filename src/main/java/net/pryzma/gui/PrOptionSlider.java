@@ -108,6 +108,9 @@ final class PrOptionSlider extends AbstractSliderButton implements PrOptionContr
         if (option == PrOptions.AF_LEVEL && Minecraft.getInstance().options.mipmapLevels().get() == 0) {
             return "pr.options.afLevel.locked";
         }
+        if (option == PrOptions.CLOUD_HEIGHT && PrOptions.isCloudsOff()) {
+            return "pr.options.cloudHeight.locked";
+        }
         return option.key();
     }
 

@@ -164,6 +164,7 @@ final class PrSettingsScreen extends PrScreen {
     void onOptionsChanged() {
         if (page == Page.DETAILS) {
             boolean farlandsOn = PryzmaConfig.prFarlandsDistance > 0;
+            boolean cloudsOff = PrOptions.isCloudsOff();
             for (AbstractWidget w : widgets()) {
                 if (w instanceof PrOptionButton b) {
                     if (b.option() == PrOptions.FOG_FANCY) {
@@ -188,6 +189,16 @@ final class PrSettingsScreen extends PrScreen {
                         } else {
                             b.refresh();
                         }
+                    }
+                } else if (w instanceof PrOptionSlider s && s.option() == PrOptions.CLOUD_HEIGHT) {
+                    s.active = !cloudsOff;
+                    if (cloudsOff) {
+                        s.setMessage(Component.translatable("pr.options.CLOUD_HEIGHT")
+                                .append(": [")
+                                .append(Component.translatable("pr.options.locked"))
+                                .append("]"));
+                    } else {
+                        s.refresh();
                     }
                 }
             }
