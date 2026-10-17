@@ -46,6 +46,7 @@ public final class Pryzma {
     }
 
     private static void prOnClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(net.pryzma.gui.PrOptions::syncVanillaClouds);
         // Development switch: load every mixin target now so that a broken injection point
         // fails at startup instead of the first time the class happens to be used.
         if (Boolean.getBoolean("pryzma.audit")) {

@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLCapabilities;
 
+import net.minecraft.client.Minecraft;
 import net.pryzma.PryzmaConfig;
 
 /**
@@ -30,6 +31,10 @@ public final class PrTextureFilter {
 
     /** Sets the anisotropy of the bound texture; level 1 is off. Render thread. */
     public static void applyAnisotropy() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc != null && mc.options != null && mc.options.mipmapLevels().get() == 0) {
+            return;
+        }
         if (anisotropy < 0) {
             GLCapabilities caps = GL.getCapabilities();
             anisotropy = caps.GL_EXT_texture_filter_anisotropic || caps.GL_ARB_texture_filter_anisotropic ? 1 : 0;
