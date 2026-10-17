@@ -1,5 +1,6 @@
 package net.pryzma.gui;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import org.lwjgl.glfw.GLFW;
 
@@ -104,6 +105,9 @@ final class PrOptionSlider extends AbstractSliderButton implements PrOptionContr
 
     @Override
     public String tooltipKey() {
+        if (option == PrOptions.AF_LEVEL && Minecraft.getInstance().options.mipmapLevels().get() == 0) {
+            return "pr.options.afLevel.locked";
+        }
         return option.key();
     }
 
