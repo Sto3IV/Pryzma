@@ -91,7 +91,6 @@ A Warm Cup of Tea
 Pryzma is 100% free, offline, and telemetry-free. There are no paywalled features, locked builds, or artificial tiers.
 
 Both of us have regular full-time jobs, and we never expect anything in return. But if Pryzma brought back a spark of that warm, timeless magic to your worlds and you'd simply like to say thank you or treat us to a hot cup of tea for our quiet weekend evenings, you are more than welcome to leave a small tip:
-* **GitHub Sponsors:** [Sponsor @Sto3IV](https://github.com/sponsors/Sto3IV)
 * **Boosty:** [Tip on Boosty](https://boosty.to/sto3iv)
 * **Ko-fi:** [Buy a Tea on Ko-fi](https://ko-fi.com/sto3iv)
 
