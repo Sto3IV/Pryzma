@@ -1,6 +1,7 @@
 package net.pryzma.shader.mixin.fabulous;
 
 import net.pryzma.shader.PryzmaShaders;
+import net.pryzma.util.AmdGpuDetector;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -29,13 +30,20 @@ public class MixinDisableFabulousGraphics {
 	private void pryzma$disableFabulousGraphics() {
 		Options options = Minecraft.getInstance().options;
 
-		if (!PryzmaShaders.getShaderConfig().areShadersEnabled()) {
-			// Nothing to do here, shaders are disabled.
+		boolean shadersActive = false;
+		try {
+			var config = PryzmaShaders.getShaderConfig();
+			shadersActive = config != null && config.areShadersEnabled();
+		} catch (Throwable ignored) {
+		}
+
+		if (!AmdGpuDetector.isAmdWindows() && !shadersActive) {
+			// Nothing to do here, shaders are disabled and not on AMD Windows.
 			return;
 		}
 
 		if (options.graphicsMode().get() == GraphicsStatus.FABULOUS) {
-			// Disable fabulous graphics when shaders are enabled.
+			// Disable fabulous graphics when shaders are enabled or running on AMD Windows.
 			options.graphicsMode().set(GraphicsStatus.FANCY);
 		}
 	}
