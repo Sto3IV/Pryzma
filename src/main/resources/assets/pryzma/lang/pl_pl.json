@@ -61,8 +61,6 @@
   "options.graphics.tooltip.4": "Bajeczna — lepsza przeźroczystość, najwolniejsza",
   "options.graphics.tooltip.5": "Zmienia wygląd chmur, liści, wody,",
   "options.graphics.tooltip.6": "cieni oraz boków bloków trawy.",
-  "options.graphics.tooltip.7": "Bajeczna grafika nie jest kompatybilna z shaderami.",
-  "options.graphics.tooltip.8": "antialiasing.",
   "pr.options.renderDistance.tiny": "Najkrótsza",
   "pr.options.renderDistance.short": "Krótsza",
   "pr.options.renderDistance.normal": "Normalna",

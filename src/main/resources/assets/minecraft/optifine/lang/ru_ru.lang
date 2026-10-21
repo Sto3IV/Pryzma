@@ -87,10 +87,7 @@ options.graphics.tooltip.1=Качество графики
 options.graphics.tooltip.2=  Быстро - низкое качество (быстрее)
 options.graphics.tooltip.3=  Детально - высокое качество (медленнее)
 options.graphics.tooltip.4=  Потрясающе - лучшая прозрачность (ещё медленнее)
-options.graphics.tooltip.5=Изменяет облик дёрна, листьев, воды, теней и облаков. 
-options.graphics.tooltip.6=Потрясающая графика несовместима с шейдерами и
-options.graphics.tooltip.7=сглаживанием.
-options.graphics.tooltip.8=
+options.graphics.tooltip.5=Изменяет облик дёрна, листьев, воды, теней и облаков.
 
 pr.options.renderDistance.tiny=Минимальная
 pr.options.renderDistance.short=Малая

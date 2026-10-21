@@ -62,8 +62,6 @@ options.graphics.tooltip.3=Pekná - vyššia kvalita
 options.graphics.tooltip.4=Nádherná - lepšie miešanie priesvitných objektov
 options.graphics.tooltip.5=Hodnotu nastavení nastavených na 'Normálne'
 options.graphics.tooltip.6=zmení na túto hodnotu (Nádherná=>Pekná).
-options.graphics.tooltip.7=Nádherná grafika nepodporuje
-options.graphics.tooltip.8=tieňovače a vyhladzovanie.
 pr.options.renderDistance.tiny=Drobná
 pr.options.renderDistance.short=Krátka
 pr.options.renderDistance.normal=Normálna

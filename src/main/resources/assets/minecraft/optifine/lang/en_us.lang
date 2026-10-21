@@ -83,8 +83,6 @@ options.graphics.tooltip.3=  Fancy - higher quality, slower
 options.graphics.tooltip.4=  Fabulous - better translucent objects, slowest
 options.graphics.tooltip.5=Changes the appearance of clouds, leaves, water,
 options.graphics.tooltip.6=shadows and grass sides.
-options.graphics.tooltip.7=Fabulous graphics is not compatible with shaders and
-options.graphics.tooltip.8=antialiasing.
 
 pr.options.renderDistance.tiny=Tiny
 pr.options.renderDistance.short=Short
