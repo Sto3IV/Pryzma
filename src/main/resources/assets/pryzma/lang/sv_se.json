@@ -61,8 +61,6 @@
   "options.graphics.tooltip.4": "Fabulöst - bättre objektgenomskinlighet, långsammast",
   "options.graphics.tooltip.5": "Ändrar utseendet för moln, löv, vatten, skuggor och",
   "options.graphics.tooltip.6": "gräskanter.",
-  "options.graphics.tooltip.7": "Alternativet \"Fabulöst\" är inte kompatibelt med shaders",
-  "options.graphics.tooltip.8": "och kantutjämning.",
   "pr.options.renderDistance.tiny": "Litet",
   "pr.options.renderDistance.short": "Kort",
   "pr.options.renderDistance.normal": "Normalt",

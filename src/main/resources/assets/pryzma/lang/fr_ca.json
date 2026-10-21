@@ -61,8 +61,6 @@
   "options.graphics.tooltip.4": "Fabuleux - Objets translucides magnifiques (Très lent)",
   "options.graphics.tooltip.5": "Change l'apparence des nuages, des feuilles,",
   "options.graphics.tooltip.6": "de l'eau, des ombres et du côté de l'herbe.",
-  "options.graphics.tooltip.7": "Les graphiques Fabuleux ne sont pas compatible avec les shaders.",
-  "options.graphics.tooltip.8": "antialiasing.",
   "pr.options.renderDistance.tiny": "Mini",
   "pr.options.renderDistance.short": "Courte",
   "pr.options.renderDistance.normal": "Normale",

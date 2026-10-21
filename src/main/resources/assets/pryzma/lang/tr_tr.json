@@ -61,8 +61,6 @@
   "options.graphics.tooltip.4": "Şahane - yarı saydam nesnelerde en iyi kalite, en yavaş",
   "options.graphics.tooltip.5": "Bulutların, yaprakların, suyun, gölgelerin",
   "options.graphics.tooltip.6": "ve çim yüzeylerinin görünüşünü etkiler.",
-  "options.graphics.tooltip.7": "Şahane grafikler gölgelendirmeler ile uyumlu değildir.",
-  "options.graphics.tooltip.8": "antialiasing.",
   "pr.options.renderDistance.tiny": "Çok Kısa",
   "pr.options.renderDistance.short": "Kısa",
   "pr.options.renderDistance.normal": "Normal",

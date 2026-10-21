@@ -61,8 +61,6 @@
   "options.graphics.tooltip.4": "Upea - paremmat läpikuultavat objektit, hitain",
   "options.graphics.tooltip.5": "Vaihtaa pilvien, lehtien, veden,",
   "options.graphics.tooltip.6": "varjojen ja ruohon sivujen ulkonäköä.",
-  "options.graphics.tooltip.7": "Upea-grafiikat eivät ole yhteensopivia shadereiden kanssa.",
-  "options.graphics.tooltip.8": "antialiasing.",
   "pr.options.renderDistance.tiny": "Pieni",
   "pr.options.renderDistance.short": "Lyhyt",
   "pr.options.renderDistance.normal": "Keskipitkä",
