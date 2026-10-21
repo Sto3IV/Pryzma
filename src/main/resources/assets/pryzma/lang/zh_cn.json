@@ -849,5 +849,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "边境之地迷雾",
   "pr.options.FARLANDS_FOG.tooltip.2": "  流畅 - LOD地平线处的浓雾，隐藏世界边缘",
   "pr.options.FARLANDS_FOG.tooltip.3": "  高品质 - 从区块边界到边境之地边缘平滑过渡的薄雾",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  关闭 - 禁用迷雾，获得最佳远景视野"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  关闭 - 禁用迷雾，获得最佳远景视野",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }

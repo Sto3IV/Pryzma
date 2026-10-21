@@ -837,5 +837,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "Farlands-sumu",
   "pr.options.FARLANDS_FOG.tooltip.2": "  Nopea - tiheä sumu LOD-horisontissa peittää maailman reunan",
   "pr.options.FARLANDS_FOG.tooltip.3": "  Hieno - pehmeä usva lohkojen rajalta Farlandsin reunalle",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  EI - sumu pois päältä, suurin näkyvyys"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  EI - sumu pois päältä, suurin näkyvyys",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }

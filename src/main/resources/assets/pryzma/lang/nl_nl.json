@@ -852,5 +852,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "Farlands-mist",
   "pr.options.FARLANDS_FOG.tooltip.2": "  Snel - dichte mist aan de LOD-horizon die de rand verbergt",
   "pr.options.FARLANDS_FOG.tooltip.3": "  Mooi - zachte nevel van chunkgrens tot Farlands-rand",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  UIT - mist uitgeschakeld, maximaal zicht"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  UIT - mist uitgeschakeld, maximaal zicht",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }

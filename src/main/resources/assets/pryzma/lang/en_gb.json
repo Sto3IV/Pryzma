@@ -143,5 +143,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "Farlands Fog",
   "pr.options.FARLANDS_FOG.tooltip.2": "  Fast - dense fog at the LOD horizon, obscuring the world cutoff",
   "pr.options.FARLANDS_FOG.tooltip.3": "  Fancy - smooth haze from chunk border to Farlands edge",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  OFF - fog disabled, maximum distant visibility"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  OFF - fog disabled, maximum distant visibility",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }

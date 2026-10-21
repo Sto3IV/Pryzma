@@ -884,5 +884,10 @@
   "pryzma.command.time.seconds": "%sс",
   "pryzma.command.time.minutes_seconds": "%sм %sс",
   "pryzma.command.time.hours_minutes_seconds": "%sч %sм %sс",
-  "pr.general.off": "ВЫКЛ"
+  "pr.general.off": "ВЫКЛ",
+  "pr.options.DROPPED_ITEMS": "Выброшенные предметы",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Выброшенные предметы",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  По умолчанию - как в настройках графики",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Быстро - 2D предметы, быстрее",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Детально - 3D предметы, медленнее"
 }

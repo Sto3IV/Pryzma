@@ -58,5 +58,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "Farlandz Fog",
   "pr.options.FARLANDS_FOG.tooltip.2": "  Fast - big thicc fog on horizon",
   "pr.options.FARLANDS_FOG.tooltip.3": "  Fancy - smooth haze",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  OFF - no fog at all"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  OFF - no fog at all",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }

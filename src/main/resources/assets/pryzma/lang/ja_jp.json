@@ -865,5 +865,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "Farlandsフォグ",
   "pr.options.FARLANDS_FOG.tooltip.2": "  高速 - LODの地平線にある濃い霧で世界の境界を隠します",
   "pr.options.FARLANDS_FOG.tooltip.3": "  描画優先 - チャンク境界からFarlandsの端まで滑らかな霞を描画",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  オフ - 霧を無効化し、最大の遠景視認性を確保"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  オフ - 霧を無効化し、最大の遠景視認性を確保",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }
