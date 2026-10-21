@@ -44,7 +44,7 @@ public final class PrVideoSettingsScreen extends PrScreen {
                 vanilla("options.ao", o.ambientOcclusion()), vanilla("options.simulationDistance", o.simulationDistance()),
                 PrOptions.AO_LEVEL, PrOptions.FRAMERATE_LIMIT,
                 vanilla("options.guiScale", o.guiScale()), vanilla("options.entityShadows", o.entityShadows()),
-                vanilla("options.gamma", o.gamma()), PrOptions.DYNAMIC_FOV,
+                vanilla("options.gamma", o.gamma()), PrOptions.DROPPED_ITEMS,
                 PrOptions.DYNAMIC_LIGHTS, null);
         guiScale = cells.get(6);
 
@@ -111,7 +111,7 @@ public final class PrVideoSettingsScreen extends PrScreen {
         g.pose().pushPose();
         g.pose().translate(0.0F, 0.0F, -10.0F);
         String version = "Pryzma " + ModList.get().getModContainerById(Pryzma.MODID)
-                .map(c -> c.getModInfo().getVersion().toString()).orElse("2.2.7");
+                .map(c -> c.getModInfo().getVersion().toString()).orElse("2.2.8");
         g.drawString(font, version, 2, height - 10, VERSION_COLOR);
         String mc = "Minecraft " + SharedConstants.getCurrentVersion().getName();
         g.drawString(font, mc, width - font.width(mc) - 2, height - 10, VERSION_COLOR);

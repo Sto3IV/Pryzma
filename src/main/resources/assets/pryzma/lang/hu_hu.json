@@ -847,5 +847,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "Farlands köd",
   "pr.options.FARLANDS_FOG.tooltip.2": "  Gyors - sűrű köd a LOD horizonton, elrejti a világ végét",
   "pr.options.FARLANDS_FOG.tooltip.3": "  Szép - lágy pára a chunkok szélétől a Farlands széléig",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  KI - köd kikapcsolva, maximális távoli láthatóság"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  KI - köd kikapcsolva, maximális távoli láthatóság",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }

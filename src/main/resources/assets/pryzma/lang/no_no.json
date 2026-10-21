@@ -797,5 +797,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "Farlands-tåke",
   "pr.options.FARLANDS_FOG.tooltip.2": "  Rask - tett tåke ved LOD-horisonten som skjuler verdenskanten",
   "pr.options.FARLANDS_FOG.tooltip.3": "  Fin - myk dis fra chunk-grensen til Farlands-kanten",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  AV - tåke deaktivert, maksimal sikt"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  AV - tåke deaktivert, maksimal sikt",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }

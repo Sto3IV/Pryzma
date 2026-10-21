@@ -10,6 +10,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import net.minecraft.client.GraphicsStatus;
+import net.minecraft.client.Minecraft;
+
 /**
  * Pryzma video settings. Field names, defaults, value ranges and the {@code optionspr.txt}
  * format are those of Pryzma 1.x, so an existing settings file loads unchanged.
@@ -29,6 +32,10 @@ public final class PryzmaConfig {
     public static final int[] TREES_VALUES = {0, 1, 4, 2};
     public static final int[] DYNAMIC_LIGHTS_VALUES = {3, 1, 2};
     public static final int[] TELEMETRY_VALUES = {0, 1, 2};
+    public static final int DROPPED_ITEMS_DEFAULT = 0;
+    public static final int DROPPED_ITEMS_FAST = 1;
+    public static final int DROPPED_ITEMS_FANCY = 2;
+    public static final int[] DROPPED_ITEMS_VALUES = {0, 1, 2};
 
     public static int prFogType = 1;
     public static float prFogStart = 0.8F;
@@ -79,6 +86,7 @@ public final class PryzmaConfig {
     /** Farlands Fog mode: 1 = Fast (dense edge fog), 2 = Fancy (gradient from render distance), 3 = OFF. */
     public static int prFarlandsFog = 2;
     public static boolean prDynamicFov = true;
+    public static int prDroppedItems = DROPPED_ITEMS_DEFAULT;
     public static boolean prAlternateBlocks = true;
     public static int prDynamicLights = 3;
     public static boolean prCustomEntityModels = true;
@@ -133,6 +141,20 @@ public final class PryzmaConfig {
     public static int prQuickInfoTargetEntity = VALUE_OFF;
     public static int prQuickInfoLabels = VALUE_COMPACT;
     public static boolean prQuickInfoBackground = false;
+
+    public static boolean isDroppedItemsFancy() {
+        if (prDroppedItems == DROPPED_ITEMS_DEFAULT) {
+            try {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc != null && mc.options != null) {
+                    return mc.options.graphicsMode().get() != GraphicsStatus.FAST;
+                }
+            } catch (Throwable ignored) {
+            }
+            return true;
+        }
+        return prDroppedItems == DROPPED_ITEMS_FANCY;
+    }
 
     private static Path gameDir;
 
@@ -294,6 +316,7 @@ public final class PryzmaConfig {
         prRenderRegions = bool(v, "prRenderRegions", prRenderRegions);
         prSmartAnimations = bool(v, "prSmartAnimations", prSmartAnimations);
         prDynamicFov = bool(v, "prDynamicFov", prDynamicFov);
+        prDroppedItems = clampInt(v, "prDroppedItems", prDroppedItems, 0, 2);
         prAlternateBlocks = bool(v, "prAlternateBlocks", prAlternateBlocks);
         prDynamicLights = oneOf(v, "prDynamicLights", prDynamicLights, DYNAMIC_LIGHTS_VALUES);
         prScreenshotSize = clampInt(v, "prScreenshotSize", prScreenshotSize, 1, 4);
@@ -437,6 +460,7 @@ public final class PryzmaConfig {
         m.put("prRenderRegions", str(prRenderRegions));
         m.put("prSmartAnimations", str(prSmartAnimations));
         m.put("prDynamicFov", str(prDynamicFov));
+        m.put("prDroppedItems", str(prDroppedItems));
         m.put("prAlternateBlocks", str(prAlternateBlocks));
         m.put("prDynamicLights", str(prDynamicLights));
         m.put("prScreenshotSize", str(prScreenshotSize));
@@ -496,6 +520,7 @@ public final class PryzmaConfig {
         prFarlandsDistance = 0;
         prFarlandsFog = 2;
         prDynamicFov = true;
+        prDroppedItems = DROPPED_ITEMS_DEFAULT;
         prAlternateBlocks = true;
         prDynamicLights = 3;
         prScreenshotSize = 1;

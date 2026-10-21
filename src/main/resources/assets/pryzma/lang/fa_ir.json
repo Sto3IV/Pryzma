@@ -810,5 +810,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "مه فارلندز",
   "pr.options.FARLANDS_FOG.tooltip.2": "  سریع - مه غلیظ در افق برای پنهان کردن لبه دنیا",
   "pr.options.FARLANDS_FOG.tooltip.3": "  زیبا - غبار ملایم از مرز چانک تا انتهای فارلندز",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  خاموش - مه غیرفعال، بیشترین دید دوردست"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  خاموش - مه غیرفعال، بیشترین دید دوردست",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }

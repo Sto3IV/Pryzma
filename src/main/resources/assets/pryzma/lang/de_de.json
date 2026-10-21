@@ -863,5 +863,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "Farlands-Nebel",
   "pr.options.FARLANDS_FOG.tooltip.2": "  Schnell - dichter Nebel am LOD-Horizont, verdeckt den Weltabschnitt",
   "pr.options.FARLANDS_FOG.tooltip.3": "  Schön - sanfter Dunst vom Chunk-Rand bis zum Farlands-Ende",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  AUS - Nebel deaktiviert, maximale Weitsicht"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  AUS - Nebel deaktiviert, maximale Weitsicht",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }

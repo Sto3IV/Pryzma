@@ -48,6 +48,9 @@ public final class PrOptions {
             });
     public static final PrOption.Cycle DYNAMIC_FOV = bool("pr.options.DYNAMIC_FOV",
             () -> PryzmaConfig.prDynamicFov, v -> PryzmaConfig.prDynamicFov = v);
+    public static final PrOption.Cycle DROPPED_ITEMS = cycle("pr.options.DROPPED_ITEMS",
+            () -> defaultFastFancy(PryzmaConfig.prDroppedItems),
+            dir -> PryzmaConfig.prDroppedItems = stepValue(PryzmaConfig.prDroppedItems, PryzmaConfig.DROPPED_ITEMS_VALUES, dir));
     public static final PrOption.Cycle DYNAMIC_LIGHTS = cycle("pr.options.DYNAMIC_LIGHTS",
             () -> I18n.get(KEYS_DYNAMIC_LIGHTS[Math.max(0, indexOf(PryzmaConfig.prDynamicLights, PryzmaConfig.DYNAMIC_LIGHTS_VALUES))]),
             dir -> PryzmaConfig.prDynamicLights = nextValue(PryzmaConfig.prDynamicLights, PryzmaConfig.DYNAMIC_LIGHTS_VALUES));
@@ -556,6 +559,14 @@ public final class PrOptions {
                 p -> (double) values[(int) Math.round(p * last)],
                 v -> Math.max(0, indexOf((int) v, values)) / (double) last,
                 v -> Component.literal(I18n.get(key) + ": " + text.apply((int) v)));
+    }
+
+    private static String defaultFastFancy(int value) {
+        return switch (value) {
+            case 1 -> fast();
+            case 2 -> fancy();
+            default -> byDefault();
+        };
     }
 
     private static String defaultFastFancyOff(int value) {

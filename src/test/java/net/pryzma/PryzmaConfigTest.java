@@ -169,4 +169,33 @@ class PryzmaConfigTest {
             PryzmaConfig.prFarlandsFog = saved;
         }
     }
+
+    @Test
+    void droppedItemsRoundTripsThroughOptionsFileAndClamps() {
+        int saved = PryzmaConfig.prDroppedItems;
+        try {
+            assertEquals(PryzmaConfig.DROPPED_ITEMS_DEFAULT, saved);
+            PryzmaConfig.apply(Map.of("prDroppedItems", "1"));
+            assertEquals(PryzmaConfig.DROPPED_ITEMS_FAST, PryzmaConfig.prDroppedItems);
+            assertEquals("1", PryzmaConfig.snapshot().get("prDroppedItems"));
+
+            PryzmaConfig.apply(Map.of("prDroppedItems", "2"));
+            assertEquals(PryzmaConfig.DROPPED_ITEMS_FANCY, PryzmaConfig.prDroppedItems);
+            assertEquals("2", PryzmaConfig.snapshot().get("prDroppedItems"));
+            assertTrue(PryzmaConfig.isDroppedItemsFancy());
+
+            PryzmaConfig.apply(Map.of("prDroppedItems", "0"));
+            assertEquals(PryzmaConfig.DROPPED_ITEMS_DEFAULT, PryzmaConfig.prDroppedItems);
+            assertEquals("0", PryzmaConfig.snapshot().get("prDroppedItems"));
+
+            // Clamping
+            PryzmaConfig.apply(Map.of("prDroppedItems", "-1"));
+            assertEquals(0, PryzmaConfig.prDroppedItems);
+            PryzmaConfig.apply(Map.of("prDroppedItems", "5"));
+            assertEquals(2, PryzmaConfig.prDroppedItems);
+        } finally {
+            PryzmaConfig.prDroppedItems = saved;
+        }
+    }
 }
+

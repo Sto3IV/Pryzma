@@ -58,5 +58,10 @@
   "pr.options.FARLANDS_FOG.tooltip.1": "Farlands Mist",
   "pr.options.FARLANDS_FOG.tooltip.2": "  Fast - thick sea mist at edge o' the world",
   "pr.options.FARLANDS_FOG.tooltip.3": "  Fancy - bonny haze to the brink",
-  "pr.options.FARLANDS_FOG.tooltip.4": "  OFF - no fog, clear skies"
+  "pr.options.FARLANDS_FOG.tooltip.4": "  OFF - no fog, clear skies",
+  "pr.options.DROPPED_ITEMS": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.1": "Dropped Items",
+  "pr.options.DROPPED_ITEMS.tooltip.2": "  Default - as set by setting Graphics",
+  "pr.options.DROPPED_ITEMS.tooltip.3": "  Fast - 2D dropped items, faster",
+  "pr.options.DROPPED_ITEMS.tooltip.4": "  Fancy - 3D dropped items, slower"
 }

@@ -74,7 +74,7 @@ final class PrSettingsScreen extends PrScreen {
             }
             case QUALITY -> {
                 grid(PrOptions.MIPMAP_LEVELS, PrOptions.MIPMAP_TYPE,
-                        wide(PrOptions.AF_LEVEL), null,
+                        PrOptions.AF_LEVEL, PrOptions.DYNAMIC_FOV,
                         PrOptions.EMISSIVE_TEXTURES, PrOptions.RANDOM_ENTITIES,
                         PrOptions.BETTER_GRASS, PrOptions.BETTER_SNOW,
                         PrOptions.CUSTOM_FONTS, PrOptions.CUSTOM_COLORS,
@@ -172,10 +172,7 @@ final class PrSettingsScreen extends PrScreen {
                         if (farlandsOn) {
                             b.setMessage(Component.translatable("pr.options.FOG_FANCY")
                                     .append(": ")
-                                    .append(CommonComponents.OPTION_OFF)
-                                    .append(" [")
-                                    .append(Component.translatable("pr.options.locked"))
-                                    .append("]"));
+                                    .append(CommonComponents.OPTION_OFF));
                         } else {
                             b.refresh();
                         }
@@ -183,9 +180,8 @@ final class PrSettingsScreen extends PrScreen {
                         b.active = !farlandsOn;
                         if (farlandsOn) {
                             b.setMessage(Component.translatable("pr.options.FOG_START")
-                                    .append(": [")
-                                    .append(Component.translatable("pr.options.locked"))
-                                    .append("]"));
+                                    .append(": ")
+                                    .append(CommonComponents.OPTION_OFF));
                         } else {
                             b.refresh();
                         }
@@ -194,9 +190,8 @@ final class PrSettingsScreen extends PrScreen {
                     s.active = !cloudsOff;
                     if (cloudsOff) {
                         s.setMessage(Component.translatable("pr.options.CLOUD_HEIGHT")
-                                .append(": [")
-                                .append(Component.translatable("pr.options.locked"))
-                                .append("]"));
+                                .append(": ")
+                                .append(CommonComponents.OPTION_OFF));
                     } else {
                         s.refresh();
                     }
@@ -211,9 +206,8 @@ final class PrSettingsScreen extends PrScreen {
                     b.active = !mipmapsOff;
                     if (mipmapsOff) {
                         b.setMessage(Component.translatable("pr.options.MIPMAP_TYPE")
-                                .append(": [")
-                                .append(Component.translatable("pr.options.locked"))
-                                .append("]"));
+                                .append(": ")
+                                .append(CommonComponents.OPTION_OFF));
                     } else {
                         b.refresh();
                     }
@@ -221,9 +215,8 @@ final class PrSettingsScreen extends PrScreen {
                     s.active = !mipmapsOff;
                     if (mipmapsOff) {
                         s.setMessage(Component.translatable("pr.options.AF_LEVEL")
-                                .append(": [")
-                                .append(Component.translatable("pr.options.locked"))
-                                .append("]"));
+                                .append(": ")
+                                .append(CommonComponents.OPTION_OFF));
                     } else {
                         s.refresh();
                     }
