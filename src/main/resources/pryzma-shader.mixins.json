@@ -67,7 +67,6 @@
     "entity_render_context.MixinHorseArmorLayer",
     "entity_render_context.MixinHumanoidArmorLayer",
     "entity_render_context.MixinItemRenderer",
-    "fabulous.MixinAmdFabulousFix",
     "fabulous.MixinDisableFabulousGraphics",
     "fantastic.MixinFireworkSparkParticle",
     "fantastic.MixinStationaryItemParticle",

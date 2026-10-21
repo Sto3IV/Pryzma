@@ -197,22 +197,5 @@ class PryzmaConfigTest {
             PryzmaConfig.prDroppedItems = saved;
         }
     }
-
-    @Test
-    void fixAmdFabulousRoundTripsThroughOptionsFile() {
-        boolean saved = PryzmaConfig.prFixAmdFabulous;
-        try {
-            assertTrue(saved, "AMD Fabulous fix is enabled by default");
-            PryzmaConfig.apply(Map.of("prFixAmdFabulous", "false"));
-            assertFalse(PryzmaConfig.prFixAmdFabulous);
-            assertEquals("false", PryzmaConfig.snapshot().get("prFixAmdFabulous"));
-
-            PryzmaConfig.apply(Map.of("prFixAmdFabulous", "true"));
-            assertTrue(PryzmaConfig.prFixAmdFabulous);
-            assertEquals("true", PryzmaConfig.snapshot().get("prFixAmdFabulous"));
-        } finally {
-            PryzmaConfig.prFixAmdFabulous = saved;
-        }
-    }
 }
 

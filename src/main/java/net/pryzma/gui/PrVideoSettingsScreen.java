@@ -40,7 +40,7 @@ public final class PrVideoSettingsScreen extends PrScreen {
         toChild = false;
         Options o = minecraft.options;
         List<AbstractWidget> cells = grid(
-                vanilla("options.graphics", o.graphicsMode()), vanilla("options.renderDistance", o.renderDistance()),
+                PrOptions.GRAPHICS, vanilla("options.renderDistance", o.renderDistance()),
                 vanilla("options.ao", o.ambientOcclusion()), vanilla("options.simulationDistance", o.simulationDistance()),
                 PrOptions.AO_LEVEL, PrOptions.FRAMERATE_LIMIT,
                 vanilla("options.guiScale", o.guiScale()), PrOptions.DROPPED_ITEMS,

@@ -23,6 +23,7 @@ import net.pryzma.perf.PrServerPriority;
 import net.pryzma.render.PrBetterGrass;
 import net.pryzma.render.PrBetterSnow;
 import net.pryzma.render.PrFontUtils;
+import net.pryzma.util.AmdGpuDetector;
 
 /**
  * Every Pryzma option of the video settings, with the cycle order and labels of Pryzma 1.x
@@ -40,6 +41,34 @@ public final class PrOptions {
     }
 
     // ------------------------------------------------------------------ main screen
+
+    public static final PrOption.Cycle GRAPHICS = cycle("options.graphics",
+            () -> {
+                Options o = options();
+                if (shouldOmitFabulous() && o.graphicsMode().get() == GraphicsStatus.FABULOUS) {
+                    o.graphicsMode().set(GraphicsStatus.FANCY);
+                    o.save();
+                }
+                return switch (o.graphicsMode().get()) {
+                    case FAST -> fast();
+                    case FANCY -> fancy();
+                    case FABULOUS -> I18n.get("options.graphics.fabulous");
+                };
+            },
+            dir -> {
+                Options o = options();
+                GraphicsStatus current = o.graphicsMode().get();
+                GraphicsStatus next;
+                if (shouldOmitFabulous()) {
+                    next = (current == GraphicsStatus.FAST) ? GraphicsStatus.FANCY : GraphicsStatus.FAST;
+                } else {
+                    GraphicsStatus[] values = GraphicsStatus.values();
+                    next = values[stepValue(current.getId(), new int[]{0, 1, 2}, dir)];
+                }
+                o.graphicsMode().set(next);
+                o.save();
+                allChanged();
+            });
 
     public static final PrOption.Slider AO_LEVEL = unitSlider("pr.options.AO_LEVEL", true,
             () -> PryzmaConfig.prAoLevel, v -> {
@@ -645,5 +674,19 @@ public final class PrOptions {
 
     static void reloadTextures() {
         Minecraft.getInstance().delayTextureReload();
+    }
+
+    private static boolean shouldOmitFabulous() {
+        if (AmdGpuDetector.isAmdWindows()) {
+            return true;
+        }
+        try {
+            var config = net.pryzma.shader.PryzmaShaders.getShaderConfig();
+            if (config != null && config.areShadersEnabled()) {
+                return true;
+            }
+        } catch (Throwable ignored) {
+        }
+        return false;
     }
 }
