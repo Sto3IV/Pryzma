@@ -430,9 +430,14 @@ public final class PrOptions {
     /** Farlands LOD radius: Off, 32..1024 chunks. The LOD starts or stops on the next tick. */
     public static final PrOption.Slider FARLANDS_DISTANCE = steppedSlider("pr.options.FARLANDS_DISTANCE",
             PryzmaConfig.FARLANDS_DISTANCE_VALUES,
-            () -> PryzmaConfig.prFarlandsDistance,
+            () -> net.pryzma.lod.DistantHorizonsBridge.isDhActive() ? 0 : PryzmaConfig.prFarlandsDistance,
             v -> {
-                PryzmaConfig.prFarlandsDistance = v;
+                if (net.pryzma.lod.DistantHorizonsBridge.isDhActive()) {
+                    PryzmaConfig.prFarlandsDistance = 0;
+                } else {
+                    PryzmaConfig.prFarlandsDistance = v;
+                    net.pryzma.lod.DistantHorizonsBridge.onFarlandsChanged(v > 0);
+                }
                 PryzmaLod.onSettingsChanged();
             },
             v -> v == 0 ? off() : I18n.get("options.chunks", v));

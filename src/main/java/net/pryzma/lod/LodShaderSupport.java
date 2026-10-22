@@ -175,7 +175,7 @@ public final class LodShaderSupport {
 
     /** Whether the Farlands option is on: shader packs are then built with the Distant Horizons contract. */
     public static boolean isEnabled() {
-        return PryzmaConfig.prFarlandsDistance > 0;
+        return PryzmaConfig.isFarlandsActive();
     }
 
     // ------------------------------------------------------------------ the pass as packs see it

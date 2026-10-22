@@ -187,16 +187,20 @@ public final class PryzmaConfig {
         return prBetterGrass == 2;
     }
 
+    public static boolean isFarlandsActive() {
+        return prFarlandsDistance > 0 && !net.pryzma.lod.DistantHorizonsBridge.isDhActive();
+    }
+
     public static boolean isFogOff() {
-        return prFarlandsDistance > 0 || prFogType == 3;
+        return isFarlandsActive() || prFogType == 3;
     }
 
     public static boolean isFogFast() {
-        return prFarlandsDistance <= 0 && prFogType == 1;
+        return !isFarlandsActive() && prFogType == 1;
     }
 
     public static boolean isFogFancy() {
-        return prFarlandsDistance <= 0 && prFogType == 2;
+        return !isFarlandsActive() && prFogType == 2;
     }
 
     public static boolean isFarlandsFogOff() {

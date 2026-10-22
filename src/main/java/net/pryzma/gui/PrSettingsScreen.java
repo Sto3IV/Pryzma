@@ -71,6 +71,7 @@ final class PrSettingsScreen extends PrScreen {
             case FARLANDS -> {
                 grid(PrOptions.FARLANDS_DISTANCE, PrOptions.FARLANDS_FOG);
                 done(width / 2 - 100, 200);
+                onOptionsChanged();
             }
             case QUALITY -> {
                 grid(PrOptions.MIPMAP_LEVELS, PrOptions.MIPMAP_TYPE,
@@ -163,8 +164,9 @@ final class PrSettingsScreen extends PrScreen {
     @Override
     void onOptionsChanged() {
         if (page == Page.DETAILS) {
-            boolean farlandsOn = PryzmaConfig.prFarlandsDistance > 0;
+            boolean farlandsOn = PryzmaConfig.isFarlandsActive();
             boolean cloudsOff = PrOptions.isCloudsOff();
+            boolean dhActive = net.pryzma.lod.DistantHorizonsBridge.isDhActive();
             for (AbstractWidget w : widgets()) {
                 if (w instanceof PrOptionButton b) {
                     if (b.option() == PrOptions.FOG_FANCY) {
@@ -194,6 +196,42 @@ final class PrSettingsScreen extends PrScreen {
                                 .append(CommonComponents.OPTION_OFF));
                     } else {
                         s.refresh();
+                    }
+                } else if (w instanceof PrButton pb && pb.id == 215) {
+                    pb.active = !dhActive;
+                    if (dhActive) {
+                        pb.setMessage(Component.translatable("pr.options.farlandsOptions")
+                                .append(": ")
+                                .append(CommonComponents.OPTION_OFF));
+                        pb.setTooltipKey("pr.options.farlands.locked_dh");
+                    } else {
+                        pb.setMessage(Component.translatable("pr.options.farlandsOptions"));
+                        pb.setTooltipKey(null);
+                    }
+                }
+            }
+            return;
+        }
+        if (page == Page.FARLANDS) {
+            boolean dhActive = net.pryzma.lod.DistantHorizonsBridge.isDhActive();
+            for (AbstractWidget w : widgets()) {
+                if (w instanceof PrOptionSlider s && s.option() == PrOptions.FARLANDS_DISTANCE) {
+                    s.active = !dhActive;
+                    if (dhActive) {
+                        s.setMessage(Component.translatable("pr.options.FARLANDS_DISTANCE")
+                                .append(": ")
+                                .append(CommonComponents.OPTION_OFF));
+                    } else {
+                        s.refresh();
+                    }
+                } else if (w instanceof PrOptionButton b && b.option() == PrOptions.FARLANDS_FOG) {
+                    b.active = !dhActive;
+                    if (dhActive) {
+                        b.setMessage(Component.translatable("pr.options.FARLANDS_FOG")
+                                .append(": ")
+                                .append(CommonComponents.OPTION_OFF));
+                    } else {
+                        b.refresh();
                     }
                 }
             }
