@@ -124,9 +124,9 @@ public final class PryzmaLod {
         gameBus.addListener(ClientTickEvent.Post.class, PryzmaLod::onClientTick);
     }
 
-    /** Whether the Farlands LOD option is on. */
+    /** Whether the Farlands LOD option is on and not blocked by Distant Horizons. */
     public static boolean enabled() {
-        return PryzmaConfig.prFarlandsDistance > 0;
+        return PryzmaConfig.isFarlandsActive();
     }
 
     /** Whether the LOD system is actively running with listeners registered. */
@@ -300,6 +300,7 @@ public final class PryzmaLod {
 
     private static void onClientTick(ClientTickEvent.Post event) {
         tick++;
+        DistantHorizonsBridge.syncWithFarlandsState(PryzmaConfig.isFarlandsActive());
         if (!enabled()) {
             if (running || trackedLevel != null) {
                 stop();

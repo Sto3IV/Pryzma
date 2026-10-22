@@ -42,7 +42,7 @@ final class PrOptionButton extends Button implements PrOptionControl {
 
     @Override
     public String tooltipKey() {
-        if (PryzmaConfig.prFarlandsDistance > 0) {
+        if (PryzmaConfig.isFarlandsActive()) {
             if (option == PrOptions.FOG_FANCY) {
                 return "pr.options.fog.locked";
             }
@@ -52,6 +52,9 @@ final class PrOptionButton extends Button implements PrOptionControl {
         }
         if (option == PrOptions.MIPMAP_TYPE && Minecraft.getInstance().options.mipmapLevels().get() == 0) {
             return "pr.options.mipmapType.locked";
+        }
+        if (option == PrOptions.FARLANDS_FOG && net.pryzma.lod.DistantHorizonsBridge.isDhActive()) {
+            return "pr.options.farlands.locked_dh";
         }
         return option.key();
     }

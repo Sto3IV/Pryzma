@@ -98,7 +98,7 @@ public final class PrRenderHooks {
         if (event.getMode() != FogRenderer.FogMode.FOG_TERRAIN || event.getType() != FogType.NONE || !isClearAir(event.getCamera())) {
             return;
         }
-        if (PryzmaConfig.prFarlandsDistance > 0 && net.pryzma.lod.PryzmaLod.isRunning()) {
+        if (PryzmaConfig.isFarlandsActive() && net.pryzma.lod.PryzmaLod.isRunning()) {
             Minecraft mc = Minecraft.getInstance();
             int vanillaBlocks = mc.options.getEffectiveRenderDistance() << 4;
             int radiusBlocks = PryzmaConfig.prFarlandsDistance << 4;
