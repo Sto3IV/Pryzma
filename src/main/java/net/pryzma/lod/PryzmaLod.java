@@ -455,7 +455,8 @@ public final class PryzmaLod {
                 if (IN_FLIGHT.contains(key)) {
                     continue;
                 }
-                int level = LodMath.levelFor(distance, mesh == null ? -1 : mesh.level);
+                float zoomFactor = net.pryzma.gui.PrZoom.zoomFactor();
+                int level = LodMath.levelFor(distance, mesh == null ? -1 : mesh.level, zoomFactor);
                 if (mesh != null) {
                     boolean levelChanged = mesh.level != level;
                     boolean dataChanged = mesh.version != current.sectorVersion(sectorX, sectorZ);
@@ -487,7 +488,8 @@ public final class PryzmaLod {
                     if (IN_FLIGHT.contains(key)) {
                         continue;
                     }
-                    int level = LodMath.levelFor(distance, mesh == null ? -1 : mesh.level);
+                    float zoomFactor = net.pryzma.gui.PrZoom.zoomFactor();
+                    int level = LodMath.levelFor(distance, mesh == null ? -1 : mesh.level, zoomFactor);
                     if (mesh != null) {
                         boolean levelChanged = mesh.level != level;
                         boolean dataChanged = mesh.version != current.sectorVersion(sectorX, sectorZ);

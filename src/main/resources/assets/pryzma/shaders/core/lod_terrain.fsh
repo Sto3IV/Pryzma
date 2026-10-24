@@ -4,7 +4,7 @@
 // discarded. Every block of a face gets its own brightness from a hash of its world position, strongly for foliage
 // (crowns read as crowns, not as painted slabs) and faintly elsewhere; water stays even. Fog is vanilla's
 // cylindrical linear fog, computed per fragment: LOD quads span up to a whole sector, too large for a per-vertex
-// distance.
+// distance. Under GPU-driven MDI (UseInstancedOffset == 1), sectorOrigin is received flat from the vertex shader.
 
 uniform vec4 ColorModulator;
 uniform float FogStart;
@@ -12,12 +12,14 @@ uniform float FogEnd;
 uniform vec4 FogColor;
 uniform float ClipRadius;
 uniform ivec2 SectorOrigin;
+uniform int UseInstancedOffset;
 
 in vec3 relativePos;
 in vec3 localPos;
 in vec4 vertexColor;
 flat in uint material;
 flat in uint normalIndex;
+flat in ivec2 sectorOrigin;
 
 out vec4 fragColor;
 
@@ -43,7 +45,8 @@ void main() {
     }
     vec4 color = vertexColor * ColorModulator;
     if (material != MATERIAL_WATER) {
-        ivec2 block = SectorOrigin + ivec2(floor(localPos.xz + INWARD[int(normalIndex)]));
+        ivec2 orig = UseInstancedOffset == 1 ? sectorOrigin : SectorOrigin;
+        ivec2 block = orig + ivec2(floor(localPos.xz + INWARD[int(normalIndex)]));
         float amplitude = material == MATERIAL_LEAVES ? 0.14 : 0.035;
         float noise = float(hashBlock(block) & 255u) / 255.0;
         color.rgb *= 1.0 - amplitude + 2.0 * amplitude * noise;

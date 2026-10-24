@@ -1,0 +1,118 @@
+#version 430 core
+layout(local_size_x = 64) in;
+
+struct Sector {
+    ivec4 box;   // box.x = originX, box.y = originZ, box.z = minY, box.w = maxY
+    uvec4 mesh;  // mesh.x = baseVertex, mesh.y = opaqueQuads, mesh.z = waterQuads, mesh.w = sectorIndex
+};
+
+struct DrawElementsIndirectCommand {
+    uint count;
+    uint instanceCount;
+    uint firstIndex;
+    int baseVertex;
+    uint baseInstance;
+};
+
+layout(std430, binding = 0) readonly buffer SectorBuf {
+    Sector sectors[];
+};
+
+layout(std430, binding = 1) writeonly buffer OpaqueCmdBuf {
+    DrawElementsIndirectCommand opaqueCmds[];
+};
+
+layout(std430, binding = 2) writeonly buffer WaterCmdBuf {
+    DrawElementsIndirectCommand waterCmds[];
+};
+
+layout(std430, binding = 3) buffer CountBuf {
+    uint drawCountOpaque;
+    uint drawCountWater;
+};
+
+uniform vec4 Planes[6];
+uniform ivec3 CameraBlock;
+uniform vec3 CameraFrac;
+uniform float ClipRadius;
+uniform uint SectorCount;
+uniform int SectorBlocks;
+
+shared uint groupOpaqueCount;
+shared uint groupOpaqueBase;
+shared uint groupWaterCount;
+shared uint groupWaterBase;
+
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    bool hasOpaque = false;
+    bool hasWater = false;
+    Sector s;
+
+    if (i < SectorCount) {
+        s = sectors[i];
+        vec3 mn = vec3(ivec3(s.box.x, s.box.z, s.box.y) - CameraBlock) - CameraFrac;
+        vec3 mx = mn + vec3(float(SectorBlocks), float(s.box.w - s.box.z), float(SectorBlocks));
+
+        vec2 far2 = max(abs(mn.xz), abs(mx.xz));
+        bool outsideClip = dot(far2, far2) >= ClipRadius * ClipRadius;
+
+        bool insideFrustum = outsideClip;
+        for (int p = 0; p < 6 && insideFrustum; p++) {
+            vec4 pl = Planes[p];
+            vec3 pv = mix(mn, mx, greaterThanEqual(pl.xyz, vec3(0.0)));
+            insideFrustum = (dot(pl.xyz, pv) + pl.w) >= 0.0;
+        }
+
+        if (insideFrustum) {
+            hasOpaque = s.mesh.y > 0u;
+            hasWater = s.mesh.z > 0u;
+        }
+    }
+
+    if (gl_LocalInvocationIndex == 0u) {
+        groupOpaqueCount = 0u;
+        groupWaterCount = 0u;
+    }
+    barrier();
+
+    uint localOpaque = 0u;
+    if (hasOpaque) {
+        localOpaque = atomicAdd(groupOpaqueCount, 1u);
+    }
+    uint localWater = 0u;
+    if (hasWater) {
+        localWater = atomicAdd(groupWaterCount, 1u);
+    }
+    barrier();
+
+    if (gl_LocalInvocationIndex == 0u) {
+        if (groupOpaqueCount > 0u) {
+            groupOpaqueBase = atomicAdd(drawCountOpaque, groupOpaqueCount);
+        }
+        if (groupWaterCount > 0u) {
+            groupWaterBase = atomicAdd(drawCountWater, groupWaterCount);
+        }
+    }
+    barrier();
+
+    if (hasOpaque) {
+        DrawElementsIndirectCommand cmd;
+        cmd.count = s.mesh.y * 6u;
+        cmd.instanceCount = 1u;
+        cmd.firstIndex = 0u;
+        cmd.baseVertex = int(s.mesh.x);
+        cmd.baseInstance = i;
+        opaqueCmds[groupOpaqueBase + localOpaque] = cmd;
+    }
+
+    if (hasWater) {
+        DrawElementsIndirectCommand cmd;
+        cmd.count = s.mesh.z * 6u;
+        cmd.instanceCount = 1u;
+        cmd.firstIndex = s.mesh.y * 6u;
+        cmd.baseVertex = int(s.mesh.x);
+        cmd.baseInstance = i;
+        waterCmds[groupWaterBase + localWater] = cmd;
+    }
+}

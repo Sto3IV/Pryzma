@@ -31,14 +31,23 @@ public final class LodMath {
      * {@link #LEVEL_HYSTERESIS}, so a camera moving along a boundary does not remesh the sector back and forth.
      */
     public static int levelFor(double distance, int current) {
-        int level = baseLevel(distance);
+        return levelFor(distance, current, 1.0F);
+    }
+
+    /**
+     * Detail level scaled by an optical zoom factor (e.g. 4.0 for OptiFine/Pryzma zoom).
+     * Effective distance scales down proportionally, refining distant features on the screen.
+     */
+    public static int levelFor(double distance, int current, float zoomFactor) {
+        double effectiveDist = zoomFactor > 1.0F ? distance / zoomFactor : distance;
+        int level = baseLevel(effectiveDist);
         if (current < 0 || current > NativeLodMesher.MAX_LEVEL || current == level) {
             return level;
         }
-        if (level > current && distance < LEVEL_LIMITS[current] + LEVEL_HYSTERESIS) {
+        if (level > current && effectiveDist < LEVEL_LIMITS[current] + LEVEL_HYSTERESIS) {
             return current;
         }
-        if (level < current && distance > LEVEL_LIMITS[current - 1] - LEVEL_HYSTERESIS) {
+        if (level < current && effectiveDist > LEVEL_LIMITS[current - 1] - LEVEL_HYSTERESIS) {
             return current;
         }
         return level;

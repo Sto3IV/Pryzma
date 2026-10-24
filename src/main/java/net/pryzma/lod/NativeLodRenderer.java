@@ -77,6 +77,9 @@ public final class NativeLodRenderer {
         final int sectorZ;
         int vao = -1;
         int vbo = -1;
+        int baseVertex = -1;
+        int allocatedVertices;
+        int tableIndex = -1;
         int opaqueQuads;
         int waterQuads;
         int minY;
@@ -128,18 +131,6 @@ public final class NativeLodRenderer {
         }
 
         private void upload(LodMesh mesh) {
-            ByteBuffer data = stage(mesh.vertices());
-            if (vao < 0) {
-                vao = GlStateManager._glGenVertexArrays();
-                vbo = GlStateManager._glGenBuffers();
-            }
-            BufferUploader.invalidate();
-            GlStateManager._glBindVertexArray(vao);
-            GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-            GlStateManager._glBufferData(GL15.GL_ARRAY_BUFFER, data, GL15.GL_STATIC_DRAW);
-            LodVertexFormat.FORMAT.setupBufferState();
-            GlStateManager._glBindVertexArray(0);
-            GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
             account(-1);
             opaqueQuads = mesh.opaqueQuads();
             waterQuads = mesh.waterQuads();
@@ -147,9 +138,28 @@ public final class NativeLodRenderer {
             maxY = mesh.maxY();
             bytes = mesh.byteSize();
             account(1);
+            if (FarlandsGpuEngine.isSupported()) {
+                FarlandsGpuEngine.uploadSector(key, this, mesh);
+            } else {
+                ByteBuffer data = stage(mesh.vertices());
+                if (vao < 0) {
+                    vao = GlStateManager._glGenVertexArrays();
+                    vbo = GlStateManager._glGenBuffers();
+                }
+                BufferUploader.invalidate();
+                GlStateManager._glBindVertexArray(vao);
+                GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
+                GlStateManager._glBufferData(GL15.GL_ARRAY_BUFFER, data, GL15.GL_STATIC_DRAW);
+                LodVertexFormat.FORMAT.setupBufferState();
+                GlStateManager._glBindVertexArray(0);
+                GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+            }
         }
 
         private void release() {
+            if (FarlandsGpuEngine.isSupported()) {
+                FarlandsGpuEngine.removeSector(key);
+            }
             if (vao >= 0) {
                 GlStateManager._glDeleteVertexArrays(vao);
                 vao = -1;
@@ -158,6 +168,9 @@ public final class NativeLodRenderer {
                 GlStateManager._glDeleteBuffers(vbo);
                 vbo = -1;
             }
+            baseVertex = -1;
+            allocatedVertices = 0;
+            tableIndex = -1;
             account(-1);
             opaqueQuads = 0;
             waterQuads = 0;
@@ -192,6 +205,7 @@ public final class NativeLodRenderer {
     /** Resources changed: the shader is built again from them when next used. Render thread. */
     static void onResourcesReloaded() {
         releaseShader();
+        FarlandsGpuEngine.onResourcesReloaded();
     }
 
     private static void releaseShader() {
@@ -254,6 +268,7 @@ public final class NativeLodRenderer {
 
     /** Deletes every mesh, the staging buffer and the shader: a stopped LOD holds no GPU resources. */
     static void clear() {
+        FarlandsGpuEngine.clear();
         for (SectorMesh mesh : MESHES.values()) {
             mesh.release();
         }
@@ -356,10 +371,16 @@ public final class NativeLodRenderer {
         if (quads == 0) {
             return;
         }
-        GlStateManager._glBindVertexArray(mesh.vao);
-        indices.bind((first + quads) * 6);
-        VertexFormat.IndexType type = indices.type();
-        GlStateManager._drawElements(GL11.GL_TRIANGLES, quads * 6, type.asGLType, (long) first * 6 * type.bytes);
+        if (FarlandsGpuEngine.isSupported() && mesh.baseVertex >= 0) {
+            FarlandsGpuEngine.drawMesh(mesh, water);
+            return;
+        }
+        if (mesh.vao >= 0) {
+            GlStateManager._glBindVertexArray(mesh.vao);
+            indices.bind((first + quads) * 6);
+            VertexFormat.IndexType type = indices.type();
+            GlStateManager._drawElements(GL11.GL_TRIANGLES, quads * 6, type.asGLType, (long) first * 6 * type.bytes);
+        }
     }
 
     // ------------------------------------------------------------------ native pass
@@ -388,6 +409,13 @@ public final class NativeLodRenderer {
             warnedProjection = true;
             Pryzma.LOGGER.warn("Farlands LOD: the projection is not a perspective one; the LOD keeps the game's depth range");
         }
+
+        if (FarlandsGpuEngine.isSupported()) {
+            drawnLastFrame = FarlandsGpuEngine.render(program, modelView, PROJECTION, camera, clipRadius,
+                    lodRadiusBlocks, fogStart, fogEnd);
+            return drawnLastFrame > 0;
+        }
+
         List<SectorMesh> visible = collectVisible(modelView, PROJECTION, camera, clipRadius);
         if (visible.isEmpty()) {
             return beyondClip;
@@ -420,6 +448,10 @@ public final class NativeLodRenderer {
         Uniform clip = program.getUniform("ClipRadius");
         if (clip != null) {
             clip.set(clipRadius);
+        }
+        Uniform inst = program.getUniform("UseInstancedOffset");
+        if (inst != null) {
+            inst.set(0);
         }
         program.apply();
 
