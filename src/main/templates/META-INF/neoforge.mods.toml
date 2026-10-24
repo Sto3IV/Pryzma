@@ -40,11 +40,11 @@ file="META-INF/accesstransformer.cfg"
     ordering="NONE"
     side="CLIENT"
 
-# Built-in rendering engine and shader pipeline: conflicting standalone mods are declared incompatible.
+# Conflicting standalone rendering / shader / LOD mods are declared incompatible.
 [[dependencies.${mod_id}]]
     modId="sodium"
     type="incompatible"
-    reason="Pryzma includes an integrated rendering and shader engine. Remove standalone Sodium."
+    reason="На данном этапе развития Pryzma я пока не обладаю знаниями для бесконфликтной работы с Sodium.\nПожалуйста, не используйте их вместе."
     versionRange="[0,)"
     ordering="NONE"
     side="CLIENT"
@@ -52,7 +52,7 @@ file="META-INF/accesstransformer.cfg"
 [[dependencies.${mod_id}]]
     modId="embeddium"
     type="incompatible"
-    reason="Pryzma includes an integrated rendering and shader engine. Remove standalone Embeddium."
+    reason="На данном этапе развития Pryzma я пока не обладаю знаниями для бесконфликтной работы с Embeddium.\nПожалуйста, не используйте их вместе."
     versionRange="[0,)"
     ordering="NONE"
     side="CLIENT"
@@ -60,7 +60,7 @@ file="META-INF/accesstransformer.cfg"
 [[dependencies.${mod_id}]]
     modId="rubidium"
     type="incompatible"
-    reason="Pryzma includes an integrated rendering and shader engine. Remove standalone Rubidium."
+    reason="На данном этапе развития Pryzma я пока не обладаю знаниями для бесконфликтной работы с Rubidium.\nПожалуйста, не используйте их вместе."
     versionRange="[0,)"
     ordering="NONE"
     side="CLIENT"
@@ -68,7 +68,7 @@ file="META-INF/accesstransformer.cfg"
 [[dependencies.${mod_id}]]
     modId="iris"
     type="incompatible"
-    reason="Pryzma includes a built-in shader pipeline. Remove standalone Iris."
+    reason="На данном этапе развития Pryzma я пока не обладаю знаниями для бесконфликтной работы с Iris.\nПожалуйста, не используйте их вместе."
     versionRange="[0,)"
     ordering="NONE"
     side="CLIENT"
@@ -76,7 +76,16 @@ file="META-INF/accesstransformer.cfg"
 [[dependencies.${mod_id}]]
     modId="oculus"
     type="incompatible"
-    reason="Pryzma includes a built-in shader pipeline. Remove standalone Oculus."
+    reason="На данном этапе развития Pryzma я пока не обладаю знаниями для бесконфликтной работы с Oculus.\nПожалуйста, не используйте их вместе."
     versionRange="[0,)"
     ordering="NONE"
     side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="distanthorizons"
+    type="incompatible"
+    reason="На данном этапе развития Pryzma я пока не обладаю знаниями для бесконфликтной работы с Distant Horizons.\nПожалуйста, не используйте их вместе."
+    versionRange="[0,)"
+    ordering="NONE"
+    side="CLIENT"
+
