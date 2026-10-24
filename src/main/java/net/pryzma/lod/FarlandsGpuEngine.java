@@ -77,6 +77,7 @@ public final class FarlandsGpuEngine {
     // Direct buffers
     private static ByteBuffer sectorTableHost;
     private static ByteBuffer countClearBuf;
+    private static ByteBuffer staging;
     private static final int[] countReadback = new int[2];
 
     // Sector management
@@ -341,6 +342,20 @@ public final class FarlandsGpuEngine {
     // ------------------------------------------------------------------ mesh intake and eviction
 
     /**
+     * Copies heap vertex data into the direct off-heap buffer GL uploads from; the buffer grows and is reused.
+     */
+    private static ByteBuffer stage(ByteBuffer vertices) {
+        int bytes = vertices.remaining();
+        if (staging == null || staging.capacity() < bytes) {
+            staging = ByteBuffer.allocateDirect(Math.max(bytes + (bytes >> 1), 1 << 20)).order(ByteOrder.nativeOrder());
+        }
+        staging.clear();
+        staging.put(vertices.duplicate());
+        staging.flip();
+        return staging;
+    }
+
+    /**
      * Uploads a sector mesh into the unified Mega-VBO and updates its slot in the Sector Table.
      */
     public static void uploadSector(long key, NativeLodRenderer.SectorMesh sector, LodMesh mesh) {
@@ -365,9 +380,9 @@ public final class FarlandsGpuEngine {
             sector.allocatedVertices = vertexCount;
         }
 
-        // Upload vertex data
+        // Upload vertex data via direct staging buffer
         GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, megaVbo);
-        GL15C.glBufferSubData(GL15C.GL_ARRAY_BUFFER, (long) sector.baseVertex * VERTEX_BYTES, mesh.vertices());
+        GL15C.glBufferSubData(GL15C.GL_ARRAY_BUFFER, (long) sector.baseVertex * VERTEX_BYTES, stage(mesh.vertices()));
         GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
 
         // Update Sector Table entry
@@ -662,6 +677,7 @@ public final class FarlandsGpuEngine {
         freeOffsets[0] = 0;
         freeLengths[0] = megaCapacityVertices;
         freeCount = 1;
+        staging = null;
     }
 
     public static void onResourcesReloaded() {
