@@ -40,4 +40,12 @@ public final class PrZoom {
             mc.levelRenderer.needsUpdate();
         }
     }
+
+    public static boolean isZooming() {
+        return zooming;
+    }
+
+    public static float zoomFactor() {
+        return zooming ? 4.0F : 1.0F;
+    }
 }

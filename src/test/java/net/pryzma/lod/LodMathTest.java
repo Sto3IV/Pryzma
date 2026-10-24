@@ -26,6 +26,16 @@ class LodMathTest {
     }
 
     @Test
+    void detailRefinesUnderZoom() {
+        // At 1000 blocks with 4x zoom, effective distance is 250 blocks -> Level 0 instead of Level 2
+        assertEquals(2, LodMath.levelFor(1000.0, -1, 1.0F));
+        assertEquals(0, LodMath.levelFor(1000.0, -1, 4.0F));
+        // At 2000 blocks with 4x zoom, effective distance is 500 blocks -> Level 1 instead of Level 3
+        assertEquals(3, LodMath.levelFor(2000.0, -1, 1.0F));
+        assertEquals(1, LodMath.levelFor(2000.0, -1, 4.0F));
+    }
+
+    @Test
     void levelsHoldAcrossABoundaryUntilTheHysteresisIsCleared() {
         assertEquals(0, LodMath.levelFor(270.0, 0), "just past 256: stays at 0");
         assertEquals(1, LodMath.levelFor(256.0 + LodMath.LEVEL_HYSTERESIS, 0), "cleared");
