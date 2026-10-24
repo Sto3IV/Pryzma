@@ -99,6 +99,14 @@ public final class PrRenderHooks {
             return;
         }
         if (PryzmaConfig.isFarlandsActive() && net.pryzma.lod.PryzmaLod.isRunning()) {
+            if (net.pryzma.lod.PryzmaLod.isActiveThisFrame()) {
+                // The native pass already clamped its window to the terrain it drew: vanilla terrain and the LOD
+                // must fade at the same distance or the seam between them shows.
+                event.setNearPlaneDistance(net.pryzma.lod.PryzmaLod.frameFogStart());
+                event.setFarPlaneDistance(net.pryzma.lod.PryzmaLod.frameFogEnd());
+                event.setCanceled(true);
+                return;
+            }
             Minecraft mc = Minecraft.getInstance();
             int vanillaBlocks = mc.options.getEffectiveRenderDistance() << 4;
             int radiusBlocks = PryzmaConfig.prFarlandsDistance << 4;

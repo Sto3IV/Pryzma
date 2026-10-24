@@ -351,6 +351,32 @@ public final class NativeLodRenderer {
 
     private static boolean beyondClip;
 
+    /**
+     * Farthest point of the LOD terrain that is in view this frame, in blocks from the camera: the far corner of the
+     * farthest sector that passes the same frustum test the draw uses. This is what the fog has to close at; it can be
+     * well inside the configured LOD radius, because the intake only reads chunks the world has saved.
+     *
+     * @return 0 when nothing would be drawn
+     */
+    static float horizon(Matrix4fc modelView, Matrix4fc projection, Vec3 camera, float clipRadius) {
+        VIEW_PROJECTION.set(projection).mul(modelView);
+        FRUSTUM.set(VIEW_PROJECTION);
+        float horizon = 0.0F;
+        for (SectorMesh mesh : MESHES.values()) {
+            if (mesh.quadCount() == 0 || LodMath.insideClip(camera.x, camera.z, mesh.sectorX, mesh.sectorZ, clipRadius)) {
+                continue;
+            }
+            float minX = (float) (mesh.originX() - camera.x);
+            float minZ = (float) (mesh.originZ() - camera.z);
+            if (!FRUSTUM.testAab(minX, (float) (mesh.minY - camera.y), minZ,
+                    minX + LodDataStore.SECTOR_BLOCKS, (float) (mesh.maxY - camera.y), minZ + LodDataStore.SECTOR_BLOCKS)) {
+                continue;
+            }
+            horizon = Math.max(horizon, (float) LodMath.sectorFarthest(camera.x, camera.z, mesh.sectorX, mesh.sectorZ));
+        }
+        return horizon;
+    }
+
     /** Whether the last {@link #collectVisible} found LOD terrain beyond the clip radius, in view or not. */
     static boolean beyondClipLastCollect() {
         return beyondClip;

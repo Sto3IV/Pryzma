@@ -103,6 +103,8 @@ public final class PryzmaLod {
     private static boolean frameActive;
     private static float frameFogStart;
     private static float frameFogEnd;
+    /** Farthest LOD fragment drawn this frame, blocks; 0 when fog is off or nothing was drawn. */
+    private static float frameHorizon;
 
     private PryzmaLod() {
     }
@@ -137,6 +139,20 @@ public final class PryzmaLod {
     /** Whether the LOD drew this frame; the terrain fog of this frame then follows {@link #fogStart}/{@link #fogEnd}. */
     public static boolean isActiveThisFrame() {
         return frameActive;
+    }
+
+    /** Fog window this frame's LOD pass actually used, valid when {@link #isActiveThisFrame()}. */
+    public static float frameFogStart() {
+        return frameFogStart;
+    }
+
+    public static float frameFogEnd() {
+        return frameFogEnd;
+    }
+
+    /** Farthest LOD fragment drawn this frame in blocks; 0 when the fog is off or nothing was drawn. */
+    public static float frameHorizon() {
+        return frameHorizon;
     }
 
     public static float fogStart() {
@@ -189,10 +205,13 @@ public final class PryzmaLod {
         if (!running) {
             return "Farlands: " + PryzmaConfig.prFarlandsDistance + " chunks, idle";
         }
-        return String.format(Locale.ROOT, "Farlands: %d chunks, data %d, sectors %d/%d, %.1fK quads, %d MB, jobs %d, reads %d%s",
+        String fog = frameActive
+                ? String.format(Locale.ROOT, ", fog %d..%d of %d", (int) frameFogStart, (int) frameFogEnd, (int) frameHorizon)
+                : "";
+        return String.format(Locale.ROOT, "Farlands: %d chunks, data %d, sectors %d/%d, %.1fK quads, %d MB, jobs %d, reads %d%s%s",
                 PryzmaConfig.prFarlandsDistance, store.size(), NativeLodRenderer.drawnLastFrame(), NativeLodRenderer.meshCount(),
                 NativeLodRenderer.quadCount() / 1000.0, NativeLodRenderer.gpuBytes() >> 20, IN_FLIGHT.size(), INTAKE.outstanding(),
-                shaderMode());
+                fog, shaderMode());
     }
 
     /** How the LOD is drawn under the active shader pack, for the F3 line. */
@@ -604,6 +623,16 @@ public final class PryzmaLod {
         }
         int vanillaBlocks = mc.options.getEffectiveRenderDistance() << 4;
         float[] fog = LodMath.farlandsFogRange(vanillaBlocks, radiusBlocks, PryzmaConfig.prFarlandsFog);
+        if (PryzmaConfig.prFarlandsFog != 3) {
+            // The intake only reads chunks the world has saved, so the LOD can stop far inside the configured
+            // radius; fog that ends past the last fragment never reaches full strength and the edge stays hard.
+            float horizon = NativeLodRenderer.horizon(event.getModelViewMatrix(), event.getProjectionMatrix(),
+                    camera.getPosition(), clipRadius);
+            fog = LodMath.clampFogToHorizon(fog, horizon);
+            frameHorizon = horizon;
+        } else {
+            frameHorizon = 0.0F;
+        }
         if (NativeLodRenderer.render(event.getModelViewMatrix(), event.getProjectionMatrix(), camera.getPosition(), clipRadius,
                 radiusBlocks, fog[0], fog[1])) {
             frameActive = true;

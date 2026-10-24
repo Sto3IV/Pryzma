@@ -171,6 +171,34 @@ class PryzmaConfigTest {
     }
 
     @Test
+    void farlandsSourceAcceptsDiskAndGenerateModes() {
+        int saved = PryzmaConfig.prFarlandsSource;
+        try {
+            assertEquals(0, saved, "Farlands Source defaults to 0 (Disk Only)");
+            assertTrue(PryzmaConfig.isFarlandsSourceDisk());
+            assertFalse(PryzmaConfig.isFarlandsSourceGenerate());
+
+            PryzmaConfig.apply(Map.of("prFarlandsSource", "1"));
+            assertEquals(1, PryzmaConfig.prFarlandsSource);
+            assertFalse(PryzmaConfig.isFarlandsSourceDisk());
+            assertTrue(PryzmaConfig.isFarlandsSourceGenerate());
+
+            PryzmaConfig.apply(Map.of("prFarlandsSource", "0"));
+            assertEquals(0, PryzmaConfig.prFarlandsSource);
+            assertTrue(PryzmaConfig.isFarlandsSourceDisk());
+            assertFalse(PryzmaConfig.isFarlandsSourceGenerate());
+
+            // Clamping
+            PryzmaConfig.apply(Map.of("prFarlandsSource", "-1"));
+            assertEquals(0, PryzmaConfig.prFarlandsSource);
+            PryzmaConfig.apply(Map.of("prFarlandsSource", "5"));
+            assertEquals(1, PryzmaConfig.prFarlandsSource);
+        } finally {
+            PryzmaConfig.prFarlandsSource = saved;
+        }
+    }
+
+    @Test
     void droppedItemsRoundTripsThroughOptionsFileAndClamps() {
         int saved = PryzmaConfig.prDroppedItems;
         try {
