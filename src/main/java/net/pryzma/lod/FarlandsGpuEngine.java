@@ -76,6 +76,7 @@ public final class FarlandsGpuEngine {
 
     // Direct buffers
     private static ByteBuffer sectorTableHost;
+    private static ByteBuffer sectorEntryBuf;
     private static ByteBuffer countClearBuf;
     private static ByteBuffer staging;
     private static final int[] countReadback = new int[2];
@@ -183,8 +184,9 @@ public final class FarlandsGpuEngine {
             GL15C.glBufferData(GL15C.GL_ARRAY_BUFFER, (long) megaCapacityVertices * VERTEX_BYTES, GL15C.GL_DYNAMIC_DRAW);
             GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
 
-            // Create Sector Table buffer
+            // Create Sector Table buffer and dedicated 32-byte entry staging buffer
             sectorTableHost = MemoryUtil.memAlloc(MAX_SECTORS * SECTOR_ENTRY_BYTES).order(ByteOrder.nativeOrder());
+            sectorEntryBuf = MemoryUtil.memAlloc(SECTOR_ENTRY_BYTES).order(ByteOrder.nativeOrder());
             sectorTableBuf = GL15C.glGenBuffers();
             GL15C.glBindBuffer(GL43C.GL_SHADER_STORAGE_BUFFER, sectorTableBuf);
             GL15C.glBufferData(GL43C.GL_SHADER_STORAGE_BUFFER, (long) MAX_SECTORS * SECTOR_ENTRY_BYTES, GL15C.GL_DYNAMIC_DRAW);
@@ -390,6 +392,11 @@ public final class FarlandsGpuEngine {
         if (idx < 0) {
             if (activeSectorCount >= MAX_SECTORS) {
                 Pryzma.LOGGER.warn("Farlands sector table full ({} sectors); dropping sector key {}", MAX_SECTORS, key);
+                if (sector.baseVertex >= 0) {
+                    freeVertices(sector.baseVertex, sector.allocatedVertices);
+                    sector.baseVertex = -1;
+                    sector.allocatedVertices = 0;
+                }
                 return;
             }
             idx = activeSectorCount++;
@@ -398,23 +405,25 @@ public final class FarlandsGpuEngine {
         }
         sector.tableIndex = idx;
 
-        // Write 32 bytes to host buffer
+        // Write 32 bytes to host buffer and upload to SSBO via dedicated entry buffer
         int baseByte = idx * SECTOR_ENTRY_BYTES;
-        sectorTableHost.position(baseByte);
-        sectorTableHost.putInt(sector.blockOriginX()); // box.x
-        sectorTableHost.putInt(sector.blockOriginZ()); // box.y
-        sectorTableHost.putInt(mesh.minY());          // box.z
-        sectorTableHost.putInt(mesh.maxY());          // box.w
-        sectorTableHost.putInt(sector.baseVertex);     // mesh.x
-        sectorTableHost.putInt(mesh.opaqueQuads());    // mesh.y
-        sectorTableHost.putInt(mesh.waterQuads());     // mesh.z
-        sectorTableHost.putInt(idx);                  // mesh.w
-        sectorTableHost.position(baseByte);
-        sectorTableHost.limit(baseByte + SECTOR_ENTRY_BYTES);
+        sectorEntryBuf.clear();
+        sectorEntryBuf.putInt(sector.blockOriginX()); // box.x
+        sectorEntryBuf.putInt(sector.blockOriginZ()); // box.y
+        sectorEntryBuf.putInt(mesh.minY());          // box.z
+        sectorEntryBuf.putInt(mesh.maxY());          // box.w
+        sectorEntryBuf.putInt(sector.baseVertex);     // mesh.x
+        sectorEntryBuf.putInt(mesh.opaqueQuads());    // mesh.y
+        sectorEntryBuf.putInt(mesh.waterQuads());     // mesh.z
+        sectorEntryBuf.putInt(idx);                  // mesh.w
+        sectorEntryBuf.flip();
+
+        // Keep sectorTableHost in sync for swap-and-pop bookkeeping
+        MemoryUtil.memCopy(MemoryUtil.memAddress(sectorEntryBuf), MemoryUtil.memAddress(sectorTableHost) + baseByte, SECTOR_ENTRY_BYTES);
 
         // Upload entry to SSBO
         GL15C.glBindBuffer(GL43C.GL_SHADER_STORAGE_BUFFER, sectorTableBuf);
-        GL15C.glBufferSubData(GL43C.GL_SHADER_STORAGE_BUFFER, (long) baseByte, sectorTableHost);
+        GL15C.glBufferSubData(GL43C.GL_SHADER_STORAGE_BUFFER, (long) baseByte, sectorEntryBuf);
         GL15C.glBindBuffer(GL43C.GL_SHADER_STORAGE_BUFFER, 0);
     }
 
@@ -453,11 +462,17 @@ public final class FarlandsGpuEngine {
             long hostAddr = MemoryUtil.memAddress(sectorTableHost);
             MemoryUtil.memCopy(hostAddr + (long) lastIdx * SECTOR_ENTRY_BYTES, hostAddr + (long) idx * SECTOR_ENTRY_BYTES, SECTOR_ENTRY_BYTES);
 
+            // Patch moved entry's table index (8th int: mesh.w = idx)
+            sectorTableHost.putInt(idx * SECTOR_ENTRY_BYTES + 28, idx);
+
             // Upload moved slot to SSBO
-            sectorTableHost.position(idx * SECTOR_ENTRY_BYTES);
-            sectorTableHost.limit(idx * SECTOR_ENTRY_BYTES + SECTOR_ENTRY_BYTES);
+            sectorEntryBuf.clear();
+            MemoryUtil.memCopy(hostAddr + (long) idx * SECTOR_ENTRY_BYTES, MemoryUtil.memAddress(sectorEntryBuf), SECTOR_ENTRY_BYTES);
+            sectorEntryBuf.position(0);
+            sectorEntryBuf.limit(SECTOR_ENTRY_BYTES);
+
             GL15C.glBindBuffer(GL43C.GL_SHADER_STORAGE_BUFFER, sectorTableBuf);
-            GL15C.glBufferSubData(GL43C.GL_SHADER_STORAGE_BUFFER, (long) idx * SECTOR_ENTRY_BYTES, sectorTableHost);
+            GL15C.glBufferSubData(GL43C.GL_SHADER_STORAGE_BUFFER, (long) idx * SECTOR_ENTRY_BYTES, sectorEntryBuf);
             GL15C.glBindBuffer(GL43C.GL_SHADER_STORAGE_BUFFER, 0);
         }
         activeSectorCount--;
@@ -744,6 +759,10 @@ public final class FarlandsGpuEngine {
         if (sectorTableHost != null) {
             MemoryUtil.memFree(sectorTableHost);
             sectorTableHost = null;
+        }
+        if (sectorEntryBuf != null) {
+            MemoryUtil.memFree(sectorEntryBuf);
+            sectorEntryBuf = null;
         }
         if (countClearBuf != null) {
             MemoryUtil.memFree(countClearBuf);
