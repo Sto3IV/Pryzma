@@ -28,7 +28,11 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+
+import net.pryzma.shader.gl.state.GlBindingCache;
 
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
@@ -211,7 +215,7 @@ public final class FarlandsGpuEngine {
 
             // Setup Mega-VAO
             megaVao = GL30C.glGenVertexArrays();
-            GL30C.glBindVertexArray(megaVao);
+            GlStateManager._glBindVertexArray(megaVao);
 
             // Binding 0: vertex data from megaVbo (stride 16)
             GL43C.glBindVertexBuffer(0, megaVbo, 0L, VERTEX_BYTES);
@@ -236,7 +240,8 @@ public final class FarlandsGpuEngine {
 
             // Shared EBO
             GL15C.glBindBuffer(GL15C.GL_ELEMENT_ARRAY_BUFFER, staticEbo);
-            GL30C.glBindVertexArray(0);
+            GlStateManager._glBindVertexArray(0);
+            VertexBuffer.unbind();
 
             // Reset allocator
             freeOffsets[0] = 0;
@@ -336,9 +341,10 @@ public final class FarlandsGpuEngine {
         megaCapacityVertices = newCap;
 
         // Rebind to Mega-VAO
-        GL30C.glBindVertexArray(megaVao);
+        GlStateManager._glBindVertexArray(megaVao);
         GL43C.glBindVertexBuffer(0, megaVbo, 0L, VERTEX_BYTES);
-        GL30C.glBindVertexArray(0);
+        GlStateManager._glBindVertexArray(0);
+        VertexBuffer.unbind();
     }
 
     // ------------------------------------------------------------------ mesh intake and eviction
@@ -487,8 +493,10 @@ public final class FarlandsGpuEngine {
         if (quads == 0) {
             return;
         }
-        GL30C.glBindVertexArray(megaVao);
+        GlStateManager._glBindVertexArray(megaVao);
         GL32C.glDrawElementsBaseVertex(GL11C.GL_TRIANGLES, quads * 6, GL11C.GL_UNSIGNED_INT, (long) first * 6 * 4, mesh.baseVertex);
+        GlStateManager._glBindVertexArray(0);
+        VertexBuffer.unbind();
     }
 
     // ------------------------------------------------------------------ rendering
@@ -556,89 +564,100 @@ public final class FarlandsGpuEngine {
         RenderSystem.clearDepth(1.0);
         RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
 
-        // 4. Upload render program uniforms
-        program.setDefaultUniforms(VertexFormat.Mode.QUADS, modelView, projection, mc.getWindow());
-        if (program.COLOR_MODULATOR != null) {
-            program.COLOR_MODULATOR.set(1.0F, 1.0F, 1.0F, 1.0F);
-        }
-        if (program.FOG_START != null) {
-            program.FOG_START.set(fogStart);
-        }
-        if (program.FOG_END != null) {
-            program.FOG_END.set(fogEnd);
-        }
-        Uniform fogColor = program.getUniform("FogColor");
-        if (fogColor != null) {
-            float[] fc = RenderSystem.getShaderFogColor();
-            fogColor.set(fc[0], fc[1], fc[2], fc.length > 3 ? fc[3] : 1.0F);
-        }
-        Uniform clip = program.getUniform("ClipRadius");
-        if (clip != null) {
-            clip.set(clipRadius);
-        }
-        Uniform camB = program.getUniform("CameraBlock");
-        if (camB != null) {
-            camB.set(cbX, cbY, cbZ);
-        }
-        Uniform camF = program.getUniform("CameraFrac");
-        if (camF != null) {
-            camF.set(fracX, fracY, fracZ);
-        }
-        Uniform inst = program.getUniform("UseInstancedOffset");
-        if (inst != null) {
-            inst.set(1);
-        }
-        program.apply();
-
-        // 5. Submit Multi-Draw Indirect
-        GL30C.glBindVertexArray(megaVao);
-
-        // Opaque pass
-        GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, opaqueCmdBuf);
-        if (hasIndirectParameters) {
-            GL15C.glBindBuffer(GL46C.GL_PARAMETER_BUFFER, countBuf);
-            GL46C.glMultiDrawElementsIndirectCount(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, 0L, activeSectorCount, CMD_BYTES);
-        } else {
-            GL15C.glBindBuffer(GL43C.GL_SHADER_STORAGE_BUFFER, countBuf);
-            GL15C.glGetBufferSubData(GL43C.GL_SHADER_STORAGE_BUFFER, 0L, countReadback);
-            if (countReadback[0] > 0) {
-                GL43C.glMultiDrawElementsIndirect(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, countReadback[0], CMD_BYTES);
+        try {
+            // 4. Upload render program uniforms
+            program.setDefaultUniforms(VertexFormat.Mode.QUADS, modelView, projection, mc.getWindow());
+            if (program.COLOR_MODULATOR != null) {
+                program.COLOR_MODULATOR.set(1.0F, 1.0F, 1.0F, 1.0F);
             }
-        }
-
-        // Water pass
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.depthMask(false);
-        if (camF != null) {
-            camF.set(fracX, fracY + NativeLodRenderer.WATER_DROP, fracZ);
-            camF.upload();
-        }
-
-        GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, waterCmdBuf);
-        if (hasIndirectParameters) {
-            GL15C.glBindBuffer(GL46C.GL_PARAMETER_BUFFER, countBuf);
-            GL46C.glMultiDrawElementsIndirectCount(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, 4L, activeSectorCount, CMD_BYTES);
-        } else {
-            if (countReadback[1] > 0) {
-                GL43C.glMultiDrawElementsIndirect(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, countReadback[1], CMD_BYTES);
+            if (program.FOG_START != null) {
+                program.FOG_START.set(fogStart);
             }
-        }
+            if (program.FOG_END != null) {
+                program.FOG_END.set(fogEnd);
+            }
+            Uniform fogColor = program.getUniform("FogColor");
+            if (fogColor != null) {
+                float[] fc = RenderSystem.getShaderFogColor();
+                fogColor.set(fc[0], fc[1], fc[2], fc.length > 3 ? fc[3] : 1.0F);
+            }
+            Uniform clip = program.getUniform("ClipRadius");
+            if (clip != null) {
+                clip.set(clipRadius);
+            }
+            Uniform camB = program.getUniform("CameraBlock");
+            if (camB != null) {
+                camB.set(cbX, cbY, cbZ);
+            }
+            Uniform camF = program.getUniform("CameraFrac");
+            if (camF != null) {
+                camF.set(fracX, fracY, fracZ);
+            }
+            Uniform inst = program.getUniform("UseInstancedOffset");
+            if (inst != null) {
+                inst.set(1);
+            }
+            program.apply();
 
-        RenderSystem.depthMask(true);
-        RenderSystem.disableBlend();
-        RenderSystem.defaultBlendFunc();
+            // 5. Submit Multi-Draw Indirect
+            GlStateManager._glBindVertexArray(megaVao);
 
-        // 6. Cleanup state and re-bind vanilla main render target
-        GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, 0);
-        if (hasIndirectParameters) {
-            GL15C.glBindBuffer(GL46C.GL_PARAMETER_BUFFER, 0);
+            // Opaque pass
+            GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, opaqueCmdBuf);
+            if (hasIndirectParameters) {
+                GL15C.glBindBuffer(GL46C.GL_PARAMETER_BUFFER, countBuf);
+                GL46C.glMultiDrawElementsIndirectCount(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, 0L, activeSectorCount, CMD_BYTES);
+            } else {
+                GL15C.glBindBuffer(GL43C.GL_SHADER_STORAGE_BUFFER, countBuf);
+                GL15C.glGetBufferSubData(GL43C.GL_SHADER_STORAGE_BUFFER, 0L, countReadback);
+                if (countReadback[0] > 0) {
+                    GL43C.glMultiDrawElementsIndirect(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, countReadback[0], CMD_BYTES);
+                }
+            }
+
+            // Water pass
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                    GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            RenderSystem.depthMask(false);
+            if (camF != null) {
+                camF.set(fracX, fracY + NativeLodRenderer.WATER_DROP, fracZ);
+                camF.upload();
+            }
+
+            GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, waterCmdBuf);
+            if (hasIndirectParameters) {
+                GL15C.glBindBuffer(GL46C.GL_PARAMETER_BUFFER, countBuf);
+                GL46C.glMultiDrawElementsIndirectCount(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, 4L, activeSectorCount, CMD_BYTES);
+            } else {
+                if (countReadback[1] > 0) {
+                    GL43C.glMultiDrawElementsIndirect(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, countReadback[1], CMD_BYTES);
+                }
+            }
+
+            RenderSystem.depthMask(true);
+            RenderSystem.disableBlend();
+            RenderSystem.defaultBlendFunc();
+        } finally {
+            // 6. Complete state cleanup and 100% restoration for Blaze3D
+            GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, 0);
+            if (hasIndirectParameters) {
+                GL15C.glBindBuffer(GL46C.GL_PARAMETER_BUFFER, 0);
+            }
+            GL30C.glBindBufferBase(GL43C.GL_SHADER_STORAGE_BUFFER, 0, 0);
+            GL30C.glBindBufferBase(GL43C.GL_SHADER_STORAGE_BUFFER, 1, 0);
+            GL30C.glBindBufferBase(GL43C.GL_SHADER_STORAGE_BUFFER, 2, 0);
+            GL30C.glBindBufferBase(GL43C.GL_SHADER_STORAGE_BUFFER, 3, 0);
+
+            GlStateManager._glBindVertexArray(0);
+            VertexBuffer.unbind();
+            BufferUploader.invalidate();
+            program.clear();
+            lightTexture.turnOffLightLayer();
+            GlBindingCache.INSTANCE.invalidate();
+            main.bindWrite(false);
+            RenderSystem.viewport(0, 0, main.width, main.height);
         }
-        GL30C.glBindVertexArray(0);
-        program.clear();
-        lightTexture.turnOffLightLayer();
-        main.bindWrite(false);
 
         return activeSectorCount;
     }
@@ -648,8 +667,9 @@ public final class FarlandsGpuEngine {
     private static void bindDepthFbo(int width, int height, int colorTex) {
         if (depthFbo < 0 || width != depthWidth || height != depthHeight || colorTex != boundColorTex) {
             setupDepthFbo(width, height, colorTex);
+        } else {
+            GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, depthFbo);
         }
-        GL30C.glBindFramebuffer(GL30C.GL_FRAMEBUFFER, depthFbo);
     }
 
     private static void setupDepthFbo(int width, int height, int colorTex) {
@@ -671,9 +691,10 @@ public final class FarlandsGpuEngine {
         GL11C.glTexParameteri(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_WRAP_T, GL12C.GL_CLAMP_TO_EDGE);
         GL11C.glTexImage2D(GL11C.GL_TEXTURE_2D, 0, GL30C.GL_DEPTH_COMPONENT32F, width, height, 0,
                 GL11C.GL_DEPTH_COMPONENT, GL11C.GL_FLOAT, (ByteBuffer) null);
+        GL11C.glBindTexture(GL11C.GL_TEXTURE_2D, 0);
 
         depthFbo = GL30C.glGenFramebuffers();
-        GL30C.glBindFramebuffer(GL30C.GL_FRAMEBUFFER, depthFbo);
+        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, depthFbo);
         GL30C.glFramebufferTexture2D(GL30C.GL_FRAMEBUFFER, GL30C.GL_COLOR_ATTACHMENT0, GL11C.GL_TEXTURE_2D, colorTex, 0);
         GL30C.glFramebufferTexture2D(GL30C.GL_FRAMEBUFFER, GL30C.GL_DEPTH_ATTACHMENT, GL11C.GL_TEXTURE_2D, depthTexture, 0);
 
@@ -681,7 +702,6 @@ public final class FarlandsGpuEngine {
         if (status != GL30C.GL_FRAMEBUFFER_COMPLETE) {
             Pryzma.LOGGER.error("Farlands private depth FBO incomplete: 0x" + Integer.toHexString(status));
         }
-        GL30C.glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
     }
 
     // ------------------------------------------------------------------ helpers
@@ -786,9 +806,9 @@ public final class FarlandsGpuEngine {
         }
         indices.flip();
         int ebo = GL15C.glGenBuffers();
-        GL15C.glBindBuffer(GL15C.GL_ELEMENT_ARRAY_BUFFER, ebo);
-        GL15C.glBufferData(GL15C.GL_ELEMENT_ARRAY_BUFFER, indices, GL15C.GL_STATIC_DRAW);
-        GL15C.glBindBuffer(GL15C.GL_ELEMENT_ARRAY_BUFFER, 0);
+        GL15C.glBindBuffer(GL31C.GL_COPY_WRITE_BUFFER, ebo);
+        GL15C.glBufferData(GL31C.GL_COPY_WRITE_BUFFER, indices, GL15C.GL_STATIC_DRAW);
+        GL15C.glBindBuffer(GL31C.GL_COPY_WRITE_BUFFER, 0);
         MemoryUtil.memFree(indices);
         return ebo;
     }
