@@ -105,6 +105,21 @@ class LodMathTest {
     }
 
     @Test
+    void fogClosesAtTheDrawnHorizon() {
+        float[] configured = LodMath.farlandsFogRange(192, 1024, 2);
+        // Saved-world intake can stop far inside the configured radius; the fade must end where the terrain does.
+        assertArrayEquals(new float[] {192.0F, 400.0F}, LodMath.clampFogToHorizon(configured, 400.0F), 1.0E-3F);
+        // A horizon inside the configured start still keeps a fade band in front of it.
+        assertArrayEquals(new float[] {144.0F, 192.0F}, LodMath.clampFogToHorizon(configured, 192.0F), 1.0E-3F);
+        // Dense (Fast) fog whose start is beyond the horizon is pulled in too.
+        assertArrayEquals(new float[] {300.0F, 400.0F},
+                LodMath.clampFogToHorizon(LodMath.farlandsFogRange(256, 1024, 1), 400.0F), 1.0E-3F);
+        // Nothing to clamp: terrain reaches the configured end, or nothing was drawn.
+        assertArrayEquals(configured, LodMath.clampFogToHorizon(configured, 2048.0F), 1.0E-6F);
+        assertArrayEquals(configured, LodMath.clampFogToHorizon(configured, 0.0F), 1.0E-6F);
+    }
+
+    @Test
     void sectorDistances() {
         assertEquals(0.0, LodMath.sectorDistance(128.0, 128.0, 0, 0));
         assertEquals(10.0, LodMath.sectorDistance(-10.0, 0.0, 0, 0), 1.0E-9);

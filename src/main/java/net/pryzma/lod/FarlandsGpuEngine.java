@@ -579,7 +579,7 @@ public final class FarlandsGpuEngine {
             Uniform fogColor = program.getUniform("FogColor");
             if (fogColor != null) {
                 float[] fc = RenderSystem.getShaderFogColor();
-                fogColor.set(fc[0], fc[1], fc[2], fc.length > 3 ? fc[3] : 1.0F);
+                fogColor.set(fc[0], fc[1], fc[2], 1.0F);
             }
             Uniform clip = program.getUniform("ClipRadius");
             if (clip != null) {

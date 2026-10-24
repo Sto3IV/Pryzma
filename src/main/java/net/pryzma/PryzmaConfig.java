@@ -85,6 +85,10 @@ public final class PryzmaConfig {
     public static final int[] FARLANDS_DISTANCE_VALUES = {0, 32, 64, 96, 128, 192, 256, 384, 512, 768, 1024};
     /** Farlands Fog mode: 1 = Fast (dense edge fog), 2 = Fancy (gradient from render distance), 3 = OFF. */
     public static int prFarlandsFog = 2;
+    /** Farlands Data Source: 0 = Disk Only (saved world / pregen), 1 = Surface Gen (on-the-fly surface generation). */
+    public static final int FARLANDS_SOURCE_DISK = 0;
+    public static final int FARLANDS_SOURCE_GENERATE = 1;
+    public static int prFarlandsSource = FARLANDS_SOURCE_DISK;
     public static boolean prDynamicFov = true;
     public static int prDroppedItems = DROPPED_ITEMS_DEFAULT;
     public static boolean prAlternateBlocks = true;
@@ -215,6 +219,14 @@ public final class PryzmaConfig {
         return prFarlandsFog == 2;
     }
 
+    public static boolean isFarlandsSourceDisk() {
+        return prFarlandsSource == FARLANDS_SOURCE_DISK;
+    }
+
+    public static boolean isFarlandsSourceGenerate() {
+        return prFarlandsSource == FARLANDS_SOURCE_GENERATE;
+    }
+
     // ---------------------------------------------------------------- persistence
 
     /** Loads {@code optionspr.txt} from {@code dir}, falling back to the 1.x and OptiFine files. */
@@ -341,6 +353,7 @@ public final class PryzmaConfig {
                 prFarlandsFog = clampInt(v, "prFarlandsFog", prFarlandsFog, 1, 3);
             }
         }
+        prFarlandsSource = clampInt(v, "prFarlandsSource", prFarlandsSource, 0, 1);
         if (v.containsKey("prChatBackground")) {
             prChatBackground = parseInt(v.get("prChatBackground"), prChatBackground);
         }
@@ -476,6 +489,7 @@ public final class PryzmaConfig {
         m.put("prDetailDistance", str(prDetailDistance));
         m.put("prFarlandsDistance", str(prFarlandsDistance));
         m.put("prFarlandsFog", str(prFarlandsFog));
+        m.put("prFarlandsSource", str(prFarlandsSource));
         m.put("prChatBackground", str(prChatBackground));
         m.put("prChatShadow", str(prChatShadow));
         m.put("prTelemetry", str(prTelemetry));
@@ -523,6 +537,7 @@ public final class PryzmaConfig {
         prDetailDistance = 0;
         prFarlandsDistance = 0;
         prFarlandsFog = 2;
+        prFarlandsSource = FARLANDS_SOURCE_DISK;
         prDynamicFov = true;
         prDroppedItems = DROPPED_ITEMS_DEFAULT;
         prAlternateBlocks = true;

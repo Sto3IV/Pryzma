@@ -19,6 +19,8 @@ public final class LodMath {
     public static final int MAX_SPIRAL_RADIUS = 1024;
     private static final float MIN_NEAR = 0.05F;
     private static final float MAX_NEAR = 64.0F;
+    /** Shortest fade band the LOD fog may keep when the drawn terrain ends inside the configured radius, in blocks. */
+    static final float MIN_FOG_BAND = 16.0F;
 
     private static final Int2ObjectOpenHashMap<int[]> SPIRAL_CACHE = new Int2ObjectOpenHashMap<>();
 
@@ -134,6 +136,27 @@ public final class LodMath {
             start = Math.min(end - 1.0F, start);
             return new float[] {start, end};
         }
+    }
+
+    /**
+     * Pulls a fog window in to the farthest LOD fragment actually drawn. The intake reads only chunks the world has
+     * saved, so the terrain often stops well inside the configured radius; fog that ends past the last fragment never
+     * reaches full strength, and the LOD edge stays a hard line against the sky. The window keeps a fade band of at
+     * least a quarter of the horizon (never shorter than {@link #MIN_FOG_BAND}) so the edge always dissolves, and the
+     * end never moves outward.
+     *
+     * @param range   {start, end} from {@link #farlandsFogRange}
+     * @param horizon farthest drawn fragment, blocks from the camera; below {@link #MIN_FOG_BAND} leaves
+     *                {@code range} untouched
+     */
+    public static float[] clampFogToHorizon(float[] range, float horizon) {
+        if (horizon < MIN_FOG_BAND || range[1] <= 0.0F || horizon >= range[1]) {
+            return range;
+        }
+        float end = horizon;
+        float band = Math.max(MIN_FOG_BAND, end * 0.25F);
+        float start = Math.max(0.0F, Math.min(range[0], end - band));
+        return new float[] {Math.min(start, end - 1.0F), end};
     }
 
     /** Horizontal distance from the camera to the nearest point of sector {@code (sectorX, sectorZ)}; 0 inside it. */

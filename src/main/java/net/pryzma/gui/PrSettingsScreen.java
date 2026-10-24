@@ -69,7 +69,7 @@ final class PrSettingsScreen extends PrScreen {
                 onOptionsChanged();
             }
             case FARLANDS -> {
-                grid(PrOptions.FARLANDS_DISTANCE, PrOptions.FARLANDS_FOG);
+                grid(PrOptions.FARLANDS_DISTANCE, PrOptions.FARLANDS_FOG, PrOptions.FARLANDS_SOURCE);
                 done(width / 2 - 100, 200);
                 onOptionsChanged();
             }

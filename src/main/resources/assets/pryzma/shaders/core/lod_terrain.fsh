@@ -51,10 +51,10 @@ void main() {
         float noise = float(hashBlock(block) & 255u) / 255.0;
         color.rgb *= 1.0 - amplitude + 2.0 * amplitude * noise;
     }
-    float fogDistance = max(horizontal, abs(relativePos.y));
+    float fogDistance = length(relativePos);
     if (fogDistance > FogStart) {
         float fogValue = fogDistance < FogEnd ? smoothstep(FogStart, FogEnd, fogDistance) : 1.0;
-        color.rgb = mix(color.rgb, FogColor.rgb, fogValue * FogColor.a);
+        color.rgb = mix(color.rgb, FogColor.rgb, fogValue);
     }
     fragColor = color;
 }

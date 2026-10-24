@@ -449,6 +449,13 @@ public final class PrOptions {
                 default -> off();
             },
             dir -> PryzmaConfig.prFarlandsFog = (PryzmaConfig.prFarlandsFog % 3) + 1);
+    /** Farlands Data Source: Disk Only (saved chunks / pregen), Surface Gen (on-the-fly surface generation). */
+    public static final PrOption.Cycle FARLANDS_SOURCE = cycle("pr.options.FARLANDS_SOURCE",
+            () -> switch (PryzmaConfig.prFarlandsSource) {
+                case 1 -> I18n.get("pr.options.farlandsSource.generate");
+                default -> I18n.get("pr.options.farlandsSource.disk");
+            },
+            dir -> PryzmaConfig.prFarlandsSource = (PryzmaConfig.prFarlandsSource + 1) % 2);
 
     // ------------------------------------------------------------------ other
 
