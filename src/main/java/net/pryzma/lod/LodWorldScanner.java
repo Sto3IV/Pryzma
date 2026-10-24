@@ -33,6 +33,8 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.GrowingPlantBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -222,6 +224,10 @@ public final class LodWorldScanner {
      */
     static boolean resolveColumn(BlockReader reader, ColumnKinds kinds, LodColumnScan.Result scan, int x, int z, int topY, int minY,
             int maxY, RawChunk raw, int i) {
+        // Descend through non-terrain flora (bamboo, cactus, pointed dripstone, etc.) down to the true terrain surface
+        while (topY >= minY && isNonTerrainPlant(reader.state(x, topY, z))) {
+            topY--;
+        }
         if (!LodColumnScan.scan(kinds.at(x, z), topY, minY, scan)) {
             return false;
         }
@@ -257,6 +263,20 @@ public final class LodWorldScanner {
         return true;
     }
 
+    /** Non-terrain flora and decorative blocks that block motion or stick out (bamboo, cactus, dripstone, etc.). */
+    static boolean isNonTerrainPlant(BlockState state) {
+        if (state.is(Blocks.BAMBOO) || state.is(Blocks.BAMBOO_SAPLING)
+                || state.is(Blocks.POINTED_DRIPSTONE) || state.is(Blocks.CACTUS)
+                || state.is(Blocks.CHORUS_PLANT) || state.is(Blocks.CHORUS_FLOWER)
+                || state.is(Blocks.SUGAR_CANE) || state.is(Blocks.AMETHYST_CLUSTER)
+                || state.is(Blocks.SMALL_AMETHYST_BUD) || state.is(Blocks.MEDIUM_AMETHYST_BUD)
+                || state.is(Blocks.LARGE_AMETHYST_BUD)) {
+            return true;
+        }
+        Block block = state.getBlock();
+        return block instanceof BushBlock || block instanceof GrowingPlantBlock;
+    }
+
     /** {@link LodColumnScan} kind of a block state. Any thread: states, tags and fluids are immutable. */
     @SuppressWarnings("deprecation") // blocksMotion is the predicate of the MOTION_BLOCKING heightmap itself
     static int kind(BlockState state) {
@@ -271,7 +291,7 @@ public final class LodWorldScanner {
         if (isFoliage(state)) {
             return LodColumnScan.FOLIAGE;
         }
-        if (!motion) {
+        if (!motion || isNonTerrainPlant(state)) {
             return LodColumnScan.PASSABLE;
         }
         return state.is(BlockTags.LOGS) ? LodColumnScan.TRUNK : LodColumnScan.SOLID;
@@ -285,7 +305,7 @@ public final class LodWorldScanner {
     /** The heightmap's own predicate: the block the {@code MOTION_BLOCKING} height stops at. */
     @SuppressWarnings("deprecation")
     static boolean isHeightmapTop(BlockState state) {
-        return state.blocksMotion() || !state.getFluidState().isEmpty();
+        return (state.blocksMotion() && !isNonTerrainPlant(state)) || !state.getFluidState().isEmpty();
     }
 
     // ------------------------------------------------------------------ saved chunks

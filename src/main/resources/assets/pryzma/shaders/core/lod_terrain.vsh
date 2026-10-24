@@ -8,9 +8,9 @@
 // Under GPU-driven MDI (UseInstancedOffset == 1), SectorOriginAttr is fetched per-instance at divisor 1 and camera-relative
 // position is computed with high-precision block+fraction split.
 
-in uvec4 vPosition;
-in vec4 iris_color;
-in uvec4 irisExtra;
+layout(location = 0) in uvec4 vPosition;
+layout(location = 1) in vec4 iris_color;
+layout(location = 2) in uvec4 irisExtra;
 layout(location = 3) in ivec2 SectorOriginAttr;
 
 uniform sampler2D Sampler2;
@@ -35,7 +35,7 @@ const float FACE_SHADE[6] = float[](0.5, 1.0, 0.8, 0.8, 0.6, 0.6);
 
 // Vanilla's minecraft_sample_lightmap: UV2 holds block and sky light times 16.
 vec4 sampleLightmap(sampler2D lightMap, ivec2 uv) {
-    return texture(lightMap, clamp(vec2(uv) / 256.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0)));
+    return texture(lightMap, clamp((vec2(uv) + vec2(8.0)) / 256.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0)));
 }
 
 void main() {

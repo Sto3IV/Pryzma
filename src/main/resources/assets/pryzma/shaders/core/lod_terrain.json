@@ -1,6 +1,12 @@
 {
     "vertex": "pryzma:lod_terrain",
     "fragment": "pryzma:lod_terrain",
+    "attributes": [
+        "vPosition",
+        "iris_color",
+        "irisExtra",
+        "SectorOriginAttr"
+    ],
     "samplers": [
         { "name": "Sampler2" }
     ],
