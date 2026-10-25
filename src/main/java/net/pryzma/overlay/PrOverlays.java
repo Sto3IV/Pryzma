@@ -10,6 +10,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -119,7 +120,7 @@ public final class PrOverlays {
         poseStack.translate(-camPos.x, -camPos.y, -camPos.z);
 
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        VertexConsumer vc = bufferSource.getBuffer(PrOverlayRenderType.OVERLAY_QUADS);
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.lines());
 
         if (lightOverlayActive) {
             PrMobSpawnOverlay.render(poseStack, vc);
@@ -129,7 +130,7 @@ public final class PrOverlays {
             PrChunkGridOverlay.render(poseStack, vc, chunkGridMode, mc.player, mc.level);
         }
 
-        bufferSource.endBatch(PrOverlayRenderType.OVERLAY_QUADS);
+        bufferSource.endBatch(RenderType.lines());
         poseStack.popPose();
     }
 }
