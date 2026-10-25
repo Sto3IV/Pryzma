@@ -120,7 +120,7 @@ public final class PrOverlays {
         poseStack.translate(-camPos.x, -camPos.y, -camPos.z);
 
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.lines());
+        VertexConsumer vc = bufferSource.getBuffer(PrRenderTypes.OVERLAY_LINES);
 
         if (lightOverlayActive) {
             PrMobSpawnOverlay.render(poseStack, vc);
@@ -130,7 +130,7 @@ public final class PrOverlays {
             PrChunkGridOverlay.render(poseStack, vc, chunkGridMode, mc.player, mc.level);
         }
 
-        bufferSource.endBatch(RenderType.lines());
+        bufferSource.endBatch(PrRenderTypes.OVERLAY_LINES);
         poseStack.popPose();
     }
 }

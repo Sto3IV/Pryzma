@@ -158,15 +158,7 @@ public final class PrMobSpawnOverlay {
                              float x1, float y1, float z1,
                              float x2, float y2, float z2,
                              float r, float g, float b, float a) {
-        float dx = x2 - x1;
-        float dy = y2 - y1;
-        float dz = z2 - z1;
-        float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
-        float nx = (len > 1.0E-5F) ? (dx / len) : 0.0f;
-        float ny = (len > 1.0E-5F) ? (dy / len) : 1.0f;
-        float nz = (len > 1.0E-5F) ? (dz / len) : 0.0f;
-
-        vc.addVertex(pose, x1, y1, z1).setColor(r, g, b, a).setNormal(pose, nx, ny, nz);
-        vc.addVertex(pose, x2, y2, z2).setColor(r, g, b, a).setNormal(pose, nx, ny, nz);
+        vc.addVertex(pose, x1, y1, z1).setColor(r, g, b, a);
+        vc.addVertex(pose, x2, y2, z2).setColor(r, g, b, a);
     }
 }

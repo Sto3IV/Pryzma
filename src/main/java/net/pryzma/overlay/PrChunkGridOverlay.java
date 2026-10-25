@@ -65,6 +65,8 @@ public final class PrChunkGridOverlay {
         }
     }
 
+    private static final float VERTICAL_SEGMENT = 16.0F;
+
     private static void drawChunkCorners(VertexConsumer vc, PoseStack.Pose pose, ChunkPos center,
                                          double playerY, int worldMinY, int worldMaxY) {
         Span span = span(playerY, worldMinY, worldMaxY, BORDER_HALF_HEIGHT);
@@ -80,7 +82,7 @@ public final class PrChunkGridOverlay {
 
                 float x = baseX + (i << 4);
                 float z = baseZ + (j << 4);
-                line(vc, pose, x, span.bottom(), z, x, span.top(), z, RED_R, RED_G, RED_B, alpha);
+                verticalLine(vc, pose, x, span.bottom(), span.top(), z, RED_R, RED_G, RED_B, alpha);
             }
         }
     }
@@ -90,7 +92,7 @@ public final class PrChunkGridOverlay {
         Span span = span(playerY, worldMinY, worldMaxY, BORDER_HALF_HEIGHT);
         float x = center.getMinBlockX() + 8.0F;
         float z = center.getMinBlockZ() + 8.0F;
-        line(vc, pose, x, span.bottom(), z, x, span.top(), z, YELLOW_R, YELLOW_G, YELLOW_B, 1.0F);
+        verticalLine(vc, pose, x, span.bottom(), span.top(), z, YELLOW_R, YELLOW_G, YELLOW_B, 1.0F);
     }
 
     private static void drawBlockCage(VertexConsumer vc, PoseStack.Pose pose, ChunkPos center,
@@ -114,10 +116,19 @@ public final class PrChunkGridOverlay {
         for (int h = 1; h <= 15; h++) {
             float x = x0 + h;
             float z = z0 + h;
-            line(vc, pose, x, span.bottom(), z0, x, span.top(), z0, GREEN_R, GREEN_G, GREEN_B, GREEN_A);
-            line(vc, pose, x, span.bottom(), z1, x, span.top(), z1, GREEN_R, GREEN_G, GREEN_B, GREEN_A);
-            line(vc, pose, x0, span.bottom(), z, x0, span.top(), z, GREEN_R, GREEN_G, GREEN_B, GREEN_A);
-            line(vc, pose, x1, span.bottom(), z, x1, span.top(), z, GREEN_R, GREEN_G, GREEN_B, GREEN_A);
+            verticalLine(vc, pose, x, span.bottom(), span.top(), z0, GREEN_R, GREEN_G, GREEN_B, GREEN_A);
+            verticalLine(vc, pose, x, span.bottom(), span.top(), z1, GREEN_R, GREEN_G, GREEN_B, GREEN_A);
+            verticalLine(vc, pose, x0, span.bottom(), span.top(), z, GREEN_R, GREEN_G, GREEN_B, GREEN_A);
+            verticalLine(vc, pose, x1, span.bottom(), span.top(), z, GREEN_R, GREEN_G, GREEN_B, GREEN_A);
+        }
+    }
+
+    private static void verticalLine(VertexConsumer vc, PoseStack.Pose pose,
+                                     float x, float minY, float maxY, float z,
+                                     float r, float g, float b, float a) {
+        for (float y = minY; y < maxY; y += VERTICAL_SEGMENT) {
+            float yNext = Math.min(y + VERTICAL_SEGMENT, maxY);
+            line(vc, pose, x, y, z, x, yNext, z, r, g, b, a);
         }
     }
 
@@ -125,16 +136,8 @@ public final class PrChunkGridOverlay {
                              float x1, float y1, float z1,
                              float x2, float y2, float z2,
                              float r, float g, float b, float a) {
-        float dx = x2 - x1;
-        float dy = y2 - y1;
-        float dz = z2 - z1;
-        float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
-        float nx = (len > 1.0E-5F) ? (dx / len) : 0.0f;
-        float ny = (len > 1.0E-5F) ? (dy / len) : 1.0f;
-        float nz = (len > 1.0E-5F) ? (dz / len) : 0.0f;
-
-        vc.addVertex(pose, x1, y1, z1).setColor(r, g, b, a).setNormal(pose, nx, ny, nz);
-        vc.addVertex(pose, x2, y2, z2).setColor(r, g, b, a).setNormal(pose, nx, ny, nz);
+        vc.addVertex(pose, x1, y1, z1).setColor(r, g, b, a);
+        vc.addVertex(pose, x2, y2, z2).setColor(r, g, b, a);
     }
 
     private static Span span(double playerY, int worldMinY, int worldMaxY, float halfHeight) {
