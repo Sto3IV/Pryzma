@@ -14,7 +14,6 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import net.pryzma.overlay.PrOverlays;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -66,7 +65,6 @@ public final class PryzmaClient {
         });
         modBus.addListener(ModelEvent.BakingCompleted.class, PrCitModels::onBakingCompleted);
         modBus.addListener(RegisterKeyMappingsEvent.class, PrZoom::onRegisterKeys);
-        modBus.addListener(RegisterKeyMappingsEvent.class, PrOverlays::onRegisterKeys);
         modBus.addListener(RegisterKeyMappingsEvent.class, event -> {
             ShaderForgeHelpers.KEYLIST.forEach(event::register);
             ShaderForgeHelpers.KEYLIST.clear();
@@ -79,8 +77,6 @@ public final class PryzmaClient {
         gameBus.addListener(ServerTickEvent.Post.class, PrWorldControl::onServerTick);
         gameBus.addListener(ViewportEvent.RenderFog.class, PrRenderHooks::onRenderFog);
         gameBus.addListener(RenderLevelStageEvent.class, PrRenderHooks::onRenderStage);
-        gameBus.addListener(RenderLevelStageEvent.class, PrOverlays::onRenderStage);
-        gameBus.addListener(ClientTickEvent.Post.class, PrOverlays::onClientTick);
         gameBus.addListener(RenderFrameEvent.Pre.class, PrQuickInfo::onFrameStart);
         gameBus.addListener(RenderFrameEvent.Post.class, PrQuickInfo::onFrameEnd);
         gameBus.addListener(RenderFrameEvent.Pre.class, event -> {
