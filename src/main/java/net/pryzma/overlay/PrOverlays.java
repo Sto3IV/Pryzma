@@ -10,7 +10,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -23,7 +22,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
  * OptiFine / classic utility overlays:
  * <ul>
  *   <li>F7: Light Level / Mob Spawn Overlay (shows yellow / red crosses on blocks)</li>
- *   <li>F9: Chunk Boundary Grid (Mode 0: OFF, Mode 1: Current Chunk, Mode 2: 3x3 Chunks Area)</li>
+ *   <li>F9: Chunk Boundary Grid (Mode 0: OFF, Mode 1: Chunk Corners, Mode 2: Chunks)</li>
  * </ul>
  */
 public final class PrOverlays {
@@ -120,7 +119,7 @@ public final class PrOverlays {
         poseStack.translate(-camPos.x, -camPos.y, -camPos.z);
 
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.lines());
+        VertexConsumer vc = bufferSource.getBuffer(PrOverlayRenderType.OVERLAY_QUADS);
 
         if (lightOverlayActive) {
             PrMobSpawnOverlay.render(poseStack, vc);
@@ -130,7 +129,7 @@ public final class PrOverlays {
             PrChunkGridOverlay.render(poseStack, vc, chunkGridMode, mc.player, mc.level);
         }
 
-        bufferSource.endBatch(RenderType.lines());
+        bufferSource.endBatch(PrOverlayRenderType.OVERLAY_QUADS);
         poseStack.popPose();
     }
 }

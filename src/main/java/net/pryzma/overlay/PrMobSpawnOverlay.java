@@ -24,6 +24,8 @@ public final class PrMobSpawnOverlay {
     private static final int HORIZONTAL_RADIUS = 18;
     private static final int VERTICAL_RADIUS = 8;
     private static final int UPDATE_INTERVAL = 4; // 5 Hz update rate
+    /** On-screen thickness of the X strokes, in framebuffer pixels. */
+    private static final float X_PIXELS = 3.0f;
 
     private static long[] packedPositions = new long[2048];
     private static byte[] colors = new byte[2048]; // 1 = Yellow, 2 = Red
@@ -122,13 +124,23 @@ public final class PrMobSpawnOverlay {
         count++;
     }
 
+    /**
+     * Draws NEI's full-face X as two flat quads lying on the top face of the floor block.
+     *
+     * <p>Quads instead of lines: {@code glLineWidth} cannot be relied on, and the old code passed
+     * {@code (0, 1, 0)} as the normal of a diagonal segment, which is the direction vector vanilla's
+     * line shader uses to widen the line - so the crosses were widened along an axis unrelated to
+     * the segment and looked uneven on every GPU, not just AMD.</p>
+     */
     public static void render(PoseStack poseStack, VertexConsumer vc) {
         if (count == 0) {
             return;
         }
 
         PoseStack.Pose pose = poseStack.last();
-        final float offset = 0.35f;
+        // NEI draws corner to corner across the whole face; 0.49 keeps the stroke inside the block.
+        final float half = 0.49f;
+        final float lift = 0.02f;
 
         for (int i = 0; i < count; i++) {
             long p = packedPositions[i];
@@ -137,21 +149,20 @@ public final class PrMobSpawnOverlay {
             int z = BlockPos.getZ(p);
 
             float cx = x + 0.5f;
-            float cy = y + 0.015f;
+            float cy = y + lift;
             float cz = z + 0.5f;
 
             float r = 1.0f;
             float g = (colors[i] == 1) ? 0.95f : 0.15f;
             float b = (colors[i] == 1) ? 0.10f : 0.15f;
-            float a = 1.0f;
 
-            // Diagonal line 1: (cx - offset, cz - offset) to (cx + offset, cz + offset)
-            vc.addVertex(pose, cx - offset, cy, cz - offset).setColor(r, g, b, a).setNormal(pose, 0.0f, 1.0f, 0.0f);
-            vc.addVertex(pose, cx + offset, cy, cz + offset).setColor(r, g, b, a).setNormal(pose, 0.0f, 1.0f, 0.0f);
+            float halfWidth = PrOverlayGeometry.halfWidth(
+                    X_PIXELS, PrOverlayGeometry.distance(cx, cy, cz), 0.004f, 0.08f);
 
-            // Diagonal line 2: (cx - offset, cz + offset) to (cx + offset, cz - offset)
-            vc.addVertex(pose, cx - offset, cy, cz + offset).setColor(r, g, b, a).setNormal(pose, 0.0f, 1.0f, 0.0f);
-            vc.addVertex(pose, cx + offset, cy, cz - offset).setColor(r, g, b, a).setNormal(pose, 0.0f, 1.0f, 0.0f);
+            PrOverlayGeometry.flat(vc, pose,
+                    cx - half, cy, cz - half, cx + half, cy, cz + half, halfWidth, r, g, b, 1.0f);
+            PrOverlayGeometry.flat(vc, pose,
+                    cx - half, cy, cz + half, cx + half, cy, cz - half, halfWidth, r, g, b, 1.0f);
         }
     }
 }
