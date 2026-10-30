@@ -7,10 +7,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Bridge between Pryzma Farlands LOD and Distant Horizons.
  * <p>
- * Enforces strict mutual exclusivity:
+ * Ensures seamless coexistence:
  * <ul>
- *   <li>If Distant Horizons is installed and actively rendering, Farlands LOD is locked to OFF.</li>
- *   <li>If Farlands LOD is active (distance &gt; 0), Distant Horizons rendering is disabled and overridden via DH API.</li>
+ *   <li>If Distant Horizons is installed and actively rendering, Farlands LOD automatically yields to Distant Horizons.</li>
+ *   <li>Pryzma never disables or suppresses Distant Horizons rendering.</li>
+ *   <li>If Distant Horizons rendering is turned off in DH configuration, Farlands can be used as a lightweight fallback.</li>
  * </ul>
  * All calls into Distant Horizons are made via reflection and guarded so that Pryzma runs
  * cleanly regardless of whether Distant Horizons is present, absent, or an incompatible version.
@@ -24,7 +25,6 @@ public final class DistantHorizonsBridge {
     private static Boolean mockDhActive = null;
 
     private static Boolean installedCache = null;
-    private static boolean lastFarlandsSuppressionState = false;
 
     private DistantHorizonsBridge() {
     }
@@ -68,7 +68,7 @@ public final class DistantHorizonsBridge {
 
     /**
      * Returns true if Distant Horizons is installed and currently configured to render LODs.
-     * When this returns true, Farlands must not run and its UI controls are locked.
+     * When this returns true, Farlands automatically yields and lets Distant Horizons handle LOD rendering.
      */
     public static boolean isDhActive() {
         if (mockDhActive != null) {
@@ -126,28 +126,14 @@ public final class DistantHorizonsBridge {
     }
 
     /**
-     * Called whenever Farlands status changes.
-     * If Farlands is enabled, Distant Horizons rendering is disabled.
-     * If Farlands is disabled, Distant Horizons override is cleared.
+     * Clears any legacy override on Distant Horizons if one was set.
+     * Pryzma Farlands never suppresses Distant Horizons.
      */
-    public static void onFarlandsChanged(boolean farlandsEnabled) {
-        lastFarlandsSuppressionState = farlandsEnabled;
-        if (!isInstalled() && mockInstalled == null) {
-            return;
-        }
-        setDhRenderingDisabledByFarlands(farlandsEnabled);
-    }
-
-    /**
-     * Applies or removes the API override on Distant Horizons.
-     */
-    public static void setDhRenderingDisabledByFarlands(boolean disable) {
-        lastFarlandsSuppressionState = disable;
+    public static void clearLegacyDhOverrides() {
         if (!isInstalled() && mockInstalled == null) {
             return;
         }
         try {
-            // Try via DhApi
             Class<?> delayedClass = Class.forName("com.seibel.distanthorizons.api.DhApi$Delayed");
             Object configs = delayedClass.getField("configs").get(null);
             if (configs != null) {
@@ -155,31 +141,13 @@ public final class DistantHorizonsBridge {
                 if (graphics != null) {
                     Object renderingEnabled = graphics.getClass().getMethod("renderingEnabled").invoke(graphics);
                     if (renderingEnabled != null) {
-                        if (disable) {
-                            try {
-                                renderingEnabled.getClass().getMethod("setValue", Object.class, String.class)
-                                        .invoke(renderingEnabled, Boolean.FALSE, OVERRIDE_NAME);
-                            } catch (NoSuchMethodException e) {
-                                renderingEnabled.getClass().getMethod("setValue", Object.class)
-                                        .invoke(renderingEnabled, Boolean.FALSE);
-                            }
-                        } else {
+                        try {
+                            renderingEnabled.getClass().getMethod("setValue", Object.class, String.class)
+                                    .invoke(renderingEnabled, null, OVERRIDE_NAME);
+                        } catch (NoSuchMethodException e) {
                             renderingEnabled.getClass().getMethod("clearValue").invoke(renderingEnabled);
                         }
                     }
-                }
-            }
-        } catch (Throwable t) {
-            LOGGER.debug("Could not toggle DH rendering via DhApi: {}", t.getMessage());
-        }
-
-        // Also sync core config if present
-        try {
-            Class<?> configClientClass = Class.forName("com.seibel.distanthorizons.core.config.Config$Client");
-            Object quickEntry = configClientClass.getField("quickEnableRendering").get(null);
-            if (quickEntry != null) {
-                if (disable) {
-                    quickEntry.getClass().getMethod("set", Object.class).invoke(quickEntry, Boolean.FALSE);
                 }
             }
         } catch (Throwable ignored) {
@@ -187,12 +155,27 @@ public final class DistantHorizonsBridge {
     }
 
     /**
-     * Syncs suppression state on tick / world load if needed.
+     * Called whenever Farlands status changes.
+     * Pryzma never disables DH rendering.
+     */
+    public static void onFarlandsChanged(boolean farlandsEnabled) {
+        clearLegacyDhOverrides();
+    }
+
+    /**
+     * Kept for backward compatibility. Farlands never suppresses DH.
+     */
+    public static void setDhRenderingDisabledByFarlands(boolean disable) {
+        if (!disable) {
+            clearLegacyDhOverrides();
+        }
+    }
+
+    /**
+     * Syncs Farlands state with Distant Horizons.
      */
     public static void syncWithFarlandsState(boolean farlandsEnabled) {
-        if (farlandsEnabled != lastFarlandsSuppressionState) {
-            onFarlandsChanged(farlandsEnabled);
-        }
+        // Farlands never suppresses DH.
     }
 
     // ------------------------------------------------------------------ test hooks
@@ -210,10 +193,9 @@ public final class DistantHorizonsBridge {
         mockInstalled = null;
         mockDhActive = null;
         installedCache = null;
-        lastFarlandsSuppressionState = false;
     }
 
     public static boolean isFarlandsSuppressionActive() {
-        return lastFarlandsSuppressionState;
+        return false;
     }
 }

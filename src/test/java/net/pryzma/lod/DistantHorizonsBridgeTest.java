@@ -77,23 +77,20 @@ class DistantHorizonsBridgeTest {
     }
 
     @Test
-    void farlandsSuppressionStateTracksBidirectionalChanges() {
+    void farlandsNeverSuppressesDistantHorizons() {
         DistantHorizonsBridge.setMockInstalled(true);
 
         assertFalse(DistantHorizonsBridge.isFarlandsSuppressionActive());
 
         DistantHorizonsBridge.onFarlandsChanged(true);
-        assertTrue(DistantHorizonsBridge.isFarlandsSuppressionActive());
+        assertFalse(DistantHorizonsBridge.isFarlandsSuppressionActive());
 
         DistantHorizonsBridge.onFarlandsChanged(false);
         assertFalse(DistantHorizonsBridge.isFarlandsSuppressionActive());
 
         // syncWithFarlandsState idempotent test
         DistantHorizonsBridge.syncWithFarlandsState(true);
-        assertTrue(DistantHorizonsBridge.isFarlandsSuppressionActive());
-        DistantHorizonsBridge.syncWithFarlandsState(true);
-        assertTrue(DistantHorizonsBridge.isFarlandsSuppressionActive());
-
+        assertFalse(DistantHorizonsBridge.isFarlandsSuppressionActive());
         DistantHorizonsBridge.syncWithFarlandsState(false);
         assertFalse(DistantHorizonsBridge.isFarlandsSuppressionActive());
     }

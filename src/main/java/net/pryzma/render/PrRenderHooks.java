@@ -98,6 +98,11 @@ public final class PrRenderHooks {
         if (event.getMode() != FogRenderer.FogMode.FOG_TERRAIN || event.getType() != FogType.NONE || !isClearAir(event.getCamera())) {
             return;
         }
+        if (net.pryzma.lod.DistantHorizonsBridge.isDhActive()) {
+            // When Distant Horizons is active, allow DH's fog renderer and mixins to manage
+            // fog distance unhindered so distant LODs are not occluded by vanilla fog.
+            return;
+        }
         if (PryzmaConfig.isFarlandsActive() && net.pryzma.lod.PryzmaLod.isRunning()) {
             if (net.pryzma.lod.PryzmaLod.isActiveThisFrame()) {
                 // The native pass already clamped its window to the terrain it drew: vanilla terrain and the LOD

@@ -440,7 +440,9 @@ public final class PrOptions {
                 }
                 PryzmaLod.onSettingsChanged();
             },
-            v -> v == 0 ? off() : I18n.get("options.chunks", v));
+            v -> net.pryzma.lod.DistantHorizonsBridge.isDhActive()
+                    ? I18n.get("pr.options.farlands.dh_active")
+                    : (v == 0 ? off() : I18n.get("options.chunks", v)));
     /** Farlands Fog: Fast (dense edge fog), Fancy (smooth gradient across LOD), OFF. */
     public static final PrOption.Cycle FARLANDS_FOG = cycle("pr.options.FARLANDS_FOG",
             () -> switch (PryzmaConfig.prFarlandsFog) {

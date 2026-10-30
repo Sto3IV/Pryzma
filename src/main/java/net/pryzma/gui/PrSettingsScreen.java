@@ -202,7 +202,7 @@ final class PrSettingsScreen extends PrScreen {
                     if (dhActive) {
                         pb.setMessage(Component.translatable("pr.options.farlandsOptions")
                                 .append(": ")
-                                .append(CommonComponents.OPTION_OFF));
+                                .append(Component.translatable("pr.options.farlands.dh_active")));
                         pb.setTooltipKey("pr.options.farlands.locked_dh");
                     } else {
                         pb.setMessage(Component.translatable("pr.options.farlandsOptions"));
@@ -220,7 +220,7 @@ final class PrSettingsScreen extends PrScreen {
                     if (dhActive) {
                         s.setMessage(Component.translatable("pr.options.FARLANDS_DISTANCE")
                                 .append(": ")
-                                .append(CommonComponents.OPTION_OFF));
+                                .append(Component.translatable("pr.options.farlands.dh_active")));
                     } else {
                         s.refresh();
                     }
@@ -229,7 +229,7 @@ final class PrSettingsScreen extends PrScreen {
                     if (dhActive) {
                         b.setMessage(Component.translatable("pr.options.FARLANDS_FOG")
                                 .append(": ")
-                                .append(CommonComponents.OPTION_OFF));
+                                .append(Component.translatable("pr.options.farlands.dh_active")));
                     } else {
                         b.refresh();
                     }
