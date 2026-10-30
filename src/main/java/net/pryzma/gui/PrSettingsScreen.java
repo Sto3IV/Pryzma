@@ -200,7 +200,7 @@ final class PrSettingsScreen extends PrScreen {
                 } else if (w instanceof PrButton pb && pb.id == 215) {
                     pb.active = !dhActive;
                     if (dhActive) {
-                        pb.setMessage(Component.translatable("pr.options.farlandsOptions")
+                        pb.setMessage(Component.translatable("pr.options.farlands")
                                 .append(": ")
                                 .append(Component.translatable("pr.options.farlands.dh_active")));
                         pb.setTooltipKey("pr.options.farlands.locked_dh");

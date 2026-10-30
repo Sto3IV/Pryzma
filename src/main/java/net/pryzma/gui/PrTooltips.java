@@ -46,17 +46,23 @@ final class PrTooltips {
         if (lines.isEmpty()) {
             return;
         }
-        int x1 = screen.width / 2 - 150;
+        int maxTextWidth = 0;
+        for (String line : lines) {
+            maxTextWidth = Math.max(maxTextWidth, screen.getMinecraft().font.width(line));
+        }
+        int panelWidth = Math.max(300, maxTextWidth + 14);
+        int panelHeight = Math.max(94, 10 + lines.size() * 11);
+        int x1 = screen.width / 2 - panelWidth / 2;
         int y1 = screen.height / 6 - 7;
-        if (y <= y1 + 98) {
-            y1 += 105;
+        if (y <= y1 + panelHeight + 4) {
+            y1 += panelHeight + 11;
         }
         g.pose().pushPose();
         g.pose().translate(0.0F, 0.0F, 400.0F);
-        g.fill(x1, y1, x1 + 300, y1 + 94, PANEL);
+        g.fill(x1, y1, x1 + panelWidth, y1 + panelHeight, PANEL);
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
-            g.drawString(screen.getMinecraft().font, line, x1 + 5, y1 + 5 + i * 11, line.endsWith("!") ? WARNING : TEXT, true);
+            g.drawString(screen.getMinecraft().font, line, x1 + 7, y1 + 6 + i * 11, line.endsWith("!") ? WARNING : TEXT, true);
         }
         g.pose().popPose();
     }
