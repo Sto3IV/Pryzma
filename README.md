@@ -27,11 +27,14 @@ Installation
 Screenshots
 ===========
 
-![Breathtaking Shaders with Celestial Skies](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/2026-09-19_10.18.35.png)
+![Hardware F3 Telemetry Cache](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/pryzma_f3_panel.png)
+*Lightweight runtime overhead delivering uncapped multi-hundred framerate ceilings and sub-7ms tick times under native NeoForge 1.21.1.*
 
-![Seamless Connected Textures and Warm Evening Atmosphere](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/2026-09-19_10.18.39.png)
+![Real-Time Shaders with Volumetric Lighting](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/pryzma_shaders.png)
+*Full compatibility with modern GLSL shaderpacks, featuring volumetric atmospheres, dynamic sun shafts, and soft real-time shadows.*
 
-![Real-Time Dynamic Handheld Lighting and Classic HUD Ergonomics](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/2026-10-02_22.06.43.png)
+![Seamless BetterGrass Turf Connectivity](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/pryzma_better_grass.png)
+*Native BetterGrass rendering seamlessly wrapping grass turf across sloped terrain elevations without unsightly dirt cuts.*
 
 Feature Matrix
 ==============
