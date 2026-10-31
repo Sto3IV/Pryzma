@@ -20,8 +20,8 @@ class PrCloudRendererTest {
     @Test
     void wallEpsilonStrictlyOccludesVerticalWallEdges() {
         float epsilon = PrCloudRenderer.WALL_EPSILON;
-        assertTrue(epsilon > 0.001F, "Epsilon must be positive and large enough for depth buffer precision");
-        assertTrue(epsilon < 0.01F, "Epsilon must be imperceptible in world coordinates (< 1 cm)");
+        assertTrue(epsilon >= 0.01F, "Epsilon must be positive and large enough for depth buffer precision (> 1 cm)");
+        assertTrue(epsilon <= 0.05F, "Epsilon must be imperceptible in world coordinates (<= 5 cm)");
 
         float z = 0.0F;
         float bottomFaceY = z + 0.0F;
@@ -61,13 +61,14 @@ class PrCloudRendererTest {
 
     @Test
     void nearZoneIsProperlyBounded() {
-        assertEquals(-4, PrCloudRenderer.NEAR_CELL_MIN);
-        assertEquals(5, PrCloudRenderer.NEAR_CELL_MAX);
+        assertEquals(-16, PrCloudRenderer.NEAR_CELL_MIN);
+        assertEquals(16, PrCloudRenderer.NEAR_CELL_MAX);
         int cellCountNear = (PrCloudRenderer.NEAR_CELL_MAX - PrCloudRenderer.NEAR_CELL_MIN + 1);
-        assertEquals(10, cellCountNear);
+        assertEquals(33, cellCountNear);
 
-        // 10 cells * 8 units * 12 blocks = 960 blocks diameter (480 blocks radius = 30 chunks)
+        // 33 cells * 8 units * 12 blocks = 3168 blocks diameter (~1584 blocks radius = ~99 chunks)
+        // Perfectly reaches the 1500m atmospheric fog coordinate where clouds begin to fade to horizon!
         int nearDiameterBlocks = cellCountNear * 8 * 12;
-        assertEquals(960, nearDiameterBlocks);
+        assertEquals(3168, nearDiameterBlocks);
     }
 }

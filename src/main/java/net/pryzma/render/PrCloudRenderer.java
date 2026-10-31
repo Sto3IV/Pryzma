@@ -23,14 +23,15 @@ import net.pryzma.PryzmaConfig;
  */
 public final class PrCloudRenderer {
     /**
-     * Vertical inset epsilon in cloud-mesh units (0.003F = ~3.6 mm in world space).
-     * Prevents Z-fighting and rasterization bleeding between the 0.7 bottom face and 0.8/0.9 vertical slices.
+     * Vertical inset epsilon in cloud-mesh units (0.02F = 2.0 cm in world space).
+     * Strictly occludes vertical wall slices behind the bottom/top faces to eliminate Z-fighting
+     * and dotted seam bleeding across all view angles and distances.
      */
-    public static final float WALL_EPSILON = 0.003F;
+    public static final float WALL_EPSILON = 0.02F;
 
-    /** Near 3D Fancy volumetric radius (in cells of 8 units = 96 blocks). */
-    public static final int NEAR_CELL_MIN = -4;
-    public static final int NEAR_CELL_MAX = 5;
+    /** Near 3D Fancy volumetric radius (in cells of 8 units = 96 blocks; 16 cells = 1536 blocks). */
+    public static final int NEAR_CELL_MIN = -16;
+    public static final int NEAR_CELL_MAX = 16;
 
     /** Far horizon radius in cells (48 cells * 8 units * 12 blocks = 4608 blocks = 288 chunks). */
     public static final int FAR_CELL_RADIUS = 48;

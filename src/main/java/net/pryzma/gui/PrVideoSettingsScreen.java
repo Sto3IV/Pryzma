@@ -43,11 +43,13 @@ public final class PrVideoSettingsScreen extends PrScreen {
                 PrOptions.GRAPHICS, vanilla("options.renderDistance", o.renderDistance()),
                 vanilla("options.ao", o.ambientOcclusion()), vanilla("options.simulationDistance", o.simulationDistance()),
                 PrOptions.AO_LEVEL, PrOptions.FRAMERATE_LIMIT,
-                vanilla("options.guiScale", o.guiScale()), PrOptions.DROPPED_ITEMS,
+                vanilla("options.guiScale", o.guiScale()), null,
                 vanilla("options.gamma", o.gamma()), vanilla("options.entityShadows", o.entityShadows()),
                 PrOptions.DYNAMIC_LIGHTS, null);
         guiScale = cells.get(6);
 
+        addRenderableWidget(new PrButton(225, cellX(7), cellY(7), 150, Component.translatable("pr.options.items"),
+                b -> open(PrSettingsScreen.Page.ITEMS)));
         addRenderableWidget(new PrButton(220, cellX(11), cellY(11), 150, Component.translatable("pr.options.quickInfo"),
                 b -> open(PrSettingsScreen.Page.QUICK_INFO)));
         int y = cellY(12);

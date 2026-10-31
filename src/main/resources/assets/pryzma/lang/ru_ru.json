@@ -250,6 +250,8 @@
   "pr.options.other.reset": "Сбросить настройки графики...",
   "pr.options.quickInfo": "Краткая информация...",
   "pr.options.quickInfoTitle": "Настройки краткой информации",
+  "pr.options.items": "Предметы...",
+  "pr.options.itemsTitle": "Настройки предметов",
   "pr.shaders.profile": "Настройки",
   "pr.options.mipmap.bilinear": "Билинейная",
   "pr.options.mipmap.linear": "Линейная",
@@ -970,5 +972,13 @@
   "pr.options.INFINITE_CLOUDS.tooltip.2": "  ВКЛ - облака простираются до горизонта (без швов)",
   "pr.options.INFINITE_CLOUDS.tooltip.3": "  ВЫКЛ - стандартная дистанция рендера чанков",
   "pr.options.INFINITE_CLOUDS.tooltip.4": "Отрисовывает облака по всему небу до горизонта,",
-  "pr.options.INFINITE_CLOUDS.tooltip.5": "устраняя обрезку по чанкам и белые полосы на стыках."
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "устраняя обрезку по чанкам и белые полосы на стыках.",
+  "pr.options.items.tooltip.1": "Настройки предметов",
+  "pr.options.items.tooltip.2": "Настройки выпавших предметов, блеска чар и меню.",
+  "options.glintSpeed.tooltip.1": "Скорость блеска",
+  "options.glintSpeed.tooltip.2": "Скорость анимации переливания зачарованных предметов.",
+  "options.glintStrength.tooltip.1": "Сила блеска",
+  "options.glintStrength.tooltip.2": "Яркость и выраженность блеска зачарованных предметов.",
+  "options.menuBackgroundBlurriness.tooltip.1": "Размытие фона меню",
+  "options.menuBackgroundBlurriness.tooltip.2": "Степень размытия игрового мира при открытии меню."
 }

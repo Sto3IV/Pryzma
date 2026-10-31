@@ -1,4 +1,4 @@
-{
+﻿{
   "pr.general.ambiguous": "불분명",
   "pr.general.compact": "컴팩트",
   "pr.general.full": "전체",
@@ -954,5 +954,7 @@
   "pr.options.INFINITE_CLOUDS.tooltip.2": "  켜짐 - 구름을 지평선까지 매끄럽게 확장",
   "pr.options.INFINITE_CLOUDS.tooltip.3": "  꺼짐 - 바닐라 청크 렌더링 거리 구름",
   "pr.options.INFINITE_CLOUDS.tooltip.4": "하늘 전체와 지평선까지 구름을 렌더링하여,",
-  "pr.options.INFINITE_CLOUDS.tooltip.5": "경계 잘림 현상과 흰색 격자 이음새를 완전히 제거합니다."
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "경계 잘림 현상과 흰색 격자 이음새를 완전히 제거합니다.",
+  "pr.options.items": "아이템...",
+  "pr.options.itemsTitle": "아이템 설정"
 }

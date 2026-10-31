@@ -30,7 +30,8 @@ final class PrSettingsScreen extends PrScreen {
         PERFORMANCE("pr.options.performanceTitle"),
         OTHER("pr.options.otherTitle"),
         QUICK_INFO("pr.options.quickInfoTitle"),
-        FARLANDS("pr.options.farlandsTitle");
+        FARLANDS("pr.options.farlandsTitle"),
+        ITEMS("pr.options.itemsTitle");
 
         final String title;
 
@@ -138,6 +139,12 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.QUICK_INFO_TARGET_FLUID, PrOptions.QUICK_INFO_TARGET_ENTITY,
                         PrOptions.QUICK_INFO_LABELS, PrOptions.QUICK_INFO_BACKGROUND);
                 allOnOff(PryzmaConfig::setAllQuickInfos);
+                onOptionsChanged();
+            }
+            case ITEMS -> {
+                grid(PrOptions.DROPPED_ITEMS, vanilla("options.menuBackgroundBlurriness", o.menuBackgroundBlurriness()),
+                        vanilla("options.glintSpeed", o.glintSpeed()), vanilla("options.glintStrength", o.glintStrength()));
+                done(width / 2 - 100, 200);
                 onOptionsChanged();
             }
         }

@@ -1,4 +1,4 @@
-{
+﻿{
   "pr.general.ambiguous": "Невизначений",
   "pr.general.compact": "Компактний",
   "pr.general.full": "Повно",
@@ -954,5 +954,7 @@
   "pr.options.INFINITE_CLOUDS.tooltip.2": "  УВІМК - хмари простягаються до горизонту (без швів)",
   "pr.options.INFINITE_CLOUDS.tooltip.3": "  ВИМК - стандартна дистанція рендеру чанків",
   "pr.options.INFINITE_CLOUDS.tooltip.4": "Відмальовує хмари по всьому небу до горизонту,",
-  "pr.options.INFINITE_CLOUDS.tooltip.5": "усуваючи обрізку по чанках та білі смуги на стиках."
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "усуваючи обрізку по чанках та білі смуги на стиках.",
+  "pr.options.items": "Предмети...",
+  "pr.options.itemsTitle": "Налаштування предметів"
 }

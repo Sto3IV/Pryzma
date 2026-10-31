@@ -1,4 +1,4 @@
-{
+﻿{
   "pr.general.ambiguous": "不明確",
   "pr.general.compact": "コンパクト",
   "pr.general.full": "完全",
@@ -974,5 +974,7 @@
   "pr.options.INFINITE_CLOUDS.tooltip.2": "  ON - 雲を地平線の彼方まで描画 (シームレス)",
   "pr.options.INFINITE_CLOUDS.tooltip.3": "  OFF - バニラのチャンク描画距離の雲",
   "pr.options.INFINITE_CLOUDS.tooltip.4": "空全体と地平線まで雲を描画し、",
-  "pr.options.INFINITE_CLOUDS.tooltip.5": "チャンク境界での途切れや白いグリッドの継ぎ目を除去します。"
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "チャンク境界での途切れや白いグリッドの継ぎ目を除去します。",
+  "pr.options.items": "アイテム...",
+  "pr.options.itemsTitle": "アイテム設定"
 }
