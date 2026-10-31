@@ -133,6 +133,7 @@ public final class DistantHorizonsBridge {
         if (!isInstalled() && mockInstalled == null) {
             return;
         }
+        clearThreadBudget();
         try {
             Class<?> delayedClass = Class.forName("com.seibel.distanthorizons.api.DhApi$Delayed");
             Object configs = delayedClass.getField("configs").get(null);
@@ -155,11 +156,114 @@ public final class DistantHorizonsBridge {
     }
 
     /**
+     * Balances thread allocation between Pryzma near-world chunk meshing and Distant Horizons LOD meshing.
+     * <p>
+     * Distant Horizons by default spawns worker threads for 100% of available CPU cores with NORM_PRIORITY,
+     * which starves near-world chunk meshing on Windows (causing terrain holes and stutters).
+     * This method applies a graceful background budget to Distant Horizons (max 1-6 threads depending on CPU count)
+     * and lowers its priority/runtime ratio so immediate near-world blocks always take precedence.
+     */
+    public static void applyThreadBudget() {
+        if (!isInstalled() && mockInstalled == null) {
+            return;
+        }
+        int cores = Runtime.getRuntime().availableProcessors();
+        int safeDhThreads = Math.max(1, Math.min(6, cores / 4));
+
+        // 1. Official DhApi: multiThreading().threadCount().setValue(...)
+        try {
+            Class<?> delayedClass = Class.forName("com.seibel.distanthorizons.api.DhApi$Delayed");
+            Object configs = delayedClass.getField("configs").get(null);
+            if (configs != null) {
+                Object multiThreading = configs.getClass().getMethod("multiThreading").invoke(configs);
+                if (multiThreading != null) {
+                    Object threadCount = multiThreading.getClass().getMethod("threadCount").invoke(multiThreading);
+                    if (threadCount != null) {
+                        try {
+                            threadCount.getClass().getMethod("setValue", Object.class, String.class)
+                                    .invoke(threadCount, safeDhThreads, OVERRIDE_NAME);
+                        } catch (NoSuchMethodException e) {
+                            threadCount.getClass().getMethod("setValue", Object.class)
+                                    .invoke(threadCount, safeDhThreads);
+                        }
+                    }
+                    if (cores <= 8) {
+                        Object runtimeRatio = multiThreading.getClass().getMethod("threadRuntimeRatio").invoke(multiThreading);
+                        if (runtimeRatio != null) {
+                            try {
+                                runtimeRatio.getClass().getMethod("setValue", Object.class, String.class)
+                                        .invoke(runtimeRatio, 0.7, OVERRIDE_NAME);
+                            } catch (NoSuchMethodException e) {
+                                runtimeRatio.getClass().getMethod("setValue", Object.class)
+                                        .invoke(runtimeRatio, 0.7);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+
+        // 2. Adjust DH internal threadPriority entry to below-normal (priority 3) so near-world workers (priority 4) outrank it
+        try {
+            Class<?> configMtClass = Class.forName("com.seibel.distanthorizons.core.config.Config$Common$MultiThreading");
+            Object priorityEntry = configMtClass.getField("threadPriority").get(null);
+            if (priorityEntry != null) {
+                try {
+                    priorityEntry.getClass().getMethod("setApiValue", Object.class).invoke(priorityEntry, 3);
+                } catch (Throwable t) {
+                    priorityEntry.getClass().getMethod("set", Object.class).invoke(priorityEntry, 3);
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * Clears any thread count / priority overrides set on Distant Horizons.
+     */
+    public static void clearThreadBudget() {
+        if (!isInstalled() && mockInstalled == null) {
+            return;
+        }
+        try {
+            Class<?> delayedClass = Class.forName("com.seibel.distanthorizons.api.DhApi$Delayed");
+            Object configs = delayedClass.getField("configs").get(null);
+            if (configs != null) {
+                Object multiThreading = configs.getClass().getMethod("multiThreading").invoke(configs);
+                if (multiThreading != null) {
+                    Object threadCount = multiThreading.getClass().getMethod("threadCount").invoke(multiThreading);
+                    if (threadCount != null) {
+                        threadCount.getClass().getMethod("clearValue").invoke(threadCount);
+                    }
+                    Object runtimeRatio = multiThreading.getClass().getMethod("threadRuntimeRatio").invoke(multiThreading);
+                    if (runtimeRatio != null) {
+                        runtimeRatio.getClass().getMethod("clearValue").invoke(runtimeRatio);
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        try {
+            Class<?> configMtClass = Class.forName("com.seibel.distanthorizons.core.config.Config$Common$MultiThreading");
+            Object priorityEntry = configMtClass.getField("threadPriority").get(null);
+            if (priorityEntry != null) {
+                try {
+                    priorityEntry.getClass().getMethod("setApiValue", Object.class).invoke(priorityEntry, (Object) null);
+                } catch (Throwable t) {
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
      * Called whenever Farlands status changes.
      * Pryzma never disables DH rendering.
      */
     public static void onFarlandsChanged(boolean farlandsEnabled) {
         clearLegacyDhOverrides();
+        applyThreadBudget();
     }
 
     /**
@@ -172,10 +276,11 @@ public final class DistantHorizonsBridge {
     }
 
     /**
-     * Syncs Farlands state with Distant Horizons.
+     * Syncs Farlands state and thread budget with Distant Horizons.
      */
     public static void syncWithFarlandsState(boolean farlandsEnabled) {
         // Farlands never suppresses DH.
+        applyThreadBudget();
     }
 
     // ------------------------------------------------------------------ test hooks

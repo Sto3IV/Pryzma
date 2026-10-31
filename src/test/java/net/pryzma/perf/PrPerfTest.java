@@ -2,6 +2,7 @@ package net.pryzma.perf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -115,5 +116,33 @@ class PrPerfTest {
             assertEquals(1, thinking);
         }
         assertFalse(PrSmoothWorld.skipsTick(100.0, 0.0, 3, -3), "negative sums stay in range (floorMod)");
+    }
+
+    @Test
+    void chunkWorkersThreadScalingIsMonotonicAndPreservesHeadroom() {
+        int cores = Runtime.getRuntime().availableProcessors();
+        for (int opt = 1; opt <= 5; opt++) {
+            int threads = PrChunkWorkers.threadsFor(opt);
+            assertTrue(threads >= 1, "worker threads must be at least 1");
+            if (cores > 4) {
+                assertTrue(threads <= cores - 2, "must preserve at least 2 cores for render and server threads on >4 cores");
+            } else {
+                assertTrue(threads <= Math.max(1, cores / 2), "must preserve at least half the cores on <=4 cores");
+            }
+            if (opt > 1) {
+                int prev = PrChunkWorkers.threadsFor(opt - 1);
+                assertTrue(threads >= prev, "threads must scale monotonically: " + prev + " -> " + threads);
+            }
+            String label = PrChunkWorkers.getOptionLabel(opt);
+            assertNotNull(label);
+            assertTrue(label.contains("(" + threads + ")"), "label must display thread count in parentheses: " + label);
+        }
+    }
+
+    @Test
+    void distantHorizonsBridgeThreadBudgetSafelyExecutes() {
+        // Must execute cleanly without unhandled exceptions regardless of whether DH is present or absent
+        net.pryzma.lod.DistantHorizonsBridge.applyThreadBudget();
+        net.pryzma.lod.DistantHorizonsBridge.clearThreadBudget();
     }
 }

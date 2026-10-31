@@ -387,7 +387,7 @@ public final class PrOptions {
                 PrServerPriority.apply();
             });
     public static final PrOption.Cycle CHUNK_UPDATES = cycle("pr.options.CHUNK_UPDATES",
-            () -> Integer.toString(PrChunkWorkers.threadsFor(PryzmaConfig.prChunkUpdates)),
+            () -> PrChunkWorkers.getOptionLabel(PryzmaConfig.prChunkUpdates),
             dir -> {
                 int next = PryzmaConfig.prChunkUpdates + dir;
                 if (next > 5) {
