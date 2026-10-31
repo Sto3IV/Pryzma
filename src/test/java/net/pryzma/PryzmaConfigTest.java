@@ -225,5 +225,23 @@ class PryzmaConfigTest {
             PryzmaConfig.prDroppedItems = saved;
         }
     }
+
+    @Test
+    void infiniteCloudsDefaultsOnAndRoundTripsThroughTheOptionsFile() {
+        boolean saved = PryzmaConfig.prInfiniteClouds;
+        try {
+            assertTrue(saved, "Infinite clouds is on by default");
+            PryzmaConfig.apply(Map.of("prInfiniteClouds", "false"));
+            assertFalse(PryzmaConfig.prInfiniteClouds);
+            assertEquals("false", PryzmaConfig.snapshot().get("prInfiniteClouds"));
+            PryzmaConfig.apply(Map.of());
+            assertFalse(PryzmaConfig.prInfiniteClouds, "a file without the key keeps the current value");
+            PryzmaConfig.apply(Map.of("prInfiniteClouds", "true"));
+            assertTrue(PryzmaConfig.prInfiniteClouds);
+            assertEquals("true", PryzmaConfig.snapshot().get("prInfiniteClouds"));
+        } finally {
+            PryzmaConfig.prInfiniteClouds = saved;
+        }
+    }
 }
 

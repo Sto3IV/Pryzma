@@ -984,5 +984,11 @@
   "options.particles.tooltip.1": "Particles",
   "options.particles.tooltip.2": "  All - all particles shown (default)",
   "options.particles.tooltip.3": "  Decreased - reduced amount (faster)",
-  "options.particles.tooltip.4": "  Minimal - only essential particles"
+  "options.particles.tooltip.4": "  Minimal - only essential particles",
+  "pr.options.INFINITE_CLOUDS": "Nubes infinitas",
+  "pr.options.INFINITE_CLOUDS.tooltip.1": "Nubes infinitas",
+  "pr.options.INFINITE_CLOUDS.tooltip.2": "  SÍ - extiende las nubes hasta el horizonte (sin cortes)",
+  "pr.options.INFINITE_CLOUDS.tooltip.3": "  NO - distancia estándar de chunks para nubes",
+  "pr.options.INFINITE_CLOUDS.tooltip.4": "Renderiza nubes por todo el cielo hasta el horizonte,",
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "eliminando cortes bruscos y líneas blancas de la cuadrícula."
 }

@@ -415,6 +415,11 @@ public final class PrOptions {
                     net.pryzma.render.PrEntityCulling.reset();
                 }
             });
+    public static final PrOption.Cycle INFINITE_CLOUDS = bool("pr.options.INFINITE_CLOUDS",
+            () -> PryzmaConfig.prInfiniteClouds, v -> {
+                PryzmaConfig.prInfiniteClouds = v;
+                net.pryzma.render.PrCloudRenderer.markDirty();
+            });
     /** Crossing 0 changes how sections are meshed, so they are rebuilt; other steps only move the draw cut. */
     public static final PrOption.Slider DETAIL_DISTANCE = steppedSlider("pr.options.DETAIL_DISTANCE",
             PryzmaConfig.DETAIL_DISTANCE_VALUES,

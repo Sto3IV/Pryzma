@@ -42,6 +42,7 @@ public final class PryzmaConfig {
     public static int prMipmapType = 0;
     public static boolean prOcclusionFancy = false;
     public static boolean prEntityCulling = true;
+    public static boolean prInfiniteClouds = true;
     public static boolean prSmoothFps = false;
     public static boolean prSmoothWorld = isSingleProcessor();
     public static boolean prLazyChunkLoading = isSingleProcessor();
@@ -281,6 +282,7 @@ public final class PryzmaConfig {
         prMipmapType = clampInt(v, "prMipmapType", prMipmapType, 0, 3);
         prOcclusionFancy = bool(v, "prOcclusionFancy", prOcclusionFancy);
         prEntityCulling = bool(v, "prEntityCulling", prEntityCulling);
+        prInfiniteClouds = bool(v, "prInfiniteClouds", prInfiniteClouds);
         prSmoothFps = bool(v, "prSmoothFps", prSmoothFps);
         prSmoothWorld = bool(v, "prSmoothWorld", prSmoothWorld);
         prAoLevel = clampDouble(v, "prAoLevel", prAoLevel);
@@ -426,6 +428,7 @@ public final class PryzmaConfig {
         m.put("prMipmapType", str(prMipmapType));
         m.put("prOcclusionFancy", str(prOcclusionFancy));
         m.put("prEntityCulling", str(prEntityCulling));
+        m.put("prInfiniteClouds", str(prInfiniteClouds));
         m.put("prSmoothFps", str(prSmoothFps));
         m.put("prSmoothWorld", str(prSmoothWorld));
         m.put("prAoLevel", Double.toString(prAoLevel));
@@ -527,6 +530,7 @@ public final class PryzmaConfig {
         prMipmapType = 0;
         prOcclusionFancy = false;
         prEntityCulling = true;
+        prInfiniteClouds = true;
         prSmartAnimations = true;
         prSmoothFps = false;
         prSmoothWorld = isSingleProcessor();

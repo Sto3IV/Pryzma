@@ -945,5 +945,11 @@
   "pr.options.farlands.dh_active.tooltip.2": "Distant Horizons is managing LOD terrain.",
   "pr.options.farlands.dh_active.tooltip.3": "Pryzma yields distant rendering to DH",
   "pr.options.farlands.dh_active.tooltip.4": "for optimal stability and seamless fog.",
-  "pr.options.farlands": "Farlands"
+  "pr.options.farlands": "Farlands",
+  "pr.options.INFINITE_CLOUDS": "Infinite Clouds",
+  "pr.options.INFINITE_CLOUDS.tooltip.1": "Infinite Clouds",
+  "pr.options.INFINITE_CLOUDS.tooltip.2": "  ON - extends clouds to the far horizon (seamless)",
+  "pr.options.INFINITE_CLOUDS.tooltip.3": "  OFF - vanilla chunk render distance clouds",
+  "pr.options.INFINITE_CLOUDS.tooltip.4": "Renders clouds across the entire sky to the horizon,",
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "eliminating edge cutoffs and white grid seam artifacts."
 }

@@ -963,5 +963,11 @@
   "options.particles.tooltip.1": "Particles",
   "options.particles.tooltip.2": "  All - all particles shown (default)",
   "options.particles.tooltip.3": "  Decreased - reduced amount (faster)",
-  "options.particles.tooltip.4": "  Minimal - only essential particles"
+  "options.particles.tooltip.4": "  Minimal - only essential particles",
+  "pr.options.INFINITE_CLOUDS": "Nuages infinis",
+  "pr.options.INFINITE_CLOUDS.tooltip.1": "Nuages infinis",
+  "pr.options.INFINITE_CLOUDS.tooltip.2": "  OUI - étend les nuages jusqu'à l'horizon (fluide)",
+  "pr.options.INFINITE_CLOUDS.tooltip.3": "  NON - distance de rendu des chunks standard",
+  "pr.options.INFINITE_CLOUDS.tooltip.4": "Affiche les nuages dans tout le ciel jusqu'à l'horizon,",
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "éliminant les coupures et les artefacts de grille blanche."
 }

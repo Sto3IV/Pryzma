@@ -948,5 +948,11 @@
   "pryzma.command.pregen.completed": "§6[Pryzma] §aPregeneration successfully finished! §fSuccess: §e%s§f, skipped: §7%s§f, errors: §c%s§f. Time: §b%s §7(avg. §b%s c/s§7).",
   "pryzma.command.time.seconds": "%ss",
   "pryzma.command.time.minutes_seconds": "%sm %ss",
-  "pryzma.command.time.hours_minutes_seconds": "%sh %sm %ss"
+  "pryzma.command.time.hours_minutes_seconds": "%sh %sm %ss",
+  "pr.options.INFINITE_CLOUDS": "Нескінченні хмари",
+  "pr.options.INFINITE_CLOUDS.tooltip.1": "Нескінченні хмари",
+  "pr.options.INFINITE_CLOUDS.tooltip.2": "  УВІМК - хмари простягаються до горизонту (без швів)",
+  "pr.options.INFINITE_CLOUDS.tooltip.3": "  ВИМК - стандартна дистанція рендеру чанків",
+  "pr.options.INFINITE_CLOUDS.tooltip.4": "Відмальовує хмари по всьому небу до горизонту,",
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "усуваючи обрізку по чанках та білі смуги на стиках."
 }

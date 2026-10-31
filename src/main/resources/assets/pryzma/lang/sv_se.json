@@ -956,5 +956,11 @@
   "options.particles.tooltip.1": "Particles",
   "options.particles.tooltip.2": "  All - all particles shown (default)",
   "options.particles.tooltip.3": "  Decreased - reduced amount (faster)",
-  "options.particles.tooltip.4": "  Minimal - only essential particles"
+  "options.particles.tooltip.4": "  Minimal - only essential particles",
+  "pr.options.INFINITE_CLOUDS": "Infinite Clouds",
+  "pr.options.INFINITE_CLOUDS.tooltip.1": "Infinite Clouds",
+  "pr.options.INFINITE_CLOUDS.tooltip.2": "  ON - extends clouds to the far horizon (seamless)",
+  "pr.options.INFINITE_CLOUDS.tooltip.3": "  OFF - vanilla chunk render distance clouds",
+  "pr.options.INFINITE_CLOUDS.tooltip.4": "Renders clouds across the entire sky to the horizon,",
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "eliminating edge cutoffs and white grid seam artifacts."
 }

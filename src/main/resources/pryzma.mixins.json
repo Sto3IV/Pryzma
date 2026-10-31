@@ -37,6 +37,7 @@
     "ItemRendererMixin",
     "LeavesCullMixin",
     "LevelRendererBiomeMixin",
+    "LevelRendererCloudsMixin",
     "LevelRendererCompileMixin",
     "LevelRendererCullMixin",
     "LevelRendererLightMixin",

@@ -964,5 +964,11 @@
   "options.particles.tooltip.1": "Particles",
   "options.particles.tooltip.2": "  All - all particles shown (default)",
   "options.particles.tooltip.3": "  Decreased - reduced amount (faster)",
-  "options.particles.tooltip.4": "  Minimal - only essential particles"
+  "options.particles.tooltip.4": "  Minimal - only essential particles",
+  "pr.options.INFINITE_CLOUDS": "Unendliche Wolken",
+  "pr.options.INFINITE_CLOUDS.tooltip.1": "Unendliche Wolken",
+  "pr.options.INFINITE_CLOUDS.tooltip.2": "  AN - Wolken reichen bis zum Horizont (nahtlos)",
+  "pr.options.INFINITE_CLOUDS.tooltip.3": "  AUS - Standard-Chunk-Sichtweite für Wolken",
+  "pr.options.INFINITE_CLOUDS.tooltip.4": "Rendert Wolken über den gesamten Himmel bis zum Horizont,",
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "beseitigt Kantenabbrüche und weiße Gitternähte."
 }

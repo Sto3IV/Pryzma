@@ -948,5 +948,11 @@
   "options.particles.tooltip.1": "Particles",
   "options.particles.tooltip.2": "  All - all particles shown (default)",
   "options.particles.tooltip.3": "  Decreased - reduced amount (faster)",
-  "options.particles.tooltip.4": "  Minimal - only essential particles"
+  "options.particles.tooltip.4": "  Minimal - only essential particles",
+  "pr.options.INFINITE_CLOUDS": "无尽云层",
+  "pr.options.INFINITE_CLOUDS.tooltip.1": "无尽云层",
+  "pr.options.INFINITE_CLOUDS.tooltip.2": "  开启 - 将云层延伸至地平线 (无缝)",
+  "pr.options.INFINITE_CLOUDS.tooltip.3": "  关闭 - 原版区块渲染距离云层",
+  "pr.options.INFINITE_CLOUDS.tooltip.4": "跨越整个天空渲染云层直至地平线，",
+  "pr.options.INFINITE_CLOUDS.tooltip.5": "消除边缘截断和白色网格缝隙伪影。"
 }
