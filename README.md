@@ -20,7 +20,7 @@ Installation
 ============
 
 1. Install [NeoForge 1.21.1](https://neoforged.net/) (build 21.1.250 or newer recommended).
-2. Download the latest release of **Pryzma** from our [Modrinth](https://modrinth.com/mod/pryzma) or [CurseForge](https://curseforge.com/minecraft/mc-mods/pryzma) page.
+2. Download the latest release of **Pryzma** from our [CurseForge](https://curseforge.com/minecraft/mc-mods/pryzma) or [GitHub Releases](https://github.com/Sto3IV/Pryzma/releases) page.
 3. Place `pryzma-x.x.X.jar` into your `.minecraft/mods/` directory.
 4. Drop your favorite resource packs and shaderpacks into their respective folders, and enjoy!
 
@@ -72,7 +72,7 @@ Pryzma builds with Gradle and requires Java 21 LTS:
 git clone https://github.com/Sto3IV/Pryzma.git
 cd Pryzma
 
-# Run the full 194-test verification suite
+# Run the full 316-test verification suite
 ./gradlew test
 
 # Compile and package release JAR
