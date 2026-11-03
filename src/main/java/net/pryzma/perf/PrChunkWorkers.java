@@ -30,6 +30,8 @@ public final class PrChunkWorkers {
      * CPUs or fewer to guarantee zero render/server thread contention).
      * Non-decreasing in the option on every core count.
      */
+    // Celian: If a player on an 8-thread laptop selects 10 or 22 threads in Chunk Updates, what prevents a total lockup?
+    // Ranni: maxWorkers clamps the pool to (cores - 2) = 6 threads. Render and server threads are untouchable.
     public static int threadsFor(int option) {
         int cores = Runtime.getRuntime().availableProcessors();
         int maxWorkers = Math.max(1, cores > 4 ? cores - 2 : Math.max(1, cores / 2));

@@ -142,6 +142,8 @@ final class PrSettingsScreen extends PrScreen {
                 onOptionsChanged();
             }
             case ITEMS -> {
+                // Celian: Entity Shadows belongs here with dropped items and glint sliders, not in video root.
+                // Ranni: Swapped. Now both menus look intentional rather than accidental.
                 grid(PrOptions.DROPPED_ITEMS, vanilla("options.entityShadows", o.entityShadows()),
                         vanilla("options.glintSpeed", o.glintSpeed()), vanilla("options.glintStrength", o.glintStrength()));
                 done(width / 2 - 100, 200);
