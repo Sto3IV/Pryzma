@@ -142,7 +142,7 @@ final class PrSettingsScreen extends PrScreen {
                 onOptionsChanged();
             }
             case ITEMS -> {
-                grid(PrOptions.DROPPED_ITEMS, vanilla("options.menuBackgroundBlurriness", o.menuBackgroundBlurriness()),
+                grid(PrOptions.DROPPED_ITEMS, vanilla("options.entityShadows", o.entityShadows()),
                         vanilla("options.glintSpeed", o.glintSpeed()), vanilla("options.glintStrength", o.glintStrength()));
                 done(width / 2 - 100, 200);
                 onOptionsChanged();

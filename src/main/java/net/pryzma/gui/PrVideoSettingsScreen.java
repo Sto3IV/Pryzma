@@ -44,7 +44,7 @@ public final class PrVideoSettingsScreen extends PrScreen {
                 vanilla("options.ao", o.ambientOcclusion()), vanilla("options.simulationDistance", o.simulationDistance()),
                 PrOptions.AO_LEVEL, PrOptions.FRAMERATE_LIMIT,
                 vanilla("options.guiScale", o.guiScale()), null,
-                vanilla("options.gamma", o.gamma()), vanilla("options.entityShadows", o.entityShadows()),
+                vanilla("options.gamma", o.gamma()), vanilla("options.menuBackgroundBlurriness", o.menuBackgroundBlurriness()),
                 PrOptions.DYNAMIC_LIGHTS, null);
         guiScale = cells.get(6);
 
