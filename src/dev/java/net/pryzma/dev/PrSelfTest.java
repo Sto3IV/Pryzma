@@ -324,6 +324,11 @@ public final class PrSelfTest {
                 PrF3RenderCache.enabled = false;
                 compareStage = 1;
             }
+            case "rd", "renderdistance" -> {
+                int dist = Integer.parseInt(a[1]);
+                mc.options.renderDistance().set(dist);
+                LOG.info("PRYZMA-SELFTEST render distance set to {}", dist);
+            }
             case "guiscale" -> {
                 mc.options.guiScale().set(Integer.parseInt(a[1]));
                 mc.resizeDisplay();

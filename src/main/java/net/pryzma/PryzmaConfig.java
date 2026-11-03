@@ -37,15 +37,15 @@ public final class PryzmaConfig {
     public static final int DROPPED_ITEMS_FANCY = 2;
     public static final int[] DROPPED_ITEMS_VALUES = {0, 1, 2};
 
-    public static int prFogType = 1;
+    public static int prFogType = 2;
     public static float prFogStart = 0.8F;
-    public static int prMipmapType = 0;
+    public static int prMipmapType = 1;
     public static boolean prOcclusionFancy = false;
     public static boolean prEntityCulling = true;
     public static boolean prInfiniteClouds = true;
     public static boolean prSmoothFps = false;
     public static boolean prSmoothWorld = isSingleProcessor();
-    public static boolean prLazyChunkLoading = isSingleProcessor();
+    public static boolean prLazyChunkLoading = false;
     public static boolean prRenderRegions = true;
     public static boolean prSmartAnimations = true;
     public static double prAoLevel = 1.0;
@@ -55,7 +55,7 @@ public final class PryzmaConfig {
     public static int prTrees = 0;
     public static int prRain = 0;
     public static int prBetterGrass = 3;
-    public static int prAutoSaveTicks = 4000;
+    public static int prAutoSaveTicks = 7200;
     public static boolean prLagometer = false;
     public static boolean prProfiler = false;
     public static boolean prWeather = true;
@@ -63,7 +63,7 @@ public final class PryzmaConfig {
     public static boolean prStars = true;
     public static boolean prSunMoon = true;
     public static int prVignette = 0;
-    public static int prChunkUpdates = 1;
+    public static int prChunkUpdates = 3;
     public static int prTime = 0;
     public static boolean prBetterSnow = false;
     public static boolean prSwampColors = true;
@@ -79,7 +79,7 @@ public final class PryzmaConfig {
     public static boolean prFastMath = false;
     public static boolean prFastRender = false;
     /** Phase B4 decorator LOD: radius in blocks beyond which decorators are not drawn; 0 = off. */
-    public static int prDetailDistance = 0;
+    public static int prDetailDistance = 96;
     public static final int[] DETAIL_DISTANCE_VALUES = {0, 48, 64, 96, 128};
     /** Farlands LOD: radius in chunks of the native distant terrain drawn beyond the render distance; 0 = off. */
     public static int prFarlandsDistance = 0;
@@ -122,7 +122,7 @@ public final class PryzmaConfig {
     /** Toggles the pause menu feedback buttons ("Give Feedback", "Report Bugs"). False = compact menu. */
     public static boolean prFeedbackButtons = false;
     /** Single-mesh baking optimization for vanilla and modded paintings. */
-    public static boolean prFastPaintings = false;
+    public static boolean prFastPaintings = true;
     /** Removes the Minecraft Realms button and notifications from TitleScreen, restoring compact vanilla 3-row layout. */
     public static boolean prRemoveRealms = true;
     /** Shows "Telemetry Data" and "Credits &amp; Attribution" in the options menu. False = compact 4-row grid. */
@@ -521,13 +521,13 @@ public final class PryzmaConfig {
     /** Pryzma 1.x "Reset Video Settings" values for the Pryzma-owned options; 2.0 turns Render Regions and Smart Animations on. */
     public static void resetToDefaults() {
         prHeldItemTooltips = true;
-        prFastPaintings = false;
+        prFastPaintings = true;
         prFeedbackButtons = false;
         prRemoveRealms = true;
         prTelemetryAttribution = false;
         prFogType = 2;
         prFogStart = 0.8F;
-        prMipmapType = 0;
+        prMipmapType = 1;
         prOcclusionFancy = false;
         prEntityCulling = true;
         prInfiniteClouds = true;
@@ -538,7 +538,7 @@ public final class PryzmaConfig {
         prRenderRegions = true;
         prFastMath = false;
         prFastRender = false;
-        prDetailDistance = 0;
+        prDetailDistance = 96;
         prFarlandsDistance = 0;
         prFarlandsFog = 2;
         prFarlandsSource = FARLANDS_SOURCE_DISK;
@@ -560,7 +560,7 @@ public final class PryzmaConfig {
         prTrees = 0;
         prRain = 0;
         prBetterGrass = 3;
-        prAutoSaveTicks = 4000;
+        prAutoSaveTicks = 7200;
         prLagometer = false;
         prProfiler = false;
         prWeather = true;
@@ -568,7 +568,7 @@ public final class PryzmaConfig {
         prStars = true;
         prSunMoon = true;
         prVignette = 0;
-        prChunkUpdates = 1;
+        prChunkUpdates = 3;
         prTime = 0;
         prBetterSnow = false;
         prSwampColors = true;

@@ -68,7 +68,7 @@ class PryzmaConfigTest {
     void detailDistanceIsOffByDefaultAndAcceptsOnlyItsSteps() {
         int saved = PryzmaConfig.prDetailDistance;
         try {
-            assertEquals(0, saved, "B4 ships off");
+            assertEquals(96, saved, "B4 ships at 96 blocks by default");
             PryzmaConfig.apply(Map.of("prDetailDistance", "64"));
             assertEquals(64, PryzmaConfig.prDetailDistance);
             assertEquals("64", PryzmaConfig.snapshot().get("prDetailDistance"));
