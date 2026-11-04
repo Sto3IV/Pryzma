@@ -30,7 +30,7 @@ Screenshots
 ![Hardware F3 Telemetry Cache](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/pryzma_f3_panel.png)
 *Lightweight runtime overhead delivering uncapped multi-hundred framerate ceilings and sub-7ms tick times under native NeoForge 1.21.1.*
 
-<img width="1919" height="764" alt="image" src="https://github.com/user-attachments/assets/9c8a03e2-0a82-4359-86e7-317d9d826baa"/>
+![Shader Compatibility](https://github.com/user-attachments/assets/9c8a03e2-0a82-4359-86e7-317d9d826baa)
 *Full compatibility with modern GLSL shaderpacks, featuring volumetric atmospheres, dynamic sun shafts, and soft real-time shadows.*
 
 ![Seamless BetterGrass Turf Connectivity](https://raw.githubusercontent.com/Sto3IV/archive-of-images/main/pryzma_better_grass.png)
