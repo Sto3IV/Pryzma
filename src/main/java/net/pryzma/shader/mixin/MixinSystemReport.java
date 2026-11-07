@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.function.Supplier;
+import net.minecraft.CrashReportDetail;
 
 /**
  * Adds the current shaderpack and number of changed options to crash reports
@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 @Mixin(SystemReport.class)
 public abstract class MixinSystemReport {
 	@Shadow
-	public abstract void setDetail(String string, Supplier<String> supplier);
+	public abstract void setDetail(String string, CrashReportDetail<Object> supplier);
 
 	@Inject(at = @At("RETURN"), method = "<init>")
 	private void fillSystemDetails(CallbackInfo ci) {
