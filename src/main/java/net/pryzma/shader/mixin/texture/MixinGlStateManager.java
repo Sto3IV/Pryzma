@@ -26,13 +26,6 @@ public class MixinGlStateManager {
 		pryzma$onDeleteTexture(id);
 	}
 
-	@Inject(method = "_deleteTextures([I)V", at = @At("TAIL"), remap = false)
-	private static void pryzma$onDeleteTextures(int[] ids, CallbackInfo ci) {
-		for (int id : ids) {
-			pryzma$onDeleteTexture(id);
-		}
-	}
-
 	@Unique
 	private static void pryzma$onDeleteTexture(int id) {
 		TextureTracker.INSTANCE.onDeleteTexture(id);

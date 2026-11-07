@@ -13,8 +13,8 @@ import net.pryzma.render.PrMipmaps;
  */
 @Mixin(MipmapGenerator.class)
 abstract class MipmapGeneratorMixin {
-    @Inject(method = "alphaBlend", at = @At("HEAD"), cancellable = true)
-    private static void prAlphaBlend(int col1, int col2, int col3, int col4, boolean transparent, CallbackInfoReturnable<Integer> cir) {
+    @Inject(method = "darkenedAlphaBlend", at = @At("HEAD"), cancellable = true)
+    private static void prAlphaBlend(int col1, int col2, int col3, int col4, CallbackInfoReturnable<Integer> cir) {
         cir.setReturnValue(PrMipmaps.alphaBlend(col1, col2, col3, col4));
     }
 }

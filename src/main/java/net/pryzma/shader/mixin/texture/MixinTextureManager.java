@@ -18,19 +18,20 @@ public class MixinTextureManager {
 	@SuppressWarnings("UnresolvedMixinReference")
 	@Inject(method = {
 		"method_18167",
-		"lambda$reload$5"
-	}, at = @At("TAIL"), require = 1)
+		"lambda$reload$5",
+		"lambda$reload$0"
+	}, at = @At("TAIL"), require = 0)
 	private void pryzma$onTailReloadLambda(ResourceManager resourceManager, Executor applyExecutor, CompletableFuture<?> future, Void void1, CallbackInfo ci) {
 		TextureFormatLoader.reload(resourceManager);
 		PBRTextureManager.INSTANCE.clear();
 	}
 
-	@Inject(method = "_dumpAllSheets(Ljava/nio/file/Path;)V", at = @At("RETURN"))
+	@Inject(method = "dumpAllSheets(Ljava/nio/file/Path;)V", at = @At("RETURN"), require = 0)
 	private void pryzma$onInnerDumpTextures(Path path, CallbackInfo ci) {
 		PBRTextureManager.INSTANCE.dumpTextures(path);
 	}
 
-	@Inject(method = "close()V", at = @At("TAIL"), remap = false)
+	@Inject(method = "close()V", at = @At("TAIL"), remap = false, require = 0)
 	private void pryzma$onTailClose(CallbackInfo ci) {
 		PBRTextureManager.INSTANCE.close();
 	}

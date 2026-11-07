@@ -11,13 +11,12 @@ import net.pryzma.gui.PrQuickInfoStats;
 /** Counts the block entities drawn each frame, for Quick Info. */
 @Mixin(LevelRenderer.class)
 abstract class QuickInfoCountersMixin {
-    @Inject(method = "renderLevel", at = @At("HEAD"))
+    @Inject(method = "render", at = @At("HEAD"))
     private void prResetBlockEntities(CallbackInfo ci) {
         PrQuickInfoStats.blockEntitiesRendered = 0;
     }
 
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;render(Lnet/minecraft/world/level/block/entity/BlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V"))
+    @Inject(method = "submitBlockEntities", at = @At("HEAD"))
     private void prCountBlockEntity(CallbackInfo ci) {
         PrQuickInfoStats.blockEntitiesRendered++;
     }

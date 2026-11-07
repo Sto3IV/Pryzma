@@ -53,11 +53,4 @@ abstract class GlStateManagerMemoryMixin {
     private static void prDeleteTexture(int texture, CallbackInfo ci) {
         PrDebugTracker.onTextureDeleted(texture);
     }
-
-    @Inject(method = "_deleteTextures([I)V", at = @At("HEAD"))
-    private static void prDeleteTextures(int[] textures, CallbackInfo ci) {
-        for (int texture : textures) {
-            PrDebugTracker.onTextureDeleted(texture);
-        }
-    }
 }

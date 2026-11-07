@@ -3,11 +3,8 @@ package net.pryzma.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -37,10 +34,5 @@ public abstract class LevelRendererBiomeMixin {
     private RandomSource prRainRandom(long seed) {
         PR_RAIN_RANDOM.setSeed(seed);
         return PR_RAIN_RANDOM;
-    }
-
-    @Inject(method = "setLevel", at = @At("HEAD"))
-    private void prSetLevel(ClientLevel level, CallbackInfo ci) {
-        PrBiomeCache.release();
     }
 }

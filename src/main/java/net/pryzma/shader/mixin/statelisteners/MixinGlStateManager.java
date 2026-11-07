@@ -17,13 +17,6 @@ public class MixinGlStateManager {
 		StateUpdateNotifiers.blendFuncNotifier = listener -> blendFuncListener = listener;
 	}
 
-	@Inject(method = "_blendFunc", at = @At("RETURN"), remap = false)
-	private static void pryzma$onBlendFunc(int srcRgb, int dstRgb, CallbackInfo ci) {
-		if (blendFuncListener != null) {
-			blendFuncListener.run();
-		}
-	}
-
 	@Inject(method = "_blendFuncSeparate", at = @At("RETURN"), remap = false)
 	private static void pryzma$onBlendFuncSeparate(int srcRgb, int dstRgb, int srcAlpha, int dstAlpha, CallbackInfo ci) {
 		if (blendFuncListener != null) {

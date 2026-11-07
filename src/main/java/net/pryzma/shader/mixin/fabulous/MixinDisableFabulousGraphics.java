@@ -14,12 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LevelRenderer.class)
 public class MixinDisableFabulousGraphics {
-	@Inject(method = "onResourceManagerReload", at = @At("HEAD"))
-	private void pryzma$disableFabulousGraphicsOnResourceReload(CallbackInfo ci) {
-		pryzma$disableFabulousGraphics();
-	}
-
-	@Inject(method = "allChanged", at = @At("HEAD"))
+	@Inject(method = "resetLevelRenderData", at = @At("HEAD"))
 	private void pryzma$disableFabulousGraphicsOnLevelRendererReload(CallbackInfo ci) {
 		pryzma$disableFabulousGraphics();
 	}

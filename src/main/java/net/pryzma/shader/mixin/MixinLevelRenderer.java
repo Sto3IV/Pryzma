@@ -33,14 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinLevelRenderer {
 	@Shadow
 	@Final
-	private Minecraft minecraft;
-
-	@Shadow
-	@Final
 	private LevelRenderState levelRenderState;
-
-	@Shadow
-	private @Nullable ClientLevel level;
 
 	@Unique
 	private WorldRenderingPipeline pipeline;
@@ -60,6 +53,7 @@ public class MixinLevelRenderer {
 		CapturedRenderingState.INSTANCE.setGbufferModelView(cameraRenderState.viewRotationMatrix);
 		CapturedRenderingState.INSTANCE.setGbufferProjection(cameraRenderState.projectionMatrix);
 		CapturedRenderingState.INSTANCE.setTickDelta(cameraRenderState.cameraEntityPartialTicks);
+		ClientLevel level = Minecraft.getInstance().level;
 		float time = (float) (level != null ? level.getGameTime() : 0L) + cameraRenderState.cameraEntityPartialTicks;
 		CapturedRenderingState.INSTANCE.setCloudTime(time * 0.03F);
 
@@ -75,7 +69,7 @@ public class MixinLevelRenderer {
 
 		ShaderRenderSystem.backupAndDisableCullingState(pipeline.shouldDisableOcclusionCulling());
 
-		if (PryzmaShaders.shouldActivateWireframe() && this.minecraft.isLocalServer()) {
+		if (PryzmaShaders.shouldActivateWireframe() && Minecraft.getInstance().isLocalServer()) {
 			ShaderRenderSystem.setPolygonMode(GL43C.GL_LINE);
 		}
 
@@ -87,20 +81,20 @@ public class MixinLevelRenderer {
 	private void pryzma$renderTerrainShadows(GraphicsResourceAllocator allocator, boolean tick,
 											CameraRenderState cameraRenderState, GpuBufferSlice bufferSlice,
 											Vector4f clearColor, boolean bl, boolean bl2, CallbackInfo ci) {
-		Camera camera = this.minecraft.gameRenderer.mainCamera();
+		Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
 		pipeline.renderShadows((LevelRendererAccessor) this, camera);
 	}
 
 	@Inject(method = "prepareTranslucents", at = @At("HEAD"))
 	private void pryzma$beginTranslucents(CallbackInfo ci) {
 		if (pipeline == null) return;
-		Camera camera = this.minecraft.gameRenderer.mainCamera();
+		Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
 		CameraRenderState cameraRenderState = this.currentCameraRenderState != null ? this.currentCameraRenderState : this.levelRenderState.cameraRenderState;
 		Matrix4f modelMatrix = cameraRenderState != null && cameraRenderState.viewRotationMatrix != null ? cameraRenderState.viewRotationMatrix : new Matrix4f();
 		float tickDelta = cameraRenderState != null ? cameraRenderState.cameraEntityPartialTicks : 0.0f;
 
 		pipeline.beginHand();
-		HandRenderer.INSTANCE.renderSolid(modelMatrix, tickDelta, camera, this.minecraft.gameRenderer, pipeline);
+		HandRenderer.INSTANCE.renderSolid(modelMatrix, tickDelta, camera, Minecraft.getInstance().gameRenderer, pipeline);
 		net.minecraft.util.profiling.Profiler.get().popPush("pryzma_pre_translucent");
 		pipeline.beginTranslucents();
 	}
@@ -109,8 +103,8 @@ public class MixinLevelRenderer {
 	private void pryzma$endLevelRender(GraphicsResourceAllocator allocator, boolean tick,
 									CameraRenderState cameraRenderState, GpuBufferSlice bufferSlice,
 									Vector4f clearColor, boolean bl, boolean bl2, CallbackInfo ci) {
-		Camera camera = this.minecraft.gameRenderer.mainCamera();
-		HandRenderer.INSTANCE.renderTranslucent(cameraRenderState.viewRotationMatrix, cameraRenderState.cameraEntityPartialTicks, camera, this.minecraft.gameRenderer, pipeline);
+		Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
+		HandRenderer.INSTANCE.renderTranslucent(cameraRenderState.viewRotationMatrix, cameraRenderState.cameraEntityPartialTicks, camera, Minecraft.getInstance().gameRenderer, pipeline);
 		net.minecraft.util.profiling.Profiler.get().popPush("iris_final");
 		pipeline.finalizeLevelRendering();
 		pipeline = null;
@@ -118,7 +112,7 @@ public class MixinLevelRenderer {
 
 		ShaderRenderSystem.restoreCullingState();
 
-		if (PryzmaShaders.shouldActivateWireframe() && this.minecraft.isLocalServer()) {
+		if (PryzmaShaders.shouldActivateWireframe() && Minecraft.getInstance().isLocalServer()) {
 			ShaderRenderSystem.setPolygonMode(GL43C.GL_FILL);
 		}
 	}

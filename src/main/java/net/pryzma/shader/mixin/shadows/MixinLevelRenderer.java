@@ -20,28 +20,6 @@ public class MixinLevelRenderer implements CullingDataCache {
 	@Unique
 	private ObjectArrayList<SectionRenderDispatcher.RenderSection> savedRenderChunks = new ObjectArrayList<>(69696);
 
-
-	@Shadow
-	private double prevCamRotX;
-
-	@Shadow
-	private double prevCamRotY;
-
-	@Unique
-	private double savedLastCameraX;
-
-	@Unique
-	private double savedLastCameraY;
-
-	@Unique
-	private double savedLastCameraZ;
-
-	@Unique
-	private double savedLastCameraPitch;
-
-	@Unique
-	private double savedLastCameraYaw;
-
 	@Override
 	public void saveState() {
 		swap();
@@ -57,14 +35,5 @@ public class MixinLevelRenderer implements CullingDataCache {
 		ObjectArrayList<SectionRenderDispatcher.RenderSection> tmpList = visibleSections;
 		visibleSections = savedRenderChunks;
 		savedRenderChunks = tmpList;
-		double tmp;
-
-		tmp = prevCamRotX;
-		prevCamRotX = savedLastCameraPitch;
-		savedLastCameraPitch = tmp;
-
-		tmp = prevCamRotY;
-		prevCamRotY = savedLastCameraYaw;
-		savedLastCameraYaw = tmp;
 	}
 }
