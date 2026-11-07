@@ -5,23 +5,27 @@ import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.gui.GuiUtil;
 import net.pryzma.shader.gui.screen.ShaderPackScreen;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.KeyEvent;
+import java.net.URI;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -33,7 +37,7 @@ import java.util.List;
 
 public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPackSelectionList.BaseEntry> {
 	private static final Component PACK_LIST_LABEL = Component.translatable("pack.pryzma.list.label").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
-	private static final ResourceLocation MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/menu_background.png");
+	private static final Identifier MENU_LIST_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/menu_background.png");
 	private final ShaderPackScreen screen;
 	private final TopButtonRowEntry topButtonRow;
 	private final WatchService watcher;
@@ -49,12 +53,12 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 
 		this.screen = screen;
 		this.topButtonRow = new TopButtonRowEntry(this, PryzmaShaders.getShaderConfig().areShadersEnabled());
-		this.downloadButton = new PinnedEntry(Component.literal("Download Shaders"), () -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+		this.downloadButton = new PinnedEntry(Component.literal("Download Shaders"), () -> this.minecraft.gui.setScreen(new ConfirmLinkScreen(bl -> {
 			if (bl) {
-				Util.getPlatform().openUri("https://modrinth.com/shaders");
+				com.mojang.blaze3d.Blaze3D.openUri(URI.create("https://modrinth.com/shaders"));
 			}
-			this.minecraft.setScreen(this.screen);
-		}, "https://modrinth.com/shaders", true)));
+			this.minecraft.gui.setScreen(this.screen);
+		}, URI.create("https://modrinth.com/shaders"), true)));
 		try {
 			watcher1 = FileSystems.getDefault().newWatchService();
 			key1 = PryzmaShaders.getShaderpacksDirectory().register(watcher1,
@@ -75,16 +79,16 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 	}
 
 	@Override
-	public boolean keyPressed(int pContainerEventHandler0, int pInt1, int pInt2) {
-		if (pContainerEventHandler0 == GLFW.GLFW_KEY_UP) {
-			if (getFocused() == getFirstElement()) return true;
+	public boolean keyPressed(KeyEvent event) {
+		if (event.key() == InputConstants.KEY_UP) {
+			if (getFocused() == (children().isEmpty() ? null : children().getFirst())) return true;
 		}
 
-		return super.keyPressed(pContainerEventHandler0, pInt1, pInt2);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void renderWidget(GuiGraphics pAbstractSelectionList0, int pInt1, int pInt2, float pFloat3) {
+	public void extractWidgetRenderState(GuiGraphicsExtractor pAbstractSelectionList0, int pInt1, int pInt2, float pFloat3) {
 		if (keyValid) {
 			for (WatchEvent<?> event : key.pollEvents()) {
 				if (event.kind() == StandardWatchEventKinds.OVERFLOW) continue;
@@ -96,7 +100,7 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 			keyValid = key.reset();
 		}
 
-		super.renderWidget(pAbstractSelectionList0, pInt1, pInt2, pFloat3);
+		super.extractWidgetRenderState(pAbstractSelectionList0, pInt1, pInt2, pFloat3);
 	}
 
 	public void close() throws IOException {
@@ -110,34 +114,28 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 	}
 
 	@Override
-	protected void renderListBackground(GuiGraphics pAbstractSelectionList0) {
+	protected void extractListBackground(GuiGraphicsExtractor pAbstractSelectionList0) {
 		if (screen.listTransition.getAsFloat() < 0.02f) return;
-		RenderSystem.enableBlend();
-		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, screen.listTransition.getAsFloat());
 		pAbstractSelectionList0.blit(
+			RenderPipelines.GUI_TEXTURED,
 			MENU_LIST_BACKGROUND,
 			this.getX(),
 			this.getY() - 2,
 			(float) this.getRight(),
-			(float) (this.getBottom() + (int) this.getScrollAmount()),
+			(float) (this.getBottom() + (int) this.scrollAmount()),
 			this.getWidth(),
 			this.getHeight(),
 			32,
 			32
 		);
-
-		RenderSystem.disableBlend();
-		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	@Override
-	protected void renderListSeparators(GuiGraphics pAbstractSelectionList0) {
-		RenderSystem.enableBlend();
-		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, screen.listTransition.getAsFloat());
-		pAbstractSelectionList0.blit(CreateWorldScreen.HEADER_SEPARATOR, this.getX(), this.getY() - 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
-		pAbstractSelectionList0.blit(CreateWorldScreen.FOOTER_SEPARATOR, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
-		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-		RenderSystem.disableBlend();
+	protected void extractListSeparators(GuiGraphicsExtractor pAbstractSelectionList0) {
+		Identifier header = this.minecraft.level == null ? Screen.HEADER_SEPARATOR : Screen.INWORLD_HEADER_SEPARATOR;
+		Identifier footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
+		pAbstractSelectionList0.blit(RenderPipelines.GUI_TEXTURED, header, this.getX(), this.getY() - 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
+		pAbstractSelectionList0.blit(RenderPipelines.GUI_TEXTURED, footer, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
 	}
 
 	@Override
@@ -146,7 +144,7 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 	}
 
 	@Override
-	protected int getRowTop(int index) {
+	public int getRowTop(int index) {
 		return super.getRowTop(index) + 2;
 	}
 
@@ -236,7 +234,7 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 
 	public void select(String name) {
 		for (int i = 0; i < getItemCount(); i++) {
-			BaseEntry entry = getEntry(i);
+			BaseEntry entry = children().get(i);
 
 			if (entry instanceof ShaderPackEntry && ((ShaderPackEntry) entry).packName.equals(name)) {
 				setSelected(entry);
@@ -271,8 +269,12 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 		}
 
 		@Override
-		public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-			guiGraphics.drawCenteredString(Minecraft.getInstance().font, label, (x + entryWidth / 2) - 2, y + (entryHeight - 11) / 2, 0xC2C2C2);
+		public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			int x = getX();
+			int y = getY();
+			int entryWidth = getWidth();
+			int entryHeight = getHeight();
+			guiGraphics.centeredText(Minecraft.getInstance().font, label, (x + entryWidth / 2) - 2, y + (entryHeight - 11) / 2, 0xC2C2C2);
 		}
 	}
 
@@ -290,21 +292,25 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 		protected abstract void onPress();
 
 		@Override
-		public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+		public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			int x = getX();
+			int y = getY();
+			int entryWidth = getWidth();
+			int entryHeight = getHeight();
 			// The full row slot (itemHeight = 20 = Button.DEFAULT_HEIGHT): the rectangle renderSelection and the pack hover use.
 			this.button.setRectangle(entryWidth, entryHeight + 4, x - 2, y - 2);
 			this.button.setFocused(this.isFocused());
-			this.button.render(guiGraphics, mouseX, mouseY, tickDelta);
+			this.button.extractRenderState(guiGraphics, mouseX, mouseY, tickDelta);
 		}
 
 		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-			return this.button.mouseClicked(mouseX, mouseY, mouseButton);
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+			return this.button.mouseClicked(event, doubleClick);
 		}
 
 		@Override
-		public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-			return this.button.keyPressed(keyCode, scanCode, modifiers);
+		public boolean keyPressed(KeyEvent event) {
+			return this.button.keyPressed(event);
 		}
 
 		@Nullable
@@ -405,7 +411,11 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 		}
 
 		@Override
-		public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+		public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			int x = getX();
+			int y = getY();
+			int entryWidth = getWidth();
+			int entryHeight = getHeight();
 			this.bounds = new ScreenRectangle(x, y, entryWidth, entryHeight);
 			Font font = Minecraft.getInstance().font;
 			int color = 0xFFFFFF;
@@ -436,26 +446,22 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 				color = 0xA2A2A2;
 			}
 
-			guiGraphics.drawCenteredString(font, text, (x + entryWidth / 2) - 2, y + (entryHeight - 11) / 2, color);
+			guiGraphics.centeredText(font, text, (x + entryWidth / 2) - 2, y + (entryHeight - 11) / 2, color);
 		}
 
 		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button) {
-			// Only do anything on left-click
-			if (button != 0) {
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+			if (event.button() != 0) {
 				return false;
 			}
-
 			return doThing();
 		}
 
 		@Override
-		public boolean keyPressed(int keycode, int pInt1, int pInt2) {
-			// Only do anything on key-press
-			if (keycode != GLFW.GLFW_KEY_ENTER) {
+		public boolean keyPressed(KeyEvent event) {
+			if (event.key() != InputConstants.KEY_RETURN) {
 				return false;
 			}
-
 			return doThing();
 		}
 

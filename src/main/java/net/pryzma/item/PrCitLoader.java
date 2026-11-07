@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 import com.google.gson.JsonObject;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.pryzma.Pryzma;
@@ -33,12 +33,12 @@ import net.pryzma.core.res.PrResources;
 public final class PrCitLoader {
     /** Everything one reload found. */
     public record Result(PrResources resources, PrCitGlobal global, List<PrCitRule> rules,
-            Map<ResourceLocation, JsonObject> models, Map<ResourceLocation, Resource> sprites,
-            Map<ResourceLocation, ResourceLocation> physical, Map<ResourceLocation, Integer> widths) {
+            Map<Identifier, JsonObject> models, Map<Identifier, Resource> sprites,
+            Map<Identifier, Identifier> physical, Map<Identifier, Integer> widths) {
         public static final Result EMPTY = new Result(null, PrCitGlobal.DEFAULT, List.of(), Map.of(), Map.of(), Map.of(), Map.of());
     }
 
-    private static final ResourceLocation GLOBAL = ResourceLocation.withDefaultNamespace("optifine/cit.properties");
+    private static final Identifier GLOBAL = Identifier.withDefaultNamespace("optifine/cit.properties");
     private static final String[] POTION_TYPES = {"normal", "splash", "linger"};
 
     private PrCitLoader() {
@@ -48,7 +48,7 @@ public final class PrCitLoader {
         PrResources res = new PrResources(manager);
         PrCitGlobal global = res.properties(GLOBAL).map(PrCitGlobal::parse).orElse(PrCitGlobal.DEFAULT);
         List<PrCitRule> rules = new ArrayList<>();
-        Set<ResourceLocation> written = new HashSet<>();
+        Set<Identifier> written = new HashSet<>();
         for (PrResources.Entry e : res.listAll("cit", ".properties")) {
             written.add(e.location());
             res.properties(e).map(p -> PrCitRule.parse(p, warn(e.location()))).ifPresent(rules::add);
@@ -67,11 +67,11 @@ public final class PrCitLoader {
         }
         rules.sort(PrCitRule.ORDER);
 
-        Map<ResourceLocation, JsonObject> models = new HashMap<>();
-        Map<ResourceLocation, Resource> sprites = new HashMap<>();
-        Map<ResourceLocation, ResourceLocation> physical = new HashMap<>();
-        Map<ResourceLocation, Integer> widths = new HashMap<>();
-        Deque<ResourceLocation> queue = new ArrayDeque<>();
+        Map<Identifier, JsonObject> models = new HashMap<>();
+        Map<Identifier, Resource> sprites = new HashMap<>();
+        Map<Identifier, Identifier> physical = new HashMap<>();
+        Map<Identifier, Integer> widths = new HashMap<>();
+        Deque<Identifier> queue = new ArrayDeque<>();
         for (PrCitRule rule : rules) {
             Consumer<String> warn = warn(rule.location);
             if (rule.type == PrCitRule.Type.ITEM) {
@@ -85,20 +85,20 @@ public final class PrCitLoader {
                 queue.addAll(rule.models.values());
                 continue;
             }
-            List<ResourceLocation> files = new ArrayList<>(rule.textures.values());
+            List<Identifier> files = new ArrayList<>(rule.textures.values());
             if (rule.texture != null) {
                 files.add(rule.texture);
             }
-            for (ResourceLocation file : files) {
+            for (Identifier file : files) {
                 res.physicalLocation(file).ifPresentOrElse(p -> physical.put(file, p), () -> warn.accept("File not found: " + file));
                 if (rule.type == PrCitRule.Type.ENCHANTMENT) {
                     widths.computeIfAbsent(file, f -> res.image(f).map(PrImage::width).orElse(16));
                 }
             }
         }
-        Set<ResourceLocation> visited = new HashSet<>();
+        Set<Identifier> visited = new HashSet<>();
         while (!queue.isEmpty()) {
-            ResourceLocation model = queue.poll();
+            Identifier model = queue.poll();
             if (!PrCitModelJson.isLocal(model) || !visited.add(model)) {
                 continue;
             }
@@ -110,8 +110,8 @@ public final class PrCitLoader {
             }
             models.put(model, json);
             queue.addAll(PrCitModelJson.dependencies(json));
-            for (ResourceLocation sprite : PrCitModelJson.textures(json)) {
-                ResourceLocation file = PrPaths.isOptifine(sprite)
+            for (Identifier sprite : PrCitModelJson.textures(json)) {
+                Identifier file = PrPaths.isOptifine(sprite)
                         ? sprite.withSuffix(".png")
                         : sprite.withPath("textures/" + sprite.getPath() + ".png");
                 addSprite(res, sprite, file, sprites, warn);
@@ -124,8 +124,8 @@ public final class PrCitLoader {
      * Adds a sprite to the block atlas. Sprites under {@code block/} and {@code item/} are already
      * there: the vanilla atlas lists both directories in every namespace.
      */
-    private static void addSprite(PrResources res, ResourceLocation sprite, ResourceLocation file,
-            Map<ResourceLocation, Resource> sprites, Consumer<String> warn) {
+    private static void addSprite(PrResources res, Identifier sprite, Identifier file,
+            Map<Identifier, Resource> sprites, Consumer<String> warn) {
         String path = sprite.getPath();
         if (path.startsWith("block/") || path.startsWith("item/") || sprites.containsKey(sprite)) {
             return;
@@ -133,7 +133,7 @@ public final class PrCitLoader {
         res.find(file).ifPresentOrElse(r -> sprites.put(sprite, r), () -> warn.accept("File not found: " + file));
     }
 
-    static Consumer<String> warn(ResourceLocation location) {
+    static Consumer<String> warn(Identifier location) {
         return message -> Pryzma.LOGGER.warn("CIT {}: {}", location, message);
     }
 }

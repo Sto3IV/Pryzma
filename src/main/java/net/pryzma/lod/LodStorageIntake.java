@@ -145,8 +145,8 @@ final class LodStorageIntake {
                 return java.nio.file.Files.isDirectory(p) ? p : root.resolve("DIM1/region");
             } else {
                 return root.resolve("dimensions")
-                        .resolve(dim.location().getNamespace())
-                        .resolve(dim.location().getPath())
+                        .resolve(dim.identifier().getNamespace())
+                        .resolve(dim.identifier().getPath())
                         .resolve("region");
             }
         } catch (RuntimeException e) {

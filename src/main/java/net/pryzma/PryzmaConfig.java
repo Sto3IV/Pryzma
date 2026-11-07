@@ -10,7 +10,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import net.minecraft.client.GraphicsStatus;
+import net.minecraft.client.GraphicsPreset;
 import net.minecraft.client.Minecraft;
 
 /**
@@ -161,7 +161,7 @@ public final class PryzmaConfig {
             try {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc != null && mc.options != null) {
-                    return mc.options.graphicsMode().get() != GraphicsStatus.FAST;
+                    return mc.options.graphicsPreset().get() != GraphicsPreset.FAST;
                 }
             } catch (Throwable ignored) {
             }

@@ -1,12 +1,12 @@
 package net.pryzma.shader.mixin.texture;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = ResourceLocation.class, priority = 1010)
+@Mixin(value = Identifier.class, priority = 1010)
 public class MixinResourceLocation {
 	@Inject(method = "isValidPath", at = @At("HEAD"), cancellable = true)
 	private static void pryzma$blockDUMMY(String string, CallbackInfoReturnable<Boolean> cir) {

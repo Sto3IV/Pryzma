@@ -7,7 +7,7 @@ import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.biome.AmbientMoodSettings;
+import net.minecraft.world.attribute.AmbientMoodSettings;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,9 +33,9 @@ public class MixinBiomeAmbientSoundsHandler implements BiomeAmbienceInterface {
 	private void calculateConstantMoodiness(AmbientMoodSettings ambientMoodSettings, CallbackInfo ci, @Local BlockPos blockPos) {
 		int j = this.player.level().getBrightness(LightLayer.SKY, blockPos);
 		if (j > 0) {
-			this.constantMoodiness -= (float) j / (float) this.player.level().getMaxLightLevel() * 0.001F;
+			this.constantMoodiness -= (float) j / 15.0F * 0.001F;
 		} else {
-			this.constantMoodiness -= (float) (this.player.level().getBrightness(LightLayer.BLOCK, blockPos) - 1) / (float) ambientMoodSettings.getTickDelay();
+			this.constantMoodiness -= (float) (this.player.level().getBrightness(LightLayer.BLOCK, blockPos) - 1) / (float) ambientMoodSettings.tickDelay();
 		}
 
 		this.constantMoodiness = Mth.clamp(constantMoodiness, 0.0f, 1.0f);

@@ -1,10 +1,10 @@
 package net.pryzma.shader.pbr.util;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.io.FilenameUtils;
+import org.lwjgl.opengl.GL11C;
 
 import java.io.File;
 
@@ -19,8 +19,8 @@ public class TextureExporter {
 
 	public static void exportTexture(String directory, String filename, int textureId, int level, int width, int height) {
 		NativeImage nativeImage = new NativeImage(width, height, false);
-		RenderSystem.bindTexture(textureId);
-		nativeImage.downloadTexture(level, false);
+		GL11C.glBindTexture(GL11C.GL_TEXTURE_2D, textureId);
+		GL11C.glGetTexImage(GL11C.GL_TEXTURE_2D, level, GL11C.GL_RGBA, GL11C.GL_UNSIGNED_BYTE, nativeImage.getPixelBytes());
 
 		File dir = new File(Minecraft.getInstance().gameDirectory, directory);
 		dir.mkdirs();

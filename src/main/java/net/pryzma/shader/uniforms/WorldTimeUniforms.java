@@ -23,11 +23,11 @@ public final class WorldTimeUniforms {
 		uniforms
 			.uniform1i(PER_TICK, "worldTime", WorldTimeUniforms::getWorldDayTime)
 			.uniform1i(PER_TICK, "worldDay", WorldTimeUniforms::getWorldDay)
-			.uniform1i(PER_TICK, "moonPhase", () -> getWorld().getMoonPhase());
+			.uniform1i(PER_TICK, "moonPhase", () -> (int)(getWorld().getDefaultClockTime() / 24000L % 8L + 8L) % 8);
 	}
 
 	static int getWorldDayTime() {
-		long timeOfDay = getWorld().getDayTime();
+		long timeOfDay = getWorld().getDefaultClockTime();
 
 		if (PryzmaShaders.getCurrentDimension() == DimensionId.END || PryzmaShaders.getCurrentDimension() == DimensionId.NETHER) {
 			// If the dimension is the nether or the end, don't override the fixed time.
@@ -35,14 +35,13 @@ public final class WorldTimeUniforms {
 			return (int) (timeOfDay % 24000L);
 		}
 
-		long dayTime = getWorld().dimensionType().fixedTime()
-			.orElse(timeOfDay % 24000L);
+		long dayTime = timeOfDay % 24000L;
 
 		return (int) dayTime;
 	}
 
 	private static int getWorldDay() {
-		long timeOfDay = getWorld().getDayTime();
+		long timeOfDay = getWorld().getDefaultClockTime();
 		long day = timeOfDay / 24000L;
 
 		return (int) day;

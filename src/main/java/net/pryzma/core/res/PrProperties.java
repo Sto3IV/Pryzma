@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * One parsed OptiFine / MCPatcher {@code .properties} file.
@@ -25,15 +25,15 @@ import net.minecraft.resources.ResourceLocation;
  * from {@code mcpatcher/...}: relative references ({@code ./tile.png}) resolve against it.
  */
 public final class PrProperties {
-    private final ResourceLocation location;
+    private final Identifier location;
     private final Map<String, String> values;
 
-    private PrProperties(ResourceLocation location, Map<String, String> values) {
+    private PrProperties(Identifier location, Map<String, String> values) {
         this.location = location;
         this.values = values;
     }
 
-    public static PrProperties parse(ResourceLocation location, Reader reader) throws IOException {
+    public static PrProperties parse(Identifier location, Reader reader) throws IOException {
         Map<String, String> ordered = new LinkedHashMap<>();
         Properties sink = new Properties() {
             @Override
@@ -145,7 +145,7 @@ public final class PrProperties {
         return out.append(line, keyEnd, line.length()).toString();
     }
 
-    public static PrProperties parse(ResourceLocation location, String text) {
+    public static PrProperties parse(Identifier location, String text) {
         try {
             return parse(location, new StringReader(text));
         } catch (IOException e) {
@@ -153,12 +153,12 @@ public final class PrProperties {
         }
     }
 
-    public static PrProperties of(ResourceLocation location, Map<String, String> values) {
+    public static PrProperties of(Identifier location, Map<String, String> values) {
         return new PrProperties(location, Collections.unmodifiableMap(new LinkedHashMap<>(values)));
     }
 
     /** Logical location of this file ({@code namespace:optifine/...}). */
-    public ResourceLocation location() {
+    public Identifier location() {
         return location;
     }
 

@@ -2,7 +2,7 @@
 
 package net.pryzma.shader.gl.shader;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.gl.GLDebug;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import org.apache.logging.log4j.LogManager;

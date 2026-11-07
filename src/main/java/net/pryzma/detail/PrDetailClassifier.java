@@ -6,10 +6,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.AttachedStemBlock;
@@ -38,8 +38,8 @@ import net.neoforged.neoforge.common.extensions.IBlockExtension;
  * entity or light, and is not a crop, sapling, fire or snow. Cheap rejections come first.
  */
 public final class PrDetailClassifier {
-    private static final TagKey<Block> DETAIL = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("pryzma", "detail"));
-    private static final TagKey<Block> DETAIL_EXCLUDE = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("pryzma", "detail_exclude"));
+    private static final TagKey<Block> DETAIL = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("pryzma", "detail"));
+    private static final TagKey<Block> DETAIL_EXCLUDE = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("pryzma", "detail_exclude"));
 
     /** NeoForge lets a non-occluding block hide its neighbour's face; such a block cannot be dropped. */
     private static final ClassValue<Boolean> HIDES_FACES = new ClassValue<>() {

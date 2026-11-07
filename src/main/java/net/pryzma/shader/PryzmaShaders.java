@@ -1,7 +1,7 @@
 package net.pryzma.shader;
 
 import com.google.common.base.Throwables;
-import com.mojang.blaze3d.platform.GlDebug;
+import com.mojang.renderpearl.backend.opengl.GlDebug;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.pryzma.shader.config.ShaderConfig;
 import net.pryzma.shader.gl.GLDebug;
@@ -28,17 +28,16 @@ import net.pryzma.shader.shaderpack.option.values.OptionValues;
 import net.pryzma.shader.shaderpack.programs.ProgramSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -147,14 +146,14 @@ public class PryzmaShaders {
 				reload();
 
 				if (minecraft.player != null) {
-					minecraft.player.displayClientMessage(Component.translatable("pryzma.shaders.reloaded"), false);
+					minecraft.player.sendSystemMessage(Component.translatable("pryzma.shaders.reloaded"));
 				}
 
 			} catch (Exception e) {
 				logger.error("Error while reloading Shaders for PryzmaShaders!", e);
 
 				if (minecraft.player != null) {
-					minecraft.player.displayClientMessage(Component.translatable("pryzma.shaders.reloaded.failure", Throwables.getRootCause(e).getMessage()).withStyle(ChatFormatting.RED), false);
+					minecraft.player.sendSystemMessage(Component.translatable("pryzma.shaders.reloaded.failure", Throwables.getRootCause(e).getMessage()).withStyle(ChatFormatting.RED));
 				}
 			}
 		} else if (toggleShadersKeybind.consumeClick()) {
@@ -164,16 +163,16 @@ public class PryzmaShaders {
 				logger.error("Error while toggling shaders!", e);
 
 				if (minecraft.player != null) {
-					minecraft.player.displayClientMessage(Component.translatable("pryzma.shaders.toggled.failure", Throwables.getRootCause(e).getMessage()).withStyle(ChatFormatting.RED), false);
+					minecraft.player.sendSystemMessage(Component.translatable("pryzma.shaders.toggled.failure", Throwables.getRootCause(e).getMessage()).withStyle(ChatFormatting.RED));
 				}
 				setShadersDisabled();
 				fallback = true;
 			}
 		} else if (shaderpackScreenKeybind.consumeClick()) {
-			minecraft.setScreen(new ShaderPackScreen(null));
+			minecraft.gui.setScreen(new ShaderPackScreen(null));
 		} else if (wireframeKeybind.consumeClick()) {
 			if (shaderConfig.areDebugOptionsEnabled() && minecraft.player != null && !Minecraft.getInstance().isLocalServer()) {
-				minecraft.player.displayClientMessage(Component.literal("No cheating; wireframe only in singleplayer!"), false);
+				minecraft.player.sendSystemMessage(Component.literal("No cheating; wireframe only in singleplayer!"));
 			}
 		}
 	}
@@ -188,7 +187,7 @@ public class PryzmaShaders {
 
 		reload();
 		if (minecraft.player != null) {
-			minecraft.player.displayClientMessage(enabled ? Component.translatable("pryzma.shaders.toggled", currentPackName) : Component.translatable("pryzma.shaders.disabled"), false);
+			minecraft.player.sendSystemMessage(enabled ? Component.translatable("pryzma.shaders.toggled", currentPackName) : Component.translatable("pryzma.shaders.disabled"));
 		}
 	}
 
@@ -333,11 +332,11 @@ public class PryzmaShaders {
 
 	private static void handleException(Exception e) {
 		if (lastDimension != null && shaderConfig.areDebugOptionsEnabled()) {
-			Minecraft.getInstance().setScreen(new DebugLoadFailedGridScreen(Minecraft.getInstance().screen, Component.literal(e instanceof ShaderCompileException ? "Failed to compile shaders" : "Exception"), e));
+			Minecraft.getInstance().gui.setScreen(new DebugLoadFailedGridScreen(Minecraft.getInstance().gui.screen(), Component.literal(e instanceof ShaderCompileException ? "Failed to compile shaders" : "Exception"), e));
 		} else {
 			if (Minecraft.getInstance().player != null) {
-				Minecraft.getInstance().player.displayClientMessage(Component.translatable(e instanceof ShaderCompileException ? "pryzma.load.failure.shader" : "pryzma.load.failure.generic").append(Component.literal("Copy Info").withStyle(arg -> arg.withUnderlined(true).withColor(
-					ChatFormatting.BLUE).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, e.getMessage())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))))), false);
+				Minecraft.getInstance().player.sendSystemMessage(Component.translatable(e instanceof ShaderCompileException ? "pryzma.load.failure.shader" : "pryzma.load.failure.generic").append(Component.literal("Copy Info").withStyle(arg -> arg.withUnderlined(true).withColor(
+					ChatFormatting.BLUE).withClickEvent(new ClickEvent.CopyToClipboard(e.getMessage())).withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.copy.click"))))));
 			} else {
 				storedError = Optional.of(e);
 			}
@@ -390,20 +389,20 @@ public class PryzmaShaders {
 			success = GLDebug.setupDebugMessageCallback();
 		} else {
 			GLDebug.reloadDebugState();
-			GlDebug.enableDebugCallback(Minecraft.getInstance().options.glDebugVerbosity, false);
+			GlDebug.enableDebugCallback(Minecraft.getInstance().options.glDebugVerbosity, false, java.util.Collections.emptySet());
 			success = 1;
 		}
 
 		logger.info("Debug functionality is " + (enable ? "enabled, logging will be more verbose!" : "disabled."));
 		if (Minecraft.getInstance().player != null) {
 			if (ShaderPlatformHelpers.getInstance().useELS()) {
-				Minecraft.getInstance().player.displayClientMessage(Component.translatable("pryzma.shaders.debug.restartNoDebug"), false);
+				Minecraft.getInstance().player.sendSystemMessage(Component.translatable("pryzma.shaders.debug.restartNoDebug"));
 			} else {
-				Minecraft.getInstance().player.displayClientMessage(Component.translatable(success != 0 ? (enable ? "pryzma.shaders.debug.enabled" : "pryzma.shaders.debug.disabled") : "pryzma.shaders.debug.failure"), false);
+				Minecraft.getInstance().player.sendSystemMessage(Component.translatable(success != 0 ? (enable ? "pryzma.shaders.debug.enabled" : "pryzma.shaders.debug.disabled") : "pryzma.shaders.debug.failure"));
 			}
 
 			if (success == 2 && !ShaderPlatformHelpers.getInstance().useELS()) {
-				Minecraft.getInstance().player.displayClientMessage(Component.translatable("pryzma.shaders.debug.restart"), false);
+				Minecraft.getInstance().player.sendSystemMessage(Component.translatable("pryzma.shaders.debug.restart"));
 			}
 		}
 	}
@@ -580,7 +579,8 @@ public class PryzmaShaders {
 		ClientLevel level = Minecraft.getInstance().level;
 
 		if (level != null) {
-			NamespacedId dimensionId = new NamespacedId(level.dimension().location().getNamespace(), level.dimension().location().getPath());
+			Identifier dimId = level.dimension().identifier();
+			NamespacedId dimensionId = new NamespacedId(dimId.getNamespace(), dimId.getPath());
 
 			ShaderPack pack = getCurrentPack().orElse(null);
 
@@ -589,18 +589,11 @@ public class PryzmaShaders {
 				return dimensionId;
 			}
 
-			// Check if the dimension type of the current level has custom effects set (end sky or nether).
-			// This is minecraft:overworld by default, but can also be minecraft:the_nether or minecraft:the_end.
-			// The appropriate shader for the dimension should be used by default in order to prevent buggy results.
-			// More information at https://minecraft.wiki/w/Dimension_type
-			// upstream issue #2200
-			ResourceLocation effects = level.dimensionType().effectsLocation();
-
-			if (Level.END.location().equals(effects)) {
+			if (level.dimensionType().skybox() == net.minecraft.world.level.dimension.DimensionType.Skybox.END || Level.END.equals(level.dimension())) {
 				return DimensionId.END;
 			}
 
-			if (Level.NETHER.location().equals(effects)) {
+			if (level.dimensionType().hasCeiling() || Level.NETHER.equals(level.dimension())) {
 				return DimensionId.NETHER;
 			}
 
@@ -707,7 +700,7 @@ public class PryzmaShaders {
 	public static String getReleaseTarget() {
 		// If this is a snapshot, you must change backupVersionNumber!
 		SharedConstants.tryDetectVersion();
-		return SharedConstants.getCurrentVersion().isStable() ? SharedConstants.getCurrentVersion().getName() : backupVersionNumber;
+		return SharedConstants.getCurrentVersion().stable() ? SharedConstants.getCurrentVersion().name() : backupVersionNumber;
 	}
 
 	public static String getBackupVersionNumber() {
@@ -759,10 +752,11 @@ public class PryzmaShaders {
 	public void onEarlyInitialize() {
 		SHADER_VERSION = ShaderPlatformHelpers.getInstance().getVersion();
 
-		reloadKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.reload", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "pryzma.keybinds"));
-		toggleShadersKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.toggleShaders", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "pryzma.keybinds"));
-		shaderpackScreenKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.shaderPackSelection", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, "pryzma.keybinds"));
-		wireframeKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.wireframe", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), "pryzma.keybinds"));
+		KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("pryzma", "keybinds"));
+		reloadKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.reload", InputConstants.Type.KEYBOARD, InputConstants.KEY_R, category));
+		toggleShadersKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.toggleShaders", InputConstants.Type.KEYBOARD, InputConstants.KEY_K, category));
+		shaderpackScreenKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.shaderPackSelection", InputConstants.Type.KEYBOARD, InputConstants.KEY_O, category));
+		wireframeKeybind = ShaderPlatformHelpers.getInstance().registerKeyBinding(new KeyMapping("pryzma.keybind.wireframe", InputConstants.Type.KEYBOARD, InputConstants.UNKNOWN.getValue(), category));
 
 		try {
 			if (!Files.exists(getShaderpacksDirectory())) {

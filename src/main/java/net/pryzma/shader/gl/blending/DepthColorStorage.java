@@ -1,7 +1,9 @@
 package net.pryzma.shader.gl.blending;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.pryzma.shader.mixin.GlStateManagerAccessor;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
+import org.lwjgl.opengl.GL11C;
+
+import java.nio.ByteBuffer;
 
 public class DepthColorStorage {
 	private static boolean originalDepthEnable;
@@ -15,17 +17,16 @@ public class DepthColorStorage {
 	public static void disableDepthColor() {
 		if (!depthColorLocked) {
 			// Only save the previous state if the depth and color mask wasn't already locked
-			GlStateManager.ColorMask colorMask = GlStateManagerAccessor.getCOLOR_MASK();
-			GlStateManager.DepthState depthState = GlStateManagerAccessor.getDEPTH();
-
-			originalDepthEnable = depthState.mask;
-			originalColor = new ColorMask(colorMask.red, colorMask.green, colorMask.blue, colorMask.alpha);
+			originalDepthEnable = GL11C.glGetBoolean(GL11C.GL_DEPTH_WRITEMASK);
+			ByteBuffer buf = ByteBuffer.allocateDirect(4);
+			GL11C.glGetBooleanv(GL11C.GL_COLOR_WRITEMASK, buf);
+			originalColor = new ColorMask(buf.get(0) != 0, buf.get(1) != 0, buf.get(2) != 0, buf.get(3) != 0);
 		}
 
 		depthColorLocked = false;
 
 		GlStateManager._depthMask(false);
-		GlStateManager._colorMask(false, false, false, false);
+		GlStateManager._colorMask(0);
 
 		depthColorLocked = true;
 	}
@@ -46,7 +47,6 @@ public class DepthColorStorage {
 		depthColorLocked = false;
 
 		GlStateManager._depthMask(originalDepthEnable);
-
-		GlStateManager._colorMask(originalColor.isRedMasked(), originalColor.isGreenMasked(), originalColor.isBlueMasked(), originalColor.isAlphaMasked());
+		GlStateManager._colorMask(originalColor != null ? originalColor.toMask() : 15);
 	}
 }

@@ -1,7 +1,6 @@
 package net.pryzma.shader.gui.screen;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.GlUtil;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.lwjgl.opengl.GL11;
@@ -20,21 +19,21 @@ import net.pryzma.shader.shaderpack.ShaderPack;
 import net.pryzma.shader.uniforms.FrameUpdateNotifier;
 import net.pryzma.shader.uniforms.transforms.SmoothedFloat;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,8 +66,8 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 		if (cachedGpuInfo == null) {
 			try {
 				String ver = GlStateManager._getString(GL11.GL_VERSION);
-				String vendor = GlUtil.getVendor();
-				String renderer = GlUtil.getRenderer();
+				String vendor = GlStateManager._getString(GL11.GL_VENDOR);
+				String renderer = GlStateManager._getString(GL11.GL_RENDERER);
 				cachedGpuInfo = "OpenGL: " + (ver != null ? ver : "Unknown") + ", " +
 						(vendor != null ? vendor : "Unknown") + ", " +
 						(renderer != null ? renderer : "Unknown");
@@ -141,28 +140,28 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
 		notifier.onNewFrame();
 		backgroundInit = 1.0f;
 
-		if (Screen.hasControlDown() && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_D)) {
-			Minecraft.getInstance().setScreen(new ConfirmScreen((option) -> {
+		if (GuiUtil.hasControlDown() && com.mojang.blaze3d.platform.InputConstants.isKeyDown(com.mojang.blaze3d.platform.InputConstants.KEY_D)) {
+			Minecraft.getInstance().gui.setScreen(new ConfirmScreen((option) -> {
 				PryzmaShaders.setDebug(option);
-				Minecraft.getInstance().setScreen(this);
+				Minecraft.getInstance().gui.setScreen(this);
 			}, Component.literal("Shader debug mode toggle"),
 				Component.literal("Debug mode helps investigate problems and shows shader errors. Would you like to enable it?"),
 				Component.literal("Yes"),
 				Component.literal("No")));
 		}
 
-		if (Screen.hasControlDown() && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_G)) {
-			Minecraft.getInstance().setScreen(new ConfirmScreen((option) -> {
+		if (GuiUtil.hasControlDown() && com.mojang.blaze3d.platform.InputConstants.isKeyDown(com.mojang.blaze3d.platform.InputConstants.KEY_G)) {
+			Minecraft.getInstance().gui.setScreen(new ConfirmScreen((option) -> {
 				try {
 					PryzmaShaders.getShaderConfig().setUnknown(option);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
-				Minecraft.getInstance().setScreen(this);
+				Minecraft.getInstance().gui.setScreen(this);
 			}, Component.literal("Unknown shader toggle"),
 				Component.literal("This allows unknown shaders to load in."),
 				Component.literal("Enable"),
@@ -170,11 +169,11 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 		}
 
 		if (!this.guiHidden) {
-			super.render(guiGraphics, mouseX, mouseY, delta);
+			super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
 		} else {
-			this.renderBlurredBackground(delta);
+			this.extractBlurredBackground(guiGraphics);
 			if (this.showHideButton != null) {
-				this.showHideButton.render(guiGraphics, mouseX, mouseY, delta);
+				this.showHideButton.extractRenderState(guiGraphics, mouseX, mouseY, delta);
 			}
 		}
 
@@ -184,15 +183,15 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 		}
 
 		if (!this.guiHidden) {
-			guiGraphics.drawCenteredString(this.font, this.title, (int) (this.width * 0.5), 8, 0xFFFFFF);
+			guiGraphics.centeredText(this.font, this.title, (int) (this.width * 0.5), 8, 0xFFFFFF);
 
 			if (notificationDialog != null && notificationDialogTimer > 0) {
-				guiGraphics.drawCenteredString(this.font, notificationDialog, (int) (this.width * 0.5), 21, 0xFFFFFF);
+				guiGraphics.centeredText(this.font, notificationDialog, (int) (this.width * 0.5), 21, 0xFFFFFF);
 			} else {
 				if (optionMenuOpen) {
-					guiGraphics.drawCenteredString(this.font, CONFIGURE_TITLE, (int) (this.width * 0.5), 21, 0xFFFFFF);
+					guiGraphics.centeredText(this.font, CONFIGURE_TITLE, (int) (this.width * 0.5), 21, 0xFFFFFF);
 				} else {
-					guiGraphics.drawCenteredString(this.font, SELECT_TITLE, (int) (this.width * 0.5), 21, 0xFFFFFF);
+					guiGraphics.centeredText(this.font, SELECT_TITLE, (int) (this.width * 0.5), 21, 0xFFFFFF);
 				}
 			}
 
@@ -202,15 +201,15 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 				int maxAvailableWidth = this.width - 16;
 				int y = this.height - 62;
 				if (textWidth <= maxAvailableWidth) {
-					guiGraphics.drawCenteredString(this.font, gpuInfo, this.width / 2, y, 0xA0A0A0);
+					guiGraphics.centeredText(this.font, gpuInfo, this.width / 2, y, 0xA0A0A0);
 				} else {
 					float scale = (float) maxAvailableWidth / (float) textWidth;
 					var pose = guiGraphics.pose();
-					pose.pushPose();
-					pose.translate(this.width / 2.0f, y, 0);
-					pose.scale(scale, scale, 1.0f);
-					guiGraphics.drawCenteredString(this.font, gpuInfo, 0, 0, 0xA0A0A0);
-					pose.popPose();
+					pose.pushMatrix();
+					pose.translate(this.width / 2.0f, y);
+					pose.scale(scale, scale);
+					guiGraphics.centeredText(this.font, gpuInfo, 0, 0, 0xA0A0A0);
+					pose.popMatrix();
 				}
 			}
 
@@ -223,9 +222,9 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 				// Draw panel
 				GuiUtil.drawPanel(guiGraphics, x, y, COMMENT_PANEL_WIDTH, panelHeight);
 				// Draw text
-				guiGraphics.drawString(font, this.hoveredElementCommentTitle.orElse(Component.empty()), x + 4, y + 4, 0xFFFFFF);
+				guiGraphics.text(font, this.hoveredElementCommentTitle.orElse(Component.empty()), x + 4, y + 4, 0xFFFFFF);
 				for (int i = 0; i < this.hoveredElementCommentBody.size(); i++) {
-					guiGraphics.drawString(font, this.hoveredElementCommentBody.get(i), x + 4, (y + 16) + (i * 10), 0xFFFFFF);
+					guiGraphics.text(font, this.hoveredElementCommentBody.get(i), x + 4, (y + 16) + (i * 10), 0xFFFFFF);
 				}
 			}
 		}
@@ -237,10 +236,10 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 		TOP_LAYER_RENDER_QUEUE.clear();
 
 		if (this.developmentComponent != null) {
-			guiGraphics.drawString(font, developmentComponent, 2, this.height - 10, 0xFFFFFF);
-			guiGraphics.drawString(font, modInfoComponent, 2, this.height - 20, 0xFFFFFF);
+			guiGraphics.text(font, developmentComponent, 2, this.height - 10, 0xFFFFFF);
+			guiGraphics.text(font, modInfoComponent, 2, this.height - 20, 0xFFFFFF);
 		} else {
-			guiGraphics.drawString(font, modInfoComponent, 2, this.height - 10, 0xFFFFFF);
+			guiGraphics.text(font, modInfoComponent, 2, this.height - 10, 0xFFFFFF);
 		}
 	}
 
@@ -362,20 +361,12 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 		}
 	}
 
-	private void processFixedBlur(float tick) {
-		PostChain blurEffect = ((GameRendererAccessor) this.minecraft.gameRenderer).getBlurEffect();
-		float g = Math.min(this.minecraft.options.getMenuBackgroundBlurriness(), this.blurTransition.getAsFloat());
-		if (blurEffect != null && g >= 1.0F) {
-			blurEffect.setUniform("Radius", g);
-			blurEffect.process(tick);
-		}
-	}
-
 	@Override
-	protected void renderBlurredBackground(float pScreen0) {
-		RenderSystem.disableDepthTest();
-		processFixedBlur(pScreen0);
-		this.minecraft.getMainRenderTarget().bindWrite(false);
+	protected void extractBlurredBackground(GuiGraphicsExtractor guiGraphics) {
+		float g = Math.min(this.minecraft.options.getMenuBackgroundBlurriness(), this.blurTransition.getAsFloat());
+		if (g >= 1.0F) {
+			guiGraphics.blurBeforeThisStratum();
+		}
 	}
 
 	@Override
@@ -394,8 +385,9 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 	}
 
 	@Override
-	public boolean keyPressed(int key, int j, int k) {
-		if (key == GLFW.GLFW_KEY_ESCAPE) {
+	public boolean keyPressed(KeyEvent event) {
+		int key = event.key();
+		if (key == InputConstants.KEY_ESCAPE) {
 			if (this.guiHidden) {
 				this.guiHidden = false;
 				this.init();
@@ -411,29 +403,24 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 
 				return true;
 			}
-		} else if (key == GLFW.GLFW_KEY_TAB) {
+		} else if (key == InputConstants.KEY_TAB) {
 			if (!optionMenuOpen) {
-				shaderPackList.keyPressed(GLFW.GLFW_KEY_ENTER, 0, 0);
+				shaderPackList.keyPressed(new KeyEvent(InputConstants.KEY_RETURN, 0, 0));
 			}
 
 			this.optionMenuOpen = !this.optionMenuOpen;
 
-			// UX: Apply changes before switching screens to avoid unintuitive behavior
-			//
-			// Not doing this leads to unintuitive behavior, since selecting a pack in the
-			// list (but not applying) would open the settings for the previous pack, rather
-			// than opening the settings for the selected (but not applied) pack.
 			this.applyChanges();
 
 			this.init();
 
 			this.setFocused(null);
-		} else if (key == GLFW.GLFW_KEY_F1 && this.showHideButton != null) {
+		} else if (key == InputConstants.KEY_F1 && this.showHideButton != null) {
 			this.guiHidden = !guiHidden;
 			this.init();
 		}
 
-		return this.guiHidden || super.keyPressed(key, j, k);
+		return this.guiHidden || super.keyPressed(event);
 	}
 
 	@Override
@@ -589,7 +576,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 			PryzmaShaders.logger.error("Failed to safely close shaderpack selection!", e);
 		}
 
-		this.minecraft.setScreen(parent);
+		this.minecraft.gui.setScreen(parent);
 	}
 
 	private void dropChangesAndClose() {
@@ -636,7 +623,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 	}
 
 	private void openShaderPackFolder() {
-		CompletableFuture.runAsync(() -> Util.getPlatform().openUri(PryzmaShaders.getShaderpacksDirectoryManager().getDirectoryUri()));
+		CompletableFuture.runAsync(() -> com.mojang.blaze3d.Blaze3D.openUri(PryzmaShaders.getShaderpacksDirectoryManager().getDirectoryUri()));
 	}
 
 	// Let the screen know if an element is hovered or not, allowing for accurately updating which element is hovered

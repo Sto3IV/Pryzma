@@ -2,7 +2,8 @@ package net.pryzma.shader.pipeline;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
@@ -21,7 +22,6 @@ import net.pryzma.shader.gl.sampler.SamplerLimits;
 import net.pryzma.shader.gl.shader.ShaderCompileException;
 import net.pryzma.shader.gl.state.FogMode;
 import net.pryzma.shader.gl.texture.TextureAccess;
-import net.pryzma.shader.mixin.GlStateManagerAccessor;
 import net.pryzma.shader.pathways.CenterDepthSampler;
 import net.pryzma.shader.pathways.FullScreenQuadRenderer;
 import net.pryzma.shader.pipeline.transform.PatchShaderType;
@@ -116,8 +116,9 @@ public class FinalPassRenderer {
 		// passes that write to framebuffers).
 		this.baseline = renderTargets.createGbufferFramebuffer(flippedBuffers, new int[]{0});
 		this.colorHolder = new GlFramebuffer();
-		this.lastColorTextureId = Minecraft.getInstance().getMainRenderTarget().getColorTextureId();
-		this.lastColorTextureVersion = ((Blaze3dRenderTargetExt) Minecraft.getInstance().getMainRenderTarget()).pryzma$getColorBufferVersion();
+		com.mojang.blaze3d.pipeline.RenderTarget initialMain = Minecraft.getInstance().gameRenderer.mainRenderTarget();
+		this.lastColorTextureId = ((GlTexture) initialMain.getColorTexture()).glId();
+		this.lastColorTextureVersion = ((Blaze3dRenderTargetExt) initialMain).pryzma$getColorBufferVersion();
 		this.colorHolder.addColorAttachment(0, lastColorTextureId);
 
 		// TODO: We don't actually fully swap the content, we merely copy it from alt to main
@@ -188,14 +189,14 @@ public class FinalPassRenderer {
 		ShaderRenderSystem.texParameteri(target.getMainTexture(), GL20C.GL_TEXTURE_2D, GL20C.GL_TEXTURE_MIN_FILTER, filter);
 		ShaderRenderSystem.texParameteri(target.getAltTexture(), GL20C.GL_TEXTURE_2D, GL20C.GL_TEXTURE_MIN_FILTER, filter);
 
-		RenderSystem.bindTexture(0);
+		GlStateManager._bindTexture(0);
 	}
 
 	public void renderFinalPass() {
-		RenderSystem.disableBlend();
-		RenderSystem.depthMask(false);
+		GL11C.glDisable(GL11C.GL_BLEND);
+		GlStateManager._depthMask(false);
 
-		final com.mojang.blaze3d.pipeline.RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
+		final com.mojang.blaze3d.pipeline.RenderTarget main = Minecraft.getInstance().gameRenderer.mainRenderTarget();
 		final int baseWidth = main.width;
 		final int baseHeight = main.height;
 
@@ -212,9 +213,10 @@ public class FinalPassRenderer {
 		//
 		// This is not a concern for depthtex1 / depthtex2 since the copy call extracts the depth values, and the
 		// shader pack only ever uses them to read the depth values.
-		if (((Blaze3dRenderTargetExt) main).pryzma$getColorBufferVersion() != lastColorTextureVersion || main.getColorTextureId() != lastColorTextureId) {
+		int currentColorTextureId = ((GlTexture) main.getColorTexture()).glId();
+		if (((Blaze3dRenderTargetExt) main).pryzma$getColorBufferVersion() != lastColorTextureVersion || currentColorTextureId != lastColorTextureId) {
 			lastColorTextureVersion = ((Blaze3dRenderTargetExt) main).pryzma$getColorBufferVersion();
-			this.lastColorTextureId = main.getColorTextureId();
+			this.lastColorTextureId = currentColorTextureId;
 			colorHolder.addColorAttachment(0, lastColorTextureId);
 		}
 
@@ -238,7 +240,7 @@ public class FinalPassRenderer {
 			ShaderRenderSystem.memoryBarrier(GL43C.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL43C.GL_TEXTURE_FETCH_BARRIER_BIT | GL43C.GL_SHADER_STORAGE_BARRIER_BIT);
 
 			if (!finalPass.mipmappedBuffers.isEmpty()) {
-				RenderSystem.activeTexture(GL15C.GL_TEXTURE0);
+				GlStateManager._activeTexture(GL15C.GL_TEXTURE0);
 
 				for (int index : finalPass.mipmappedBuffers) {
 					setupMipmapping(renderTargets.get(index), finalPass.stageReadsFromAlt.contains(index));
@@ -267,10 +269,10 @@ public class FinalPassRenderer {
 			// https://stackoverflow.com/a/23994979/18166885
 			this.baseline.bindAsReadBuffer();
 
-			ShaderRenderSystem.copyTexSubImage2D(main.getColorTextureId(), GL11C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, baseWidth, baseHeight);
+			ShaderRenderSystem.copyTexSubImage2D(currentColorTextureId, GL11C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, baseWidth, baseHeight);
 		}
 
-		RenderSystem.activeTexture(GL15C.GL_TEXTURE0);
+		GlStateManager._activeTexture(GL15C.GL_TEXTURE0);
 
 		for (int i = 0; i < renderTargets.getRenderTargetCount(); i++) {
 			// Reset mipmapping states at the end of the frame.
@@ -288,27 +290,24 @@ public class FinalPassRenderer {
 			// Also note that RenderTargets already calls readBuffer(0) for us.
 			swapPass.from.bind();
 
-			RenderSystem.bindTexture(swapPass.targetTexture);
-			GlStateManager._glCopyTexSubImage2D(GL20C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, swapPass.width, swapPass.height);
+			GlStateManager._bindTexture(swapPass.targetTexture);
+			GL11C.glCopyTexSubImage2D(GL11C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, swapPass.width, swapPass.height);
 		}
 
 		// Make sure to reset the viewport to how it was before... Otherwise weird issues could occur.
 		// Also bind the "main" framebuffer if it isn't already bound.
-		main.bindWrite(true);
+		GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
+		GL11C.glViewport(0, 0, main.width, main.height);
 		ProgramUniforms.clearActiveUniforms();
 		ProgramSamplers.clearActiveSamplers();
 		GlStateManager._glUseProgram(0);
 
 		for (int i = 0; i < SamplerLimits.get().getMaxTextureUnits(); i++) {
-			// Unbind all textures that we may have used.
-			// NB: This is necessary for shader pack reloading to work properly
-			if (GlStateManagerAccessor.getTEXTURES()[i].binding != 0) {
-				RenderSystem.activeTexture(GL15C.GL_TEXTURE0 + i);
-				RenderSystem.bindTexture(0);
-			}
+			GlStateManager._activeTexture(GL15C.GL_TEXTURE0 + i);
+			GlStateManager._bindTexture(0);
 		}
 
-		RenderSystem.activeTexture(GL15C.GL_TEXTURE0);
+		GlStateManager._activeTexture(GL15C.GL_TEXTURE0);
 	}
 
 	public void recalculateSwapPassSize() {

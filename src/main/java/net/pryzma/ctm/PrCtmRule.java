@@ -9,10 +9,10 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
 import net.pryzma.core.match.PrBiomeMatcher;
 import net.pryzma.core.match.PrBlockMatcher;
@@ -31,34 +31,32 @@ public final class PrCtmRule {
     public static final int CONNECT_STATE = 3;
 
     /**
-     * Chunk layer of an overlay rule. Kept apart from {@link RenderType} so parsing never loads the
+     * Chunk layer of an overlay rule. Kept apart so parsing never loads the
      * render classes; resolved when quads are built.
      */
     enum Layer {
         SOLID, CUTOUT_MIPPED, CUTOUT, TRANSLUCENT, TRIPWIRE;
 
-        RenderType type() {
+        ChunkSectionLayer sectionLayer() {
             return switch (this) {
-                case SOLID -> RenderType.solid();
-                case CUTOUT_MIPPED -> RenderType.cutoutMipped();
-                case CUTOUT -> RenderType.cutout();
-                case TRANSLUCENT -> RenderType.translucent();
-                case TRIPWIRE -> RenderType.tripwire();
+                case SOLID -> ChunkSectionLayer.SOLID;
+                case CUTOUT_MIPPED, CUTOUT -> ChunkSectionLayer.CUTOUT;
+                case TRANSLUCENT, TRIPWIRE -> ChunkSectionLayer.TRANSLUCENT;
             };
         }
     }
 
     /** A tile reference: an atlas sprite, or one of the {@code <skip>} / {@code <default>} markers. */
-    public record Tile(ResourceLocation sprite, ResourceLocation file, boolean skip, boolean keep) {
+    public record Tile(Identifier sprite, Identifier file, boolean skip, boolean keep) {
         static final Tile SKIP = new Tile(null, null, true, false);
         static final Tile DEFAULT = new Tile(null, null, false, true);
     }
 
-    final ResourceLocation source;
+    final Identifier source;
     final PrCtmMethod method;
     /** {@code null} when absent (any block); present with unknown blocks only, it matches nothing. */
     final PrBlockMatcher matchBlocks;
-    final List<ResourceLocation> matchTiles;
+    final List<Identifier> matchTiles;
     final List<Tile> tiles;
     final int connect;
     final int faces;
@@ -76,7 +74,7 @@ public final class PrCtmRule {
     final boolean linked;
     /** {@code null} when absent. */
     final PrBlockMatcher connectBlocks;
-    final List<ResourceLocation> connectTiles;
+    final List<Identifier> connectTiles;
     final int tintIndex;
     /** {@code null} means untinted, as OptiFine's default of air. */
     final BlockState tintBlock;
@@ -115,7 +113,7 @@ public final class PrCtmRule {
         this.layer = b.layer;
     }
 
-    public ResourceLocation source() {
+    public Identifier source() {
         return source;
     }
 
@@ -127,11 +125,11 @@ public final class PrCtmRule {
         return tiles;
     }
 
-    public List<ResourceLocation> matchTiles() {
+    public List<Identifier> matchTiles() {
         return matchTiles;
     }
 
-    public List<ResourceLocation> connectTiles() {
+    public List<Identifier> connectTiles() {
         return connectTiles;
     }
 
@@ -151,10 +149,10 @@ public final class PrCtmRule {
     // ------------------------------------------------------------------ parsing
 
     private static final class Builder {
-        ResourceLocation source;
+        Identifier source;
         PrCtmMethod method;
         PrBlockMatcher matchBlocks;
-        List<ResourceLocation> matchTiles;
+        List<Identifier> matchTiles;
         List<Tile> tiles;
         int connect;
         int faces = 63;
@@ -171,7 +169,7 @@ public final class PrCtmRule {
         int symmetry = 1;
         boolean linked;
         PrBlockMatcher connectBlocks;
-        List<ResourceLocation> connectTiles;
+        List<Identifier> connectTiles;
         int tintIndex = -1;
         BlockState tintBlock;
         Layer layer = Layer.CUTOUT_MIPPED;
@@ -184,7 +182,7 @@ public final class PrCtmRule {
      * @param spriteExists tells whether a sprite name already exists in the atlas ({@code matchTiles}
      *                     auto-detection from the file name)
      */
-    static Optional<PrCtmRule> parse(PrProperties p, Predicate<ResourceLocation> spriteExists,
+    static Optional<PrCtmRule> parse(PrProperties p, Predicate<Identifier> spriteExists,
             Consumer<String> warn) {
         Consumer<String> w = msg -> warn.accept(msg + " in " + p);
         Builder b = new Builder();
@@ -206,13 +204,13 @@ public final class PrCtmRule {
         b.matchTiles = parseSpriteList(p.get("matchTiles"), p);
         String fileName = p.name();
         if (b.matchBlocks == null && fileName.startsWith("block_")) {
-            ResourceLocation blockId = ResourceLocation.tryParse(fileName.substring("block_".length()));
+            Identifier blockId = Identifier.tryParse(fileName.substring("block_".length()));
             if (blockId != null && BuiltInRegistries.BLOCK.containsKey(blockId)) {
                 b.matchBlocks = PrBlockMatcher.parse(blockId.toString(), null, w);
             }
         }
         if (b.matchBlocks == null && b.matchTiles == null) {
-            ResourceLocation auto = spriteId(fileName, p);
+            Identifier auto = spriteId(fileName, p);
             if (auto != null && spriteExists.test(auto)) {
                 b.matchTiles = List.of(auto);
             }
@@ -417,27 +415,27 @@ public final class PrCtmRule {
                 path = "textures/block/" + path;
             }
         }
-        ResourceLocation file = ResourceLocation.tryBuild(ns, path + ".png");
+        Identifier file = Identifier.tryBuild(ns, path + ".png");
         if (file == null) {
             return null;
         }
         file = PrPaths.logical(file);
         String filePath = file.getPath();
-        ResourceLocation sprite = filePath.startsWith("textures/")
+        Identifier sprite = filePath.startsWith("textures/")
                 ? file.withPath(filePath.substring("textures/".length(), filePath.length() - 4))
                 : file.withPath(filePath.substring(0, filePath.length() - 4));
         return new Tile(sprite, file, false, false);
     }
 
     /** {@code matchTiles} / {@code connectTiles}: atlas sprite names, bare names meaning {@code block/<name>}. */
-    static List<ResourceLocation> parseSpriteList(String text, PrProperties p) {
+    static List<Identifier> parseSpriteList(String text, PrProperties p) {
         if (text == null) {
             return null;
         }
-        List<ResourceLocation> out = new ArrayList<>();
+        List<Identifier> out = new ArrayList<>();
         for (String token : text.trim().split("\\s+")) {
             if (!token.isEmpty()) {
-                ResourceLocation id = spriteId(token, p);
+                Identifier id = spriteId(token, p);
                 if (id != null) {
                     out.add(id);
                 }
@@ -446,9 +444,9 @@ public final class PrCtmRule {
         return out;
     }
 
-    static ResourceLocation spriteId(String token, PrProperties p) {
+    static Identifier spriteId(String token, PrProperties p) {
         String name = PrPaths.resolve(PrPaths.stripExtension(token, ".png"), p.basePath());
-        ResourceLocation id = ResourceLocation.tryParse(name);
+        Identifier id = Identifier.tryParse(name);
         if (id == null) {
             return null;
         }

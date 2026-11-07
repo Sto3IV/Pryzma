@@ -2,7 +2,7 @@ package net.pryzma.shader.gl.program;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import net.pryzma.shader.gl.ShaderRenderSystem;
@@ -13,8 +13,8 @@ import net.pryzma.shader.gl.sampler.SamplerLimits;
 import net.pryzma.shader.gl.state.ValueUpdateNotifier;
 import net.pryzma.shader.gl.texture.TextureAccess;
 import net.pryzma.shader.gl.texture.TextureType;
-import net.pryzma.shader.mixin.GlStateManagerAccessor;
 import net.pryzma.shader.shaderpack.properties.PackRenderTargetDirectives;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL20C;
 
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public class ProgramSamplers {
 
 		if (initializer != null) {
 			for (GlUniform1iCall call : initializer) {
-				RenderSystem.glUniform1i(call.location(), call.value());
+				GL20C.glUniform1i(call.location(), call.value());
 			}
 
 			initializer = null;
@@ -71,13 +71,13 @@ public class ProgramSamplers {
 
 		// We need to keep the active texture intact, since if we mess it up
 		// in the middle of RenderType setup, bad things will happen.
-		int activeTexture = GlStateManagerAccessor.getActiveTexture();
+		int activeTexture = GL11C.glGetInteger(GL20C.GL_ACTIVE_TEXTURE) - GL20C.GL_TEXTURE0;
 
 		for (SamplerBinding samplerBinding : samplerBindings) {
 			samplerBinding.update();
 		}
 
-		RenderSystem.activeTexture(GL20C.GL_TEXTURE0 + activeTexture);
+		GlStateManager._activeTexture(GL20C.GL_TEXTURE0 + activeTexture);
 	}
 
 	public void removeListeners() {

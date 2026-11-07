@@ -10,12 +10,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.pryzma.core.res.PrProperties;
 
 class PrSkyLayerTest {
     private static PrSkyLayer layer(String text, List<String> warnings) {
-        PrProperties p = PrProperties.parse(ResourceLocation.withDefaultNamespace("optifine/sky/world0/sky1.properties"), text);
+        PrProperties p = PrProperties.parse(Identifier.withDefaultNamespace("optifine/sky/world0/sky1.properties"), text);
         return PrSkyLayer.parse(p, 1, warnings::add).orElse(null);
     }
 
@@ -36,7 +36,7 @@ class PrSkyLayerTest {
         PrSkyLayer sky1 = layer("startFadeIn=18:00\nendFadeIn=18:45\nstartFadeOut=18:50\nendFadeOut=19:10\n"
                 + "blend=add\nrotate=true\naxis=0.0 -0.2 0.0\nsource=./cloud2.png\n", w);
         assertTrue(w.isEmpty(), w.toString());
-        assertEquals(ResourceLocation.withDefaultNamespace("optifine/sky/world0/cloud2.png"), sky1.texture);
+        assertEquals(Identifier.withDefaultNamespace("optifine/sky/world0/cloud2.png"), sky1.texture);
         assertEquals(PrSkyBlend.ADD, sky1.blend);
         assertEquals(0.5F, sky1.fadeBrightness(12375), 1e-3);
         assertEquals(1.0F, sky1.fadeBrightness(12800), 1e-3);

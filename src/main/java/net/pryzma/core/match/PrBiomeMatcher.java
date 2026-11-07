@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 
 /**
@@ -26,7 +26,7 @@ public final class PrBiomeMatcher {
 
     private final Set<String> names;
     private final boolean negated;
-    private final Map<ResourceLocation, Boolean> cache = new ConcurrentHashMap<>();
+    private final Map<Identifier, Boolean> cache = new ConcurrentHashMap<>();
 
     private PrBiomeMatcher(Set<String> names, boolean negated) {
         this.names = names;
@@ -65,10 +65,10 @@ public final class PrBiomeMatcher {
     }
 
     public boolean matches(ResourceKey<Biome> key) {
-        return matches(key.location());
+        return matches(key.identifier());
     }
 
-    public boolean matches(ResourceLocation id) {
+    public boolean matches(Identifier id) {
         return cache.computeIfAbsent(id, i -> names.contains(compact(i.toString())) != negated);
     }
 

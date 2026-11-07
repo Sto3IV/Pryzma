@@ -40,7 +40,7 @@ public class BiomeUniforms {
 				}
 			}))
 			.uniform1i(PER_TICK, "biome_precipitation", playerI(player -> {
-				Biome.Precipitation precipitation = player.level().getBiome(player.blockPosition()).value().getPrecipitationAt(player.blockPosition());
+				Biome.Precipitation precipitation = player.level().getBiome(player.blockPosition()).value().getPrecipitationAt(player.blockPosition(), player.level().getSeaLevel());
 				return switch (precipitation) {
 					case NONE -> 0;
 					case RAIN -> 1;
@@ -81,9 +81,9 @@ public class BiomeUniforms {
 			return BiomeCategories.DESERT;
 		} else if (holder.is(BiomeTags.IS_RIVER)) {
 			return BiomeCategories.RIVER;
-		} else if (holder.is(BiomeTags.HAS_CLOSER_WATER_FOG)) {
+		} else if (holder.is(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BIOME, net.minecraft.resources.Identifier.withDefaultNamespace("has_closer_water_fog")))) {
 			return BiomeCategories.SWAMP;
-		} else if (holder.is(BiomeTags.PLAYS_UNDERWATER_MUSIC)) {
+		} else if (holder.is(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BIOME, net.minecraft.resources.Identifier.withDefaultNamespace("plays_underwater_music")))) {
 			return BiomeCategories.UNDERGROUND;
 		} else if (holder.is(BiomeTags.WITHOUT_ZOMBIE_SIEGES)) {
 			return BiomeCategories.MUSHROOM;

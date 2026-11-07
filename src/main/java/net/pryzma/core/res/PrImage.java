@@ -20,7 +20,7 @@ public record PrImage(int width, int height, int[] argb) {
 
     public static PrImage read(InputStream in) throws IOException {
         try (NativeImage image = NativeImage.read(in)) {
-            int[] abgr = image.getPixelsRGBA();
+            int[] abgr = image.getPixelsABGR();
             for (int i = 0; i < abgr.length; i++) {
                 int c = abgr[i];
                 abgr[i] = (c & 0xFF00FF00) | ((c >>> 16) & 0xFF) | ((c & 0xFF) << 16);

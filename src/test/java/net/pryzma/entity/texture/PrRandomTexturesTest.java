@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 class PrRandomTexturesTest {
-    private static ResourceLocation mc(String path) {
-        return ResourceLocation.withDefaultNamespace(path);
+    private static Identifier mc(String path) {
+        return Identifier.withDefaultNamespace(path);
     }
 
     @Test
@@ -22,8 +22,8 @@ class PrRandomTexturesTest {
                 "optifine/mob/ is the MCPatcher layout under textures/entity/");
         assertEquals(mc("textures/entity/creeper/creeper.png"), PrRandomTextures.baseTexture(mc("mcpatcher/mob/creeper/creeper3.png")),
                 "mcpatcher/ is read as optifine/");
-        assertEquals(ResourceLocation.fromNamespaceAndPath("mowziesmobs", "textures/entity/foliaath.png"),
-                PrRandomTextures.baseTexture(ResourceLocation.fromNamespaceAndPath("mowziesmobs", "optifine/random/entity/foliaath3.png")));
+        assertEquals(Identifier.fromNamespaceAndPath("mowziesmobs", "textures/entity/foliaath.png"),
+                PrRandomTextures.baseTexture(Identifier.fromNamespaceAndPath("mowziesmobs", "optifine/random/entity/foliaath3.png")));
         assertNull(PrRandomTextures.baseTexture(mc("optifine/cit/sword.png")));
     }
 

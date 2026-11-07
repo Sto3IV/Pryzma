@@ -1,111 +1,68 @@
 package net.pryzma.shader.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.objects.Object2IntFunction;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.pipeline.WorldRenderingPipeline;
 import net.pryzma.shader.shaderpack.materialmap.NamespacedId;
 import net.pryzma.shader.shaderpack.materialmap.WorldRenderingSettings;
 import net.pryzma.shader.uniforms.CapturedRenderingState;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.List;
 
 @Mixin(EntityRenderDispatcher.class)
 public class MixinEntityRenderDispatcher {
-	@Unique
-	private static final String RENDER_SHADOW =
-		"renderShadow(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/entity/Entity;FFLnet/minecraft/world/level/LevelReader;F)V";
-	@Unique
-	private static final String RENDER_BLOCK_SHADOW =
-		"Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;renderBlockShadow(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/level/chunk/ChunkAccess;Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;DDDFF)V";
-
 	@Unique
 	private static final NamespacedId shadowId = new NamespacedId("minecraft", "entity_shadow");
 
 	@Unique
 	private static final NamespacedId flameId = new NamespacedId("minecraft", "entity_flame");
 
-	@Unique
-	private static int cachedId;
-
-	@Inject(method = RENDER_SHADOW, at = @At("HEAD"), cancellable = true)
-	private static void pryzma$maybeSuppressEntityShadow(PoseStack poseStack, MultiBufferSource bufferSource,
-													   Entity entity, float opacity, float tickDelta, LevelReader level,
-													   float radius, CallbackInfo ci) {
-		if (!pryzma$maybeSuppressShadow(ci)) {
-			Object2IntFunction<NamespacedId> entityIds = WorldRenderingSettings.INSTANCE.getEntityIds();
-
-			if (entityIds == null) {
-				return;
-			}
-
-			cachedId = CapturedRenderingState.INSTANCE.getCurrentRenderedEntity();
-			CapturedRenderingState.INSTANCE.setCurrentEntity(entityIds.getInt(shadowId));
-		}
-	}
-
-	@Inject(method = "renderShadow", at = @At("RETURN"))
-	private static void restoreShadow(PoseStack pPoseStack0, MultiBufferSource pMultiBufferSource1, Entity pEntity2, float pFloat3, float pFloat4, LevelReader pLevelReader5, float pFloat6, CallbackInfo ci) {
-		CapturedRenderingState.INSTANCE.setCurrentEntity(cachedId);
-		cachedId = 0;
-	}
-
-	// The underlying method called by renderShadow.
-	@Inject(method = "renderBlockShadow", at = @At("HEAD"), cancellable = true)
-	private static void renderBlockShadow(PoseStack.Pose pPoseStack$Pose0, VertexConsumer pVertexConsumer1, ChunkAccess pChunkAccess2, LevelReader pLevelReader3, BlockPos pBlockPos4, double pDouble5, double pDouble6, double pDouble7, float pFloat8, float pFloat9, CallbackInfo ci) {
-		pryzma$maybeSuppressShadow(ci);
-	}
-
-	// First Person Model by tr7zw compatibility, this is a method added by First Person Model:
-	// https://github.com/tr7zw/FirstPersonModel/blob/172ab05368832df82e34ca9f9b06814672f69f59/FPShared/src/main/java/dev/tr7zw/firstperson/mixins/RenderDispatcherMixin.java#L68
-	// The renderBlockShadow injection will handle this, but it's easier to suppress it before all of the other calculations.
-	@SuppressWarnings("all")
-	@Inject(method = "renderOffsetShadow", at = @At("HEAD"), cancellable = true, require = 0, remap = false, expect = 0)
-	private static void pryzma$maybeSuppressEntityShadow(PoseStack poseStack, MultiBufferSource bufferSource,
-													   Entity entity, float opacity, float tickDelta, LevelReader level,
-													   float radius, Vec3 offset, CallbackInfo ci) {
-		pryzma$maybeSuppressShadow(ci);
-	}
-
-	@Unique
-	private static boolean pryzma$maybeSuppressShadow(CallbackInfo ci) {
+	@WrapOperation(
+		method = "submit",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitShadow(Lcom/mojang/blaze3d/vertex/PoseStack;FLjava/util/List;)V")
+	)
+	private void pryzma$maybeSuppressShadow(SubmitNodeCollector instance, PoseStack poseStack, float radius, List pieces, Operation<Void> original) {
 		WorldRenderingPipeline pipeline = PryzmaShaders.getPipelineManager().getPipelineNullable();
-
 		if (pipeline != null && pipeline.shouldDisableVanillaEntityShadows()) {
-			ci.cancel();
-			return true;
-		}
-
-		return false;
-	}
-
-	@Inject(method = "renderFlame", at = @At("HEAD"))
-	private void pryzma$setFlameId(PoseStack pEntityRenderDispatcher0, MultiBufferSource pMultiBufferSource1, Entity pEntity2, Quaternionf pQuaternionf3, CallbackInfo ci) {
-		Object2IntFunction<NamespacedId> entityIds = WorldRenderingSettings.INSTANCE.getEntityIds();
-
-		if (entityIds == null) {
 			return;
 		}
 
-		cachedId = CapturedRenderingState.INSTANCE.getCurrentRenderedEntity();
-		CapturedRenderingState.INSTANCE.setCurrentEntity(entityIds.getInt(flameId));
+		Object2IntFunction<NamespacedId> entityIds = WorldRenderingSettings.INSTANCE.getEntityIds();
+		int old = CapturedRenderingState.INSTANCE.getCurrentRenderedEntity();
+		if (entityIds != null) {
+			CapturedRenderingState.INSTANCE.setCurrentEntity(entityIds.getInt(shadowId));
+		}
+		try {
+			original.call(instance, poseStack, radius, pieces);
+		} finally {
+			CapturedRenderingState.INSTANCE.setCurrentEntity(old);
+		}
 	}
 
-	@Inject(method = "renderFlame", at = @At("RETURN"))
-	private void restoreFlameId(PoseStack pEntityRenderDispatcher0, MultiBufferSource pMultiBufferSource1, Entity pEntity2, Quaternionf pQuaternionf3, CallbackInfo ci) {
-		CapturedRenderingState.INSTANCE.setCurrentEntity(cachedId);
-		cachedId = 0;
+	@WrapOperation(
+		method = "submit",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitFlame(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/entity/state/EntityRenderState;Lorg/joml/Quaternionf;)V")
+	)
+	private void pryzma$handleFlame(SubmitNodeCollector instance, PoseStack poseStack, EntityRenderState state, Quaternionf rot, Operation<Void> original) {
+		Object2IntFunction<NamespacedId> entityIds = WorldRenderingSettings.INSTANCE.getEntityIds();
+		int old = CapturedRenderingState.INSTANCE.getCurrentRenderedEntity();
+		if (entityIds != null) {
+			CapturedRenderingState.INSTANCE.setCurrentEntity(entityIds.getInt(flameId));
+		}
+		try {
+			original.call(instance, poseStack, state, rot);
+		} finally {
+			CapturedRenderingState.INSTANCE.setCurrentEntity(old);
+		}
 	}
 }

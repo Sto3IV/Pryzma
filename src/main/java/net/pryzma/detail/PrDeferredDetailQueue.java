@@ -2,14 +2,11 @@ package net.pryzma.detail;
 
 import java.util.Arrays;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
  * Phase B4: the decorator blocks one chunk worker deferred while meshing one section, and for each
@@ -17,26 +14,24 @@ import net.neoforged.neoforge.client.model.data.ModelData;
  * One instance per thread, reset at the start and the end of every compile; allocation-free once warm.
  */
 public final class PrDeferredDetailQueue {
-    /** One deferred {@code renderBatched} call. The position is copied: the caller's is a loop cursor. */
+    /** One deferred {@code tesselateBlock} call. The position is copied: the caller's is a loop cursor. */
     public static final class Entry {
-        public BlockState state;
+        public float x;
+        public float y;
+        public float z;
         public final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        public ModelData modelData;
-        public RenderType renderType;
+        public BlockState state;
+        public BlockStateModel model;
+        public long seed;
     }
 
     private static final ThreadLocal<PrDeferredDetailQueue> QUEUES = ThreadLocal.withInitial(PrDeferredDetailQueue::new);
 
-    /** At identity between blocks: the replay pushes and pops it around each one. */
-    public final PoseStack poseStack = new PoseStack();
-    /** Same LCG as the compile's own; tesselateBlock reseeds it with {@code state.getSeed(pos)} before every getQuads. */
-    public final RandomSource random = RandomSource.create(0L);
-
     private final ObjectArrayList<Entry> entries = new ObjectArrayList<>();
     private int size;
-    /** The layers with deferred blocks, at most the five chunk layers, and the core vertex count of each. */
-    private RenderType[] layers = new RenderType[5];
-    private int[] cores = new int[5];
+    /** The layers with deferred blocks, at most the chunk layers, and the core vertex count of each. */
+    private ChunkSectionLayer[] layers = new ChunkSectionLayer[3];
+    private int[] cores = new int[3];
     private int layerCount;
 
     private PrDeferredDetailQueue() {
@@ -46,21 +41,27 @@ public final class PrDeferredDetailQueue {
         return QUEUES.get();
     }
 
-    public void add(BlockState state, BlockPos pos, ModelData modelData, RenderType renderType) {
+    public void add(float x, float y, float z, BlockPos pos, BlockState state, BlockStateModel model, long seed) {
         if (size == entries.size()) {
             entries.add(new Entry());
         }
         Entry e = entries.get(size++);
-        e.state = state;
+        e.x = x;
+        e.y = y;
+        e.z = z;
         e.pos.set(pos);
-        e.modelData = modelData;
-        e.renderType = renderType;
-        if (indexOf(renderType) < 0) {
+        e.state = state;
+        e.model = model;
+        e.seed = seed;
+    }
+
+    public void recordLayer(ChunkSectionLayer layer) {
+        if (indexOf(layer) < 0) {
             if (layerCount == layers.length) {
                 layers = Arrays.copyOf(layers, layerCount * 2);
                 cores = Arrays.copyOf(cores, layerCount * 2);
             }
-            layers[layerCount] = renderType;
+            layers[layerCount] = layer;
             cores[layerCount++] = 0;
         }
     }
@@ -77,7 +78,7 @@ public final class PrDeferredDetailQueue {
         return layerCount;
     }
 
-    public RenderType layer(int index) {
+    public ChunkSectionLayer layer(int index) {
         return layers[index];
     }
 
@@ -90,7 +91,7 @@ public final class PrDeferredDetailQueue {
         cores[index] = vertices;
     }
 
-    private int indexOf(RenderType type) {
+    private int indexOf(ChunkSectionLayer type) {
         for (int i = 0; i < layerCount; i++) {
             if (layers[i] == type) {
                 return i;
@@ -104,11 +105,9 @@ public final class PrDeferredDetailQueue {
         for (int i = 0; i < size; i++) {
             Entry e = entries.get(i);
             e.state = null;
-            e.modelData = null;
-            e.renderType = null;
+            e.model = null;
         }
         size = 0;
-        Arrays.fill(layers, 0, layerCount, null);
         layerCount = 0;
     }
 }

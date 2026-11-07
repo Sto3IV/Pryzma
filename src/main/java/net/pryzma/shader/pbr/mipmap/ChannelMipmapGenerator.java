@@ -1,7 +1,5 @@
 package net.pryzma.shader.pbr.mipmap;
 
-import net.minecraft.util.FastColor;
-
 public class ChannelMipmapGenerator extends AbstractMipmapGenerator {
 	protected final BlendFunction redFunc;
 	protected final BlendFunction greenFunc;
@@ -17,32 +15,11 @@ public class ChannelMipmapGenerator extends AbstractMipmapGenerator {
 
 	@Override
 	public int blend(int c0, int c1, int c2, int c3) {
-		return FastColor.ABGR32.color(
-			alphaFunc.blend(
-				FastColor.ABGR32.alpha(c0),
-				FastColor.ABGR32.alpha(c1),
-				FastColor.ABGR32.alpha(c2),
-				FastColor.ABGR32.alpha(c3)
-			),
-			blueFunc.blend(
-				FastColor.ABGR32.blue(c0),
-				FastColor.ABGR32.blue(c1),
-				FastColor.ABGR32.blue(c2),
-				FastColor.ABGR32.blue(c3)
-			),
-			greenFunc.blend(
-				FastColor.ABGR32.green(c0),
-				FastColor.ABGR32.green(c1),
-				FastColor.ABGR32.green(c2),
-				FastColor.ABGR32.green(c3)
-			),
-			redFunc.blend(
-				FastColor.ABGR32.red(c0),
-				FastColor.ABGR32.red(c1),
-				FastColor.ABGR32.red(c2),
-				FastColor.ABGR32.red(c3)
-			)
-		);
+		int a = alphaFunc.blend((c0 >>> 24) & 0xFF, (c1 >>> 24) & 0xFF, (c2 >>> 24) & 0xFF, (c3 >>> 24) & 0xFF);
+		int b = blueFunc.blend((c0 >>> 16) & 0xFF, (c1 >>> 16) & 0xFF, (c2 >>> 16) & 0xFF, (c3 >>> 16) & 0xFF);
+		int g = greenFunc.blend((c0 >>> 8) & 0xFF, (c1 >>> 8) & 0xFF, (c2 >>> 8) & 0xFF, (c3 >>> 8) & 0xFF);
+		int r = redFunc.blend(c0 & 0xFF, c1 & 0xFF, c2 & 0xFF, c3 & 0xFF);
+		return ((a & 0xFF) << 24) | ((b & 0xFF) << 16) | ((g & 0xFF) << 8) | (r & 0xFF);
 	}
 
 	public interface BlendFunction {

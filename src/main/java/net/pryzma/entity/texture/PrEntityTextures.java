@@ -5,8 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -30,21 +29,21 @@ import net.pryzma.render.PrRenderTypes;
  */
 public final class PrEntityTextures {
     /** Parsed resource state of one reload. */
-    public record Data(Map<ResourceLocation, PrRandomProperties<ResourceLocation>> random, String emissiveSuffix,
+    public record Data(Map<Identifier, PrRandomProperties<Identifier>> random, String emissiveSuffix,
             ResourceManager manager) {
         public static final Data EMPTY = new Data(Map.of(), null, null);
     }
 
     private static volatile Data data = Data.EMPTY;
     /** Texture to its emissive texture; {@link Optional#empty()} caches "none". */
-    private static final Map<ResourceLocation, Optional<ResourceLocation>> EMISSIVE = new ConcurrentHashMap<>();
-    private static final Set<ResourceLocation> EMISSIVE_TEXTURES = ConcurrentHashMap.newKeySet();
+    private static final Map<Identifier, Optional<Identifier>> EMISSIVE = new ConcurrentHashMap<>();
+    private static final Set<Identifier> EMISSIVE_TEXTURES = ConcurrentHashMap.newKeySet();
 
     // Render thread state: the thing being rendered, its CEM model texture and the pass.
     private static Entity entity;
     private static BlockEntity blockEntity;
-    private static ResourceLocation modelTextureFrom;
-    private static ResourceLocation modelTextureTo;
+    private static Identifier modelTextureFrom;
+    private static Identifier modelTextureTo;
     private static boolean emissivePass;
     private static boolean sawEmissive;
 
@@ -54,7 +53,7 @@ public final class PrEntityTextures {
     // ------------------------------------------------------------------ loading
 
     public static Data prepare(PrResources res) {
-        String suffix = res.properties(ResourceLocation.withDefaultNamespace(PrPaths.OPTIFINE + "emissive.properties"))
+        String suffix = res.properties(Identifier.withDefaultNamespace(PrPaths.OPTIFINE + "emissive.properties"))
                 .map(p -> p.get("suffix.emissive"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
@@ -71,7 +70,7 @@ public final class PrEntityTextures {
     // ------------------------------------------------------------------ render context
 
     /** Saved context of an enclosing render, restored by {@link #end}. */
-    public record Scope(Entity entity, BlockEntity blockEntity, ResourceLocation modelTextureFrom, ResourceLocation modelTextureTo,
+    public record Scope(Entity entity, BlockEntity blockEntity, Identifier modelTextureFrom, Identifier modelTextureTo,
             boolean emissivePass, boolean sawEmissive) {
     }
 
@@ -111,7 +110,7 @@ public final class PrEntityTextures {
     }
 
     /** A CEM model's {@code texture}: the renderer's own texture {@code from} is drawn as {@code to}. */
-    public static void setModelTexture(ResourceLocation from, ResourceLocation to) {
+    public static void setModelTexture(Identifier from, Identifier to) {
         modelTextureFrom = from;
         modelTextureTo = to;
     }
@@ -130,13 +129,12 @@ public final class PrEntityTextures {
         return sawEmissive && data.emissiveSuffix() != null && PryzmaConfig.prEmissiveTextures;
     }
 
-    /** Switches to the emissive pass and returns the buffers it must draw into. */
-    public static MultiBufferSource beginEmissivePass(MultiBufferSource buffers) {
-        emissivePass = true;
-        return type -> {
-            ResourceLocation texture = PrRenderTypes.texture(type);
-            return texture != null && EMISSIVE_TEXTURES.contains(texture) ? buffers.getBuffer(type) : PrRenderTypes.DISCARD;
-        };
+    public static void setEmissivePass(boolean pass) {
+        emissivePass = pass;
+    }
+
+    public static boolean isEmissive(Identifier texture) {
+        return EMISSIVE_TEXTURES.contains(texture);
     }
 
     public static boolean isEmissivePass() {
@@ -146,14 +144,14 @@ public final class PrEntityTextures {
     // ------------------------------------------------------------------ texture mapping
 
     /** The texture an entity render type should bind instead of {@code texture}. */
-    public static ResourceLocation remap(ResourceLocation texture) {
+    public static Identifier remap(Identifier texture) {
         if (entity == null && blockEntity == null) {
             return texture;
         }
         Data d = data;
-        ResourceLocation out = modelTextureFrom != null && modelTextureFrom.equals(texture) ? modelTextureTo : texture;
+        Identifier out = modelTextureFrom != null && modelTextureFrom.equals(texture) ? modelTextureTo : texture;
         if (PryzmaConfig.prRandomEntities && !d.random().isEmpty()) {
-            PrRandomProperties<ResourceLocation> props = d.random().get(out);
+            PrRandomProperties<Identifier> props = d.random().get(out);
             if (props != null) {
                 PrWorldInfo world = PrWorldInfo.client();
                 out = entity != null
@@ -162,7 +160,7 @@ public final class PrEntityTextures {
             }
         }
         if (d.emissiveSuffix() != null && PryzmaConfig.prEmissiveTextures) {
-            ResourceLocation emissive = emissiveOf(out, d);
+            Identifier emissive = emissiveOf(out, d);
             if (emissivePass) {
                 return emissive != null ? emissive : out;
             }
@@ -174,7 +172,7 @@ public final class PrEntityTextures {
     }
 
     /** {@code <path><suffix>.png} when that resource exists; an emissive texture maps to itself. */
-    static ResourceLocation emissiveOf(ResourceLocation texture, Data d) {
+    static Identifier emissiveOf(Identifier texture, Data d) {
         if (EMISSIVE_TEXTURES.contains(texture)) {
             return texture;
         }
@@ -183,7 +181,7 @@ public final class PrEntityTextures {
             if (!path.endsWith(".png") || d.manager() == null) {
                 return Optional.empty();
             }
-            ResourceLocation candidate = tex.withPath(path.substring(0, path.length() - 4) + d.emissiveSuffix() + ".png");
+            Identifier candidate = tex.withPath(path.substring(0, path.length() - 4) + d.emissiveSuffix() + ".png");
             if (d.manager().getResource(candidate).isEmpty()) {
                 return Optional.empty();
             }

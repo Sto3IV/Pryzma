@@ -18,7 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
@@ -31,11 +31,11 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
  * component at a time, and kept for the life of the view (one rule lookup).
  */
 final class PrCitStack implements PrCitItem {
-    private static final ResourceLocation[] NO_IDS = new ResourceLocation[0];
+    private static final Identifier[] NO_IDS = new Identifier[0];
 
     private final ItemStack stack;
     private final boolean offHand;
-    private ResourceLocation[] enchantmentIds;
+    private Identifier[] enchantmentIds;
     private int[] enchantmentLevels;
     private Map<String, Tag> components;
 
@@ -45,7 +45,7 @@ final class PrCitStack implements PrCitItem {
     }
 
     @Override
-    public ResourceLocation item() {
+    public Identifier item() {
         return BuiltInRegistries.ITEM.getKey(stack.getItem());
     }
 
@@ -54,7 +54,7 @@ final class PrCitStack implements PrCitItem {
         if (stack.getItem() instanceof PotionItem) {
             PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
             String potion = contents == null ? null
-                    : contents.potion().flatMap(Holder::unwrapKey).map(key -> key.location().toString()).orElse(null);
+                    : contents.potion().flatMap(Holder::unwrapKey).map(key -> key.identifier().toString()).orElse(null);
             return PrCitPotions.damage(potion, stack.is(Items.SPLASH_POTION));
         }
         return stack.getDamageValue();
@@ -77,7 +77,7 @@ final class PrCitStack implements PrCitItem {
     }
 
     @Override
-    public ResourceLocation enchantment(int index) {
+    public Identifier enchantment(int index) {
         readEnchantments();
         return enchantmentIds[index];
     }
@@ -102,11 +102,11 @@ final class PrCitStack implements PrCitItem {
             enchantmentLevels = new int[0];
             return;
         }
-        ResourceLocation[] ids = new ResourceLocation[enchantments.size()];
+        Identifier[] ids = new Identifier[enchantments.size()];
         int[] levels = new int[ids.length];
         int n = 0;
         for (Object2IntMap.Entry<Holder<Enchantment>> e : enchantments.entrySet()) {
-            ResourceLocation id = e.getKey().unwrapKey().map(ResourceKey::location).orElse(null);
+            Identifier id = e.getKey().unwrapKey().map(ResourceKey::identifier).orElse(null);
             if (id != null) {
                 ids[n] = id;
                 levels[n++] = e.getIntValue();
@@ -132,8 +132,8 @@ final class PrCitStack implements PrCitItem {
                 encode(component.type(), component.value(), ops, root);
             }
         } else {
-            ResourceLocation location = ResourceLocation.tryParse(id);
-            DataComponentType<?> type = location == null ? null : BuiltInRegistries.DATA_COMPONENT_TYPE.get(location);
+            Identifier location = Identifier.tryParse(id);
+            DataComponentType<?> type = location == null ? null : BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(location);
             Object value = type == null ? null : stack.get(type);
             if (value != null) {
                 encode(type, value, ops, root);
@@ -151,7 +151,7 @@ final class PrCitStack implements PrCitItem {
     @SuppressWarnings("unchecked")
     private static <T> void encode(DataComponentType<T> type, Object value, DynamicOps<Tag> ops, CompoundTag root) {
         Codec<T> codec = type.codec();
-        ResourceLocation key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type);
+        Identifier key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type);
         if (codec == null || key == null) {
             return;
         }

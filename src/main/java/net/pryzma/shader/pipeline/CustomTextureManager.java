@@ -1,6 +1,6 @@
 package net.pryzma.shader.pipeline;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -10,8 +10,6 @@ import net.pryzma.shader.gl.texture.GlTexture;
 import net.pryzma.shader.gl.texture.TextureAccess;
 import net.pryzma.shader.gl.texture.TextureType;
 import net.pryzma.shader.gl.texture.TextureWrapper;
-import net.pryzma.shader.mixin.GlStateManagerAccessor;
-import net.pryzma.shader.mixin.LightTextureAccessor;
 import net.pryzma.shader.pbr.format.TextureFormat;
 import net.pryzma.shader.pbr.format.TextureFormatLoader;
 import net.pryzma.shader.pbr.texture.PBRAtlasTexture;
@@ -23,13 +21,12 @@ import net.pryzma.shader.shaderpack.texture.CustomTextureData;
 import net.pryzma.shader.shaderpack.texture.TextureStage;
 import net.pryzma.shader.targets.backed.NativeImageBackedCustomTexture;
 import net.pryzma.shader.targets.backed.NativeImageBackedNoiseTexture;
-import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.io.FilenameUtils;
 import org.lwjgl.opengl.GL46C;
 
@@ -60,7 +57,7 @@ public class CustomTextureManager {
 			customTextureStageDataMap.forEach((samplerName, textureData) -> {
 				try {
 					customTextureIds.put(samplerName, createCustomTexture(textureData));
-				} catch (IOException | ResourceLocationException e) {
+				} catch (IOException | net.minecraft.IdentifierException e) {
 					PryzmaShaders.logger.error("Unable to parse the image data for the custom texture on stage "
 						+ textureStage + ", sampler " + samplerName, e);
 				}
@@ -93,7 +90,7 @@ public class CustomTextureManager {
 		}
 	}
 
-	private TextureAccess createCustomTexture(CustomTextureData textureData) throws IOException, ResourceLocationException {
+	private TextureAccess createCustomTexture(CustomTextureData textureData) throws IOException {
 		if (textureData instanceof CustomTextureData.PngData) {
 			NativeImageBackedCustomTexture texture = new NativeImageBackedCustomTexture((CustomTextureData.PngData) textureData);
 			ownedTextures.add(texture);
@@ -102,8 +99,7 @@ public class CustomTextureManager {
 		} else if (textureData instanceof CustomTextureData.LightmapMarker) {
 			// Special code path for the light texture. While shader packs hardcode the primary light texture, it's
 			// possible that a mod will create a different light texture, so this code path is robust to that.
-			return new TextureWrapper(((LightTextureAccessor) Minecraft.getInstance().gameRenderer.lightTexture())
-				.getLightTexture()::getId, TextureType.TEXTURE_2D);
+			return new TextureWrapper(() -> ((com.mojang.renderpearl.backend.opengl.GlTextureView) Minecraft.getInstance().gameRenderer.lightmap()).glId(), TextureType.TEXTURE_2D);
 		} else if (textureData instanceof CustomTextureData.RawData1D rawData1D) {
 			GlTexture texture = new GlTexture(TextureType.TEXTURE_1D, rawData1D.getSizeX(), 0, 0, rawData1D.getInternalFormat().getGlFormat(), rawData1D.getPixelFormat().getGlFormat(), rawData1D.getPixelType().getGlFormat(), rawData1D.getContent(), rawData1D.getFilteringData());
 			ownedRawTextures.add(texture);
@@ -140,7 +136,7 @@ public class CustomTextureManager {
 			TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 
 			if (pbrType == null) {
-				ResourceLocation textureLocation = ResourceLocation.fromNamespaceAndPath(namespace, location);
+				Identifier textureLocation = Identifier.fromNamespaceAndPath(namespace, location);
 
 				// NB: We have to re-query the TextureManager for the texture object every time. This is because the
 				//     AbstractTexture object could be removed / deleted from the TextureManager on resource reloads,
@@ -149,31 +145,17 @@ public class CustomTextureManager {
 				//     now.
 				return new TextureWrapper(() -> {
 					AbstractTexture texture = textureManager.getTexture(textureLocation);
-					if (texture instanceof TextureAtlas || texture instanceof PBRAtlasTexture) {
-						int tex = GlStateManagerAccessor.getActiveTexture();
-						int binding = GlStateManagerAccessor.getTEXTURES()[tex].binding;
-						texture.setFilter(false, Minecraft.getInstance().options.mipmapLevels().get() > 0);
-						GlStateManager._activeTexture(GL46C.GL_TEXTURE0 + tex);
-						GlStateManager._bindTexture(binding);
-					}
-					return texture != null ? texture.getId() : MissingTextureAtlasSprite.getTexture().getId();
+					return getTextureGlId(texture, textureManager);
 				}, TextureType.TEXTURE_2D);
 			} else {
 				location = location.substring(0, extensionIndex - pbrType.getSuffix().length()) + location.substring(extensionIndex);
-				ResourceLocation textureLocation = ResourceLocation.fromNamespaceAndPath(namespace, location);
+				Identifier textureLocation = Identifier.fromNamespaceAndPath(namespace, location);
 
 				return new TextureWrapper(() -> {
 					AbstractTexture texture = textureManager.getTexture(textureLocation);
 
 					if (texture != null) {
-						if (texture instanceof TextureAtlas || texture instanceof PBRAtlasTexture) {
-							int tex = GlStateManagerAccessor.getActiveTexture();
-							int binding = GlStateManagerAccessor.getTEXTURES()[tex].binding;
-							texture.setFilter(false, Minecraft.getInstance().options.mipmapLevels().get() > 0);
-							GlStateManager._activeTexture(GL46C.GL_TEXTURE0 + tex);
-							GlStateManager._bindTexture(binding);
-						}
-						int id = texture.getId();
+						int id = getTextureGlId(texture, textureManager);
 						PBRTextureHolder pbrHolder = PBRTextureManager.INSTANCE.getOrLoadHolder(id);
 						AbstractTexture pbrTexture = switch (pbrType) {
 							case NORMAL -> pbrHolder.normalTexture();
@@ -182,20 +164,32 @@ public class CustomTextureManager {
 
 						TextureFormat textureFormat = TextureFormatLoader.getFormat();
 						if (textureFormat != null) {
-							int previousBinding = GlStateManagerAccessor.getTEXTURES()[GlStateManagerAccessor.getActiveTexture()].binding;
-							GlStateManager._bindTexture(pbrTexture.getId());
+							int pbrId = getTextureGlId(pbrTexture, textureManager);
+							int previousBinding = org.lwjgl.opengl.GL11C.glGetInteger(org.lwjgl.opengl.GL11C.GL_TEXTURE_BINDING_2D);
+							GlStateManager._bindTexture(pbrId);
 							textureFormat.setupTextureParameters(pbrType, pbrTexture);
 							GlStateManager._bindTexture(previousBinding);
 						}
 
-						return pbrTexture.getId();
+						return getTextureGlId(pbrTexture, textureManager);
 					}
 
-					return MissingTextureAtlasSprite.getTexture().getId();
+					return getTextureGlId(null, textureManager);
 				}, TextureType.TEXTURE_2D);
 			}
 		}
 		throw new IllegalArgumentException("Don't know texture type!");
+	}
+
+	private static int getTextureGlId(AbstractTexture texture, TextureManager textureManager) {
+		if (texture != null && texture.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture gl) {
+			return gl.glId();
+		}
+		AbstractTexture missing = textureManager.getTexture(MissingTextureAtlasSprite.getLocation());
+		if (missing != null && missing.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture gl) {
+			return gl.glId();
+		}
+		return 0;
 	}
 
 	public EnumMap<TextureStage, Object2ObjectMap<String, TextureAccess>> getCustomTextureIdMap() {

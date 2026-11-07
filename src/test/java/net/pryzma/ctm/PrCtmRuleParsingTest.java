@@ -13,18 +13,18 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.pryzma.core.res.PrProperties;
 
 /** CTM properties parsing against OptiFine's ConnectedProperties rules. */
 class PrCtmRuleParsingTest {
     private static final PrProperties GLASS = PrProperties.parse(mc("optifine/ctm/glass/glass.properties"), "");
 
-    private static ResourceLocation mc(String path) {
-        return ResourceLocation.withDefaultNamespace(path);
+    private static Identifier mc(String path) {
+        return Identifier.withDefaultNamespace(path);
     }
 
-    private static ResourceLocation sprite(String tile) {
+    private static Identifier sprite(String tile) {
         return PrCtmRule.tile(tile, GLASS).sprite();
     }
 
@@ -51,8 +51,8 @@ class PrCtmRuleParsingTest {
         PrCtmRule.Tile t = PrCtmRule.tile("7", mcp);
         assertEquals(mc("optifine/ctm/glass/7"), t.sprite(), "mcpatcher tiles share the optifine sprite names");
         assertEquals(mc("optifine/ctm/glass/7.png"), t.file());
-        PrProperties mod = PrProperties.parse(ResourceLocation.fromNamespaceAndPath("mymod", "optifine/ctm/x/x.properties"), "");
-        assertEquals(ResourceLocation.fromNamespaceAndPath("mymod", "optifine/ctm/x/0"), PrCtmRule.tile("0", mod).sprite());
+        PrProperties mod = PrProperties.parse(Identifier.fromNamespaceAndPath("mymod", "optifine/ctm/x/x.properties"), "");
+        assertEquals(Identifier.fromNamespaceAndPath("mymod", "optifine/ctm/x/0"), PrCtmRule.tile("0", mod).sprite());
     }
 
     @Test
@@ -101,7 +101,7 @@ class PrCtmRuleParsingTest {
 
     // ------------------------------------------------------------------ whole files
 
-    private static Optional<PrCtmRule> rule(String path, String text, Predicate<ResourceLocation> sprites, List<String> warnings) {
+    private static Optional<PrCtmRule> rule(String path, String text, Predicate<Identifier> sprites, List<String> warnings) {
         return PrCtmRule.parse(PrProperties.parse(mc(path), text), sprites, warnings::add);
     }
 

@@ -2,7 +2,7 @@ package net.pryzma.item;
 
 import java.util.Map;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 
 /**
@@ -13,11 +13,11 @@ final class PrCitIndex {
     static final PrCitIndex EMPTY = new PrCitIndex(Map.of(), Map.of(), PrCitGlobal.DEFAULT, 0);
 
     final Map<Item, PrCitEntry[]> items;
-    final Map<ResourceLocation, PrCitEntry[]> enchantments;
+    final Map<Identifier, PrCitEntry[]> enchantments;
     final PrCitGlobal global;
     final int rules;
 
-    PrCitIndex(Map<Item, PrCitEntry[]> items, Map<ResourceLocation, PrCitEntry[]> enchantments, PrCitGlobal global, int rules) {
+    PrCitIndex(Map<Item, PrCitEntry[]> items, Map<Identifier, PrCitEntry[]> enchantments, PrCitGlobal global, int rules) {
         this.items = items;
         this.enchantments = enchantments;
         this.global = global;

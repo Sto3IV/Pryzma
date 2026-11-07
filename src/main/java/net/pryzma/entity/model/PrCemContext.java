@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public final class PrCemContext {
     private static int serial;
     static Entity entity;
-    static EntityRenderer<?> renderer;
+    static EntityRenderer<?, ?> renderer;
     static BlockEntity blockEntity;
     static float limbSwing;
     static float limbSpeed;
@@ -31,11 +31,11 @@ public final class PrCemContext {
     private PrCemContext() {
     }
 
-    public record Scope(Entity entity, EntityRenderer<?> renderer, BlockEntity blockEntity, float limbSwing, float limbSpeed,
+    public record Scope(Entity entity, EntityRenderer<?, ?> renderer, BlockEntity blockEntity, float limbSwing, float limbSpeed,
             float age, float headYaw, float headPitch, float partialTick, int ruleIndex) {
     }
 
-    public static Scope begin(Entity e, EntityRenderer<?> r, float partial) {
+    public static Scope begin(Entity e, EntityRenderer<?, ?> r, float partial) {
         Scope saved = save();
         serial++;
         entity = e;

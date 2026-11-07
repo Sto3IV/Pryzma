@@ -1,33 +1,25 @@
 package net.pryzma.shader.mixin;
 
-import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.gl.ShaderRenderSystem;
-import net.pryzma.shader.layer.IsOutlineRenderStateShard;
-import net.pryzma.shader.layer.OuterWrappedRenderType;
 import net.pryzma.shader.pathways.HandRenderer;
 import net.pryzma.shader.pipeline.WorldRenderingPhase;
 import net.pryzma.shader.pipeline.WorldRenderingPipeline;
 import net.pryzma.shader.shadows.frustum.fallback.NonCullingFrustum;
 import net.pryzma.shader.uniforms.CapturedRenderingState;
 import net.pryzma.shader.uniforms.ShaderTimeUniforms;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL43C;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,67 +27,48 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LevelRenderer.class)
 public class MixinLevelRenderer {
-	@Unique
-	private static final String CLEAR = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V";
-	@Unique
-	private static final String RENDER_SKY = "Lnet/minecraft/client/renderer/LevelRenderer;renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V";
-	@Unique
-	private static final String RENDER_CLOUDS = "Lnet/minecraft/client/renderer/LevelRenderer;renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;FDDD)V";
-	@Unique
-	private static final String RENDER_WEATHER = "Lnet/minecraft/client/renderer/LevelRenderer;renderSnowAndRain(Lnet/minecraft/client/renderer/LightTexture;FDDD)V";
-
 	@Shadow
 	@Final
 	private Minecraft minecraft;
 
-	@Unique
-	private WorldRenderingPipeline pipeline;
-
 	@Shadow
-	private RenderBuffers renderBuffers;
-
-	@Shadow
-	private int ticks;
-
-	@Shadow
-	private Frustum cullingFrustum;
+	@Final
+	private LevelRenderState levelRenderState;
 
 	@Shadow
 	private @Nullable ClientLevel level;
+
 	@Unique
-	private boolean warned;
+	private WorldRenderingPipeline pipeline;
 
 	@Unique
 	private NonCullingFrustum overrideFrustum;
 
-	// Begin shader rendering after buffers have been cleared.
-	// At this point we've ensured that Minecraft's main framebuffer is cleared.
-	// This is important or else very odd issues will happen with shaders that have a final pass that doesn't write to
-	// all pixels.
-	@Inject(method = "renderLevel", at = @At("HEAD"))
-	private void pryzma$setupPipeline(DeltaTracker deltaTracker, boolean renderBlockOutline,
-									Camera camera, GameRenderer gameRenderer, LightTexture lightTexture,
-									Matrix4f modelView, Matrix4f projection, CallbackInfo callback) {
+	@Unique
+	private CameraRenderState currentCameraRenderState;
+
+	@Inject(method = "render", at = @At("HEAD"))
+	private void pryzma$setupPipeline(GraphicsResourceAllocator allocator, boolean tick,
+									CameraRenderState cameraRenderState, GpuBufferSlice bufferSlice,
+									Vector4f clearColor, boolean bl, boolean bl2, CallbackInfo ci) {
+		this.currentCameraRenderState = cameraRenderState;
 		ShaderTimeUniforms.updateTime();
-		CapturedRenderingState.INSTANCE.setGbufferModelView(modelView);
-		CapturedRenderingState.INSTANCE.setGbufferProjection(projection);
-		float fakeTickDelta = deltaTracker.getGameTimeDeltaPartialTick(false);
-		CapturedRenderingState.INSTANCE.setTickDelta(fakeTickDelta);
-		CapturedRenderingState.INSTANCE.setCloudTime((ticks + fakeTickDelta) * 0.03F);
+		CapturedRenderingState.INSTANCE.setGbufferModelView(cameraRenderState.viewRotationMatrix);
+		CapturedRenderingState.INSTANCE.setGbufferProjection(cameraRenderState.projectionMatrix);
+		CapturedRenderingState.INSTANCE.setTickDelta(cameraRenderState.cameraEntityPartialTicks);
+		float time = (float) (level != null ? level.getGameTime() : 0L) + cameraRenderState.cameraEntityPartialTicks;
+		CapturedRenderingState.INSTANCE.setCloudTime(time * 0.03F);
 
 		pipeline = PryzmaShaders.getPipelineManager().preparePipeline(PryzmaShaders.getCurrentDimension());
 
 		if (pipeline.shouldDisableFrustumCulling()) {
 			this.overrideFrustum = new NonCullingFrustum();
-			this.overrideFrustum.prepare(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
-			this.cullingFrustum = overrideFrustum;
+			this.overrideFrustum.prepare(cameraRenderState.pos.x, cameraRenderState.pos.y, cameraRenderState.pos.z);
+			cameraRenderState.cullFrustum = overrideFrustum;
 		} else {
 			this.overrideFrustum = null;
 		}
@@ -105,184 +78,48 @@ public class MixinLevelRenderer {
 		if (PryzmaShaders.shouldActivateWireframe() && this.minecraft.isLocalServer()) {
 			ShaderRenderSystem.setPolygonMode(GL43C.GL_LINE);
 		}
-	}
 
-	@ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V"), index = 1)
-	private Frustum changeFrustum(Frustum frustum) {
-		return this.overrideFrustum != null ? this.overrideFrustum : frustum;
-	}
-
-	// Begin shader rendering after buffers have been cleared.
-	// At this point we've ensured that Minecraft's main framebuffer is cleared.
-	// This is important or else very odd issues will happen with shaders that have a final pass that doesn't write to
-	// all pixels.
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = CLEAR, shift = At.Shift.AFTER, remap = false))
-	private void pryzma$beginLevelRender(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
 		pipeline.beginLevelRendering();
 		pipeline.setPhase(WorldRenderingPhase.NONE);
 	}
 
+	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;addSkyPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;)V"))
+	private void pryzma$renderTerrainShadows(GraphicsResourceAllocator allocator, boolean tick,
+											CameraRenderState cameraRenderState, GpuBufferSlice bufferSlice,
+											Vector4f clearColor, boolean bl, boolean bl2, CallbackInfo ci) {
+		Camera camera = this.minecraft.gameRenderer.mainCamera();
+		pipeline.renderShadows((LevelRendererAccessor) this, camera);
+	}
 
-	// Inject a bit early so that we can end our rendering before mods like VoxelMap (which inject at RETURN)
-	// render their waypoint beams.
-	@Inject(method = "renderLevel", at = @At(value = "RETURN", shift = At.Shift.BEFORE))
-	private void pryzma$endLevelRender(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f modelMatrix, Matrix4f matrix4f2, CallbackInfo ci) {
-		HandRenderer.INSTANCE.renderTranslucent(modelMatrix, deltaTracker.getGameTimeDeltaPartialTick(true), camera, gameRenderer, pipeline);
-		Minecraft.getInstance().getProfiler().popPush("iris_final");
+	@Inject(method = "prepareTranslucents", at = @At("HEAD"))
+	private void pryzma$beginTranslucents(CallbackInfo ci) {
+		if (pipeline == null) return;
+		Camera camera = this.minecraft.gameRenderer.mainCamera();
+		CameraRenderState cameraRenderState = this.currentCameraRenderState != null ? this.currentCameraRenderState : this.levelRenderState.cameraRenderState;
+		Matrix4f modelMatrix = cameraRenderState != null && cameraRenderState.viewRotationMatrix != null ? cameraRenderState.viewRotationMatrix : new Matrix4f();
+		float tickDelta = cameraRenderState != null ? cameraRenderState.cameraEntityPartialTicks : 0.0f;
+
+		pipeline.beginHand();
+		HandRenderer.INSTANCE.renderSolid(modelMatrix, tickDelta, camera, this.minecraft.gameRenderer, pipeline);
+		net.minecraft.util.profiling.Profiler.get().popPush("pryzma_pre_translucent");
+		pipeline.beginTranslucents();
+	}
+
+	@Inject(method = "render", at = @At(value = "RETURN"))
+	private void pryzma$endLevelRender(GraphicsResourceAllocator allocator, boolean tick,
+									CameraRenderState cameraRenderState, GpuBufferSlice bufferSlice,
+									Vector4f clearColor, boolean bl, boolean bl2, CallbackInfo ci) {
+		Camera camera = this.minecraft.gameRenderer.mainCamera();
+		HandRenderer.INSTANCE.renderTranslucent(cameraRenderState.viewRotationMatrix, cameraRenderState.cameraEntityPartialTicks, camera, this.minecraft.gameRenderer, pipeline);
+		net.minecraft.util.profiling.Profiler.get().popPush("iris_final");
 		pipeline.finalizeLevelRendering();
 		pipeline = null;
+		this.currentCameraRenderState = null;
 
 		ShaderRenderSystem.restoreCullingState();
 
 		if (PryzmaShaders.shouldActivateWireframe() && this.minecraft.isLocalServer()) {
 			ShaderRenderSystem.setPolygonMode(GL43C.GL_FILL);
 		}
-	}
-
-	// Setup shadow terrain & render shadows before the main terrain setup. We need to do things in this order to
-	// avoid breaking other mods such as Light Overlay: upstream issue #1356
-
-	// Do this before sky rendering so it's ready before the sky render starts.
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V"))
-	private void pryzma$renderTerrainShadows(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.renderShadows((LevelRendererAccessor) this, camera);
-	}
-
-	@ModifyVariable(method = "renderSky", at = @At(value = "HEAD"), index = 5, argsOnly = true)
-	private boolean pryzma$alwaysRenderSky(boolean value) {
-		return false;
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V"))
-	private void pryzma$beginSky(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		// Use CUSTOM_SKY until levelFogColor is called as a heuristic to catch FabricSkyboxes.
-		pipeline.setPhase(WorldRenderingPhase.CUSTOM_SKY);
-
-		// We've changed the phase, but vanilla doesn't update the shader program at this point before rendering stuff,
-		// so we need to manually refresh the shader program so that the correct shader override gets applied.
-		// TODO: Move the injection instead
-		RenderSystem.setShader(GameRenderer::getPositionShader);
-	}
-
-	@Inject(method = "renderSky",
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/FogRenderer;levelFogColor()V"))
-	private void pryzma$renderSky$beginNormalSky(Matrix4f matrix4f, Matrix4f matrix4f2, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
-		// None of the vanilla sky is rendered until after this call, so if anything is rendered before, it's
-		// CUSTOM_SKY.
-		pipeline.setPhase(WorldRenderingPhase.SKY);
-	}
-
-	@Inject(method = "renderSky", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;SUN_LOCATION:Lnet/minecraft/resources/ResourceLocation;"))
-	private void pryzma$setSunRenderStage(Matrix4f matrix4f, Matrix4f matrix4f2, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.SUN);
-	}
-
-	@Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DimensionSpecialEffects;getSunriseColor(FF)[F"))
-	private void pryzma$setSunsetRenderStage(Matrix4f matrix4f, Matrix4f matrix4f2, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.SUNSET);
-	}
-
-	@Inject(method = "renderSky", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;MOON_LOCATION:Lnet/minecraft/resources/ResourceLocation;"))
-	private void pryzma$setMoonRenderStage(Matrix4f matrix4f, Matrix4f matrix4f2, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.MOON);
-	}
-
-	@Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getStarBrightness(F)F"))
-	private void pryzma$setStarRenderStage(Matrix4f matrix4f, Matrix4f matrix4f2, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.STARS);
-	}
-
-	@Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getEyePosition(F)Lnet/minecraft/world/phys/Vec3;"))
-	private void pryzma$setVoidRenderStage(Matrix4f matrix4f, Matrix4f matrix4f2, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.VOID);
-	}
-
-	@Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getTimeOfDay(F)F"),
-		slice = @Slice(from = @At(value = "FIELD", target = "Lcom/mojang/math/Axis;YP:Lcom/mojang/math/Axis;")))
-	private void pryzma$renderSky$tiltSun(Matrix4f matrix4f, Matrix4f matrix4f2, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci, @Local PoseStack poseStack) {
-		poseStack.mulPose(Axis.ZP.rotationDegrees(pipeline.getSunPathRotation()));
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V", shift = At.Shift.AFTER))
-	private void pryzma$endSky(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.NONE);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FDDD)V"))
-	private void pryzma$beginClouds(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.CLOUDS);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FDDD)V", shift = At.Shift.AFTER))
-	private void pryzma$endClouds(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.NONE);
-	}
-
-
-	@Inject(method = "renderSectionLayer", at = @At("HEAD"))
-	private void pryzma$beginTerrainLayer(RenderType renderType, double d, double e, double f, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.fromTerrainRenderType(renderType));
-	}
-
-	@Inject(method = "renderSectionLayer", at = @At("RETURN"))
-	private void pryzma$endTerrainLayer(RenderType renderType, double d, double e, double f, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.NONE);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = RENDER_WEATHER))
-	private void pryzma$beginWeather(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.RAIN_SNOW);
-	}
-
-	@ModifyArg(method = RENDER_WEATHER, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;depthMask(Z)V", ordinal = 0, remap = false))
-	private boolean pryzma$writeRainAndSnowToDepthBuffer(boolean depthMaskEnabled) {
-		if (pipeline.shouldWriteRainAndSnowToDepthBuffer()) {
-			return true;
-		}
-
-		return depthMaskEnabled;
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = RENDER_WEATHER, shift = At.Shift.AFTER))
-	private void pryzma$endWeather(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.NONE);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderWorldBorder(Lnet/minecraft/client/Camera;)V"))
-	private void pryzma$beginWorldBorder(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.WORLD_BORDER);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderWorldBorder(Lnet/minecraft/client/Camera;)V", shift = At.Shift.AFTER))
-	private void pryzma$endWorldBorder(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.NONE);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/debug/DebugRenderer;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;DDD)V"))
-	private void pryzma$setDebugRenderStage(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.DEBUG);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/debug/DebugRenderer;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;DDD)V", shift = At.Shift.AFTER))
-	private void pryzma$resetDebugRenderStage(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.setPhase(WorldRenderingPhase.NONE);
-	}
-
-	@ModifyArg(method = "renderLevel",
-		at = @At(value = "INVOKE", target = "net/minecraft/client/renderer/MultiBufferSource$BufferSource.getBuffer (Lnet/minecraft/client/renderer/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;"),
-		slice = @Slice(
-			from = @At(value = "CONSTANT", args = "stringValue=outline"),
-			to = @At(value = "INVOKE", target = "net/minecraft/client/renderer/LevelRenderer.renderHitOutline (Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/entity/Entity;DDDLnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V")
-		))
-	private RenderType pryzma$beginBlockOutline(RenderType type) {
-		return new OuterWrappedRenderType("pryzma:is_outline", type, IsOutlineRenderStateShard.INSTANCE);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "CONSTANT", args = "stringValue=translucent"))
-	private void pryzma$beginTranslucents(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f modelMatrix, Matrix4f matrix4f2, CallbackInfo ci) {
-		pipeline.beginHand();
-		HandRenderer.INSTANCE.renderSolid(modelMatrix, deltaTracker.getGameTimeDeltaPartialTick(true), camera, gameRenderer, pipeline);
-		Minecraft.getInstance().getProfiler().popPush("pryzma_pre_translucent");
-		pipeline.beginTranslucents();
 	}
 }

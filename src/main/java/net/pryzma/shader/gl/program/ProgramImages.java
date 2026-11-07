@@ -1,12 +1,13 @@
 package net.pryzma.shader.gl.program;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.pryzma.shader.gl.image.ImageBinding;
 import net.pryzma.shader.gl.image.ImageHolder;
 import net.pryzma.shader.gl.image.ImageLimits;
 import net.pryzma.shader.gl.texture.InternalTextureFormat;
+import org.lwjgl.opengl.GL20C;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class ProgramImages {
 	public void update() {
 		if (initializer != null) {
 			for (GlUniform1iCall call : initializer) {
-				RenderSystem.glUniform1i(call.location(), call.value());
+				GL20C.glUniform1i(call.location(), call.value());
 			}
 
 			initializer = null;

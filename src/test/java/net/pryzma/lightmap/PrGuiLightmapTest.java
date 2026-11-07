@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 class PrGuiLightmapTest {
-    private static final ResourceLocation LIGHTMAP = ResourceLocation.withDefaultNamespace("dynamic/light_map_1");
+    private static final Identifier LIGHTMAP = Identifier.withDefaultNamespace("dynamic/light_map_1");
 
     @Test
     void worldAlwaysKeepsTheLightmap() {

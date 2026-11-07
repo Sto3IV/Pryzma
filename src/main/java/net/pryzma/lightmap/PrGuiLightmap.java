@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.pryzma.Pryzma;
 
 /**
@@ -18,7 +18,7 @@ import net.pryzma.Pryzma;
  * night-time world needs the white lightmap too. Render thread only.
  */
 public final class PrGuiLightmap {
-    public static final ResourceLocation WHITE_LIGHTMAP = ResourceLocation.fromNamespaceAndPath(Pryzma.MODID, "dynamic/gui_lightmap");
+    public static final Identifier WHITE_LIGHTMAP = Identifier.fromNamespaceAndPath(Pryzma.MODID, "dynamic/gui_lightmap");
 
     /** The lightmap texture was last written by the custom lightmap. */
     private static boolean customLightmap;
@@ -51,12 +51,12 @@ public final class PrGuiLightmap {
      * {@code location} when the lightmap stays, else the white lightmap, created on first use. 16x16: the text
      * shaders read texel (15, 15) with {@code texelFetch}, which a smaller texture does not have.
      */
-    public static ResourceLocation substitute(ResourceLocation location) {
+    public static Identifier substitute(Identifier location) {
         if (!replacesLightmap()) {
             return location;
         }
         if (white == null) {
-            white = new DynamicTexture(16, 16, false);
+            white = new DynamicTexture("pryzma_white_lightmap", 16, 16, false);
             NativeImage pixels = white.getPixels();
             if (pixels != null) {
                 pixels.fillRect(0, 0, 16, 16, 0xFFFFFFFF);

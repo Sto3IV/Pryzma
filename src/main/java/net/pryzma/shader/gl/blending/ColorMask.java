@@ -28,4 +28,8 @@ public class ColorMask {
 	public boolean isAlphaMasked() {
 		return alpha;
 	}
+
+	public int toMask() {
+		return (red ? 1 : 0) | (green ? 2 : 0) | (blue ? 4 : 0) | (alpha ? 8 : 0);
+	}
 }

@@ -25,19 +25,15 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryUtil;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlTexture;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.pryzma.shader.gl.state.GlBindingCache;
 
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
 import net.pryzma.Pryzma;
 
@@ -241,7 +237,7 @@ public final class FarlandsGpuEngine {
             // Shared EBO
             GL15C.glBindBuffer(GL15C.GL_ELEMENT_ARRAY_BUFFER, staticEbo);
             GlStateManager._glBindVertexArray(0);
-            VertexBuffer.unbind();
+            GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
 
             // Reset allocator
             freeOffsets[0] = 0;
@@ -344,7 +340,7 @@ public final class FarlandsGpuEngine {
         GlStateManager._glBindVertexArray(megaVao);
         GL43C.glBindVertexBuffer(0, megaVbo, 0L, VERTEX_BYTES);
         GlStateManager._glBindVertexArray(0);
-        VertexBuffer.unbind();
+        GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
     }
 
     // ------------------------------------------------------------------ mesh intake and eviction
@@ -496,7 +492,7 @@ public final class FarlandsGpuEngine {
         GlStateManager._glBindVertexArray(megaVao);
         GL32C.glDrawElementsBaseVertex(GL11C.GL_TRIANGLES, quads * 6, GL11C.GL_UNSIGNED_INT, (long) first * 6 * 4, mesh.baseVertex);
         GlStateManager._glBindVertexArray(0);
-        VertexBuffer.unbind();
+        GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
     }
 
     // ------------------------------------------------------------------ rendering
@@ -504,7 +500,7 @@ public final class FarlandsGpuEngine {
     /**
      * Executes GPU-driven frustum culling and MDI submission into the private depth FBO.
      */
-    public static int render(ShaderInstance program, Matrix4f modelView, Matrix4f projection, Vec3 camera,
+    public static int render(Matrix4f modelView, Matrix4f projection, Vec3 camera,
             float clipRadius, int lodRadiusBlocks, float fogStart, float fogEnd) {
         if (!isSupported() || activeSectorCount == 0) {
             return 0;
@@ -551,53 +547,40 @@ public final class FarlandsGpuEngine {
 
         // 3. Prepare private Depth FBO (zero clearing of the main depth buffer)
         Minecraft mc = Minecraft.getInstance();
-        RenderTarget main = mc.getMainRenderTarget();
-        bindDepthFbo(main.width, main.height, main.getColorTextureId());
+        RenderTarget main = mc.gameRenderer.mainRenderTarget();
+        int colorTexId = 0;
+        if (main.getColorTexture() instanceof GlTexture glt) {
+            colorTexId = glt.glId();
+        }
+        bindDepthFbo(main.width, main.height, colorTexId);
 
-        LightTexture lightTexture = mc.gameRenderer.lightTexture();
-        lightTexture.turnOnLightLayer();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthFunc(GL11C.GL_LEQUAL);
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
-        RenderSystem.clearDepth(1.0);
-        RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+        GpuTextureView lightTexView = mc.gameRenderer.levelLightmap();
+        int lightTexId = 0;
+        if (lightTexView != null && lightTexView.texture() instanceof GlTexture glt) {
+            lightTexId = glt.glId();
+        }
+        LodProgram.bindLightmap(lightTexId);
+
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthFunc(GL11C.GL_LEQUAL);
+        GlStateManager._depthMask(true);
+        GlStateManager._enableCull();
+        GL11C.glDisable(GL11C.GL_BLEND);
+        GlStateManager._clearBuffer(1.0);
+        GlStateManager._clear(GL11C.GL_DEPTH_BUFFER_BIT);
 
         try {
             // 4. Upload render program uniforms
-            program.setDefaultUniforms(VertexFormat.Mode.QUADS, modelView, projection, mc.getWindow());
-            if (program.COLOR_MODULATOR != null) {
-                program.COLOR_MODULATOR.set(1.0F, 1.0F, 1.0F, 1.0F);
-            }
-            if (program.FOG_START != null) {
-                program.FOG_START.set(fogStart);
-            }
-            if (program.FOG_END != null) {
-                program.FOG_END.set(fogEnd);
-            }
-            Uniform fogColor = program.getUniform("FogColor");
-            if (fogColor != null) {
-                float[] fc = RenderSystem.getShaderFogColor();
-                fogColor.set(fc[0], fc[1], fc[2], 1.0F);
-            }
-            Uniform clip = program.getUniform("ClipRadius");
-            if (clip != null) {
-                clip.set(clipRadius);
-            }
-            Uniform camB = program.getUniform("CameraBlock");
-            if (camB != null) {
-                camB.set(cbX, cbY, cbZ);
-            }
-            Uniform camF = program.getUniform("CameraFrac");
-            if (camF != null) {
-                camF.set(fracX, fracY, fracZ);
-            }
-            Uniform inst = program.getUniform("UseInstancedOffset");
-            if (inst != null) {
-                inst.set(1);
-            }
-            program.apply();
+            LodProgram.use();
+            LodProgram.setModelView(modelView);
+            LodProgram.setProj(projection);
+            LodProgram.setColorModulator(1.0F, 1.0F, 1.0F, 1.0F);
+            org.joml.Vector3d fc = net.pryzma.shader.uniforms.CapturedRenderingState.INSTANCE.getFogColor();
+            LodProgram.setFog(fogStart, fogEnd, (float) fc.x, (float) fc.y, (float) fc.z, 1.0F);
+            LodProgram.setClipRadius(clipRadius);
+            LodProgram.setCameraBlock(cbX, cbY, cbZ);
+            LodProgram.setCameraFrac(fracX, fracY, fracZ);
+            LodProgram.setUseInstancedOffset(1);
 
             // 5. Submit Multi-Draw Indirect
             GlStateManager._glBindVertexArray(megaVao);
@@ -616,14 +599,10 @@ public final class FarlandsGpuEngine {
             }
 
             // Water pass
-            RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                    GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            RenderSystem.depthMask(false);
-            if (camF != null) {
-                camF.set(fracX, fracY + NativeLodRenderer.WATER_DROP, fracZ);
-                camF.upload();
-            }
+            GL11C.glEnable(GL11C.GL_BLEND);
+            GlStateManager._blendFuncSeparate(GL11C.GL_SRC_ALPHA, GL11C.GL_ONE_MINUS_SRC_ALPHA, GL11C.GL_ONE, GL11C.GL_ONE_MINUS_SRC_ALPHA);
+            GlStateManager._depthMask(false);
+            LodProgram.setCameraFrac(fracX, fracY + NativeLodRenderer.WATER_DROP, fracZ);
 
             GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, waterCmdBuf);
             if (hasIndirectParameters) {
@@ -635,11 +614,11 @@ public final class FarlandsGpuEngine {
                 }
             }
 
-            RenderSystem.depthMask(true);
-            RenderSystem.disableBlend();
-            RenderSystem.defaultBlendFunc();
+            GlStateManager._depthMask(true);
+            GL11C.glDisable(GL11C.GL_BLEND);
+            GlStateManager._blendFuncSeparate(GL11C.GL_ONE, GL11C.GL_ZERO, GL11C.GL_ONE, GL11C.GL_ZERO);
         } finally {
-            // 6. Complete state cleanup and 100% restoration for Blaze3D
+            // 6. Complete state cleanup and 100% restoration
             GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, 0);
             if (hasIndirectParameters) {
                 GL15C.glBindBuffer(GL46C.GL_PARAMETER_BUFFER, 0);
@@ -650,13 +629,12 @@ public final class FarlandsGpuEngine {
             GL30C.glBindBufferBase(GL43C.GL_SHADER_STORAGE_BUFFER, 3, 0);
 
             GlStateManager._glBindVertexArray(0);
-            VertexBuffer.unbind();
-            BufferUploader.invalidate();
-            program.clear();
-            lightTexture.turnOffLightLayer();
+            GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+            LodProgram.unuse();
+            LodProgram.unbindLightmap();
             GlBindingCache.INSTANCE.invalidate();
-            main.bindWrite(false);
-            RenderSystem.viewport(0, 0, main.width, main.height);
+            GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
+            GL11C.glViewport(0, 0, main.width, main.height);
         }
 
         return activeSectorCount;

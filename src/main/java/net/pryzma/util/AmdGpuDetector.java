@@ -1,6 +1,6 @@
 package net.pryzma.util;
 
-import com.mojang.blaze3d.platform.GlUtil;
+import org.lwjgl.opengl.GL11C;
 import java.util.Locale;
 
 /**
@@ -29,8 +29,8 @@ public final class AmdGpuDetector {
         }
 
         try {
-            String vendor = GlUtil.getVendor();
-            String renderer = GlUtil.getRenderer();
+            String vendor = GL11C.glGetString(GL11C.GL_VENDOR);
+            String renderer = GL11C.glGetString(GL11C.GL_RENDERER);
             if (vendor == null && renderer == null) {
                 return false; // OpenGL context not ready yet
             }

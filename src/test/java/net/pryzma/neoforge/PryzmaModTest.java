@@ -799,7 +799,7 @@ class PryzmaModTest {
         assertTrue(ModelBakerTransformer.inject(node));
         assertFalse(ModelBakerTransformer.inject(node));
         assertTrue(node.methods.stream().anyMatch(m -> "getTopLevelModel".equals(m.name)
-                && "(Lnet/minecraft/client/resources/model/ModelResourceLocation;)Lnet/minecraft/client/resources/model/UnbakedModel;".equals(m.desc)));
+                && "(Lnet/minecraft/client/resources/model/ModelIdentifier;)Lnet/minecraft/client/resources/model/UnbakedModel;".equals(m.desc)));
         assertVerifies(node);
     }
 

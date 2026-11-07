@@ -1,12 +1,14 @@
 package net.pryzma.shader.mixin.texture;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.platform.Transparency;
+import net.minecraft.client.renderer.texture.MipmapStrategy;
+import net.minecraft.resources.Identifier;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.pbr.SpriteContentsExtension;
 import net.pryzma.shader.pbr.mipmap.CustomMipmapGenerator;
 import net.minecraft.client.renderer.texture.MipmapGenerator;
 import net.minecraft.client.renderer.texture.SpriteContents;
-import net.minecraft.client.renderer.texture.SpriteTicker;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,10 +21,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinSpriteContents implements SpriteContentsExtension {
 	@Unique
 	@Nullable
-	private SpriteContents.Ticker createdTicker;
+	private SpriteContents.AnimationState createdTicker;
 
-	@Redirect(method = "increaseMipLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/MipmapGenerator;generateMipLevels([Lcom/mojang/blaze3d/platform/NativeImage;I)[Lcom/mojang/blaze3d/platform/NativeImage;"))
-	private NativeImage[] pryzma$redirectMipmapGeneration(NativeImage[] nativeImages, int mipLevel) {
+	@Redirect(method = "increaseMipLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/MipmapGenerator;generateMipLevels(Lnet/minecraft/resources/Identifier;[Lcom/mojang/blaze3d/platform/NativeImage;ILnet/minecraft/client/renderer/texture/MipmapStrategy;FLcom/mojang/blaze3d/platform/Transparency;)[Lcom/mojang/blaze3d/platform/NativeImage;"))
+	private NativeImage[] pryzma$redirectMipmapGeneration(Identifier id, NativeImage[] nativeImages, int mipLevel, MipmapStrategy strategy, float cutOff, Transparency transparency) {
 		if (this instanceof CustomMipmapGenerator.Provider provider) {
 			CustomMipmapGenerator generator = provider.getMipmapGenerator();
 			if (generator != null) {
@@ -33,20 +35,17 @@ public class MixinSpriteContents implements SpriteContentsExtension {
 				}
 			}
 		}
-		return MipmapGenerator.generateMipLevels(nativeImages, mipLevel);
+		return MipmapGenerator.generateMipLevels(id, nativeImages, mipLevel, strategy, cutOff, transparency);
 	}
 
-	@Inject(method = "createTicker()Lnet/minecraft/client/renderer/texture/SpriteTicker;", at = @At("RETURN"))
-	private void onReturnCreateTicker(CallbackInfoReturnable<SpriteTicker> cir) {
-		SpriteTicker ticker = cir.getReturnValue();
-		if (ticker instanceof SpriteContents.Ticker innerTicker) {
-			createdTicker = innerTicker;
-		}
+	@Inject(method = "createAnimationState", at = @At("RETURN"))
+	private void onReturnCreateAnimationState(CallbackInfoReturnable<SpriteContents.AnimationState> cir) {
+		createdTicker = cir.getReturnValue();
 	}
 
 	@Override
 	@Nullable
-	public SpriteContents.Ticker getCreatedTicker() {
+	public SpriteContents.AnimationState getCreatedTicker() {
 		return createdTicker;
 	}
 }

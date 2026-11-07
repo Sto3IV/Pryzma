@@ -4,7 +4,8 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.fog.FogRenderer;
+import net.minecraft.client.renderer.fog.environment.AtmosphericFogEnvironment;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
@@ -95,7 +96,7 @@ public final class PrRenderHooks {
      * starts beyond anything rendered. Water, lava, snow, blindness and foggy biomes keep theirs.
      */
     public static void onRenderFog(ViewportEvent.RenderFog event) {
-        if (event.getMode() != FogRenderer.FogMode.FOG_TERRAIN || event.getType() != FogType.NONE || !isClearAir(event.getCamera())) {
+        if (!(event.getEnvironment() instanceof AtmosphericFogEnvironment) || event.getType() != FogType.NONE || !isClearAir(event.getCamera())) {
             return;
         }
         if (net.pryzma.lod.DistantHorizonsBridge.isDhActive()) {
@@ -109,7 +110,6 @@ public final class PrRenderHooks {
                 // must fade at the same distance or the seam between them shows.
                 event.setNearPlaneDistance(net.pryzma.lod.PryzmaLod.frameFogStart());
                 event.setFarPlaneDistance(net.pryzma.lod.PryzmaLod.frameFogEnd());
-                event.setCanceled(true);
                 return;
             }
             Minecraft mc = Minecraft.getInstance();
@@ -118,7 +118,6 @@ public final class PrRenderHooks {
             float[] fog = net.pryzma.lod.LodMath.farlandsFogRange(vanillaBlocks, radiusBlocks, PryzmaConfig.prFarlandsFog);
             event.setNearPlaneDistance(fog[0]);
             event.setFarPlaneDistance(fog[1]);
-            event.setCanceled(true);
             return;
         }
         float far = event.getFarPlaneDistance();
@@ -128,23 +127,20 @@ public final class PrRenderHooks {
         } else {
             event.setNearPlaneDistance(far * PryzmaConfig.prFogStart);
         }
-        event.setCanceled(true);
     }
 
     public static boolean isClearAir(Camera camera) {
         Minecraft mc = Minecraft.getInstance();
-        if (camera.getEntity() instanceof LivingEntity living
+        if (camera.entity() instanceof LivingEntity living
                 && (living.hasEffect(MobEffects.BLINDNESS) || living.hasEffect(MobEffects.DARKNESS))) {
             return false;
         }
-        var pos = camera.getBlockPosition();
-        return mc.level != null && !mc.level.effects().isFoggyAt(pos.getX(), pos.getZ())
-                && !mc.gui.getBossOverlay().shouldCreateWorldFog();
+        return mc.level != null && !mc.gui.hud.getBossOverlay().shouldCreateWorldFog();
     }
 
     /** Smooth FPS: wait for the GPU before the terrain, as 1.x did, to even out frame times. */
     public static void onRenderStage(RenderLevelStageEvent event) {
-        if (PryzmaConfig.prSmoothFps && event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
+        if (PryzmaConfig.prSmoothFps && event instanceof RenderLevelStageEvent.AfterSky) {
             GL11.glFinish();
         }
     }

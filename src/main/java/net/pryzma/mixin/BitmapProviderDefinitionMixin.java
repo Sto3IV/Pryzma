@@ -10,7 +10,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import net.minecraft.client.gui.font.providers.BitmapProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.pryzma.render.PrFontUtils;
 
@@ -20,12 +20,12 @@ abstract class BitmapProviderDefinitionMixin {
         method = "load",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/packs/resources/ResourceManager;open(Lnet/minecraft/resources/ResourceLocation;)Ljava/io/InputStream;"
+            target = "Lnet/minecraft/server/packs/resources/ResourceManager;open(Lnet/minecraft/resources/Identifier;)Ljava/io/InputStream;"
         )
     )
     private InputStream pryzma$wrapOpenFontImage(
         ResourceManager resourceManager,
-        ResourceLocation location,
+        Identifier location,
         Operation<InputStream> original
     ) throws IOException {
         return PrFontUtils.openFontImageStream(resourceManager, location, original);

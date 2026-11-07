@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.minecraft.client.OptionInstance;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -106,15 +106,15 @@ abstract class PrScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 1) {
-            AbstractWidget widget = PrTooltips.widgetAt(widgets(), mouseX, mouseY);
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 1) {
+            AbstractWidget widget = PrTooltips.widgetAt(widgets(), event.x(), event.y());
             if (widget != null && widget.active && onRightClick(widget)) {
                 widget.playDownSound(minecraft.getSoundManager());
                 return true;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     List<AbstractWidget> widgets() {
@@ -134,9 +134,9 @@ abstract class PrScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
-        g.drawCenteredString(font, title, width / 2, 15, 0xFFFFFF);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
+        g.centeredText(font, title, width / 2, 15, 0xFFFFFF);
         tooltips.render(g, mouseX, mouseY, widgets(),
                 w -> w instanceof PrOptionControl c ? c.tooltipKey() : vanillaKeys.get(w));
     }
@@ -150,6 +150,6 @@ abstract class PrScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
     }
 }

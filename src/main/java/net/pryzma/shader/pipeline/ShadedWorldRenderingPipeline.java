@@ -3,9 +3,12 @@ package net.pryzma.shader.pipeline;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
+import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL13C;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import net.pryzma.lod.LodShaderSupport;
@@ -34,7 +37,6 @@ import net.pryzma.shader.gui.option.ShaderVideoSettings;
 import net.pryzma.shader.helpers.FakeChainedJsonException;
 import net.pryzma.shader.helpers.OptionalBoolean;
 import net.pryzma.shader.helpers.Tri;
-import net.pryzma.shader.mixin.GlStateManagerAccessor;
 import net.pryzma.shader.mixin.LevelRendererAccessor;
 import net.pryzma.shader.pathways.CenterDepthSampler;
 import net.pryzma.shader.pathways.HorizonRenderer;
@@ -89,9 +91,9 @@ import net.pryzma.shader.uniforms.FrameUpdateNotifier;
 import net.pryzma.shader.uniforms.custom.CustomUniforms;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.pryzma.shader.pipeline.programs.ShaderInstance;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import org.apache.commons.lang3.StringUtils;
@@ -234,8 +236,8 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		this.resolver = new ProgramFallbackResolver(programSet);
 		this.pack = programSet.getPack();
 
-		RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
-		int depthTextureId = main.getDepthTextureId();
+		RenderTarget main = Minecraft.getInstance().gameRenderer.mainRenderTarget();
+		int depthTextureId = ((GlTexture) main.getDepthTexture()).glId();
 		int internalFormat = TextureInfoCache.INSTANCE.getInfo(depthTextureId).getInternalFormat();
 		DepthBufferFormat depthBufferFormat = DepthBufferFormat.fromGlEnumOrDefault(internalFormat);
 
@@ -838,12 +840,12 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 	public void onSetShaderTexture(int id) {
 		if (shouldBindPBR && isRenderingWorld) {
 			PBRTextureHolder pbrHolder = PBRTextureManager.INSTANCE.getOrLoadHolder(id);
-			currentNormalTexture = pbrHolder.normalTexture().getId();
-			currentSpecularTexture = pbrHolder.specularTexture().getId();
+			currentNormalTexture = ((GlTexture) pbrHolder.normalTexture().getTexture()).glId();
+			currentSpecularTexture = ((GlTexture) pbrHolder.specularTexture().getTexture()).glId();
 
 			TextureFormat textureFormat = TextureFormatLoader.getFormat();
 			if (textureFormat != null) {
-				int previousBinding = GlStateManagerAccessor.getTEXTURES()[GlStateManagerAccessor.getActiveTexture()].binding;
+				int previousBinding = GlStateManager._getInteger(org.lwjgl.opengl.GL11C.GL_TEXTURE_BINDING_2D);
 				textureFormat.setupTextureParameters(PBRType.NORMAL, pbrHolder.normalTexture());
 				textureFormat.setupTextureParameters(PBRType.SPECULAR, pbrHolder.specularTexture());
 				GlStateManager._bindTexture(previousBinding);
@@ -861,12 +863,12 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 			WorldRenderingSettings.INSTANCE.setBlockStateIds(
 				BlockMaterialMapping.createBlockStateIdMap(pack.getIdMap().getBlockProperties(), pack.getIdMap().getTagEntries()));
 			WorldRenderingSettings.INSTANCE.setBlockTypeIds(BlockMaterialMapping.createBlockTypeMap(pack.getIdMap().getBlockRenderTypeMap()));
-			Minecraft.getInstance().levelRenderer.allChanged();
+			Minecraft.getInstance().levelRenderer.resetLevelRenderData();
 			initializedBlockIds = true;
 		}
 
 		// Make sure we're using texture unit 0 for this.
-		RenderSystem.activeTexture(GL15C.GL_TEXTURE0);
+		GlStateManager._activeTexture(GL13C.GL_TEXTURE0);
 		Vector4f emptyClearColor = new Vector4f(1.0F);
 
 		GLDebug.pushGroup(100, "Clear textures");
@@ -888,7 +890,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 			} else {
 				// Clear depth first, regardless of any color clearing.
 				shadowRenderTargets.getDepthSourceFb().bind();
-				RenderSystem.clear(GL21C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+				GlStateManager._clear(GL11C.GL_DEPTH_BUFFER_BIT);
 
 				ImmutableList<ClearPass> passes;
 
@@ -921,9 +923,9 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		// Update custom uniforms
 		this.customUniforms.update();
 
-		RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
+		RenderTarget main = Minecraft.getInstance().gameRenderer.mainRenderTarget();
 
-		int depthTextureId = main.getDepthTextureId();
+		int depthTextureId = ((GlTexture) main.getDepthTexture()).glId();
 		int internalFormat = TextureInfoCache.INSTANCE.getInfo(depthTextureId).getInternalFormat();
 		DepthBufferFormat depthBufferFormat = DepthBufferFormat.fromGlEnumOrDefault(internalFormat);
 
@@ -986,7 +988,8 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		//
 		// If we forget to do this, then weird lines appear at the top of the screen and the right of the screen
 		// on Sildur's Vibrant Shaders.
-		main.bindWrite(true);
+		GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
+		GL11C.glViewport(0, 0, main.width, main.height);
 		isMainBound = true;
 
 		if (changed) {
@@ -1015,18 +1018,14 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		// while rendering the sky.
 		//
 		// A lot of dimension mods touch sky rendering, FabricSkyboxes injects at HEAD and cancels, etc.
-		DimensionSpecialEffects.SkyType skyType = Minecraft.getInstance().level.effects().skyType();
+		DimensionType.Skybox skyType = Minecraft.getInstance().level.dimensionType().skybox();
 
-		if (shouldRenderSkyDisc && (skyType == DimensionSpecialEffects.SkyType.NORMAL || Minecraft.getInstance().level.dimensionType().hasSkyLight())) {
-			RenderSystem.depthMask(false);
+		if (shouldRenderSkyDisc && (skyType == DimensionType.Skybox.OVERWORLD || Minecraft.getInstance().level.dimensionType().hasSkyLight())) {
+			GlStateManager._depthMask(false);
 
-			RenderSystem.setShaderColor(fogColor.x, fogColor.y, fogColor.z, fogColor.w);
+			horizonRenderer.renderHorizon(CapturedRenderingState.INSTANCE.getGbufferModelView(), CapturedRenderingState.INSTANCE.getGbufferProjection());
 
-			horizonRenderer.renderHorizon(CapturedRenderingState.INSTANCE.getGbufferModelView(), CapturedRenderingState.INSTANCE.getGbufferProjection(), GameRenderer.getPositionShader());
-
-			RenderSystem.depthMask(true);
-
-			RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+			GlStateManager._depthMask(true);
 		}
 	}
 
@@ -1080,7 +1079,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 
 		deferredRenderer.renderAll();
 
-		RenderSystem.enableBlend();
+		GL11C.glEnable(GL11C.GL_BLEND);
 
 		// note: we are careful not to touch the lightmap texture unit or overlay color texture unit here,
 		// so we don't need to do anything to restore them if needed.
@@ -1092,7 +1091,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		// Not good!
 
 		// Reset shader or whatever...
-		RenderSystem.setShader(GameRenderer::getPositionShader);
+		GlStateManager._glUseProgram(0);
 	}
 
 	@Override
@@ -1105,7 +1104,8 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 
 	@Override
 	public void finalizeGameRendering() {
-		colorSpaceConverter.process(Minecraft.getInstance().getMainRenderTarget().getColorTextureId());
+		RenderTarget main = Minecraft.getInstance().gameRenderer.mainRenderTarget();
+		colorSpaceConverter.process(((GlTexture) main.getColorTexture()).glId());
 	}
 
 	@Override
@@ -1225,7 +1225,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		//
 		// Without this code, there will be weird issues when reloading certain shaderpacks.
 		for (int i = 0; i < 16; i++) {
-			GlStateManager.glActiveTexture(GL20C.GL_TEXTURE0 + i);
+			GlStateManager._activeTexture(GL13C.GL_TEXTURE0 + i);
 			ShaderRenderSystem.unbindAllSamplers();
 			GlStateManager._bindTexture(0);
 		}
@@ -1233,11 +1233,11 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		// Set the active texture unit to unit 0
 		//
 		// This seems to be what most code expects. It's a sane default in any case.
-		GlStateManager.glActiveTexture(GL20C.GL_TEXTURE0);
+		GlStateManager._activeTexture(GL13C.GL_TEXTURE0);
 
 		for (int i = 0; i < 12; i++) {
-			// Clear all shader textures
-			RenderSystem.setShaderTexture(i, 0);
+			GlStateManager._activeTexture(GL13C.GL_TEXTURE0 + i);
+			GlStateManager._bindTexture(0);
 		}
 
 		if (shadowCompositeRenderer != null) {
@@ -1257,8 +1257,6 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		GlStateManager._glBindFramebuffer(GL30C.GL_READ_FRAMEBUFFER, 0);
 		GlStateManager._glBindFramebuffer(GL30C.GL_DRAW_FRAMEBUFFER, 0);
 		GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
-
-		Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 
 		renderTargets.destroy();
 
@@ -1339,7 +1337,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 
 	/** Points the normals and specular samplers at the neutral maps of an untextured surface. */
 	public void useNeutralPbrTextures() {
-		onSetShaderTexture(whitePixel.getId());
+		onSetShaderTexture(((GlTexture) whitePixel.getTexture()).glId());
 	}
 
 	/** The Farlands LOD's part of this pipeline, null while the option is off. */

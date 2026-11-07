@@ -5,11 +5,11 @@ import java.util.List;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LightLayer;
@@ -53,9 +53,9 @@ public final class PrQuickInfo {
     }
 
     /** GUI layer: drawn where the debug screen goes, while it is closed. */
-    public static void render(GuiGraphics g, DeltaTracker delta) {
+    public static void render(GuiGraphicsExtractor g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
-        if (!PryzmaConfig.prQuickInfo || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen()
+        if (!PryzmaConfig.prQuickInfo || mc.gui.hud.isHidden() || mc.gui.hud.getDebugOverlay().showDebugScreen()
                 || mc.level == null || mc.getCameraEntity() == null) {
             return;
         }
@@ -69,7 +69,7 @@ public final class PrQuickInfo {
         draw(g, mc, right, true);
     }
 
-    private static void draw(GuiGraphics g, Minecraft mc, List<String> lines, boolean alignRight) {
+    private static void draw(GuiGraphicsExtractor g, Minecraft mc, List<String> lines, boolean alignRight) {
         if (lines.isEmpty()) {
             return;
         }
@@ -85,7 +85,7 @@ public final class PrQuickInfo {
         int y = 2;
         for (String s : lines) {
             int w = mc.font.width(s);
-            g.drawString(mc.font, s, alignRight ? g.guiWidth() - 2 - w : 2, y, TEXT, false);
+            g.text(mc.font, s, alignRight ? g.guiWidth() - 2 - w : 2, y, TEXT, false);
             y += 9;
         }
     }
@@ -103,7 +103,7 @@ public final class PrQuickInfo {
             sb.append(" fps");
         }
         if (PryzmaConfig.prQuickInfoChunks) {
-            next(sb).append(full ? "Chunks: " : "C: ").append(mc.levelRenderer.countRenderedSections());
+            next(sb).append(full ? "Chunks: " : "C: ").append(mc.levelRenderer.visibleSections().size());
         }
         if (PryzmaConfig.prQuickInfoEntities) {
             next(sb).append(full ? "Entities: " : "E: ")
@@ -159,7 +159,7 @@ public final class PrQuickInfo {
             }
             newLine(lines, sb);
             if (PryzmaConfig.prQuickInfoBiome) {
-                String biome = mc.level.getBiome(pos).unwrapKey().map(k -> name(k.location())).orElse("[unregistered]");
+                String biome = mc.level.getBiome(pos).unwrapKey().map(k -> name(k.identifier())).orElse("[unregistered]");
                 next(sb).append(full ? "Biome: " : "B: ").append(biome);
             }
             if (PryzmaConfig.prQuickInfoLight) {
@@ -261,8 +261,8 @@ public final class PrQuickInfo {
         };
     }
 
-    private static String name(ResourceLocation id) {
-        return id == null ? "" : id.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE) ? id.getPath() : id.toString();
+    private static String name(Identifier id) {
+        return id == null ? "" : id.getNamespace().equals(Identifier.DEFAULT_NAMESPACE) ? id.getPath() : id.toString();
     }
 
     private static int mb(long bytes) {

@@ -2,6 +2,7 @@ package net.pryzma.shader.targets;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import net.pryzma.shader.gl.framebuffer.GlFramebuffer;
 import net.pryzma.shader.gl.texture.DepthBufferFormat;
@@ -209,7 +210,7 @@ public class RenderTargets {
 	public void copyPreTranslucentDepth() {
 		if (translucentDepthDirty) {
 			translucentDepthDirty = false;
-			RenderSystem.bindTexture(noTranslucents.getTextureId());
+			GlStateManager._bindTexture(noTranslucents.getTextureId());
 			depthSourceFb.bindAsReadBuffer();
 			ShaderRenderSystem.copyTexImage2D(GL20C.GL_TEXTURE_2D, 0, currentDepthFormat.getGlInternalFormat(), 0, 0, cachedWidth, cachedHeight, 0);
 		} else {
@@ -221,7 +222,7 @@ public class RenderTargets {
 	public void copyPreHandDepth() {
 		if (handDepthDirty) {
 			handDepthDirty = false;
-			RenderSystem.bindTexture(noHand.getTextureId());
+			GlStateManager._bindTexture(noHand.getTextureId());
 			depthSourceFb.bindAsReadBuffer();
 			ShaderRenderSystem.copyTexImage2D(GL20C.GL_TEXTURE_2D, 0, currentDepthFormat.getGlInternalFormat(), 0, 0, cachedWidth, cachedHeight, 0);
 		} else {

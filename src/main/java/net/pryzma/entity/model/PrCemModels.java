@@ -22,7 +22,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
@@ -50,19 +50,19 @@ public final class PrCemModels {
     private static Map<String, Map<String, String>> partTable;
 
     private static PrResources resources;
-    private static final Map<ResourceLocation, Optional<PrJem>> PARSED = new HashMap<>();
+    private static final Map<Identifier, Optional<PrJem>> PARSED = new HashMap<>();
     private static final Map<ModelLayerLocation, Integer> BAKES = new HashMap<>();
     private static boolean reloading;
     private static int variant = 1;
     private static int applied;
 
     /** Random model variants of one entity type: renderer and model texture per variant index. */
-    private record Variants(PrRandomProperties<Integer> rules, Map<Integer, EntityRenderer<?>> renderers,
-            Map<Integer, ResourceLocation> textures) {
+    private record Variants(PrRandomProperties<Integer> rules, Map<Integer, EntityRenderer<?, ?>> renderers,
+            Map<Integer, Identifier> textures) {
     }
 
     private static Map<EntityType<?>, Variants> variants = Map.of();
-    private static Map<EntityType<?>, ResourceLocation> baseTextures = Map.of();
+    private static Map<EntityType<?>, Identifier> baseTextures = Map.of();
 
     private PrCemModels() {
     }
@@ -84,15 +84,15 @@ public final class PrCemModels {
 
     /** Entity renderers exist: applies model shadow sizes, builds the variant renderers, ends the reload. */
     public static void onEntityRenderersCreated(EntityRendererProvider.Context context,
-            Map<EntityType<?>, EntityRendererProvider<?>> providers, Map<EntityType<?>, EntityRenderer<?>> created) {
+            Map<EntityType<?>, EntityRendererProvider<?>> providers, Map<EntityType<?>, EntityRenderer<?, ?>> created) {
         Map<EntityType<?>, Variants> built = new IdentityHashMap<>();
-        Map<EntityType<?>, ResourceLocation> textures = new IdentityHashMap<>();
+        Map<EntityType<?>, Identifier> textures = new IdentityHashMap<>();
         if (resources != null) {
             for (Map.Entry<EntityType<?>, EntityRendererProvider<?>> e : providers.entrySet()) {
                 EntityType<?> type = e.getKey();
-                ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+                Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
                 String name = entityName(id);
-                ResourceLocation base = jemLocation(id.getNamespace(), name, 1);
+                Identifier base = jemLocation(id.getNamespace(), name, 1);
                 PrJem baseJem = base == null ? null : parse(base);
                 if (baseJem != null && baseJem.texture() != null) {
                     textures.put(type, baseJem.texture());
@@ -104,15 +104,15 @@ public final class PrCemModels {
                 if (rules == null) {
                     continue;
                 }
-                Map<Integer, EntityRenderer<?>> renderers = new HashMap<>();
-                Map<Integer, ResourceLocation> variantTextures = new HashMap<>();
+                Map<Integer, EntityRenderer<?, ?>> renderers = new HashMap<>();
+                Map<Integer, Identifier> variantTextures = new HashMap<>();
                 for (Integer index : rules.allResources()) {
                     if (index <= 1 || renderers.containsKey(index)) {
                         continue;
                     }
                     variant = index;
                     try {
-                        EntityRenderer<?> renderer = e.getValue().create(context);
+                        EntityRenderer<?, ?> renderer = e.getValue().create(context);
                         renderers.put(index, renderer);
                         PrJem jem = parse(jemLocation(id.getNamespace(), name, index));
                         if (jem != null && jem.texture() != null) {
@@ -186,9 +186,9 @@ public final class PrCemModels {
             // Something bakes this layer over and over (a mod making models per frame); stay vanilla.
             return vanilla;
         }
-        PrCemNames names = PrCemNames.of(layer.getModel().getNamespace(), layer.getModel().getPath(), layer.getLayer());
+        PrCemNames names = PrCemNames.of(layer.model().getNamespace(), layer.model().getPath(), layer.layer());
         for (String file : names.files()) {
-            ResourceLocation location = jemLocation(names.namespace(), file, variant);
+            Identifier location = jemLocation(names.namespace(), file, variant);
             PrJem jem = location == null ? null : parse(location);
             if (jem == null) {
                 continue;
@@ -205,10 +205,10 @@ public final class PrCemModels {
     }
 
     /** The model file of {@code name} (variant {@code index}), {@code emf/cem/} before {@code optifine/cem/}. */
-    private static ResourceLocation jemLocation(String namespace, String name, int index) {
+    private static Identifier jemLocation(String namespace, String name, int index) {
         String file = index <= 1 ? name : indexed(name, index);
         for (String root : new String[] {"emf/cem/", PrPaths.OPTIFINE + "cem/"}) {
-            ResourceLocation loc = ResourceLocation.tryBuild(namespace, root + file + ".jem");
+            Identifier loc = Identifier.tryBuild(namespace, root + file + ".jem");
             if (loc != null && resources.exists(loc)) {
                 return loc;
             }
@@ -222,7 +222,7 @@ public final class PrCemModels {
         return name + (digit ? "." : "") + index;
     }
 
-    private static PrJem parse(ResourceLocation location) {
+    private static PrJem parse(Identifier location) {
         return PARSED.computeIfAbsent(location, loc -> {
             try {
                 JsonObject json = readJson(loc);
@@ -234,7 +234,7 @@ public final class PrCemModels {
         }).orElse(null);
     }
 
-    private static JsonObject readJson(ResourceLocation location) {
+    private static JsonObject readJson(Identifier location) {
         Optional<Resource> resource = resources.find(location);
         if (resource.isEmpty()) {
             return null;
@@ -250,7 +250,7 @@ public final class PrCemModels {
     // ------------------------------------------------------------------ variants
 
     /** OptiFine names the model of an entity after its id, with the same renames as the layers. */
-    static String entityName(ResourceLocation entityId) {
+    static String entityName(Identifier entityId) {
         return switch (entityId.getPath()) {
             case "ender_dragon" -> "dragon";
             case "leash_knot" -> "lead_knot";
@@ -261,7 +261,7 @@ public final class PrCemModels {
 
     private static PrRandomProperties<Integer> variantRules(String namespace, String name) {
         for (String candidate : new String[] {name, name + "/" + name}) {
-            ResourceLocation props = ResourceLocation.tryBuild(namespace, PrPaths.OPTIFINE + "cem/" + candidate + ".properties");
+            Identifier props = Identifier.tryBuild(namespace, PrPaths.OPTIFINE + "cem/" + candidate + ".properties");
             if (props != null && resources.exists(props)) {
                 PrProperties parsed = resources.properties(props).orElse(null);
                 if (parsed != null) {
@@ -289,19 +289,19 @@ public final class PrCemModels {
     }
 
     /** The renderer for {@code entity}: its random model variant's, or {@code base}. */
-    public static EntityRenderer<?> select(Entity entity, EntityRenderer<?> base) {
+    public static EntityRenderer<?, ?> select(Entity entity, EntityRenderer<?, ?> base) {
         Variants v = variants.get(entity.getType());
         if (v == null) {
             return base;
         }
         int[] rule = new int[1];
         Integer index = v.rules().select(PrEntityInfos.entity(entity), PrWorldInfo.client(), 1, rule);
-        EntityRenderer<?> renderer = v.renderers().get(index);
+        EntityRenderer<?, ?> renderer = v.renderers().get(index);
         return renderer != null ? renderer : base;
     }
 
     /** The rule index ({@code rule_index}) and model texture for the entity about to render. */
-    public static ResourceLocation modelTexture(Entity entity) {
+    public static Identifier modelTexture(Entity entity) {
         Variants v = variants.get(entity.getType());
         if (v == null) {
             return baseTextures.get(entity.getType());
@@ -309,7 +309,7 @@ public final class PrCemModels {
         int[] rule = new int[1];
         Integer index = v.rules().select(PrEntityInfos.entity(entity), PrWorldInfo.client(), 1, rule);
         PrCemContext.setRuleIndex(rule[0]);
-        ResourceLocation texture = v.textures().get(index);
+        Identifier texture = v.textures().get(index);
         return texture != null ? texture : index == 1 ? baseTextures.get(entity.getType()) : null;
     }
 

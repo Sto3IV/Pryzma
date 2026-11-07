@@ -4,12 +4,14 @@ import net.pryzma.shader.gui.GuiUtil;
 import net.pryzma.shader.shaderpack.option.menu.OptionMenuStringOptionElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenAxis;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.screens.Screen;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
 
 public class SliderElementWidget extends StringElementWidget {
 	private static final int PREVIEW_SLIDER_WIDTH = 4;
@@ -22,7 +24,7 @@ public class SliderElementWidget extends StringElementWidget {
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float tickDelta, boolean hovered) {
+	public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float tickDelta, boolean hovered) {
 		this.updateRenderParams(35);
 
 
@@ -37,13 +39,13 @@ public class SliderElementWidget extends StringElementWidget {
 		}
 
 		if (usedKeyboard) {
-			if (Screen.hasShiftDown()) {
+			if (GuiUtil.hasShiftDown()) {
 				renderTooltip(guiGraphics, SET_TO_DEFAULT, bounds.getBoundInDirection(ScreenDirection.RIGHT), bounds.position().y(), hovered);
 			} else if (!this.screen.isDisplayingComment()) {
 				renderTooltip(guiGraphics, this.unmodifiedLabel, bounds.getBoundInDirection(ScreenDirection.RIGHT), bounds.position().y(), hovered);
 			}
 		} else {
-			if (Screen.hasShiftDown()) {
+			if (GuiUtil.hasShiftDown()) {
 				renderTooltip(guiGraphics, SET_TO_DEFAULT, mouseX, mouseY, hovered);
 			} else if (!this.screen.isDisplayingComment()) {
 				renderTooltip(guiGraphics, this.unmodifiedLabel, mouseX, mouseY, hovered);
@@ -67,7 +69,7 @@ public class SliderElementWidget extends StringElementWidget {
 		}
 	}
 
-	private void renderSlider(GuiGraphics guiGraphics) {
+	private void renderSlider(GuiGraphicsExtractor guiGraphics) {
 		GuiUtil.bindWidgetsTexture();
 
 		// Draw background button
@@ -84,7 +86,7 @@ public class SliderElementWidget extends StringElementWidget {
 
 		// Draw value label
 		Font font = Minecraft.getInstance().font;
-		guiGraphics.drawString(font, this.valueLabel, bounds.getCenterInAxis(ScreenAxis.HORIZONTAL) - (int) (font.width(this.valueLabel) * 0.5), bounds.position().y() + 7, 0xFFFFFF);
+		guiGraphics.text(font, this.valueLabel, bounds.getCenterInAxis(ScreenAxis.HORIZONTAL) - (int) (font.width(this.valueLabel) * 0.5), bounds.position().y() + 7, 0xFFFFFF);
 	}
 
 	private void whileDragging(int mouseX) {
@@ -109,9 +111,10 @@ public class SliderElementWidget extends StringElementWidget {
 	}
 
 	@Override
-	public boolean mouseClicked(double mx, double my, int button) {
-		if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
-			if (Screen.hasShiftDown()) {
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		int button = event.button();
+		if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+			if (GuiUtil.hasShiftDown()) {
 				if (this.applyOriginalValue()) {
 					this.navigation.refresh();
 				}
@@ -131,9 +134,10 @@ public class SliderElementWidget extends StringElementWidget {
 	}
 
 	@Override
-	public boolean keyPressed(int keycode, int scancode, int modifiers) {
-		if (keycode == GLFW.GLFW_KEY_ENTER) {
-			if (Screen.hasShiftDown()) {
+	public boolean keyPressed(KeyEvent event) {
+		int keycode = event.key();
+		if (keycode == InputConstants.KEY_RETURN) {
+			if (GuiUtil.hasShiftDown()) {
 				if (this.applyOriginalValue()) {
 					this.navigation.refresh();
 				}
@@ -150,11 +154,11 @@ public class SliderElementWidget extends StringElementWidget {
 		}
 
 		if (mouseDown && usedKeyboard) {
-			if (keycode == GLFW.GLFW_KEY_LEFT) {
+			if (keycode == InputConstants.KEY_LEFT) {
 				valueIndex = Math.max(0, valueIndex - 1);
 				this.updateLabels();
 				return true;
-			} else if (keycode == GLFW.GLFW_KEY_RIGHT) {
+			} else if (keycode == InputConstants.KEY_RIGHT) {
 				valueIndex = Math.min(valueCount - 1, valueIndex + 1);
 				this.updateLabels();
 				return true;
@@ -165,12 +169,12 @@ public class SliderElementWidget extends StringElementWidget {
 	}
 
 	@Override
-	public boolean mouseReleased(double mx, double my, int button) {
-		if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+	public boolean mouseReleased(MouseButtonEvent event) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 			this.onReleased();
 
 			return true;
 		}
-		return super.mouseReleased(mx, my, button);
+		return super.mouseReleased(event);
 	}
 }

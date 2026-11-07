@@ -9,7 +9,7 @@ import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.gui.option.ShaderVideoSettings;
 import net.pryzma.shader.pathways.colorspace.ColorSpace;
 import net.pryzma.shader.platform.ShaderPlatformHelpers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +50,7 @@ public class ShaderConfig {
 	/**
 	 * What shaders should be nuked.
 	 */
-	private List<ResourceLocation> shadersToSkip = new ArrayList<>();
+	private List<Identifier> shadersToSkip = new ArrayList<>();
 	/**
 	 * If the update notification should be disabled or not.
 	 */
@@ -184,7 +184,7 @@ public class ShaderConfig {
 		if (Files.exists(excludedPath)) {
 			JsonArray json = JsonParser.parseString(Files.readString(excludedPath)).getAsJsonObject().getAsJsonArray("excluded");
 			for (int i = 0; i < json.size(); i++) {
-				ResourceLocation resource = ResourceLocation.tryParse(json.get(i).getAsString());
+				Identifier resource = Identifier.tryParse(json.get(i).getAsString());
 				if (resource == null) {
 					PryzmaShaders.logger.warn("Unknown shader " + json.get(i).getAsString());
 				}
@@ -255,7 +255,7 @@ public class ShaderConfig {
 		return allowUnknownShaders;
 	}
 
-	public boolean shouldSkip(ResourceLocation value) {
+	public boolean shouldSkip(Identifier value) {
 		return shadersToSkip.contains(value); // TODO
 	}
 

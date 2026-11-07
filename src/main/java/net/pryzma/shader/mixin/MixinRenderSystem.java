@@ -8,7 +8,7 @@ import net.pryzma.shader.gl.ShaderRenderSystem;
 import net.pryzma.shader.pbr.TextureTracker;
 import net.pryzma.shader.samplers.ShaderSamplers;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -25,9 +25,10 @@ public class MixinRenderSystem {
 		PryzmaShaders.onRenderSystemInit();
 	}
 
-	@Inject(method = "_setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/AbstractTexture;getId()I", shift = At.Shift.AFTER))
-	private static void _setShaderTexture(int unit, ResourceLocation resourceLocation, CallbackInfo ci, @Local AbstractTexture tex) {
-		TextureTracker.INSTANCE.onSetShaderTexture(unit, tex.getId());
+	@Inject(method = "_setShaderTexture(ILnet/minecraft/resources/Identifier;)V", at = @At("RETURN"), remap = false)
+	private static void _setShaderTexture(int unit, Identifier resourceLocation, CallbackInfo ci, @Local AbstractTexture tex) {
+		int id = tex != null && tex.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture glTex ? glTex.glId() : 0;
+		TextureTracker.INSTANCE.onSetShaderTexture(unit, id);
 	}
 
 	@Inject(method = "_setShaderTexture(II)V", at = @At("RETURN"), remap = false)

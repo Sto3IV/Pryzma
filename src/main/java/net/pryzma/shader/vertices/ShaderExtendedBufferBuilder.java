@@ -1,11 +1,12 @@
 package net.pryzma.shader.vertices;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 
 public interface ShaderExtendedBufferBuilder {
 	VertexFormat pryzma$format();
 
-	VertexFormat.Mode pryzma$mode();
+	PrimitiveTopology pryzma$mode();
 
 	boolean pryzma$extending();
 

@@ -2,7 +2,6 @@ package net.pryzma.shader.mixin;
 
 import net.pryzma.shader.PryzmaShaders;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +25,7 @@ public class MixinMinecraft_PipelineManagement {
 	 * NB: Not on leave, another inject is used for that
 	 */
 	@Inject(method = "setLevel", at = @At("HEAD"))
-	private void pryzma$trackLastDimensionOnLevelChange(ClientLevel clientLevel, ReceivingLevelScreen.Reason reason, CallbackInfo ci) {
+	private void pryzma$trackLastDimensionOnLevelChange(ClientLevel clientLevel, CallbackInfo ci) {
 		PryzmaShaders.lastDimension = PryzmaShaders.getCurrentDimension();
 	}
 

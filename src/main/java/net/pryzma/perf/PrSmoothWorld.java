@@ -8,8 +8,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ambient.AmbientCreature;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Bee;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.bee.Bee;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.entity.monster.Enemy;
 import net.pryzma.PryzmaConfig;
 
@@ -73,7 +73,7 @@ public final class PrSmoothWorld {
         if (mob.getTarget() != null || mob.isLeashed() || mob.isPassenger() || mob.isVehicle()) {
             return false;
         }
-        if (mob instanceof OwnableEntity owned && owned.getOwnerUUID() != null) {
+        if (mob instanceof OwnableEntity owned && owned.getOwnerReference() != null) {
             return false;
         }
         return !(mob instanceof Animal animal && animal.isInLove());

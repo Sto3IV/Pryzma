@@ -18,12 +18,12 @@ public class ShaderInternalUniforms {
 	public static void addFogUniforms(DynamicUniformHolder uniforms, FogMode fogMode) {
 		uniforms
 			.uniform4f(PER_FRAME, "iris_FogColor", () -> {
-				float[] fogColor = RenderSystem.getShaderFogColor();
-				return new Vector4f(fogColor[0], fogColor[1], fogColor[2], fogColor[3]);
+				org.joml.Vector3d fogColor = CapturedRenderingState.INSTANCE.getFogColor();
+				return new Vector4f((float) fogColor.x, (float) fogColor.y, (float) fogColor.z, 1.0F);
 			});
 
-		uniforms.uniform1f(PER_FRAME, "iris_FogStart", RenderSystem::getShaderFogStart)
-			.uniform1f(PER_FRAME, "iris_FogEnd", RenderSystem::getShaderFogEnd);
+		uniforms.uniform1f(PER_FRAME, "iris_FogStart", CapturedRenderingState.INSTANCE::getFogStart)
+			.uniform1f(PER_FRAME, "iris_FogEnd", CapturedRenderingState.INSTANCE::getFogEnd);
 
 		uniforms.uniform1f("iris_FogDensity", () -> {
 			// ensure that the minimum value is 0.0

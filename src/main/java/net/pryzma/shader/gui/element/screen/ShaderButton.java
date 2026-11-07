@@ -1,17 +1,13 @@
 package net.pryzma.shader.gui.element.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.pryzma.shader.gl.uniform.FloatSupplier;
-import net.pryzma.shader.gui.GuiUtil;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
-public class ShaderButton extends Button {
+public class ShaderButton extends Button.Plain {
 	private final FloatSupplier alphaSupplier;
 
 	public ShaderButton(int pButton0, int pInt1, int pInt2, int pInt3, Component pComponent4, OnPress pButton$OnPress5, CreateNarration pButton$CreateNarration6, FloatSupplier alpha) {
@@ -24,19 +20,12 @@ public class ShaderButton extends Button {
 	}
 
 	@Override
-	protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-		Minecraft mc = Minecraft.getInstance();
+	protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
 		float alpha = this.alphaSupplier.getAsFloat();
 		if (alpha < 0.01f) {
 			return;
 		}
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, alpha);
-		RenderSystem.enableBlend();
-		RenderSystem.enableDepthTest();
-		guiGraphics.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-		int fgColor = this.getFGColor();
-		this.renderString(guiGraphics, mc.font, fgColor | Mth.ceil(alpha * 255.0F) << 24);
+		super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
 	}
 
 	public static class Builder {

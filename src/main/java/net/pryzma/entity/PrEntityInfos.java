@@ -6,23 +6,24 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Cat;
-import net.minecraft.world.entity.animal.Sheep;
-import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.animal.feline.Cat;
+import net.minecraft.world.entity.animal.sheep.Sheep;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Phantom;
-import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.entity.npc.VillagerDataHolder;
+import net.minecraft.world.entity.monster.cubemob.Slime;
+import net.minecraft.world.entity.npc.villager.VillagerDataHolder;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.entity.BedBlockEntity;
+import net.minecraft.world.level.block.WoolCarpetBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,7 +63,7 @@ public final class PrEntityInfos {
         PrEntityData data = PrEntityData.of(entity);
         BlockPos pos = entity.blockPosition();
         data.spawnPos = pos;
-        data.spawnBiome = level.getBiome(pos).unwrapKey().map(k -> k.location()).orElse(null);
+        data.spawnBiome = level.getBiome(pos).unwrapKey().map(ResourceKey::identifier).orElse(null);
     }
 
     private static final class EntityView implements PrEntityInfo {
@@ -80,10 +81,10 @@ public final class PrEntityInfos {
         }
 
         @Override
-        public ResourceLocation spawnBiome() {
-            ResourceLocation biome = PrEntityData.of(entity).spawnBiome;
+        public Identifier spawnBiome() {
+            Identifier biome = PrEntityData.of(entity).spawnBiome;
             if (biome == null) {
-                biome = entity.level().getBiome(entity.blockPosition()).unwrapKey().map(k -> k.location()).orElse(null);
+                biome = entity.level().getBiome(entity.blockPosition()).unwrapKey().map(ResourceKey::identifier).orElse(null);
             }
             return biome;
         }
@@ -104,14 +105,14 @@ public final class PrEntityInfos {
         }
 
         @Override
-        public ResourceLocation profession() {
+        public Identifier profession() {
             return entity instanceof VillagerDataHolder villager
-                    ? BuiltInRegistries.VILLAGER_PROFESSION.getKey(villager.getVillagerData().getProfession()) : null;
+                    ? villager.getVillagerData().profession().unwrapKey().map(ResourceKey::identifier).orElse(null) : null;
         }
 
         @Override
         public int professionLevel() {
-            return entity instanceof VillagerDataHolder villager ? villager.getVillagerData().getLevel() : 0;
+            return entity instanceof VillagerDataHolder villager ? villager.getVillagerData().level() : 0;
         }
 
         @Override
@@ -125,7 +126,14 @@ public final class PrEntityInfos {
             if (entity instanceof Sheep sheep) {
                 return sheep.getColor();
             }
-            return entity instanceof Llama llama ? llama.getSwag() : null;
+            if (entity instanceof Llama llama) {
+                var body = llama.getBodyArmorItem();
+                if (body.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof WoolCarpetBlock carpet) {
+                    return carpet.getColor();
+                }
+                return null;
+            }
+            return null;
         }
 
         @Override
@@ -170,7 +178,7 @@ public final class PrEntityInfos {
         /** A bed's head uses the foot's position, so both halves pick the same variant. */
         @Override
         public BlockPos spawnPos() {
-            if (blockEntity instanceof BedBlockEntity) {
+            if (blockEntity.getBlockState().getBlock() instanceof BedBlock) {
                 BlockState state = blockEntity.getBlockState();
                 if (state.hasProperty(BedBlock.PART) && state.getValue(BedBlock.PART) == BedPart.HEAD) {
                     Direction facing = state.getValue(BedBlock.FACING);
@@ -181,10 +189,10 @@ public final class PrEntityInfos {
         }
 
         @Override
-        public ResourceLocation spawnBiome() {
+        public Identifier spawnBiome() {
             Level level = blockEntity.getLevel();
             return level == null ? null
-                    : level.getBiome(blockEntity.getBlockPos()).unwrapKey().map(k -> k.location()).orElse(null);
+                    : level.getBiome(blockEntity.getBlockPos()).unwrapKey().map(k -> k.identifier()).orElse(null);
         }
 
         @Override
@@ -204,7 +212,7 @@ public final class PrEntityInfos {
         }
 
         @Override
-        public ResourceLocation profession() {
+        public Identifier profession() {
             return null;
         }
 
@@ -215,7 +223,7 @@ public final class PrEntityInfos {
 
         @Override
         public DyeColor color() {
-            if (blockEntity instanceof BedBlockEntity bed) {
+            if (blockEntity.getBlockState().getBlock() instanceof BedBlock bed) {
                 return bed.getColor();
             }
             return blockEntity instanceof ShulkerBoxBlockEntity box ? box.getColor() : null;

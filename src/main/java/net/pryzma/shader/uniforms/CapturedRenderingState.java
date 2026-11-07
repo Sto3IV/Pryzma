@@ -14,6 +14,8 @@ public class CapturedRenderingState {
 	private Matrix4fc gbufferProjection;
 	private Vector3d fogColor;
 	private float fogDensity;
+	private float fogStart;
+	private float fogEnd;
 	private float darknessLightFactor;
 	private float tickDelta;
 	private float realTickDelta;
@@ -62,6 +64,22 @@ public class CapturedRenderingState {
 
 	public void setFogDensity(float fogDensity) {
 		this.fogDensity = fogDensity;
+	}
+
+	public float getFogStart() {
+		return fogStart;
+	}
+
+	public void setFogStart(float fogStart) {
+		this.fogStart = fogStart;
+	}
+
+	public float getFogEnd() {
+		return fogEnd;
+	}
+
+	public void setFogEnd(float fogEnd) {
+		this.fogEnd = fogEnd;
 	}
 
 	public float getTickDelta() {

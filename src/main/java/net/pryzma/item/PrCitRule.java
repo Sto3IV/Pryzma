@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.pryzma.core.match.PrNbtMatcher;
 import net.pryzma.core.match.PrRangeList;
 import net.pryzma.core.res.PrPaths;
@@ -80,25 +80,25 @@ public final class PrCitRule {
             "SkullOwner", "minecraft:profile.name",
             "SkullOwner.Name", "minecraft:profile.name");
 
-    final ResourceLocation location;
+    final Identifier location;
     final String name;
     final String basePath;
     final Type type;
     /** Item ids as written; empty for an enchantment rule that names no items. */
-    final List<ResourceLocation> items;
+    final List<Identifier> items;
     /** The main texture file ({@code .png}), or {@code null}. */
-    final ResourceLocation texture;
+    final Identifier texture;
     /** {@code texture.<key>} files by key. */
-    final Map<String, ResourceLocation> textures;
-    final ResourceLocation model;
+    final Map<String, Identifier> textures;
+    final Identifier model;
     /** {@code model.<key>} models by key. */
-    final Map<String, ResourceLocation> models;
+    final Map<String, Identifier> models;
     final PrRangeList damage;
     final boolean damagePercent;
     final int damageMask;
     final PrRangeList stackSize;
     /** {@code null} when the rule has no enchantment condition. */
-    final Set<ResourceLocation> enchantments;
+    final Set<Identifier> enchantments;
     final PrRangeList enchantmentLevels;
     /** {@code null} when the rule has no component condition. */
     final PrNbtMatcher[] components;
@@ -141,20 +141,20 @@ public final class PrCitRule {
     }
 
     private static final class Builder {
-        ResourceLocation location;
+        Identifier location;
         String name;
         String basePath;
         Type type;
-        List<ResourceLocation> items;
-        ResourceLocation texture;
-        final Map<String, ResourceLocation> textures = new LinkedHashMap<>();
-        ResourceLocation model;
-        final Map<String, ResourceLocation> models = new LinkedHashMap<>();
+        List<Identifier> items;
+        Identifier texture;
+        final Map<String, Identifier> textures = new LinkedHashMap<>();
+        Identifier model;
+        final Map<String, Identifier> models = new LinkedHashMap<>();
         PrRangeList damage;
         boolean damagePercent;
         int damageMask;
         PrRangeList stackSize;
-        Set<ResourceLocation> enchantments;
+        Set<Identifier> enchantments;
         PrRangeList enchantmentLevels;
         PrNbtMatcher[] components;
         Hand hand;
@@ -212,11 +212,11 @@ public final class PrCitRule {
         if (itemsText != null) {
             b.items = parseIds(itemsText, "item", warn);
         } else if (b.type == Type.ELYTRA) {
-            b.items = List.of(ResourceLocation.withDefaultNamespace("elytra"));
+            b.items = List.of(Identifier.withDefaultNamespace("elytra"));
         } else if (b.type == Type.ENCHANTMENT) {
             b.items = List.of();
         } else {
-            ResourceLocation guess = ResourceLocation.tryParse(b.name);
+            Identifier guess = Identifier.tryParse(b.name);
             if (guess == null) {
                 warn.accept("No items defined");
                 return null;
@@ -313,7 +313,7 @@ public final class PrCitRule {
     }
 
     /** Whether an enchantment rule applies to {@code item}: every item unless {@code items} names some. */
-    boolean appliesTo(ResourceLocation item) {
+    boolean appliesTo(Identifier item) {
         return items.isEmpty() || items.contains(item);
     }
 
@@ -360,7 +360,7 @@ public final class PrCitRule {
         return null;
     }
 
-    private static void put(Map<String, ResourceLocation> map, String key, ResourceLocation value, String text,
+    private static void put(Map<String, Identifier> map, String key, Identifier value, String text,
             Consumer<String> warn) {
         if (value == null) {
             warn.accept("Invalid location: " + text);
@@ -369,13 +369,13 @@ public final class PrCitRule {
         }
     }
 
-    private static List<ResourceLocation> parseIds(String text, String what, Consumer<String> warn) {
-        List<ResourceLocation> out = new ArrayList<>();
+    private static List<Identifier> parseIds(String text, String what, Consumer<String> warn) {
+        List<Identifier> out = new ArrayList<>();
         for (String token : text.trim().split("\\s+")) {
             if (token.isEmpty()) {
                 continue;
             }
-            ResourceLocation id = ResourceLocation.tryParse(token);
+            Identifier id = Identifier.tryParse(token);
             if (id == null) {
                 warn.accept("Invalid " + what + ": " + token);
             } else if (!out.contains(id)) {
@@ -385,11 +385,11 @@ public final class PrCitRule {
         return out;
     }
 
-    private static Set<ResourceLocation> parseEnchantments(String text, Consumer<String> warn) {
+    private static Set<Identifier> parseEnchantments(String text, Consumer<String> warn) {
         if (text == null) {
             return null;
         }
-        Set<ResourceLocation> out = new LinkedHashSet<>();
+        Set<Identifier> out = new LinkedHashSet<>();
         for (String token : text.trim().split("\\s+")) {
             if (token.isEmpty()) {
                 continue;
@@ -402,7 +402,7 @@ public final class PrCitRule {
                     continue;
                 }
             }
-            ResourceLocation id = ResourceLocation.tryParse(name);
+            Identifier id = Identifier.tryParse(name);
             if (id == null) {
                 warn.accept("Invalid value: " + token);
             } else {
@@ -544,9 +544,9 @@ public final class PrCitRule {
      * name refers to. Names resolve like other OptiFine paths; a bare name not rooted in
      * {@code textures/} or {@code optifine/} is taken relative to the properties file.
      */
-    static ResourceLocation textureFile(String text, String basePath) {
+    static Identifier textureFile(String text, String basePath) {
         String s = fixName(PrPaths.stripExtension(text.trim(), ".png"), basePath, false);
-        ResourceLocation id = ResourceLocation.tryParse(s);
+        Identifier id = Identifier.tryParse(s);
         if (id == null) {
             return null;
         }
@@ -556,13 +556,13 @@ public final class PrCitRule {
         } else if (s.indexOf(':') >= 0 && !isRooted(path)) {
             path = "textures/" + path;
         }
-        ResourceLocation file = ResourceLocation.tryBuild(id.getNamespace(), path + ".png");
+        Identifier file = Identifier.tryBuild(id.getNamespace(), path + ".png");
         return file == null ? null : PrPaths.logical(file);
     }
 
     /** OptiFine {@code fixModelName}: {@code item/} and {@code block/} models stay vanilla. */
-    static ResourceLocation modelLocation(String text, String basePath) {
-        ResourceLocation id = ResourceLocation.tryParse(fixName(PrPaths.stripExtension(text.trim(), ".json"), basePath, true));
+    static Identifier modelLocation(String text, String basePath) {
+        Identifier id = Identifier.tryParse(fixName(PrPaths.stripExtension(text.trim(), ".json"), basePath, true));
         return id == null ? null : PrPaths.logical(id);
     }
 
@@ -580,7 +580,7 @@ public final class PrCitRule {
     }
 
     /** Block atlas sprite of a texture file: its path without {@code textures/} and {@code .png}. */
-    static ResourceLocation spriteOf(ResourceLocation file) {
+    static Identifier spriteOf(Identifier file) {
         String path = PrPaths.stripExtension(file.getPath(), ".png");
         return file.withPath(path.startsWith("textures/") ? path.substring("textures/".length()) : path);
     }

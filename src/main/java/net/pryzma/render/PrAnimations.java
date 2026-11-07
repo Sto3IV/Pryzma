@@ -3,15 +3,15 @@ package net.pryzma.render;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.resources.Identifier;
 import net.pryzma.PryzmaConfig;
+import net.pryzma.mixin.SpriteContentsAnimatedTextureAccessor;
+import net.pryzma.mixin.SpriteContentsAnimationStateAccessor;
 
 /**
  * Which Animations switch governs a block atlas sprite: water, lava, fire (all fire and campfire
- * frames), the nether portal, and everything else under Terrain Animated. Other atlases always
- * animate, as in 1.x.
+ * frames), the nether portal, and everything else under Terrain Animated.
  */
 public final class PrAnimations {
     public enum Kind {
@@ -47,38 +47,36 @@ public final class PrAnimations {
     private PrAnimations() {
     }
 
-    public static Kind kindOf(TextureAtlasSprite sprite) {
-        if (!InventoryMenu.BLOCK_ATLAS.equals(sprite.atlasLocation())) {
+    public static Kind kindOf(Identifier name) {
+        if (name == null) {
             return Kind.OTHER;
         }
-        ResourceLocation name = sprite.contents().name();
-        Kind kind = ResourceLocation.DEFAULT_NAMESPACE.equals(name.getNamespace()) ? NAMED.get(name.getPath()) : null;
+        Kind kind = Identifier.DEFAULT_NAMESPACE.equals(name.getNamespace()) ? NAMED.get(name.getPath()) : null;
         return kind != null ? kind : Kind.TERRAIN;
     }
 
     /** Animations that advance: all but the switched ones whose switch is off. */
-    public static int countRunning(List<TextureAtlasSprite.Ticker> tickers) {
+    public static int countRunning(List<SpriteContents.AnimationState> states) {
+        if (states == null) {
+            return 0;
+        }
         int running = 0;
-        for (TextureAtlasSprite.Ticker ticker : tickers) {
-            if (!(ticker instanceof SwitchedTicker switched) || switched.kind().enabled()) {
-                running++;
+        for (SpriteContents.AnimationState state : states) {
+            try {
+                SpriteContents.AnimatedTexture info = ((SpriteContentsAnimationStateAccessor) (Object) state).prGetAnimationInfo();
+                if (info != null) {
+                    SpriteContents contents = ((SpriteContentsAnimatedTextureAccessor) (Object) info).prGetContents();
+                    if (contents != null) {
+                        Kind kind = kindOf(contents.name());
+                        if (kind != null && !kind.enabled()) {
+                            continue;
+                        }
+                    }
+                }
+            } catch (Throwable ignored) {
             }
+            running++;
         }
         return running;
-    }
-
-    /** A block atlas animation that holds its current frame while its switch is off. */
-    public record SwitchedTicker(TextureAtlasSprite.Ticker ticker, Kind kind) implements TextureAtlasSprite.Ticker {
-        @Override
-        public void tickAndUpload() {
-            if (kind.enabled()) {
-                ticker.tickAndUpload();
-            }
-        }
-
-        @Override
-        public void close() {
-            ticker.close();
-        }
     }
 }

@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.pryzma.core.PrHash;
 import net.pryzma.core.match.PrBlockMatcher;
@@ -74,11 +74,11 @@ public final class PrColormap {
      *
      * @param defaultFormat {@code palette.format} of color.properties
      */
-    static Optional<PrColormap> load(PrResources res, ResourceLocation png, Format defaultFormat, Consumer<String> warn) {
+    static Optional<PrColormap> load(PrResources res, Identifier png, Format defaultFormat, Consumer<String> warn) {
         if (!res.exists(png)) {
             return Optional.empty();
         }
-        ResourceLocation propsLoc = png.withPath(PrPaths.stripExtension(png.getPath(), ".png") + ".properties");
+        Identifier propsLoc = png.withPath(PrPaths.stripExtension(png.getPath(), ".png") + ".properties");
         Optional<PrProperties> props = res.properties(propsLoc);
         if (props.isPresent()) {
             return fromProperties(res, props.get(), defaultFormat, false, warn);
@@ -118,7 +118,7 @@ public final class PrColormap {
         }
         String source = p.get("source");
         String sourcePath = source != null ? PrPaths.withExtension(source, ".png") : "./" + p.name() + ".png";
-        ResourceLocation image = PrPaths.resolveSibling(sourcePath, p.location());
+        Identifier image = PrPaths.resolveSibling(sourcePath, p.location());
         if (image == null) {
             warn.accept("Invalid colormap source '" + source + "' in " + p);
             return Optional.empty();

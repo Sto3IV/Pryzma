@@ -23,28 +23,36 @@ public final class PrWorldControl {
                 holdTime(level);
             }
             if (!PryzmaConfig.prWeather && (level.getRainLevel(1.0F) > 0.0F || level.isThundering())) {
-                level.setWeatherParameters(6000, 0, false, false);
+                var weather = level.getWeatherData();
+                weather.setClearWeatherTime(6000);
+                weather.setRainTime(0);
+                weather.setThunderTime(0);
+                weather.setRaining(false);
+                weather.setThundering(false);
+                weather.setDirty();
             }
         }
     }
 
     private static void holdTime(ServerLevel level) {
-        long time = level.getDayTime();
+        long time = level.getDefaultClockTime();
         long timeOfDay = time % 24000L;
-        if (PryzmaConfig.prTime == 1) {
-            if (timeOfDay <= 1000L) {
-                level.setDayTime(time - timeOfDay + 1001L);
+        level.dimensionTypeRegistration().value().defaultClock().ifPresent(clock -> {
+            if (PryzmaConfig.prTime == 1) {
+                if (timeOfDay <= 1000L) {
+                    level.clockManager().setTotalTicks(clock, time - timeOfDay + 1001L);
+                }
+                if (timeOfDay >= 11000L) {
+                    level.clockManager().setTotalTicks(clock, time - timeOfDay + 24001L);
+                }
+            } else if (PryzmaConfig.prTime == 2) {
+                if (timeOfDay <= 14000L) {
+                    level.clockManager().setTotalTicks(clock, time - timeOfDay + 14001L);
+                }
+                if (timeOfDay >= 22000L) {
+                    level.clockManager().setTotalTicks(clock, time - timeOfDay + 24000L + 14001L);
+                }
             }
-            if (timeOfDay >= 11000L) {
-                level.setDayTime(time - timeOfDay + 24001L);
-            }
-        } else if (PryzmaConfig.prTime == 2) {
-            if (timeOfDay <= 14000L) {
-                level.setDayTime(time - timeOfDay + 14001L);
-            }
-            if (timeOfDay >= 22000L) {
-                level.setDayTime(time - timeOfDay + 24000L + 14001L);
-            }
-        }
+        });
     }
 }

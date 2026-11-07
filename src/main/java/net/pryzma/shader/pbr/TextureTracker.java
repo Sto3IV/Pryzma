@@ -20,10 +20,25 @@ public class TextureTracker {
 	}
 
 	private final Int2ObjectMap<AbstractTexture> textures = new Int2ObjectOpenHashMap<>();
+	private final int[] shaderTextures = new int[16];
 
 	private boolean lockBindCallback;
 
 	private TextureTracker() {
+	}
+
+	public static int getTextureId(AbstractTexture texture) {
+		if (texture == null) {
+			return 0;
+		}
+		if (texture.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture glTex) {
+			return glTex.glId();
+		}
+		return 0;
+	}
+
+	public int getShaderTexture(int unit) {
+		return unit >= 0 && unit < shaderTextures.length ? shaderTextures[unit] : 0;
 	}
 
 	public void trackTexture(int id, AbstractTexture texture) {
@@ -36,6 +51,9 @@ public class TextureTracker {
 	}
 
 	public void onSetShaderTexture(int unit, int id) {
+		if (unit >= 0 && unit < shaderTextures.length) {
+			shaderTextures[unit] = id;
+		}
 		if (lockBindCallback) {
 			return;
 		}

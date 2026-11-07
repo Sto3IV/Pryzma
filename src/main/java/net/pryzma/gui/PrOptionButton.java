@@ -1,8 +1,9 @@
 package net.pryzma.gui;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.InputWithModifiers;
 import net.pryzma.PryzmaConfig;
 
 /** Cycling option button: click steps forward (Shift: backward), the wheel steps like vanilla's. */
@@ -18,8 +19,14 @@ final class PrOptionButton extends Button implements PrOptionControl {
     }
 
     @Override
-    public void onPress() {
-        step(Screen.hasShiftDown() ? -1 : 1);
+    public void onPress(InputWithModifiers input) {
+        step(Minecraft.getInstance().hasShiftDown() ? -1 : 1);
+    }
+
+    @Override
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        this.extractDefaultSprite(graphics);
+        this.extractDefaultLabel(graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
     }
 
     @Override

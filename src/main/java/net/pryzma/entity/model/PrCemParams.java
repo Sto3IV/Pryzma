@@ -11,10 +11,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.animal.Fox;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.animal.fox.Fox;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -75,9 +75,11 @@ final class PrCemParams {
             case "player_rot_y" -> (PrExpr.F) () -> player() == null ? 0.0F : toRad(Mth.lerp(PrCemContext.partialTick, player().yRotO, player().getYRot()));
             case "frame_time" -> (PrExpr.F) () -> PrCemContext.frameSeconds;
             case "frame_counter" -> (PrExpr.F) () -> PrCemContext.frames;
-            case "anger_time" -> (PrExpr.F) () -> living() instanceof NeutralMob n ? n.getRemainingPersistentAngerTime() : 0.0F;
+            case "anger_time" -> (PrExpr.F) () -> living() instanceof NeutralMob n && n.isAngry()
+                    ? (float) Math.max(0L, n.getPersistentAngerEndTime() - ((Entity) n).level().getGameTime())
+                    : 0.0F;
             case "anger_time_start" -> (PrExpr.F) () -> 0.0F;
-            case "swing_progress" -> (PrExpr.F) () -> living() == null ? 0.0F : living().getAttackAnim(PrCemContext.partialTick);
+            case "swing_progress" -> (PrExpr.F) () -> living() == null ? 0.0F : living().getSwingAnimation(PrCemContext.partialTick);
             case "dimension" -> (PrExpr.F) PrCemParams::dimension;
             case "rule_index" -> (PrExpr.F) () -> PrCemContext.ruleIndex;
             case "is_alive" -> (PrExpr.B) () -> PrCemContext.entity != null && PrCemContext.entity.isAlive();
@@ -91,7 +93,7 @@ final class PrCemParams {
             case "is_in_gui" -> (PrExpr.B) () -> PrCemContext.itemContext == ItemDisplayContext.GUI;
             case "is_on_head" -> (PrExpr.B) () -> PrCemContext.itemContext == ItemDisplayContext.HEAD;
             case "is_in_ground" -> (PrExpr.B) () -> PrCemContext.entity instanceof AbstractArrow a
-                    && (a.inGround || a.tickCount == 0 && a.xo == 0.0 && a.yo == 0.0 && a.zo == 0.0);
+                    && (a.isInGround() || a.tickCount == 0 && a.xo == 0.0 && a.yo == 0.0 && a.zo == 0.0);
             case "is_in_lava" -> (PrExpr.B) () -> PrCemContext.entity != null && PrCemContext.entity.isInLava();
             case "is_in_water" -> (PrExpr.B) () -> {
                 if (PrCemContext.blockEntity != null) {
@@ -131,7 +133,7 @@ final class PrCemParams {
     /** Boats report their rowing as limb swing, carts their travel along the rail (OptiFine). */
     private static float boatOrCart(boolean swing, float fallback) {
         Entity e = PrCemContext.entity;
-        if (e instanceof Boat boat) {
+        if (e instanceof AbstractBoat boat) {
             if (!swing) {
                 return 1.0F;
             }

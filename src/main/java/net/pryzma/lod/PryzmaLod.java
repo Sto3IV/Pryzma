@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
+import org.joml.Matrix4f;
 import org.jetbrains.annotations.Nullable;
 
 import it.unimi.dsi.fastutil.longs.Long2LongLinkedOpenHashMap;
@@ -292,7 +293,7 @@ public final class PryzmaLod {
             return;
         }
         ChunkPos pos = chunk.getPos();
-        PENDING_LOADS.putAndMoveToLast(LodDataStore.key(pos.x, pos.z), tick + LOAD_CAPTURE_DELAY_TICKS);
+        PENDING_LOADS.putAndMoveToLast(LodDataStore.key(pos.x(), pos.z()), tick + LOAD_CAPTURE_DELAY_TICKS);
     }
 
     /** The chunk is still complete, light included: its final state becomes the LOD's. */
@@ -305,7 +306,7 @@ public final class PryzmaLod {
             return;
         }
         ChunkPos pos = chunk.getPos();
-        PENDING_LOADS.remove(LodDataStore.key(pos.x, pos.z));
+        PENDING_LOADS.remove(LodDataStore.key(pos.x(), pos.z()));
         capture(level, chunk);
     }
 
@@ -344,7 +345,7 @@ public final class PryzmaLod {
             tintedGeneration = LodBlockColors.generation();
             retintAll(level, current);
         }
-        Vec3 camera = mc.gameRenderer.getMainCamera().getPosition();
+        Vec3 camera = mc.gameRenderer.mainCamera().position();
         int cameraChunkX = Mth.floor(camera.x) >> 4;
         int cameraChunkZ = Mth.floor(camera.z) >> 4;
         int radius = PryzmaConfig.prFarlandsDistance;
@@ -365,8 +366,8 @@ public final class PryzmaLod {
         listen(true);
         ChunkPos center = mc.player.chunkPosition();
         int reach = mc.options.getEffectiveRenderDistance() + 2;
-        for (int z = center.z - reach; z <= center.z + reach; z++) {
-            for (int x = center.x - reach; x <= center.x + reach; x++) {
+        for (int z = center.z() - reach; z <= center.z() + reach; z++) {
+            for (int x = center.x() - reach; x <= center.x() + reach; x++) {
                 if (level.getChunkSource().getChunk(x, z, false) != null) {
                     PENDING_LOADS.putAndMoveToLast(LodDataStore.key(x, z), tick);
                 }
@@ -581,9 +582,8 @@ public final class PryzmaLod {
      * Skipped where the camera's surroundings hide the distance anyway.
      */
     private static void onRenderStage(RenderLevelStageEvent event) {
-        RenderLevelStageEvent.Stage stage = event.getStage();
-        boolean sky = stage == RenderLevelStageEvent.Stage.AFTER_SKY;
-        if (!sky && stage != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+        boolean sky = event instanceof RenderLevelStageEvent.AfterSky;
+        if (!sky && !(event instanceof RenderLevelStageEvent.AfterTranslucentBlocks)) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
@@ -598,8 +598,8 @@ public final class PryzmaLod {
         } else if (shaders == null) {
             return;
         }
-        Camera camera = event.getCamera();
-        if (camera.getFluidInCamera() != FogType.NONE) {
+        var cameraState = event.getLevelRenderState().cameraRenderState;
+        if (cameraState.fogType != FogType.NONE) {
             return;
         }
         int radiusBlocks = PryzmaConfig.prFarlandsDistance << 4;
@@ -611,14 +611,15 @@ public final class PryzmaLod {
             // The pack's own fog and lighting apply; the vanilla fog is left alone.
             if (shaders != null) {
                 if (sky) {
-                    shaders.renderOpaque(camera.getPosition(), clipRadius);
+                    shaders.renderOpaque(cameraState.pos, clipRadius);
                 } else {
-                    shaders.renderWater(camera.getPosition(), clipRadius);
+                    shaders.renderWater(cameraState.pos, clipRadius);
                 }
             }
             return;
         }
-        if (!sky || !PrRenderHooks.isClearAir(camera)) {
+        Camera mainCamera = mc.gameRenderer.mainCamera();
+        if (!sky || !PrRenderHooks.isClearAir(mainCamera)) {
             return;
         }
         int vanillaBlocks = mc.options.getEffectiveRenderDistance() << 4;
@@ -626,14 +627,14 @@ public final class PryzmaLod {
         if (PryzmaConfig.prFarlandsFog != 3) {
             // The intake only reads chunks the world has saved, so the LOD can stop far inside the configured
             // radius; fog that ends past the last fragment never reaches full strength and the edge stays hard.
-            float horizon = NativeLodRenderer.horizon(event.getModelViewMatrix(), event.getProjectionMatrix(),
-                    camera.getPosition(), clipRadius);
+            float horizon = NativeLodRenderer.horizon(event.getModelViewMatrix(), cameraState.projectionMatrix,
+                    cameraState.pos, clipRadius);
             fog = LodMath.clampFogToHorizon(fog, horizon);
             frameHorizon = horizon;
         } else {
             frameHorizon = 0.0F;
         }
-        if (NativeLodRenderer.render(event.getModelViewMatrix(), event.getProjectionMatrix(), camera.getPosition(), clipRadius,
+        if (NativeLodRenderer.render(new Matrix4f(event.getModelViewMatrix()), new Matrix4f(cameraState.projectionMatrix), cameraState.pos, clipRadius,
                 radiusBlocks, fog[0], fog[1])) {
             frameActive = true;
             frameFogStart = fog[0];

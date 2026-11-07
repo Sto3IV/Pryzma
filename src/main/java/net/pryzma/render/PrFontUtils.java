@@ -9,10 +9,10 @@ import java.util.concurrent.Executor;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.font.FontManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -34,7 +34,7 @@ public final class PrFontUtils {
      *
      * <p>Checks {@code assets/<namespace>/optifine/font/...} and {@code assets/<namespace>/mcpatcher/font/...}.
      */
-    public static ResourceLocation getHdFontLocation(ResourceLocation fontLoc, ResourceManager rm) {
+    public static Identifier getHdFontLocation(Identifier fontLoc, ResourceManager rm) {
         if (!PryzmaConfig.prCustomFonts || fontLoc == null || rm == null) {
             return fontLoc;
         }
@@ -48,13 +48,13 @@ public final class PrFontUtils {
         }
 
         // 1. Check OptiFine path: optifine/...
-        ResourceLocation optifineLoc = ResourceLocation.fromNamespaceAndPath(fontLoc.getNamespace(), "optifine/" + subPath);
+        Identifier optifineLoc = Identifier.fromNamespaceAndPath(fontLoc.getNamespace(), "optifine/" + subPath);
         if (rm.getResource(optifineLoc).isPresent()) {
             return optifineLoc;
         }
 
         // 2. Check MCPatcher legacy path: mcpatcher/...
-        ResourceLocation mcpatcherLoc = ResourceLocation.fromNamespaceAndPath(fontLoc.getNamespace(), "mcpatcher/" + subPath);
+        Identifier mcpatcherLoc = Identifier.fromNamespaceAndPath(fontLoc.getNamespace(), "mcpatcher/" + subPath);
         if (rm.getResource(mcpatcherLoc).isPresent()) {
             return mcpatcherLoc;
         }
@@ -71,7 +71,7 @@ public final class PrFontUtils {
      */
     public static InputStream openFontImageStream(
         ResourceManager rm,
-        ResourceLocation location,
+        Identifier location,
         Operation<InputStream> original
     ) throws IOException {
         if (!PryzmaConfig.prCustomFonts) {
@@ -87,7 +87,7 @@ public final class PrFontUtils {
             return original.call(rm, location);
         }
 
-        ResourceLocation hdLoc = getHdFontLocation(location, rm);
+        Identifier hdLoc = getHdFontLocation(location, rm);
         if (!hdLoc.equals(location)) {
             return rm.open(hdLoc);
         }
@@ -153,6 +153,6 @@ public final class PrFontUtils {
 
         PreparableReloadListener.PreparationBarrier barrier = CompletableFuture::completedFuture;
         Executor background = Util.backgroundExecutor();
-        fontManager.reload(barrier, resourceManager, InactiveProfiler.INSTANCE, InactiveProfiler.INSTANCE, background, mc);
+        fontManager.reload(new PreparableReloadListener.SharedState(resourceManager), background, barrier, mc);
     }
 }

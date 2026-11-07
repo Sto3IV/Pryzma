@@ -1,6 +1,6 @@
 package net.pryzma.shader.gl.framebuffer;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.pryzma.shader.gl.GlResource;
@@ -100,7 +100,7 @@ public class GlFramebuffer extends GlResource {
 	public int getStatus() {
 		bind();
 
-		return GlStateManager.glCheckFramebufferStatus(GL30C.GL_FRAMEBUFFER);
+		return GL30C.glCheckFramebufferStatus(GL30C.GL_FRAMEBUFFER);
 	}
 
 	public int getId() {

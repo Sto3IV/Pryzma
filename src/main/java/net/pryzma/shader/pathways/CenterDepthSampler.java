@@ -1,7 +1,7 @@
 package net.pryzma.shader.pathways;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import net.pryzma.shader.gl.framebuffer.GlFramebuffer;
@@ -17,7 +17,9 @@ import net.pryzma.shader.uniforms.SystemTimeUniforms;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.io.IOUtils;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL21C;
+import org.lwjgl.opengl.GL30C;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -42,7 +44,7 @@ public class CenterDepthSampler {
 		InternalTextureFormat format = InternalTextureFormat.R32F;
 		setupColorTexture(texture, format);
 		setupColorTexture(altTexture, format);
-		RenderSystem.bindTexture(0);
+		GlStateManager._bindTexture(0);
 
 		this.framebuffer.addColorAttachment(0, texture);
 		ProgramBuilder builder;
@@ -77,7 +79,7 @@ public class CenterDepthSampler {
 		this.framebuffer.bind();
 		this.program.use();
 
-		RenderSystem.viewport(0, 0, 1, 1);
+		GL11C.glViewport(0, 0, 1, 1);
 
 		FullScreenQuadRenderer.INSTANCE.render();
 
@@ -88,7 +90,8 @@ public class CenterDepthSampler {
 		DepthCopyStrategy.fastest(false).copy(this.framebuffer, texture, null, altTexture, 1, 1);
 
 		//Reset viewport
-		Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
+		GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
+		GL11C.glViewport(0, 0, Minecraft.getInstance().getWindow().getWidth(), Minecraft.getInstance().getWindow().getHeight());
 	}
 
 	public void setupColorTexture(int texture, InternalTextureFormat format) {

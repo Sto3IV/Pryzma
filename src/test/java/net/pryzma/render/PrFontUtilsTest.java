@@ -21,7 +21,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -49,11 +49,11 @@ class PrFontUtilsTest {
     void testHdFontLocationResolvesOptifineWhenEnabled() {
         PryzmaConfig.prCustomFonts = true;
         TestResourceManager rm = new TestResourceManager();
-        ResourceLocation optifineAscii = ResourceLocation.fromNamespaceAndPath("minecraft", "optifine/font/ascii.png");
+        Identifier optifineAscii = Identifier.fromNamespaceAndPath("minecraft", "optifine/font/ascii.png");
         rm.registerResource(optifineAscii);
 
-        ResourceLocation vanillaLoc = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/font/ascii.png");
-        ResourceLocation resolved = PrFontUtils.getHdFontLocation(vanillaLoc, rm);
+        Identifier vanillaLoc = Identifier.fromNamespaceAndPath("minecraft", "textures/font/ascii.png");
+        Identifier resolved = PrFontUtils.getHdFontLocation(vanillaLoc, rm);
 
         assertEquals(optifineAscii, resolved);
     }
@@ -62,11 +62,11 @@ class PrFontUtilsTest {
     void testHdFontLocationResolvesMcpatcherWhenOptifineMissing() {
         PryzmaConfig.prCustomFonts = true;
         TestResourceManager rm = new TestResourceManager();
-        ResourceLocation mcpatcherAscii = ResourceLocation.fromNamespaceAndPath("minecraft", "mcpatcher/font/ascii.png");
+        Identifier mcpatcherAscii = Identifier.fromNamespaceAndPath("minecraft", "mcpatcher/font/ascii.png");
         rm.registerResource(mcpatcherAscii);
 
-        ResourceLocation vanillaLoc = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/font/ascii.png");
-        ResourceLocation resolved = PrFontUtils.getHdFontLocation(vanillaLoc, rm);
+        Identifier vanillaLoc = Identifier.fromNamespaceAndPath("minecraft", "textures/font/ascii.png");
+        Identifier resolved = PrFontUtils.getHdFontLocation(vanillaLoc, rm);
 
         assertEquals(mcpatcherAscii, resolved);
     }
@@ -75,11 +75,11 @@ class PrFontUtilsTest {
     void testHdFontLocationBypassedWhenCustomFontsDisabled() {
         PryzmaConfig.prCustomFonts = false;
         TestResourceManager rm = new TestResourceManager();
-        rm.registerResource(ResourceLocation.fromNamespaceAndPath("minecraft", "optifine/font/ascii.png"));
-        rm.registerResource(ResourceLocation.fromNamespaceAndPath("minecraft", "mcpatcher/font/ascii.png"));
+        rm.registerResource(Identifier.fromNamespaceAndPath("minecraft", "optifine/font/ascii.png"));
+        rm.registerResource(Identifier.fromNamespaceAndPath("minecraft", "mcpatcher/font/ascii.png"));
 
-        ResourceLocation vanillaLoc = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/font/ascii.png");
-        ResourceLocation resolved = PrFontUtils.getHdFontLocation(vanillaLoc, rm);
+        Identifier vanillaLoc = Identifier.fromNamespaceAndPath("minecraft", "textures/font/ascii.png");
+        Identifier resolved = PrFontUtils.getHdFontLocation(vanillaLoc, rm);
 
         assertEquals(vanillaLoc, resolved);
     }
@@ -167,7 +167,7 @@ class PrFontUtilsTest {
         }
 
         @Override
-        public IoSupplier<InputStream> getResource(PackType type, ResourceLocation location) {
+        public IoSupplier<InputStream> getResource(PackType type, Identifier location) {
             return null;
         }
 
@@ -189,14 +189,14 @@ class PrFontUtilsTest {
     }
 
     private static class TestResourceManager implements ResourceManager {
-        private final Map<ResourceLocation, Resource> resources = new HashMap<>();
+        private final Map<Identifier, Resource> resources = new HashMap<>();
 
-        void registerResource(ResourceLocation loc) {
+        void registerResource(Identifier loc) {
             resources.put(loc, createDummyResource("test_pack"));
         }
 
         @Override
-        public Optional<Resource> getResource(ResourceLocation location) {
+        public Optional<Resource> getResource(Identifier location) {
             return Optional.ofNullable(resources.get(location));
         }
 
@@ -206,18 +206,18 @@ class PrFontUtilsTest {
         }
 
         @Override
-        public List<Resource> getResourceStack(ResourceLocation location) {
+        public List<Resource> getResourceStack(Identifier location) {
             Resource r = resources.get(location);
             return r != null ? List.of(r) : Collections.emptyList();
         }
 
         @Override
-        public Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
+        public Map<Identifier, Resource> listResources(String path, Predicate<Identifier> filter) {
             return Collections.emptyMap();
         }
 
         @Override
-        public Map<ResourceLocation, List<Resource>> listResourceStacks(String path, Predicate<ResourceLocation> filter) {
+        public Map<Identifier, List<Resource>> listResourceStacks(String path, Predicate<Identifier> filter) {
             return Collections.emptyMap();
         }
 

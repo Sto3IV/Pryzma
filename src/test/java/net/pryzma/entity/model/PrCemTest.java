@@ -29,7 +29,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 class PrCemTest {
     /** Records what a model emits: position, texture coordinates and normal per vertex. */
@@ -75,7 +75,7 @@ class PrCemTest {
         }
     }
 
-    private static final ResourceLocation JEM = ResourceLocation.withDefaultNamespace("optifine/cem/creeper.jem");
+    private static final Identifier JEM = Identifier.withDefaultNamespace("optifine/cem/creeper.jem");
 
     private static JsonObject json(String text) {
         return JsonParser.parseString(text).getAsJsonObject();
@@ -84,7 +84,7 @@ class PrCemTest {
     private static PoseStack.Pose pose() {
         PoseStack stack = new PoseStack();
         stack.translate(0.25F, -1.5F, 0.75F);
-        stack.mulPose(new Quaternionf().rotationXYZ(0.3F, -0.7F, 0.2F));
+        stack.rotate(new Quaternionf().rotationXYZ(0.3F, -0.7F, 0.2F));
         return stack.last();
     }
 
@@ -157,7 +157,7 @@ class PrCemTest {
                         "uvFront": [0, 0, 1, 1], "uvDown": [1, 1, 2, 2] } ] }
                   ]
                 }"""), JEM, loc -> null);
-        assertEquals(ResourceLocation.withDefaultNamespace("optifine/cem/creeper_custom.png"), jem.texture(), "bare names sit next to the model");
+        assertEquals(Identifier.withDefaultNamespace("optifine/cem/creeper_custom.png"), jem.texture(), "bare names sit next to the model");
         assertEquals(0.75F, jem.shadowSize());
         PrJem.Part head = jem.parts().get(0);
         assertEquals("head", head.part());
@@ -184,15 +184,15 @@ class PrCemTest {
 
     @Test
     void externalPartsAndBaseIdsCopyMissingKeysOnly() {
-        Map<ResourceLocation, JsonObject> files = new HashMap<>();
-        files.put(ResourceLocation.withDefaultNamespace("optifine/cem/pig.jpm"), json("""
+        Map<Identifier, JsonObject> files = new HashMap<>();
+        files.put(Identifier.withDefaultNamespace("optifine/cem/pig.jpm"), json("""
                 { "textureSize": [64, 32], "translate": [1, 1, 1],
                   "boxes": [ { "coordinates": [-12, -12, 4, 8, 8, 8], "uvNorth": [8, 8, 16, 16] } ] }"""));
         PrJem jem = PrJemParser.parse(json("""
                 { "models": [
                     { "id": "head", "model": "pig.jpm", "part": "head", "translate": [8, 8, -12] },
                     { "baseId": "head", "part": "body" }
-                ] }"""), ResourceLocation.withDefaultNamespace("optifine/cem/pig.jem"), files::get);
+                ] }"""), Identifier.withDefaultNamespace("optifine/cem/pig.jem"), files::get);
         PrJem.Part head = jem.parts().get(0);
         assertEquals(8.0F, head.x(), "the jem's own translate wins over the jpm's");
         assertEquals(1, head.boxes().size(), "boxes come from the jpm");
@@ -208,13 +208,13 @@ class PrCemTest {
 
     @Test
     void resourcePathsFollowOptifineRules() {
-        assertEquals(ResourceLocation.withDefaultNamespace("optifine/cem/tex.png"), PrJemParser.resolve(JEM, "optifine/cem", "tex", ".png"));
-        assertEquals(ResourceLocation.withDefaultNamespace("optifine/cem/sub/tex.png"), PrJemParser.resolve(JEM, "optifine/cem", "./sub/tex.png", ".png"));
-        assertEquals(ResourceLocation.withDefaultNamespace("optifine/other/tex.png"), PrJemParser.resolve(JEM, "optifine/cem", "~/other/tex", ".png"));
-        assertEquals(ResourceLocation.withDefaultNamespace("textures/entity/pig.png"), PrJemParser.resolve(JEM, "optifine/cem", "textures/entity/pig", ".png"));
-        assertEquals(ResourceLocation.fromNamespaceAndPath("mymod", "textures/a.png"), PrJemParser.resolve(JEM, "optifine/cem", "mymod:textures/a", ".png"));
-        assertEquals(ResourceLocation.withDefaultNamespace("optifine/cem/pig.jpm"),
-                PrJemParser.resolve(ResourceLocation.withDefaultNamespace("mcpatcher/cem/pig.jem"), "mcpatcher/cem", "./pig", ".jpm"),
+        assertEquals(Identifier.withDefaultNamespace("optifine/cem/tex.png"), PrJemParser.resolve(JEM, "optifine/cem", "tex", ".png"));
+        assertEquals(Identifier.withDefaultNamespace("optifine/cem/sub/tex.png"), PrJemParser.resolve(JEM, "optifine/cem", "./sub/tex.png", ".png"));
+        assertEquals(Identifier.withDefaultNamespace("optifine/other/tex.png"), PrJemParser.resolve(JEM, "optifine/cem", "~/other/tex", ".png"));
+        assertEquals(Identifier.withDefaultNamespace("textures/entity/pig.png"), PrJemParser.resolve(JEM, "optifine/cem", "textures/entity/pig", ".png"));
+        assertEquals(Identifier.fromNamespaceAndPath("mymod", "textures/a.png"), PrJemParser.resolve(JEM, "optifine/cem", "mymod:textures/a", ".png"));
+        assertEquals(Identifier.withDefaultNamespace("optifine/cem/pig.jpm"),
+                PrJemParser.resolve(Identifier.withDefaultNamespace("mcpatcher/cem/pig.jem"), "mcpatcher/cem", "./pig", ".jpm"),
                 "mcpatcher paths fold onto optifine");
     }
 

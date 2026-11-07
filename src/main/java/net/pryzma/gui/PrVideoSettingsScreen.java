@@ -4,12 +4,12 @@ import java.util.List;
 
 import com.mojang.blaze3d.platform.Window;
 
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -75,13 +75,13 @@ public final class PrVideoSettingsScreen extends PrScreen {
 
     private void open(PrSettingsScreen.Page page) {
         toChild = true;
-        minecraft.setScreen(new PrSettingsScreen(page, this));
+        minecraft.gui.setScreen(new PrSettingsScreen(page, this));
     }
 
     /** The shader pack screen of the Pryzma Shaders; it returns here. */
     private void openShaders() {
         toChild = true;
-        minecraft.setScreen(new ShaderPackScreen(this));
+        minecraft.gui.setScreen(new ShaderPackScreen(this));
     }
 
     /** 1.x: right-click lowers GUI Scale, wrapping from Auto to the largest scale that fits. */
@@ -102,24 +102,21 @@ public final class PrVideoSettingsScreen extends PrScreen {
 
     /** The GUI scale changed under the cursor; put the cursor back on the (moved) button. */
     private void keepCursorOnGuiScale() {
-        minecraft.resizeDisplay();
+        minecraft.resizeGui();
         Window window = minecraft.getWindow();
         int x = guiScale.getX() + (guiScale.getWidth() - guiScale.getHeight());
         int y = guiScale.getY() + guiScale.getHeight() / 2;
-        GLFW.glfwSetCursorPos(window.getWindow(), x * window.getGuiScale(), y * window.getGuiScale());
+        SDLMouse.SDL_WarpMouseInWindow(window.handle(), (float) (x * window.getGuiScale()), (float) (y * window.getGuiScale()));
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
-        g.pose().pushPose();
-        g.pose().translate(0.0F, 0.0F, -10.0F);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
         String version = "Pryzma " + ModList.get().getModContainerById(Pryzma.MODID)
                 .map(c -> c.getModInfo().getVersion().toString()).orElse("2.3.0");
-        g.drawString(font, version, 2, height - 10, VERSION_COLOR);
-        String mc = "Minecraft " + SharedConstants.getCurrentVersion().getName();
-        g.drawString(font, mc, width - font.width(mc) - 2, height - 10, VERSION_COLOR);
-        g.pose().popPose();
+        g.text(font, version, 2, height - 10, VERSION_COLOR);
+        String mc = "Minecraft " + SharedConstants.getCurrentVersion().name();
+        g.text(font, mc, width - font.width(mc) - 2, height - 10, VERSION_COLOR);
     }
 
     /** Vanilla applies a new mipmap level when its video settings close; so does this screen. */

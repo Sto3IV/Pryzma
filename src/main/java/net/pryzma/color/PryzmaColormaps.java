@@ -12,9 +12,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockTintCache;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -77,7 +77,7 @@ public final class PryzmaColormaps {
     public static Data prepare(PrResources res) {
         List<String> warnings = new ArrayList<>();
         Consumer<String> warn = warnings::add;
-        ResourceLocation colorPropsLoc = mc("optifine/color.properties");
+        Identifier colorPropsLoc = mc("optifine/color.properties");
         Optional<PrProperties> colorProps = res.properties(colorPropsLoc);
         PrColormap.Format defaultFormat = PrColormap.Format.VANILLA;
         if (colorProps.isPresent()) {
@@ -128,7 +128,7 @@ public final class PryzmaColormaps {
             fogEnd = vec(p.getColor("fog.end", -1));
             skyEnd = vec(p.getColor("sky.end", -1));
             for (Map.Entry<String, String> e : p.withPrefix("palette.block.").entrySet()) {
-                ResourceLocation image = PrPaths.resolveLocation(e.getKey(), p.location());
+                Identifier image = PrPaths.resolveLocation(e.getKey(), p.location());
                 if (image == null) {
                     warn.accept("Invalid palette path: " + e.getKey());
                     continue;
@@ -149,7 +149,7 @@ public final class PryzmaColormaps {
 
         List<PrColormap> blockMaps = new ArrayList<>();
         for (String dir : new String[] {"colormap/custom", "colormap/blocks"}) {
-            for (Map.Entry<ResourceLocation, Resource> e : res.list(dir, ".properties").entrySet()) {
+            for (Map.Entry<Identifier, Resource> e : res.list(dir, ".properties").entrySet()) {
                 res.properties(e.getKey(), e.getValue())
                         .flatMap(p -> PrColormap.fromProperties(res, p, fmt, true, warn))
                         .ifPresent(blockMaps::add);
@@ -418,7 +418,7 @@ public final class PryzmaColormaps {
         return rgb < 0 ? null : new Vec3((rgb >> 16 & 0xFF) / 255.0, (rgb >> 8 & 0xFF) / 255.0, (rgb & 0xFF) / 255.0);
     }
 
-    private static ResourceLocation mc(String path) {
-        return ResourceLocation.withDefaultNamespace(path);
+    private static Identifier mc(String path) {
+        return Identifier.withDefaultNamespace(path);
     }
 }

@@ -40,7 +40,7 @@ public final class PrDebugOverlay {
         if (i >= 0) {
             lines.set(i, brand(lines.get(i), ClientBrandRetriever.getClientModName()));
         }
-        i = mc.fpsString.isEmpty() ? -1 : lines.indexOf(mc.fpsString);
+        i = find(lines, " fps");
         if (i >= 0) {
             lines.set(i, fpsLine(lines.get(i), PrDebugTracker.getFpsMin(), PrDebugTracker.getChunkUpdates(), flags()));
         }
@@ -51,9 +51,10 @@ public final class PrDebugOverlay {
         }
         i = find(lines, "P: ");
         if (i >= 0) {
-            List<TextureAtlasSprite.Ticker> tickers = ((TextureAtlasAccessor) mc.getModelManager()
-                    .getAtlas(InventoryMenu.BLOCK_ATLAS)).prGetAnimatedTextures();
-            lines.set(i, lines.get(i) + animations(PryzmaConfig.prSmartAnimations, PrAnimations.countRunning(tickers), tickers.size()));
+            java.util.List<net.minecraft.client.renderer.texture.SpriteContents.AnimationState> states = ((net.pryzma.mixin.TextureAtlasAccessor) mc.getAtlasManager()
+                    .getAtlasOrThrow(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS)).prGetAnimatedTextures();
+            int total = states != null ? states.size() : 0;
+            lines.set(i, lines.get(i) + animations(PryzmaConfig.prSmartAnimations, net.pryzma.render.PrAnimations.countRunning(states), total));
         }
         insertAfterCounts(lines, PryzmaLod.debugLine());
     }
@@ -150,7 +151,7 @@ public final class PrDebugOverlay {
     /** "Pryzma_1.21.1_2.2.2", the 1.x version format. */
     private static String version() {
         if (pryzmaVersion == null) {
-            pryzmaVersion = "Pryzma_" + SharedConstants.getCurrentVersion().getName() + "_" + ModList.get()
+            pryzmaVersion = "Pryzma_" + SharedConstants.getCurrentVersion().name() + "_" + ModList.get()
                     .getModContainerById(Pryzma.MODID).map(c -> c.getModInfo().getVersion().toString()).orElse("dev");
         }
         return pryzmaVersion;

@@ -10,7 +10,7 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import net.minecraft.client.CloudStatus;
-import net.minecraft.client.GraphicsStatus;
+import net.minecraft.client.GraphicsPreset;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.resources.language.I18n;
@@ -45,27 +45,35 @@ public final class PrOptions {
     public static final PrOption.Cycle GRAPHICS = cycle("options.graphics",
             () -> {
                 Options o = options();
-                if (shouldOmitFabulous() && o.graphicsMode().get() == GraphicsStatus.FABULOUS) {
-                    o.graphicsMode().set(GraphicsStatus.FANCY);
+                if (shouldOmitFabulous() && o.graphicsPreset().get() == GraphicsPreset.FABULOUS) {
+                    o.graphicsPreset().set(GraphicsPreset.FANCY);
                     o.save();
                 }
-                return switch (o.graphicsMode().get()) {
+                return switch (o.graphicsPreset().get()) {
                     case FAST -> fast();
                     case FANCY -> fancy();
                     case FABULOUS -> I18n.get("options.graphics.fabulous");
+                    case CUSTOM -> I18n.get("options.graphics.custom");
                 };
             },
             dir -> {
                 Options o = options();
-                GraphicsStatus current = o.graphicsMode().get();
-                GraphicsStatus next;
+                GraphicsPreset current = o.graphicsPreset().get();
+                GraphicsPreset next;
                 if (shouldOmitFabulous()) {
-                    next = (current == GraphicsStatus.FAST) ? GraphicsStatus.FANCY : GraphicsStatus.FAST;
+                    next = (current == GraphicsPreset.FAST) ? GraphicsPreset.FANCY : GraphicsPreset.FAST;
                 } else {
-                    GraphicsStatus[] values = GraphicsStatus.values();
-                    next = values[stepValue(current.getId(), new int[]{0, 1, 2}, dir)];
+                    GraphicsPreset[] presets = {GraphicsPreset.FAST, GraphicsPreset.FANCY, GraphicsPreset.FABULOUS};
+                    int curIdx = 0;
+                    for (int i = 0; i < presets.length; i++) {
+                        if (presets[i] == current) {
+                            curIdx = i;
+                            break;
+                        }
+                    }
+                    next = presets[stepValue(curIdx, new int[]{0, 1, 2}, dir)];
                 }
-                o.graphicsMode().set(next);
+                o.graphicsPreset().set(next);
                 o.save();
                 allChanged();
             });
@@ -129,7 +137,7 @@ public final class PrOptions {
                     case 1 -> CloudStatus.FAST;
                     case 2 -> CloudStatus.FANCY;
                     case 3 -> CloudStatus.OFF;
-                    default -> mc.options.graphicsMode().get() == GraphicsStatus.FAST ? CloudStatus.FAST : CloudStatus.FANCY;
+                    default -> CloudStatus.FANCY;
                 };
                 mc.options.cloudStatus().set(status);
             }
@@ -688,7 +696,7 @@ public final class PrOptions {
     }
 
     static void allChanged() {
-        Minecraft.getInstance().levelRenderer.allChanged();
+        Minecraft.getInstance().levelExtractor.allChanged();
     }
 
     static void reloadTextures() {

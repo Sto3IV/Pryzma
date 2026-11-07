@@ -4,7 +4,7 @@ import net.pryzma.Pryzma;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
@@ -27,14 +27,14 @@ public class ShaderForgeHelpers implements ShaderPlatformHelpers {
 
 	@Override
 	public boolean isModLoaded(String modId) {
-		return LoadingModList.get().getModFileById(modId) != null;
+		return FMLLoader.getCurrent().getLoadingModList().getModFileById(modId) != null;
 	}
 
 	boolean HAS_CAMO = isModLoaded("cable_facades");
 
 	@Override
 	public String getVersion() {
-		var list = LoadingModList.get();
+		var list = FMLLoader.getCurrent().getLoadingModList();
 		var modFile = list != null ? list.getModFileById(Pryzma.MODID) : null;
 		String ver = (modFile != null && !modFile.getMods().isEmpty())
 				? modFile.getMods().get(0).getVersion().toString()
@@ -44,7 +44,7 @@ public class ShaderForgeHelpers implements ShaderPlatformHelpers {
 
 	@Override
 	public boolean isDevelopmentEnvironment() {
-		return !FMLLoader.isProduction();
+		return !FMLLoader.getCurrent().isProduction();
 	}
 
 	@Override

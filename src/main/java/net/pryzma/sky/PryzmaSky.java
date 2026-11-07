@@ -10,22 +10,28 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
+import org.joml.Vector4f;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -42,22 +48,23 @@ public final class PryzmaSky {
     private static final Pattern LAYER = Pattern.compile("optifine/sky/world(-?\\d+)/sky(\\d+)\\.properties");
 
     private static volatile Data data = Data.EMPTY;
-    private static final Set<ResourceLocation> REGISTERED = new HashSet<>();
+    private static final Set<Identifier> REGISTERED = new HashSet<>();
+    private static GpuBuffer cubeBuffer;
 
     private PryzmaSky() {
     }
 
     /** Parsed layers per world id, with the physical texture location of every layer. */
-    public record Data(Map<Integer, PrSkyLayer[]> worlds, Map<ResourceLocation, ResourceLocation> textures) {
+    public record Data(Map<Integer, PrSkyLayer[]> worlds, Map<Identifier, Identifier> textures) {
         static final Data EMPTY = new Data(Map.of(), Map.of());
     }
 
     public static Data prepare(PrResources res) {
         Map<Integer, TreeMap<Integer, PrSkyLayer>> byWorld = new HashMap<>();
-        Map<ResourceLocation, ResourceLocation> textures = new HashMap<>();
+        Map<Identifier, Identifier> textures = new HashMap<>();
         List<String> warnings = new ArrayList<>();
-        for (Map.Entry<ResourceLocation, Resource> e : res.list("sky", ".properties").entrySet()) {
-            ResourceLocation loc = e.getKey();
+        for (Map.Entry<Identifier, Resource> e : res.list("sky", ".properties").entrySet()) {
+            Identifier loc = e.getKey();
             Matcher m = LAYER.matcher(loc.getPath());
             if (!"minecraft".equals(loc.getNamespace()) || !m.matches()) {
                 continue;
@@ -65,9 +72,9 @@ public final class PryzmaSky {
             int world = Integer.parseInt(m.group(1));
             int index = Integer.parseInt(m.group(2));
             res.properties(loc, e.getValue())
-                    .flatMap(p -> PrSkyLayer.parse(p, index, w -> warnings.add(w)))
+                    .flatMap(p -> PrSkyLayer.parse(p, index, warnings::add))
                     .ifPresent(layer -> {
-                        ResourceLocation physical = res.physicalLocation(layer.texture).orElse(null);
+                        Identifier physical = res.physicalLocation(layer.texture).orElse(null);
                         if (physical == null) {
                             warnings.add("Texture not found: " + layer.texture + " (" + loc + ")");
                             return;
@@ -90,14 +97,14 @@ public final class PryzmaSky {
     /** Swaps in the new layers and (re)loads their textures. Render thread. */
     public static void apply(Data d) {
         TextureManager textures = Minecraft.getInstance().getTextureManager();
-        Set<ResourceLocation> wanted = new HashSet<>(d.textures().values());
-        for (ResourceLocation old : REGISTERED) {
+        Set<Identifier> wanted = new HashSet<>(d.textures().values());
+        for (Identifier old : REGISTERED) {
             if (!wanted.contains(old)) {
                 textures.release(old);
             }
         }
         REGISTERED.clear();
-        for (ResourceLocation physical : wanted) {
+        for (Identifier physical : wanted) {
             textures.register(physical, new SimpleTexture(physical));
             REGISTERED.add(physical);
         }
@@ -121,29 +128,52 @@ public final class PryzmaSky {
         return PryzmaConfig.prStars && !hasLayers(level);
     }
 
+    private static synchronized GpuBuffer getOrCreateCubeBuffer() {
+        if (cubeBuffer == null || cubeBuffer.isClosed()) {
+            try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(24 * DefaultVertexFormat.POSITION_TEX.getVertexSize())) {
+                BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_TEX);
+                PoseStack pose = new PoseStack();
+                PrSkyLayer.emitCube(pose, bufferBuilder);
+                try (MeshData meshData = bufferBuilder.buildOrThrow()) {
+                    cubeBuffer = RenderSystem.getDevice().createBuffer(() -> "Pryzma custom sky cube", 40, meshData.vertexBuffer());
+                }
+            }
+        }
+        return cubeBuffer;
+    }
+
     /**
      * Draws every active layer. {@code pose} holds vanilla's sky orientation (rotated -90 degrees
-     * around Y, before the celestial rotation); blend state is restored to vanilla's afterwards.
+     * around Y, before the celestial rotation).
      */
-    public static void render(ClientLevel level, PoseStack pose, float partialTick) {
+    public static void render(RenderPass renderPass, PoseStack pose, float sunAngle, float rainBrightness) {
         if (!PryzmaConfig.prCustomSky) {
+            return;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        ClientLevel level = mc.level;
+        if (level == null) {
             return;
         }
         Data d = data;
         PrSkyLayer[] layers = d.worlds().get(worldId(level));
-        if (layers == null) {
+        if (layers == null || layers.length == 0) {
             return;
         }
-        long dayTime = level.getDayTime();
+        long dayTime = level.getDefaultClockTime();
         int timeOfDay = (int) (dayTime % 24000L);
-        float celestialAngle = level.getTimeOfDay(partialTick);
-        float rain = level.getRainLevel(partialTick);
-        float thunder = level.getThunderLevel(partialTick);
+        float celestialAngle = sunAngle / ((float) (Math.PI * 2.0));
+        float rain = 1.0F - rainBrightness;
+        float thunder = level.getThunderLevel(1.0F);
         float thunderRel = rain > 0.0F ? thunder / rain : 0.0F;
-        Entity camera = Minecraft.getInstance().getCameraEntity();
+        Entity camera = mc.getCameraEntity();
         BlockPos cameraPos = camera != null ? camera.blockPosition() : BlockPos.ZERO;
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.AutoStorageIndexBuffer autoIndices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
+        GpuBuffer indexBuffer = autoIndices.getBuffer(36);
+        GpuBuffer vertexBuffer = getOrCreateCubeBuffer();
+        TextureManager textureManager = mc.getTextureManager();
+
         for (PrSkyLayer layer : layers) {
             if (!layer.isActive(dayTime, timeOfDay)) {
                 continue;
@@ -153,30 +183,55 @@ public final class PryzmaSky {
             if (brightness < 1.0E-4F) {
                 continue;
             }
-            ResourceLocation texture = d.textures().get(layer.texture);
-            RenderSystem.setShaderTexture(0, texture);
-            layer.blend.apply(brightness);
+            Identifier textureLoc = d.textures().get(layer.texture);
+            if (textureLoc == null) {
+                continue;
+            }
+            AbstractTexture texture = textureManager.getTexture(textureLoc);
+            if (texture == null) {
+                continue;
+            }
+
+            Vector4f color;
+            if (layer.blend == PrSkyBlend.MULTIPLY) {
+                color = new Vector4f(brightness, brightness, brightness, brightness);
+            } else if (layer.blend.isRgbBrightness()) {
+                color = new Vector4f(brightness, brightness, brightness, 1.0F);
+            } else {
+                color = new Vector4f(1.0F, 1.0F, 1.0F, brightness);
+            }
+
             pose.pushPose();
             layer.rotate(pose, dayTime, celestialAngle);
-            BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            PrSkyLayer.emitCube(pose, buffer);
-            BufferUploader.drawWithShader(buffer.buildOrThrow());
+
+            Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+            modelViewStack.pushMatrix();
+            modelViewStack.mul(pose.last().pose());
+            GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
+                    .writeTransform(new Matrix4f(modelViewStack), color);
+
+            renderPass.pushDebugGroup(() -> "Pryzma custom sky: " + layer.texture);
+            renderPass.setPipeline(RenderSystem.getCompiledPipeline(layer.blend.pipeline()));
+            RenderSystem.bindDefaultUniforms(renderPass);
+            renderPass.setUniform("DynamicTransforms", dynamicTransforms);
+            renderPass.setUniform("Sampler0", texture.getTextureView(), texture.getSampler());
+            renderPass.setVertexBuffer(0, vertexBuffer.slice());
+            renderPass.setIndexBuffer(indexBuffer, autoIndices.type());
+            renderPass.drawIndexed(36, 1, 0, 0, 0);
+            renderPass.popDebugGroup();
+
+            modelViewStack.popMatrix();
             pose.popPose();
         }
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
-                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F - rain);
     }
 
-    /** End sky variant: vanilla's End pose is used unrotated and the blend reset matches renderEndSky. */
-    public static void renderEnd(ClientLevel level, PoseStack pose) {
-        if (!hasLayers(level)) {
+    /** End sky variant: draws End sky layers unrotated. */
+    public static void renderEnd(RenderPass renderPass, PoseStack pose) {
+        Minecraft mc = Minecraft.getInstance();
+        ClientLevel level = mc.level;
+        if (level == null || !hasLayers(level)) {
             return;
         }
-        render(level, pose, 0.0F);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableBlend();
+        render(renderPass, pose, 0.0F, 1.0F);
     }
 }

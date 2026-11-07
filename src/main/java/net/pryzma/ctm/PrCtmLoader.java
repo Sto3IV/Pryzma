@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.pryzma.Pryzma;
@@ -28,7 +28,7 @@ public final class PrCtmLoader {
     private static final String[][] DEFAULTS = defaults();
 
     /** Loaded rules plus every tile sprite to stitch, with the file it is read from. */
-    public record Result(List<PrCtmRule> rules, Map<ResourceLocation, Resource> sprites) {
+    public record Result(List<PrCtmRule> rules, Map<Identifier, Resource> sprites) {
         public static final Result EMPTY = new Result(List.of(), Map.of());
     }
 
@@ -38,7 +38,7 @@ public final class PrCtmLoader {
     public static Result load(ResourceManager manager) {
         long start = System.nanoTime();
         PrResources res = new PrResources(manager);
-        Predicate<ResourceLocation> spriteExists = id -> manager.getResource(
+        Predicate<Identifier> spriteExists = id -> manager.getResource(
                 id.withPath("textures/" + id.getPath() + ".png")).isPresent();
         List<String> warnings = new ArrayList<>();
         List<PrCtmRule> rules = new ArrayList<>();
@@ -57,17 +57,17 @@ public final class PrCtmLoader {
             if (variant == null) {
                 continue;
             }
-            ResourceLocation loc = ResourceLocation.fromNamespaceAndPath(Pryzma.MODID, "ctm_default/" + variant + d[1]);
+            Identifier loc = Identifier.fromNamespaceAndPath(Pryzma.MODID, "ctm_default/" + variant + d[1]);
             Optional<Resource> r = manager.getResource(loc);
             r.flatMap(resource -> res.properties(loc, resource))
                     .flatMap(p -> PrCtmRule.parse(p, spriteExists, warnings::add))
                     .ifPresent(rules::add);
         }
 
-        Map<ResourceLocation, Resource> sprites = new LinkedHashMap<>();
+        Map<Identifier, Resource> sprites = new LinkedHashMap<>();
         List<PrCtmRule> usable = new ArrayList<>(rules.size());
         int usablePack = 0;
-        Map<ResourceLocation, Resource> found = new LinkedHashMap<>();
+        Map<Identifier, Resource> found = new LinkedHashMap<>();
         for (int i = 0; i < rules.size(); i++) {
             PrCtmRule rule = rules.get(i);
             // A rule with a missing tile is dropped whole, and none of its tiles are stitched.
@@ -105,7 +105,7 @@ public final class PrCtmLoader {
      * programmer art variant while the Programmer Art pack provides it; any other pack wins.
      */
     private static String defaultVariant(ResourceManager manager, String texture) {
-        Optional<Resource> r = manager.getResource(ResourceLocation.withDefaultNamespace(texture));
+        Optional<Resource> r = manager.getResource(Identifier.withDefaultNamespace(texture));
         if (r.isEmpty()) {
             return null;
         }
@@ -136,7 +136,7 @@ public final class PrCtmLoader {
     }
 
     /** Parses one file outside any pack scan; used by tests. */
-    static Optional<PrCtmRule> parse(PrProperties p, Predicate<ResourceLocation> spriteExists, List<String> warnings) {
+    static Optional<PrCtmRule> parse(PrProperties p, Predicate<Identifier> spriteExists, List<String> warnings) {
         return PrCtmRule.parse(p, spriteExists, warnings::add);
     }
 }

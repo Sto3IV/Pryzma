@@ -1,8 +1,9 @@
 package net.pryzma.render;
 
 import java.util.concurrent.ConcurrentHashMap;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.core.Direction;
 import net.pryzma.Pryzma;
 
@@ -72,36 +73,21 @@ public final class PrNaturalProperties {
     }
 
     private BakedQuad makeQuad(BakedQuad quad, int rotate, boolean flipU) {
-        int[] vertexData = quad.getVertices();
-        if (vertexData.length < 32) {
-            return quad;
-        }
-        int tintIndex = quad.getTintIndex();
-        Direction face = quad.getDirection();
-        TextureAtlasSprite sprite = quad.getSprite();
-        boolean shade = quad.isShade();
-        boolean ao = quad.hasAmbientOcclusion();
         if (!this.isFullSprite(quad)) {
             rotate = 0;
         }
-        vertexData = this.transformVertexData(vertexData, rotate, flipU);
-        return new BakedQuad(vertexData, tintIndex, face, sprite, shade, ao);
-    }
-
-    private int[] transformVertexData(int[] vertexData, int rotate, boolean flipU) {
-        int[] vertexData2 = vertexData.clone();
+        if (rotate == 0 && !flipU) {
+            return quad;
+        }
         int v2 = 4 - rotate;
         if (flipU) {
             v2 += 3;
         }
         v2 %= 4;
-        int step = vertexData2.length / 4; // 8 ints per vertex in standard BakedQuad
 
+        long[] newUV = new long[4];
         for (int v = 0; v < 4; v++) {
-            int pos = v * step;
-            int pos2 = v2 * step;
-            vertexData2[pos2 + 4] = vertexData[pos + 4]; // U
-            vertexData2[pos2 + 5] = vertexData[pos + 5]; // V
+            newUV[v2] = quad.packedUV(v);
             if (flipU) {
                 if (--v2 < 0) {
                     v2 = 3;
@@ -110,11 +96,17 @@ public final class PrNaturalProperties {
                 v2 = 0;
             }
         }
-        return vertexData2;
+
+        return new BakedQuad(
+            quad.position0(), quad.position1(), quad.position2(), quad.position3(),
+            newUV[0], newUV[1], newUV[2], newUV[3],
+            quad.direction(), quad.materialInfo(),
+            quad.bakedNormals(), quad.bakedColors()
+        );
     }
 
     private boolean isFullSprite(BakedQuad quad) {
-        TextureAtlasSprite sprite = quad.getSprite();
+        TextureAtlasSprite sprite = quad.materialInfo().sprite();
         if (sprite == null) {
             return false;
         }
@@ -124,13 +116,11 @@ public final class PrNaturalProperties {
         float vMin = sprite.getV0();
         float vMax = sprite.getV1();
         float vDelta = (vMax - vMin) / 256.0F;
-        int[] vertexData = quad.getVertices();
-        int step = vertexData.length / 4;
 
         for (int i = 0; i < 4; i++) {
-            int pos = i * step;
-            float u = Float.intBitsToFloat(vertexData[pos + 4]);
-            float v = Float.intBitsToFloat(vertexData[pos + 5]);
+            long packed = quad.packedUV(i);
+            float u = UVPair.unpackU(packed);
+            float v = UVPair.unpackV(packed);
             if (!this.equalsDelta(u, uMin, uDelta) && !this.equalsDelta(u, uMax, uDelta)) {
                 return false;
             }

@@ -1,11 +1,10 @@
 package net.pryzma.shader.uniforms;
 
-import com.mojang.blaze3d.shaders.FogShape;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.pryzma.shader.gl.state.FogMode;
 import net.pryzma.shader.gl.state.StateUpdateNotifiers;
 import net.pryzma.shader.gl.uniform.DynamicUniformHolder;
 import net.pryzma.shader.gl.uniform.UniformUpdateFrequency;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
@@ -32,8 +31,8 @@ public class FogUniforms {
 			}, listener -> {
 			});
 
-			// To keep a stable interface, 0 is defined as spherical while 1 is defined as cylindrical, even if Mojang's index changes.
-			uniforms.uniform1i(PER_FRAME, "fogShape", () -> RenderSystem.getShaderFogShape() == FogShape.CYLINDER ? 1 : 0);
+			// To keep a stable interface, 0 is defined as spherical while 1 is defined as cylindrical.
+			uniforms.uniform1i(PER_FRAME, "fogShape", () -> 0);
 		}
 
 		uniforms.uniform1f("fogDensity", () -> {
@@ -42,15 +41,13 @@ public class FogUniforms {
 		}, notifier -> {
 		});
 
-		uniforms.uniform1f("fogStart", RenderSystem::getShaderFogStart, listener -> StateUpdateNotifiers.fogStartNotifier.setListener(listener));
+		uniforms.uniform1f("fogStart", () -> CapturedRenderingState.INSTANCE.getFogStart(), listener -> StateUpdateNotifiers.fogStartNotifier.setListener(listener));
 
-		uniforms.uniform1f("fogEnd", RenderSystem::getShaderFogEnd, listener -> StateUpdateNotifiers.fogEndNotifier.setListener(listener));
+		uniforms.uniform1f("fogEnd", () -> CapturedRenderingState.INSTANCE.getFogEnd(), listener -> StateUpdateNotifiers.fogEndNotifier.setListener(listener));
 
-		uniforms
-			// TODO: Update frequency of continuous?
-			.uniform3f(PER_FRAME, "fogColor", () -> {
-				float[] fogColor = RenderSystem.getShaderFogColor();
-				return new Vector3f(fogColor[0], fogColor[1], fogColor[2]);
-			});
+		uniforms.uniform3f(PER_FRAME, "fogColor", () -> {
+			Vector3d color = CapturedRenderingState.INSTANCE.getFogColor();
+			return new Vector3f((float) color.x, (float) color.y, (float) color.z);
+		});
 	}
 }

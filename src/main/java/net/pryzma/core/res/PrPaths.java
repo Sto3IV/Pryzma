@@ -1,6 +1,6 @@
 package net.pryzma.core.res;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * OptiFine resource path rules. Paths inside {@code .properties} files are resolved with
@@ -50,12 +50,12 @@ public final class PrPaths {
      * prefix wins; otherwise the namespace of {@code base} is used. Returns {@code null} for an
      * invalid location.
      */
-    public static ResourceLocation resolveLocation(String path, ResourceLocation base) {
+    public static Identifier resolveLocation(String path, Identifier base) {
         String resolved = resolve(path, parent(base.getPath()));
         int colon = resolved.indexOf(':');
-        ResourceLocation loc = colon >= 0
-                ? ResourceLocation.tryParse(resolved)
-                : ResourceLocation.tryBuild(base.getNamespace(), resolved);
+        Identifier loc = colon >= 0
+                ? Identifier.tryParse(resolved)
+                : Identifier.tryBuild(base.getNamespace(), resolved);
         return loc == null ? null : logical(loc);
     }
 
@@ -64,7 +64,7 @@ public final class PrPaths {
      * name that is not rooted in {@code textures/} or {@code optifine/} is taken relative to the
      * properties file.
      */
-    public static ResourceLocation resolveSibling(String path, ResourceLocation base) {
+    public static Identifier resolveSibling(String path, Identifier base) {
         String dir = parent(base.getPath());
         String resolved = resolve(path, dir);
         if (resolved.indexOf(':') < 0 && !resolved.startsWith(dir) && !resolved.startsWith("textures/")
@@ -72,24 +72,24 @@ public final class PrPaths {
             resolved = dir.isEmpty() ? resolved : dir + "/" + resolved;
         }
         int colon = resolved.indexOf(':');
-        ResourceLocation loc = colon >= 0
-                ? ResourceLocation.tryParse(resolved)
-                : ResourceLocation.tryBuild(base.getNamespace(), resolved);
+        Identifier loc = colon >= 0
+                ? Identifier.tryParse(resolved)
+                : Identifier.tryBuild(base.getNamespace(), resolved);
         return loc == null ? null : logical(loc);
     }
 
     /** Folds {@code mcpatcher/...} onto {@code optifine/...}; other paths are unchanged. */
-    public static ResourceLocation logical(ResourceLocation loc) {
+    public static Identifier logical(Identifier loc) {
         String p = loc.getPath();
         return p.startsWith(MCPATCHER) ? loc.withPath(OPTIFINE + p.substring(MCPATCHER.length())) : loc;
     }
 
-    public static boolean isOptifine(ResourceLocation loc) {
+    public static boolean isOptifine(Identifier loc) {
         return loc.getPath().startsWith(OPTIFINE);
     }
 
     /** The {@code mcpatcher/} spelling of an {@code optifine/} location, or {@code null}. */
-    public static ResourceLocation mcpatcherAlias(ResourceLocation loc) {
+    public static Identifier mcpatcherAlias(Identifier loc) {
         String p = loc.getPath();
         return p.startsWith(OPTIFINE) ? loc.withPath(MCPATCHER + p.substring(OPTIFINE.length())) : null;
     }

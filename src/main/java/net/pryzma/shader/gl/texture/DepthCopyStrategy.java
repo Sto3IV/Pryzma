@@ -1,10 +1,11 @@
 package net.pryzma.shader.gl.texture;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import net.pryzma.shader.gl.framebuffer.GlFramebuffer;
-import net.pryzma.shader.mixin.GlStateManagerAccessor;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.opengl.GL43C;
@@ -56,7 +57,7 @@ public interface DepthCopyStrategy {
 		public void copy(GlFramebuffer sourceFb, int sourceTexture, GlFramebuffer destFb, int destTexture, int width, int height) {
 			sourceFb.bindAsReadBuffer();
 
-			int previousTexture = GlStateManagerAccessor.getTEXTURES()[GlStateManagerAccessor.getActiveTexture()].binding;
+			int previousTexture = GL11C.glGetInteger(GL11C.GL_TEXTURE_BINDING_2D);
 
 			ShaderRenderSystem.copyTexSubImage2D(
 				destTexture,
@@ -73,7 +74,7 @@ public interface DepthCopyStrategy {
 				// height
 				height);
 
-			RenderSystem.bindTexture(previousTexture);
+			GlStateManager._bindTexture(previousTexture);
 		}
 	}
 

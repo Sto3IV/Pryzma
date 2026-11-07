@@ -2,21 +2,19 @@ package net.pryzma.shader.mixin.vertices.block_rendering;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockQuadOutput;
+import net.minecraft.client.renderer.block.FluidRenderer;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.chunk.RenderSectionRegion;
 import net.minecraft.client.renderer.chunk.SectionCompiler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import net.pryzma.shader.shaderpack.materialmap.WorldRenderingSettings;
 import net.pryzma.shader.vertices.BlockContext;
-import net.pryzma.shader.vertices.BlockSensitiveBufferBuilder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,8 +22,7 @@ import org.spongepowered.asm.mixin.injection.At;
 /**
  * Block context for the extended terrain format on the vanilla chunk path: each block and fluid is
  * meshed with its {@code block.properties} id ({@code mc_Entity}), light emission and section-local
- * position ({@code at_midBlock}), as PryzmaShaders supplies them on the terrain chunk path. Previously,
- * vanilla meshing left every vanilla chunk vertex at id -1.
+ * position ({@code at_midBlock}), as PryzmaShaders supplies them on the terrain chunk path.
  *
  * <p>Runs on the chunk workers. The id map is replaced, never mutated, when a pipeline is built.
  */
@@ -35,48 +32,44 @@ public class MixinSectionCompiler {
 	@Unique
 	private static final byte FLUID_RENDER_TYPE = 1;
 
-	@WrapOperation(method = "compile(Lnet/minecraft/core/SectionPos;Lnet/minecraft/client/renderer/chunk/RenderChunkRegion;Lcom/mojang/blaze3d/vertex/VertexSorting;Lnet/minecraft/client/renderer/SectionBufferBuilderPack;Ljava/util/List;)Lnet/minecraft/client/renderer/chunk/SectionCompiler$Results;",
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/BlockRenderDispatcher;renderLiquid(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/BlockAndTintGetter;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/material/FluidState;)V"))
-	private void pryzma$liquidContext(BlockRenderDispatcher dispatcher, BlockPos pos, BlockAndTintGetter level, VertexConsumer consumer,
-									BlockState blockState, FluidState fluidState, Operation<Void> original) {
-		Object2IntMap<BlockState> ids = pryzma$ids(consumer);
-		if (ids == null) {
-			original.call(dispatcher, pos, level, consumer, blockState, fluidState);
+	@WrapOperation(method = "compile(Lnet/minecraft/core/SectionPos;Lnet/minecraft/client/renderer/chunk/RenderSectionRegion;Lcom/mojang/blaze3d/vertex/VertexSorting;Lnet/minecraft/client/renderer/SectionBufferBuilderPack;Ljava/util/List;)Lnet/minecraft/client/renderer/chunk/SectionCompiler$Results;",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/FluidRenderer;tesselate(Lnet/minecraft/client/renderer/block/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/client/renderer/block/FluidRenderer$Output;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/material/FluidState;)V"))
+	private void pryzma$liquidContext(FluidRenderer renderer, BlockAndTintGetter level, BlockPos pos,
+									FluidRenderer.Output output, BlockState blockState, FluidState fluidState,
+									Operation<Void> original) {
+		if (!WorldRenderingSettings.INSTANCE.shouldUseExtendedVertexFormat()) {
+			original.call(renderer, level, pos, output, blockState, fluidState);
 			return;
 		}
-		BlockSensitiveBufferBuilder builder = (BlockSensitiveBufferBuilder) consumer;
-		builder.beginBlock(ids.getInt(fluidState.createLegacyBlock()), FLUID_RENDER_TYPE, (byte) blockState.getLightEmission(),
-			pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
+		Object2IntMap<BlockState> ids = WorldRenderingSettings.INSTANCE.getBlockStateIds();
+		int blockId = ids != null ? ids.getInt(fluidState.createLegacyBlock()) : -1;
+		byte emission = (byte) blockState.getLightEmission();
+		BlockContext.set(blockId, FLUID_RENDER_TYPE, emission, pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
 		try {
-			original.call(dispatcher, pos, level, consumer, blockState, fluidState);
+			original.call(renderer, level, pos, output, blockState, fluidState);
 		} finally {
-			builder.endBlock();
+			BlockContext.clear();
 		}
 	}
 
-	@WrapOperation(method = "compile(Lnet/minecraft/core/SectionPos;Lnet/minecraft/client/renderer/chunk/RenderChunkRegion;Lcom/mojang/blaze3d/vertex/VertexSorting;Lnet/minecraft/client/renderer/SectionBufferBuilderPack;Ljava/util/List;)Lnet/minecraft/client/renderer/chunk/SectionCompiler$Results;",
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/BlockRenderDispatcher;renderBatched(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/BlockAndTintGetter;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;Lnet/neoforged/neoforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V"))
-	private void pryzma$blockContext(BlockRenderDispatcher dispatcher, BlockState state, BlockPos pos, BlockAndTintGetter level, PoseStack pose,
-								   VertexConsumer consumer, boolean checkSides, RandomSource random, ModelData modelData, RenderType renderType,
+	@WrapOperation(method = "compile(Lnet/minecraft/core/SectionPos;Lnet/minecraft/client/renderer/chunk/RenderSectionRegion;Lcom/mojang/blaze3d/vertex/VertexSorting;Lnet/minecraft/client/renderer/SectionBufferBuilderPack;Ljava/util/List;)Lnet/minecraft/client/renderer/chunk/SectionCompiler$Results;",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/ModelBlockRenderer;tesselateBlock(Lnet/minecraft/client/renderer/block/BlockQuadOutput;FFFLnet/minecraft/client/renderer/block/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/client/renderer/block/dispatch/BlockStateModel;J)V"))
+	private void pryzma$blockContext(ModelBlockRenderer blockRenderer, BlockQuadOutput output,
+								   float x, float y, float z, BlockAndTintGetter region, BlockPos pos,
+								   BlockState state, BlockStateModel model, long seed,
 								   Operation<Void> original) {
-		BlockSensitiveBufferBuilder builder = BlockContext.begin(consumer, state, pos);
-		if (builder == null) {
-			original.call(dispatcher, state, pos, level, pose, consumer, checkSides, random, modelData, renderType);
+		if (!WorldRenderingSettings.INSTANCE.shouldUseExtendedVertexFormat()) {
+			original.call(blockRenderer, output, x, y, z, region, pos, state, model, seed);
 			return;
 		}
+		Object2IntMap<BlockState> ids = WorldRenderingSettings.INSTANCE.getBlockStateIds();
+		int blockId = ids != null ? ids.getInt(state) : -1;
+		byte emission = (byte) state.getLightEmission();
+		BlockContext.set(blockId, (byte) 0, emission, pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
 		try {
-			original.call(dispatcher, state, pos, level, pose, consumer, checkSides, random, modelData, renderType);
+			original.call(blockRenderer, output, x, y, z, region, pos, state, model, seed);
 		} finally {
-			builder.endBlock();
+			BlockContext.clear();
 		}
-	}
-
-	/** The pack's id map while chunks are meshed in the extended format, else null. */
-	@Unique
-	private static Object2IntMap<BlockState> pryzma$ids(VertexConsumer consumer) {
-		if (!WorldRenderingSettings.INSTANCE.shouldUseExtendedVertexFormat() || !(consumer instanceof BlockSensitiveBufferBuilder)) {
-			return null;
-		}
-		return WorldRenderingSettings.INSTANCE.getBlockStateIds();
 	}
 }

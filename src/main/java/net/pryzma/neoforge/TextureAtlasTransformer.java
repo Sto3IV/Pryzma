@@ -24,7 +24,7 @@ import cpw.mods.modlauncher.api.TargetType;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 
 /**
- * NeoForge 21.1 adds {@code public Map<ResourceLocation, TextureAtlasSprite> getTextures()}
+ * NeoForge 21.1 adds {@code public Map<Identifier, TextureAtlasSprite> getTextures()}
  * to {@link net.minecraft.client.renderer.texture.TextureAtlas}.
  * NeoForge's {@link net.neoforged.neoforge.client.textures.FluidSpriteCache#reload()} invokes
  * this method to index all block atlas textures.
@@ -57,7 +57,7 @@ public class TextureAtlasTransformer implements ITransformer<ClassNode> {
                     Opcodes.ACC_PUBLIC,
                     "getTextures",
                     "()Ljava/util/Map;",
-                    "()Ljava/util/Map<Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;>;",
+                    "()Ljava/util/Map<Lnet/minecraft/resources/Identifier;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;>;",
                     null);
             m.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
             m.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, OWNER, "texturesByName", "Ljava/util/Map;"));

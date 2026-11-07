@@ -2,10 +2,12 @@ package net.pryzma.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueOutput;
 
 /**
  * Client-side facts about one entity that OptiFine rules read: where it spawned (random textures and
@@ -17,7 +19,7 @@ public final class PrEntityData {
     private static final long BLOCK_REFRESH_MS = 50L;
 
     public BlockPos spawnPos;
-    public ResourceLocation spawnBiome;
+    public Identifier spawnBiome;
 
     private CompoundTag nbt;
     private long nbtTime;
@@ -42,7 +44,9 @@ public final class PrEntityData {
         if (nbt == null || now - nbtTime > NBT_REFRESH_MS) {
             CompoundTag tag = new CompoundTag();
             try {
-                entity.saveWithoutId(tag);
+                TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, entity.registryAccess());
+                entity.saveWithoutId(output);
+                tag = output.buildResult();
             } catch (RuntimeException e) {
                 // Client copies of some modded entities cannot serialise; the rule then sees no tags.
             }

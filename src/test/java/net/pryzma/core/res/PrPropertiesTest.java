@@ -8,11 +8,11 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 class PrPropertiesTest {
     private static Map<String, String> parse(String text) {
-        return PrProperties.parse(ResourceLocation.withDefaultNamespace("optifine/x.properties"), text).asMap();
+        return PrProperties.parse(Identifier.withDefaultNamespace("optifine/x.properties"), text).asMap();
     }
 
     @Test

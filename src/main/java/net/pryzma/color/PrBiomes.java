@@ -9,8 +9,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
@@ -65,11 +65,11 @@ public final class PrBiomes {
     }
 
     private static Snapshot build(Level level) {
-        Registry<Biome> registry = level.registryAccess().registryOrThrow(Registries.BIOME);
+        Registry<Biome> registry = level.registryAccess().lookupOrThrow(Registries.BIOME);
         Map<Biome, Integer> ids = new IdentityHashMap<>();
         int next = 0;
         for (String name : OPTIFINE_ORDER) {
-            Biome biome = registry.get(ResourceLocation.withDefaultNamespace(name));
+            Biome biome = registry.getValue(Identifier.withDefaultNamespace(name));
             if (biome != null) {
                 ids.putIfAbsent(biome, next);
             }
@@ -80,7 +80,7 @@ public final class PrBiomes {
                 ids.put(biome, next++);
             }
         }
-        return new Snapshot(level, ids, registry.get(Biomes.PLAINS), registry.get(Biomes.SWAMP), registry.get(Biomes.MANGROVE_SWAMP));
+        return new Snapshot(level, ids, registry.getValue(Biomes.PLAINS), registry.getValue(Biomes.SWAMP), registry.getValue(Biomes.MANGROVE_SWAMP));
     }
 
     /** OptiFine grid column of {@code biome}; unknown biomes fall back to plains (1). */

@@ -21,13 +21,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.pryzma.core.match.PrRangeList;
 import net.pryzma.core.res.PrProperties;
 
 class PrCitRuleTest {
     /** An item stack as a rule reads it. */
-    record Stack(ResourceLocation item, int damage, int maxDamage, int count, List<ResourceLocation> ids,
+    record Stack(Identifier item, int damage, int maxDamage, int count, List<Identifier> ids,
             List<Integer> levels, CompoundTag all, boolean offHand) implements PrCitItem {
         static Stack of(String id) {
             return new Stack(mc(id), 0, 0, 1, List.of(), List.of(), new CompoundTag(), false);
@@ -49,7 +49,7 @@ class PrCitRuleTest {
         }
 
         Stack enchanted(String id, int level) {
-            List<ResourceLocation> i = new ArrayList<>(ids);
+            List<Identifier> i = new ArrayList<>(ids);
             List<Integer> l = new ArrayList<>(levels);
             i.add(mc(id));
             l.add(level);
@@ -66,7 +66,7 @@ class PrCitRuleTest {
         }
 
         @Override
-        public ResourceLocation enchantment(int index) {
+        public Identifier enchantment(int index) {
             return ids.get(index);
         }
 
@@ -90,8 +90,8 @@ class PrCitRuleTest {
 
     private final List<String> warnings = new ArrayList<>();
 
-    private static ResourceLocation mc(String id) {
-        return ResourceLocation.parse(id);
+    private static Identifier mc(String id) {
+        return Identifier.parse(id);
     }
 
     private PrCitRule parse(String path, String text) {
@@ -296,7 +296,7 @@ class PrCitRuleTest {
         PrCitEntry strong = glint("strong", "enchantmentIDs=sharpness\nlayer=0\nweight=5\n");
         PrCitEntry tough = glint("tough", "enchantmentIDs=unbreaking\nlayer=1\n");
         PrCitEntry diamondOnly = glint("diamond", "enchantmentIDs=mending\nlayer=2\nitems=diamond_sword\n");
-        Map<ResourceLocation, PrCitEntry[]> byEnchantment = Map.of(
+        Map<Identifier, PrCitEntry[]> byEnchantment = Map.of(
                 mc("sharpness"), new PrCitEntry[] {strong, weak},
                 mc("unbreaking"), new PrCitEntry[] {tough},
                 mc("mending"), new PrCitEntry[] {diamondOnly});
@@ -321,7 +321,7 @@ class PrCitRuleTest {
         return PrCitEntry.plain(rule, rule.texture, Map.of(), 16);
     }
 
-    private static PrCitIndex index(Map<ResourceLocation, PrCitEntry[]> enchantments, PrCitGlobal global) {
+    private static PrCitIndex index(Map<Identifier, PrCitEntry[]> enchantments, PrCitGlobal global) {
         return new PrCitIndex(Map.of(), enchantments, global, enchantments.size());
     }
 }

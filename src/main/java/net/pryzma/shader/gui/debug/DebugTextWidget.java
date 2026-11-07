@@ -2,8 +2,9 @@ package net.pryzma.shader.gui.debug;
 
 import net.pryzma.shader.gl.shader.ShaderCompileException;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractScrollWidget;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractScrollArea;
+import net.minecraft.client.gui.components.AbstractTextAreaWidget;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.LayoutSettings;
@@ -13,13 +14,12 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-public class DebugTextWidget
-	extends AbstractScrollWidget {
+public class DebugTextWidget extends AbstractTextAreaWidget {
 	private final Font font;
 	private final Content content;
 
 	public DebugTextWidget(int i, int j, int k, int l, Font arg, Exception exception) {
-		super(i, j, k, l, Component.empty());
+		super(i, j, k, l, Component.empty(), AbstractScrollArea.defaultSettings(9));
 		this.font = arg;
 		this.content = this.buildContent(exception);
 	}
@@ -65,23 +65,13 @@ public class DebugTextWidget
 	}
 
 	@Override
-	protected boolean scrollbarVisible() {
-		return this.getInnerHeight() > this.height;
-	}
-
-	@Override
-	protected double scrollRate() {
-		return this.font.lineHeight;
-	}
-
-	@Override
-	protected void renderContents(GuiGraphics arg, int i, int j, float f) {
-		int k = this.getY() + this.innerPadding();
-		int l = this.getX() + this.innerPadding();
-		arg.pose().pushPose();
-		arg.pose().translate(l, k, 0.0);
-		this.content.container().visitWidgets(element -> element.render(arg, i, j, f));
-		arg.pose().popPose();
+	protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+		int top = this.getInnerTop();
+		int left = this.getInnerLeft();
+		graphics.pose().pushMatrix();
+		graphics.pose().translate((float) left, (float) top);
+		this.content.container().visitWidgets(widget -> widget.extractRenderState(graphics, mouseX, mouseY, delta));
+		graphics.pose().popMatrix();
 	}
 
 	@Override

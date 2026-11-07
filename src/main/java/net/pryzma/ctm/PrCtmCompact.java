@@ -3,9 +3,9 @@ package net.pryzma.ctm;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.neoforged.neoforge.client.model.IQuadTransformer;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.neoforged.neoforge.client.model.quad.MutableQuad;
 
 /**
  * OptiFine {@code ctm_compact}: the 47 connection states are built from 5 tiles by splitting the
@@ -29,9 +29,6 @@ final class PrCtmCompact {
         }
     }
 
-    private static final int STRIDE = IQuadTransformer.STRIDE;
-    private static final int POS = IQuadTransformer.POSITION;
-    private static final int UV = IQuadTransformer.UV0;
     private static final Map<TextureAtlasSprite, Map<BakedQuad, BakedQuad[]>> CACHE = new ConcurrentHashMap<>();
 
     private PrCtmCompact() {
@@ -135,7 +132,7 @@ final class PrCtmCompact {
         for (int i = 0; i < out.length; i++) {
             Part part = (Part) pairs[i * 2];
             int tile = (Integer) pairs[i * 2 + 1];
-            TextureAtlasSprite sprite = r.tileKeep[tile] ? quad.getSprite() : r.tileSprites[tile];
+            TextureAtlasSprite sprite = r.tileKeep[tile] ? quad.materialInfo().sprite() : r.tileSprites[tile];
             if (sprite == null) {
                 return null;
             }
@@ -158,21 +155,27 @@ final class PrCtmCompact {
 
     /** OptiFine makeSpriteQuadCompact: moves each vertex to the part's edge and remaps its UV. */
     private static BakedQuad make(BakedQuad quad, TextureAtlasSprite to, int side, Part part) {
-        int[] data = quad.getVertices().clone();
-        TextureAtlasSprite from = quad.getSprite();
-        float atlasW = from.contents().width() / (from.getU1() - from.getU0());
-        float atlasH = from.contents().height() / (from.getV1() - from.getV0());
+        MutableQuad mq = new MutableQuad();
+        mq.setFrom(quad);
+        BakedQuad.MaterialInfo mi = quad.materialInfo();
+        TextureAtlasSprite from = mi.sprite();
+        float uOrigin = from.getU0();
+        float vOrigin = from.getV0();
+        float uWidth = from.getU1() - uOrigin;
+        float vWidth = from.getV1() - vOrigin;
+        float atlasW = from.contents().width() / uWidth;
+        float atlasH = from.contents().height() / vWidth;
         float k = 4.0F / Math.max(atlasH, atlasW);
         float scale = 16.0F * (1.0F - k);
+
         for (int v = 0; v < 4; v++) {
-            int o = v * STRIDE;
-            float u = Float.intBitsToFloat(data[o + UV]);
-            float w = Float.intBitsToFloat(data[o + UV + 1]);
-            double su = from.getUOffset(u) * 16.0;
-            double sv = from.getVOffset(w) * 16.0;
-            float x = Float.intBitsToFloat(data[o + POS]);
-            float y = Float.intBitsToFloat(data[o + POS + 1]);
-            float z = Float.intBitsToFloat(data[o + POS + 2]);
+            float u = mq.u(v);
+            float w = mq.v(v);
+            double su = ((u - uOrigin) / uWidth) * 16.0;
+            double sv = ((w - vOrigin) / vWidth) * 16.0;
+            float x = mq.x(v);
+            float y = mq.y(v);
+            float z = mq.z(v);
             float cu;
             float cv;
             switch (side) {
@@ -243,12 +246,10 @@ final class PrCtmCompact {
                     y = 1.0F - cv;
                 }
             }
-            data[o + UV] = Float.floatToRawIntBits(to.getU((float) (su / 16.0)));
-            data[o + UV + 1] = Float.floatToRawIntBits(to.getV((float) (sv / 16.0)));
-            data[o + POS] = Float.floatToRawIntBits(x);
-            data[o + POS + 1] = Float.floatToRawIntBits(y);
-            data[o + POS + 2] = Float.floatToRawIntBits(z);
+            mq.setPosition(v, x, y, z);
+            mq.setUv(v, to.getU((float) (su / 16.0)), to.getV((float) (sv / 16.0)));
         }
-        return new BakedQuad(data, quad.getTintIndex(), quad.getDirection(), to, quad.isShade(), quad.hasAmbientOcclusion());
+        mq.setSprite(to, mi.layer(), mi.itemRenderType(), mi.itemGlintRenderType(), mi.itemGlintSpecialRenderType());
+        return mq.toBakedQuad();
     }
 }

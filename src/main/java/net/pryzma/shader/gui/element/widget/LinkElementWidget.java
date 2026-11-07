@@ -1,19 +1,20 @@
 package net.pryzma.shader.gui.element.widget;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.pryzma.shader.gui.GuiUtil;
 import net.pryzma.shader.gui.NavigationController;
 import net.pryzma.shader.gui.screen.ShaderPackScreen;
 import net.pryzma.shader.shaderpack.option.menu.OptionMenuLinkElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenAxis;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public class LinkElementWidget extends CommentedElementWidget<OptionMenuLinkElem
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float tickDelta, boolean hovered) {
+	public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float tickDelta, boolean hovered) {
 		GuiUtil.bindWidgetsTexture();
 		GuiUtil.drawButton(guiGraphics, bounds.position().x(), bounds.position().y(), bounds.width(), bounds.height(), hovered || isFocused(), false);
 
@@ -58,8 +59,8 @@ public class LinkElementWidget extends CommentedElementWidget<OptionMenuLinkElem
 
 		int labelWidth = font.width(this.trimmedLabel);
 
-		guiGraphics.drawString(font, this.trimmedLabel, bounds.getCenterInAxis(ScreenAxis.HORIZONTAL) - (int) (labelWidth * 0.5) - (int) (0.5 * Math.max(labelWidth - (bounds.width() - 18), 0)), bounds.position().y() + 7, 0xFFFFFF);
-		guiGraphics.drawString(font, ARROW, bounds.getBoundInDirection(ScreenDirection.RIGHT) - 9, bounds.position().y() + 7, 0xFFFFFF);
+		guiGraphics.text(font, this.trimmedLabel, bounds.getCenterInAxis(ScreenAxis.HORIZONTAL) - (int) (labelWidth * 0.5) - (int) (0.5 * Math.max(labelWidth - (bounds.width() - 18), 0)), bounds.position().y() + 7, 0xFFFFFF);
+		guiGraphics.text(font, ARROW, bounds.getBoundInDirection(ScreenDirection.RIGHT) - 9, bounds.position().y() + 7, 0xFFFFFF);
 
 		if (hovered && this.isLabelTrimmed) {
 			// To prevent other elements from being drawn on top of the tooltip
@@ -68,26 +69,26 @@ public class LinkElementWidget extends CommentedElementWidget<OptionMenuLinkElem
 	}
 
 	@Override
-	public boolean mouseClicked(double mx, double my, int button) {
-		if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 			this.navigation.open(targetScreenId);
 			GuiUtil.playButtonClickSound();
 
 			return true;
 		}
-		return super.mouseClicked(mx, my, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int pInt1, int pInt2) {
-		if (keyCode == InputConstants.KEY_RETURN) {
+	public boolean keyPressed(KeyEvent event) {
+		if (event.key() == InputConstants.KEY_RETURN) {
 			this.navigation.open(targetScreenId);
 			GuiUtil.playButtonClickSound();
 
 			return true;
 		}
 
-		return super.keyPressed(keyCode, pInt1, pInt2);
+		return super.keyPressed(event);
 	}
 
 	@Override
@@ -98,6 +99,6 @@ public class LinkElementWidget extends CommentedElementWidget<OptionMenuLinkElem
 	@Override
 	public Optional<Component> getCommentBody() {
 		String translation = "screen." + this.targetScreenId + ".comment";
-		return Optional.ofNullable(I18n.exists(translation) ? Component.translatable(translation) : null);
+		return Optional.ofNullable(net.minecraft.locale.Language.getInstance().has(translation) ? Component.translatable(translation) : null);
 	}
 }

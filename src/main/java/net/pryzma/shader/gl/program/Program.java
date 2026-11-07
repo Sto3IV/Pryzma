@@ -1,7 +1,6 @@
 package net.pryzma.shader.gl.program;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.shaders.ProgramManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.gl.GlResource;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import org.lwjgl.opengl.GL43C;
@@ -22,12 +21,12 @@ public final class Program extends GlResource {
 	public static void unbind() {
 		ProgramUniforms.clearActiveUniforms();
 		ProgramSamplers.clearActiveSamplers();
-		ProgramManager.glUseProgram(0);
+		GlStateManager._glUseProgram(0);
 	}
 
 	public void use() {
 		ShaderRenderSystem.memoryBarrier(GL43C.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL43C.GL_TEXTURE_FETCH_BARRIER_BIT | GL43C.GL_SHADER_STORAGE_BARRIER_BIT);
-		ProgramManager.glUseProgram(getGlId());
+		GlStateManager._glUseProgram(getGlId());
 
 		uniforms.update();
 		samplers.update();

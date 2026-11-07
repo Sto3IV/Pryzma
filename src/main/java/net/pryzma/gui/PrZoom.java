@@ -1,6 +1,6 @@
 package net.pryzma.gui;
 
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -12,7 +12,7 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
  * times and the smooth camera is on; releasing it restores the player's own smooth camera.
  */
 public final class PrZoom {
-    public static final KeyMapping KEY = new KeyMapping("pr.key.zoom", GLFW.GLFW_KEY_C, "key.categories.misc");
+    public static final KeyMapping KEY = new KeyMapping("pr.key.zoom", InputConstants.KEY_C, KeyMapping.Category.MISC);
 
     private static boolean zooming;
     private static boolean savedSmoothCamera;
@@ -26,18 +26,16 @@ public final class PrZoom {
 
     public static void onComputeFov(ViewportEvent.ComputeFov event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen == null && KEY.isDown()) {
+        if (mc.gui.screen() == null && KEY.isDown()) {
             if (!zooming) {
                 zooming = true;
                 savedSmoothCamera = mc.options.smoothCamera;
                 mc.options.smoothCamera = true;
-                mc.levelRenderer.needsUpdate();
             }
-            event.setFOV(event.getFOV() / 4.0);
+            event.setFOV((float) (event.getFOV() / 4.0));
         } else if (zooming) {
             zooming = false;
             mc.options.smoothCamera = savedSmoothCamera;
-            mc.levelRenderer.needsUpdate();
         }
     }
 

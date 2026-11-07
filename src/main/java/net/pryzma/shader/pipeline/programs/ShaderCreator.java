@@ -3,7 +3,7 @@ package net.pryzma.shader.pipeline.programs;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Ints;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import net.pryzma.shader.gl.blending.AlphaTest;
 import net.pryzma.shader.gl.blending.BlendModeOverride;
 import net.pryzma.shader.gl.blending.BufferBlendOverride;
@@ -25,7 +25,7 @@ import net.pryzma.shader.uniforms.VanillaUniforms;
 import net.pryzma.shader.uniforms.builtin.BuiltinReplacementUniforms;
 import net.pryzma.shader.uniforms.custom.CustomUniforms;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.repository.KnownPack;
@@ -203,7 +203,7 @@ public class ShaderCreator {
 											  String tessEval, String fragment) implements ResourceProvider {
 
 		@Override
-		public Optional<Resource> getResource(ResourceLocation id) {
+		public Optional<Resource> getResource(Identifier id) {
 			final String path = id.getPath();
 
 			if (path.endsWith("json")) {
@@ -236,7 +236,7 @@ public class ShaderCreator {
 	private static class StringResource extends Resource {
 		private final String content;
 
-		private StringResource(ResourceLocation id, String content) {
+		private StringResource(Identifier id, String content) {
 			super(new PathPackResources(new PackLocationInfo("<pryzma shaderpack shaders>", Component.literal("pryzma"), PackSource.BUILT_IN, Optional.of(new KnownPack("pryzma", "shader", "1.0"))), ShaderPlatformHelpers.getInstance().getConfigDir()), () -> new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
 			this.content = content;
 		}

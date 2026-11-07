@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.pryzma.Pryzma;
 import net.pryzma.core.res.PrPaths;
 import net.pryzma.core.res.PrProperties;
@@ -34,20 +34,20 @@ public final class PrRandomTextures {
     }
 
     /** Every texture with random variants, keyed by the full texture location. */
-    public static Map<ResourceLocation, PrRandomProperties<ResourceLocation>> load(PrResources res) {
-        Set<ResourceLocation> randomFiles = new HashSet<>();
+    public static Map<Identifier, PrRandomProperties<Identifier>> load(PrResources res) {
+        Set<Identifier> randomFiles = new HashSet<>();
         randomFiles.addAll(res.list("random", ".png").keySet());
         randomFiles.addAll(res.list("random", ".properties").keySet());
         randomFiles.addAll(res.list("mob", ".png").keySet());
         randomFiles.addAll(res.list("mob", ".properties").keySet());
-        Map<ResourceLocation, PrRandomProperties<ResourceLocation>> out = new HashMap<>();
-        Set<ResourceLocation> checked = new HashSet<>();
-        for (ResourceLocation file : randomFiles) {
-            ResourceLocation texture = baseTexture(file);
+        Map<Identifier, PrRandomProperties<Identifier>> out = new HashMap<>();
+        Set<Identifier> checked = new HashSet<>();
+        for (Identifier file : randomFiles) {
+            Identifier texture = baseTexture(file);
             if (texture == null || !checked.add(texture) || !res.exists(texture)) {
                 continue;
             }
-            PrRandomProperties<ResourceLocation> props = make(res, texture, false);
+            PrRandomProperties<Identifier> props = make(res, texture, false);
             if (props == null) {
                 props = make(res, texture, true);
             }
@@ -66,7 +66,7 @@ public final class PrRandomTextures {
      * {@code optifine/random/} mapped to {@code textures/} and {@code optifine/mob/} to
      * {@code textures/entity/}. {@code null} for files outside both trees.
      */
-    static ResourceLocation baseTexture(ResourceLocation file) {
+    static Identifier baseTexture(Identifier file) {
         String path = PrPaths.logical(file).getPath();
         path = stripSuffix(stripSuffix(path, ".png"), ".properties");
         int end = path.length();
@@ -88,7 +88,7 @@ public final class PrRandomTextures {
     }
 
     /** The random-folder counterpart of a texture: {@code optifine/random/...} or legacy {@code optifine/mob/...}. */
-    static ResourceLocation randomLocation(ResourceLocation texture, boolean legacy) {
+    static Identifier randomLocation(Identifier texture, boolean legacy) {
         String path = texture.getPath();
         if (path.startsWith(PrPaths.OPTIFINE)) {
             return texture;
@@ -99,7 +99,7 @@ public final class PrRandomTextures {
     }
 
     /** OptiFine {@code getLocationIndexed}: {@code a.png} to {@code a2.png}, {@code a1.png} to {@code a1.2.png}. */
-    static ResourceLocation indexed(ResourceLocation location, int index) {
+    static Identifier indexed(Identifier location, int index) {
         String path = location.getPath();
         int dot = path.lastIndexOf('.');
         if (dot < 0) {
@@ -110,12 +110,12 @@ public final class PrRandomTextures {
         return location.withPath(prefix + separator + index + path.substring(dot));
     }
 
-    private static PrRandomProperties<ResourceLocation> make(PrResources res, ResourceLocation texture, boolean legacy) {
-        ResourceLocation random = randomLocation(texture, legacy);
+    private static PrRandomProperties<Identifier> make(PrResources res, Identifier texture, boolean legacy) {
+        Identifier random = randomLocation(texture, legacy);
         if (random == null) {
             return null;
         }
-        ResourceLocation propsLocation = propertiesFor(res, random);
+        Identifier propsLocation = propertiesFor(res, random);
         if (propsLocation != null) {
             PrProperties props = res.properties(propsLocation).orElse(null);
             if (props != null) {
@@ -124,39 +124,39 @@ public final class PrRandomTextures {
                         msg -> Pryzma.LOGGER.warn("Random entities: {}", msg));
             }
         }
-        List<ResourceLocation> variants = new ArrayList<>();
+        List<Identifier> variants = new ArrayList<>();
         variants.add(texture);
         for (int index = 2; index < variants.size() + 10; index++) {
-            ResourceLocation candidate = indexed(random, index);
+            Identifier candidate = indexed(random, index);
             if (candidate != null && res.exists(candidate)) {
                 // The texture manager loads by location, so keep the spelling that exists.
                 variants.add(res.physicalLocation(candidate).orElse(candidate));
             }
         }
-        return variants.size() <= 1 ? null : PrRandomProperties.ofVariants(variants.toArray(new ResourceLocation[0]));
+        return variants.size() <= 1 ? null : PrRandomProperties.ofVariants(variants.toArray(new Identifier[0]));
     }
 
     /** {@code <base>.properties}, else the base texture's for dependent overlays like {@code _eyes}. */
-    private static ResourceLocation propertiesFor(PrResources res, ResourceLocation random) {
+    private static Identifier propertiesFor(PrResources res, Identifier random) {
         String base = stripSuffix(random.getPath(), ".png");
-        ResourceLocation own = random.withPath(base + ".properties");
+        Identifier own = random.withPath(base + ".properties");
         if (res.exists(own)) {
             return own;
         }
         for (String suffix : DEPENDENT_SUFFIXES) {
             if (base.endsWith(suffix)) {
-                ResourceLocation parent = random.withPath(base.substring(0, base.length() - suffix.length()) + ".properties");
+                Identifier parent = random.withPath(base.substring(0, base.length() - suffix.length()) + ".properties");
                 return res.exists(parent) ? parent : null;
             }
         }
         return null;
     }
 
-    private static ResourceLocation resourceFor(PrResources res, ResourceLocation texture, ResourceLocation random, int index) {
+    private static Identifier resourceFor(PrResources res, Identifier texture, Identifier random, int index) {
         if (index <= 1) {
             return texture;
         }
-        ResourceLocation variant = indexed(random, index);
+        Identifier variant = indexed(random, index);
         if (variant == null || !res.exists(variant)) {
             return null;
         }
@@ -164,7 +164,7 @@ public final class PrRandomTextures {
         return res.physicalLocation(variant).orElse(variant);
     }
 
-    private static boolean isProfession(ResourceLocation id) {
+    private static boolean isProfession(Identifier id) {
         return BuiltInRegistries.VILLAGER_PROFESSION.containsKey(id);
     }
 

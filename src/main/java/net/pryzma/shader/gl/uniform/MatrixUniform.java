@@ -46,7 +46,7 @@ public class MatrixUniform extends Uniform {
 			cachedValue.get(buffer);
 			buffer.rewind();
 
-			RenderSystem.glUniformMatrix4(location, false, buffer);
+			org.lwjgl.opengl.GL20C.glUniformMatrix4fv(location, false, buffer);
 		}
 	}
 }

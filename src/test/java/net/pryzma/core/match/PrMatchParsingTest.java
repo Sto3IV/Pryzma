@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 class PrMatchParsingTest {
     @Test
@@ -54,24 +54,24 @@ class PrMatchParsingTest {
     @Test
     void biomeNamesMatchExactlyAndCompactly() {
         PrBiomeMatcher m = PrBiomeMatcher.parse("plains Birch_Forest minecraft:dark_forest othermod:MistyPeaks");
-        assertTrue(m.matches(ResourceLocation.withDefaultNamespace("plains")));
-        assertTrue(m.matches(ResourceLocation.withDefaultNamespace("birch_forest")));
-        assertTrue(m.matches(ResourceLocation.withDefaultNamespace("dark_forest")));
-        assertTrue(m.matches(ResourceLocation.fromNamespaceAndPath("othermod", "misty_peaks")));
-        assertFalse(m.matches(ResourceLocation.withDefaultNamespace("desert")));
-        assertFalse(m.matches(ResourceLocation.fromNamespaceAndPath("othermod", "plains")));
+        assertTrue(m.matches(Identifier.withDefaultNamespace("plains")));
+        assertTrue(m.matches(Identifier.withDefaultNamespace("birch_forest")));
+        assertTrue(m.matches(Identifier.withDefaultNamespace("dark_forest")));
+        assertTrue(m.matches(Identifier.fromNamespaceAndPath("othermod", "misty_peaks")));
+        assertFalse(m.matches(Identifier.withDefaultNamespace("desert")));
+        assertFalse(m.matches(Identifier.fromNamespaceAndPath("othermod", "plains")));
     }
 
     @Test
     void biomeNegationAndLegacyNames() {
         PrBiomeMatcher not = PrBiomeMatcher.parse("!ocean deep_ocean");
-        assertFalse(not.matches(ResourceLocation.withDefaultNamespace("ocean")));
-        assertTrue(not.matches(ResourceLocation.withDefaultNamespace("plains")));
+        assertFalse(not.matches(Identifier.withDefaultNamespace("ocean")));
+        assertTrue(not.matches(Identifier.withDefaultNamespace("plains")));
         PrBiomeMatcher legacy = PrBiomeMatcher.parse("IcePlains Swampland extreme_hills Roofed_Forest");
-        assertTrue(legacy.matches(ResourceLocation.withDefaultNamespace("snowy_plains")));
-        assertTrue(legacy.matches(ResourceLocation.withDefaultNamespace("swamp")));
-        assertTrue(legacy.matches(ResourceLocation.withDefaultNamespace("windswept_hills")));
-        assertTrue(legacy.matches(ResourceLocation.withDefaultNamespace("dark_forest")));
+        assertTrue(legacy.matches(Identifier.withDefaultNamespace("snowy_plains")));
+        assertTrue(legacy.matches(Identifier.withDefaultNamespace("swamp")));
+        assertTrue(legacy.matches(Identifier.withDefaultNamespace("windswept_hills")));
+        assertTrue(legacy.matches(Identifier.withDefaultNamespace("dark_forest")));
         assertNull(PrBiomeMatcher.parse(null));
     }
 

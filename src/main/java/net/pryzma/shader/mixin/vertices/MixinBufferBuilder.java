@@ -4,21 +4,24 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormatElement;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.uniforms.CapturedRenderingState;
+import net.pryzma.shader.vertices.BlockContext;
 import net.pryzma.shader.vertices.BlockSensitiveBufferBuilder;
 import net.pryzma.shader.vertices.BufferBuilderPolygonView;
 import net.pryzma.shader.vertices.ExtendedDataHelper;
+import net.pryzma.shader.vertices.ExtendingBufferBuilder;
 import net.pryzma.shader.vertices.ImmediateState;
-import net.pryzma.shader.vertices.ShaderVertexFormats;
 import net.pryzma.shader.vertices.MojangBufferAccessor;
 import net.pryzma.shader.vertices.NormI8;
 import net.pryzma.shader.vertices.NormalHelper;
+import net.pryzma.shader.vertices.ShaderExtendedBufferBuilder;
+import net.pryzma.shader.vertices.ShaderVertexFormats;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
-import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,7 +29,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -36,7 +38,7 @@ import java.util.Arrays;
  * Dynamically and transparently extends the vanilla vertex formats with additional data
  */
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensitiveBufferBuilder {
+public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensitiveBufferBuilder, ExtendingBufferBuilder, ShaderExtendedBufferBuilder {
 	@Unique
 	private final BufferBuilderPolygonView polygon = new BufferBuilderPolygonView();
 	@Unique
@@ -47,22 +49,18 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 	private int elementsToFill;
 	@Shadow
 	@Final
-	private VertexFormat.Mode mode;
+	private PrimitiveTopology primitiveTopology;
 	@Shadow
 	@Final
 	private VertexFormat format;
-	@Shadow
-	@Final
-	private int[] offsetsByElement;
-	@Shadow
-	@Final
-	private boolean fastFormat;
 	@Shadow
 	private long vertexPointer;
 	@Shadow
 	private int vertices;
 	@Unique
 	private boolean extending;
+	@Unique
+	private boolean pryzma$isTerrain;
 	@Unique
 	private boolean injectNormalAndUV1;
 	@Unique
@@ -87,59 +85,79 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 	@Shadow
 	public abstract VertexConsumer setNormal(float f, float g, float h);
 
-	@Shadow
-	protected abstract long beginElement(VertexFormatElement vertexFormatElement);
-
-	@ModifyVariable(method = "<init>", at = @At(value = "FIELD", target = "Lcom/mojang/blaze3d/vertex/VertexFormatElement;POSITION:Lcom/mojang/blaze3d/vertex/VertexFormatElement;", ordinal = 0), argsOnly = true)
+	@ModifyVariable(method = "<init>", at = @At("HEAD"), argsOnly = true)
 	private VertexFormat pryzma$extendFormat(VertexFormat format) {
-		boolean pryzma$isTerrain = false;
-		injectNormalAndUV1 = false;
-
 		if (ImmediateState.skipExtension.get() || !PryzmaShaders.isPackInUseQuick()) {
 			return format;
 		}
 
 		if (format == DefaultVertexFormat.BLOCK || format == ShaderVertexFormats.TERRAIN) {
-			extending = true;
-			pryzma$isTerrain = true;
-			injectNormalAndUV1 = false;
 			return ShaderVertexFormats.TERRAIN;
-		} else if (format == DefaultVertexFormat.NEW_ENTITY || format == ShaderVertexFormats.ENTITY) {
-			extending = true;
-			pryzma$isTerrain = false;
-			injectNormalAndUV1 = false;
+		} else if (format == DefaultVertexFormat.ENTITY || format == ShaderVertexFormats.ENTITY) {
 			return ShaderVertexFormats.ENTITY;
 		} else if (format == DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP || format == ShaderVertexFormats.GLYPH) {
-			extending = true;
-			pryzma$isTerrain = false;
-			injectNormalAndUV1 = true;
 			return ShaderVertexFormats.GLYPH;
 		}
 
 		return format;
 	}
 
-	@Redirect(method = "addVertex(FFFIFFIIFFF)V", at = @At(value = "FIELD", target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;fastFormat:Z"))
-	private boolean fastFormat(BufferBuilder instance) {
-		return this.fastFormat && !extending;
+	@Inject(method = "<init>", at = @At("RETURN"))
+	private void pryzma$initExtensionState(ByteBufferBuilder buffer, PrimitiveTopology primitiveTopology, VertexFormat format, CallbackInfo ci) {
+		if (format == ShaderVertexFormats.TERRAIN) {
+			this.extending = true;
+			this.pryzma$isTerrain = true;
+			this.injectNormalAndUV1 = false;
+		} else if (format == ShaderVertexFormats.ENTITY) {
+			this.extending = true;
+			this.pryzma$isTerrain = false;
+			this.injectNormalAndUV1 = false;
+		} else if (format == ShaderVertexFormats.GLYPH) {
+			this.extending = true;
+			this.pryzma$isTerrain = false;
+			this.injectNormalAndUV1 = true;
+		} else {
+			this.extending = false;
+			this.pryzma$isTerrain = false;
+			this.injectNormalAndUV1 = false;
+		}
 	}
 
 	@Inject(method = "addVertex(FFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;", at = @At("RETURN"))
 	private void injectMidBlock(float x, float y, float z, CallbackInfoReturnable<VertexConsumer> cir) {
-		if ((this.elementsToFill & ShaderVertexFormats.MID_BLOCK_ELEMENT.mask()) != 0) {
-			long midBlockOffset = this.beginElement(ShaderVertexFormats.MID_BLOCK_ELEMENT);
-			MemoryUtil.memPutInt(midBlockOffset, ExtendedDataHelper.computeMidBlock(x, y, z, currentLocalPosX, currentLocalPosY, currentLocalPosZ));
-			MemoryUtil.memPutByte(midBlockOffset + 3, currentBlockEmission);
+		if (!this.extending) {
+			return;
 		}
 
-		if ((this.elementsToFill & ShaderVertexFormats.ENTITY_ELEMENT.mask()) != 0) {
-			long offset = this.beginElement(ShaderVertexFormats.ENTITY_ELEMENT);
-			// ENTITY_ELEMENT
-			MemoryUtil.memPutShort(offset, (short) currentBlock);
-			MemoryUtil.memPutShort(offset + 2, currentRenderType);
-		} else if ((this.elementsToFill & ShaderVertexFormats.ENTITY_ID_ELEMENT.mask()) != 0) {
-			long offset = this.beginElement(ShaderVertexFormats.ENTITY_ID_ELEMENT);
-			// ENTITY_ID_ELEMENT
+		if (this.pryzma$isTerrain) {
+			int block = currentBlock;
+			byte rType = currentRenderType;
+			byte emiss = currentBlockEmission;
+			int lx = currentLocalPosX;
+			int ly = currentLocalPosY;
+			int lz = currentLocalPosZ;
+
+			if (block == -1) {
+				BlockContext.State s = BlockContext.current();
+				if (s.active) {
+					block = s.block;
+					rType = s.renderType;
+					emiss = s.emission;
+					lx = s.localX;
+					ly = s.localY;
+					lz = s.localZ;
+				}
+			}
+
+			long midBlockOffset = this.vertexPointer + ShaderVertexFormats.MID_BLOCK_ELEMENT.offset();
+			MemoryUtil.memPutInt(midBlockOffset, ExtendedDataHelper.computeMidBlock(x, y, z, lx, ly, lz));
+			MemoryUtil.memPutByte(midBlockOffset + 3, emiss);
+
+			long entityOffset = this.vertexPointer + ShaderVertexFormats.ENTITY_ELEMENT.offset();
+			MemoryUtil.memPutShort(entityOffset, (short) block);
+			MemoryUtil.memPutShort(entityOffset + 2, rType);
+		} else {
+			long offset = this.vertexPointer + ShaderVertexFormats.ENTITY_ID_ELEMENT.offset();
 			MemoryUtil.memPutShort(offset, (short) CapturedRenderingState.INSTANCE.getCurrentRenderedEntity());
 			MemoryUtil.memPutShort(offset + 2, (short) CapturedRenderingState.INSTANCE.getCurrentRenderedBlockEntity());
 			MemoryUtil.memPutShort(offset + 4, (short) CapturedRenderingState.INSTANCE.getCurrentRenderedItem());
@@ -152,72 +170,66 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 			return;
 		}
 
-		// We can't fill these yet.
-		this.elementsToFill = this.elementsToFill & ~ShaderVertexFormats.MID_TEXTURE_ELEMENT.mask();
-		this.elementsToFill = this.elementsToFill & ~ShaderVertexFormats.TANGENT_ELEMENT.mask();
-
-		if (injectNormalAndUV1 && this.elementsToFill != (this.elementsToFill & ~VertexFormatElement.NORMAL.mask())) {
+		if (injectNormalAndUV1) {
 			this.setNormal(0, 1, 0);
 		}
 
-		if (mode != VertexFormat.Mode.QUADS && mode != VertexFormat.Mode.TRIANGLES) {
+		if (primitiveTopology != PrimitiveTopology.QUADS && primitiveTopology != PrimitiveTopology.TRIANGLES) {
 			return;
 		}
 
 		vertexOffsets[pryzma$vertexCount] = vertexPointer - ((MojangBufferAccessor) buffer).getPointer();
-
 		pryzma$vertexCount++;
 
-		if (mode == VertexFormat.Mode.QUADS && pryzma$vertexCount == 4 || mode == VertexFormat.Mode.TRIANGLES && pryzma$vertexCount == 3) {
+		if (primitiveTopology == PrimitiveTopology.QUADS && pryzma$vertexCount == 4 || primitiveTopology == PrimitiveTopology.TRIANGLES && pryzma$vertexCount == 3) {
 			fillExtendedData(pryzma$vertexCount);
 		}
 	}
 
-    @Unique
-    private int lastBlock = -1;
+	@Unique
+	private int lastBlock = -1;
 
-    @Override
-    public void beginBlock(int block, byte renderType, byte blockEmission, int localPosX, int localPosY, int localPosZ) {
-        currentBlock = block;
-        currentRenderType = renderType;
-        currentBlockEmission = blockEmission;
-        currentLocalPosX = localPosX;
-        currentLocalPosY = localPosY;
-        currentLocalPosZ = localPosZ;
-    }
+	@Override
+	public void beginBlock(int block, byte renderType, byte blockEmission, int localPosX, int localPosY, int localPosZ) {
+		currentBlock = block;
+		currentRenderType = renderType;
+		currentBlockEmission = blockEmission;
+		currentLocalPosX = localPosX;
+		currentLocalPosY = localPosY;
+		currentLocalPosZ = localPosZ;
+	}
 
-    @Override
-    public void overrideBlock(int block) {
-        lastBlock = currentBlock;
-        currentBlock = block;
-    }
+	@Override
+	public void overrideBlock(int block) {
+		lastBlock = currentBlock;
+		currentBlock = block;
+	}
 
-    @Override
-    public void restoreBlock() {
-        if (lastBlock != -1) {
-            currentBlock = lastBlock;
-            lastBlock = -1;
-        }
-    }
+	@Override
+	public void restoreBlock() {
+		if (lastBlock != -1) {
+			currentBlock = lastBlock;
+			lastBlock = -1;
+		}
+	}
 
-    @Override
-    public void endBlock() {
-        currentBlock = -1;
-        currentRenderType = -1;
-        currentBlockEmission = 0;
-    }
+	@Override
+	public void endBlock() {
+		currentBlock = -1;
+		currentRenderType = -1;
+		currentBlockEmission = 0;
+	}
 
-    @Override
-    public void ignoreMidBlock(boolean b) {
+	@Override
+	public void ignoreMidBlock(boolean b) {
 
-    }
+	}
 
-    @Unique
+	@Unique
 	private void fillExtendedData(int vertexAmount) {
 		pryzma$vertexCount = 0;
 
 		int stride = format.getVertexSize();
-
 		polygon.setup(((MojangBufferAccessor) buffer).getPointer(), vertexOffsets, stride, vertexAmount);
 
 		float midU = 0;
@@ -231,15 +243,13 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 		midU /= vertexAmount;
 		midV /= vertexAmount;
 
-		int midTexOffset = this.offsetsByElement[ShaderVertexFormats.MID_TEXTURE_ELEMENT.id()];
-		int normalOffset = this.offsetsByElement[VertexFormatElement.NORMAL.id()];
-		int tangentOffset = this.offsetsByElement[ShaderVertexFormats.TANGENT_ELEMENT.id()];
+		int midTexOffset = format.getElement("mc_midTexCoord").offset();
+		int normalOffset = format.getElement("Normal").offset();
+		int tangentOffset = format.getElement("at_tangent").offset();
 		if (vertexAmount == 3) {
-			// NormalHelper.computeFaceNormalTri(normal, polygon);	// Removed to enable smooth shaded triangles. Mods rendering triangles with bad normals need to recalculate their normals manually or otherwise shading might be inconsistent.
-
 			for (int vertex = 0; vertex < vertexAmount; vertex++) {
 				long newPointer = ((MojangBufferAccessor) buffer).getPointer() + vertexOffsets[vertex];
-				int vertexNormal = MemoryUtil.memGetInt(newPointer + normalOffset); // retrieve per-vertex normal
+				int vertexNormal = MemoryUtil.memGetInt(newPointer + normalOffset);
 
 				int tangent = NormalHelper.computeTangentSmooth(NormI8.unpackX(vertexNormal), NormI8.unpackY(vertexNormal), NormI8.unpackZ(vertexNormal), polygon);
 
@@ -248,7 +258,6 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 				MemoryUtil.memPutInt(newPointer + tangentOffset, tangent);
 			}
 		} else {
-			// TODO: Temporary fix for EMI item batching
 			boolean recalculateNormal = ImmediateState.isRenderingLevel;
 			NormalHelper.computeFaceNormal(normal, polygon);
 			int packedNormal = 0;
@@ -270,5 +279,75 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 		}
 
 		Arrays.fill(vertexOffsets, 0);
+	}
+
+	@Override
+	public void pryzma$beginWithoutExtending(PrimitiveTopology topology, VertexFormat vertexFormat) {
+		this.extending = false;
+	}
+
+	@Override
+	public VertexFormat pryzma$format() {
+		return this.format;
+	}
+
+	@Override
+	public PrimitiveTopology pryzma$mode() {
+		return this.primitiveTopology;
+	}
+
+	@Override
+	public boolean pryzma$extending() {
+		return this.extending;
+	}
+
+	@Override
+	public boolean pryzma$isTerrain() {
+		return this.pryzma$isTerrain;
+	}
+
+	@Override
+	public boolean pryzma$injectNormalAndUV1() {
+		return this.injectNormalAndUV1;
+	}
+
+	@Override
+	public int pryzma$vertexCount() {
+		return this.pryzma$vertexCount;
+	}
+
+	@Override
+	public void pryzma$incrementVertexCount() {
+		this.pryzma$vertexCount++;
+	}
+
+	@Override
+	public void pryzma$resetVertexCount() {
+		this.pryzma$vertexCount = 0;
+	}
+
+	@Override
+	public short pryzma$currentBlock() {
+		return (short) this.currentBlock;
+	}
+
+	@Override
+	public short pryzma$currentRenderType() {
+		return this.currentRenderType;
+	}
+
+	@Override
+	public int pryzma$currentLocalPosX() {
+		return this.currentLocalPosX;
+	}
+
+	@Override
+	public int pryzma$currentLocalPosY() {
+		return this.currentLocalPosY;
+	}
+
+	@Override
+	public int pryzma$currentLocalPosZ() {
+		return this.currentLocalPosZ;
 	}
 }

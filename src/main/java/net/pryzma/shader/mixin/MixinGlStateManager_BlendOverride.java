@@ -1,6 +1,6 @@
 package net.pryzma.shader.mixin;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.gl.blending.BlendModeStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

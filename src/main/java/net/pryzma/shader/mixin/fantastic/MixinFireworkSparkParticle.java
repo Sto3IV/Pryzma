@@ -13,7 +13,7 @@ public class MixinFireworkSparkParticle extends SimpleAnimatedParticle {
 	}
 
 	@Override
-	public ParticleRenderType getRenderType() {
-		return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+	public ParticleRenderType getGroup() {
+		return ParticleRenderType.SINGLE_QUADS;
 	}
 }

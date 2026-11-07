@@ -1,149 +1,88 @@
 package net.pryzma.shader.pathways;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.pryzma.shader.batchedentityrendering.impl.FullyBufferedMultiBufferSource;
 import net.pryzma.shader.PryzmaShaders;
-import net.pryzma.shader.mixin.GameRendererAccessor;
-import net.pryzma.shader.mixinterface.ItemInHandInterface;
 import net.pryzma.shader.pipeline.WorldRenderingPhase;
 import net.pryzma.shader.pipeline.WorldRenderingPipeline;
-import net.pryzma.shader.uniforms.CapturedRenderingState;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
-import org.joml.Matrix4f;
+import net.minecraft.world.level.block.HalfTransparentBlock;
+import net.minecraft.world.level.block.TransparentBlock;
 import org.joml.Matrix4fc;
 
 public class HandRenderer {
 	public static final HandRenderer INSTANCE = new HandRenderer();
 	public static final float DEPTH = 0.125F;
-	private final FullyBufferedMultiBufferSource bufferSource = new FullyBufferedMultiBufferSource();
 	private boolean ACTIVE;
 	private boolean renderingSolid;
 
-	private PoseStack setupGlState(GameRenderer gameRenderer, Camera camera, Matrix4fc modelMatrix, float tickDelta) {
-		final PoseStack poseStack = new PoseStack();
-
-		// We need to scale the matrix by 0.125 so the hand doesn't clip through blocks.
-		Matrix4f scaleMatrix = new Matrix4f().scale(1F, 1F, DEPTH);
-		scaleMatrix.mul(gameRenderer.getProjectionMatrix(((GameRendererAccessor) gameRenderer).invokeGetFov(camera, tickDelta, false)));
-		gameRenderer.resetProjectionMatrix(scaleMatrix);
-
-		poseStack.setIdentity();
-
-		((GameRendererAccessor) gameRenderer).invokeBobHurt(poseStack, tickDelta);
-
-		if (Minecraft.getInstance().options.bobView().get()) {
-			((GameRendererAccessor) gameRenderer).invokeBobView(poseStack, tickDelta);
-		}
-
-		return poseStack;
-	}
-
 	private boolean canRender(Camera camera, GameRenderer gameRenderer) {
-		return !(!((GameRendererAccessor) gameRenderer).getRenderHand()
-			|| camera.isDetached()
-			|| !(camera.getEntity() instanceof Player)
-			|| ((GameRendererAccessor) gameRenderer).getPanoramicMode()
-			|| Minecraft.getInstance().options.hideGui
-			|| (camera.getEntity() instanceof LivingEntity && ((LivingEntity) camera.getEntity()).isSleeping())
-			|| Minecraft.getInstance().gameMode.getPlayerMode() == GameType.SPECTATOR);
+		Minecraft mc = Minecraft.getInstance();
+		return !(camera.isDetached()
+			|| !(camera.entity() instanceof Player)
+			|| mc.gui.hud.isHidden()
+			|| (camera.entity() instanceof LivingEntity living && living.isSleeping())
+			|| mc.gameMode.getPlayerMode() == GameType.SPECTATOR);
 	}
 
 	public boolean isHandTranslucent(ItemStack itemStack) {
-		Item item = itemStack.getItem();
-		if (item instanceof BlockItem) {
-			return ItemBlockRenderTypes.getChunkRenderType(((BlockItem) item).getBlock().defaultBlockState()) == RenderType.translucent();
+		if (itemStack == null || itemStack.isEmpty()) {
+			return false;
 		}
-
+		Item item = itemStack.getItem();
+		if (item instanceof BlockItem blockItem) {
+			return blockItem.getBlock() instanceof HalfTransparentBlock || blockItem.getBlock() instanceof TransparentBlock;
+		}
 		return false;
 	}
 
+	public boolean isAnyHandSolid() {
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.player == null) {
+			return false;
+		}
+		return !isHandTranslucent(mc.player.getMainHandItem()) || !isHandTranslucent(mc.player.getOffhandItem());
+	}
+
+	public boolean isAnyHandTranslucent() {
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.player == null) {
+			return false;
+		}
+		return isHandTranslucent(mc.player.getMainHandItem()) || isHandTranslucent(mc.player.getOffhandItem());
+	}
+
 	public void renderSolid(Matrix4fc modelMatrix, float tickDelta, Camera camera, GameRenderer gameRenderer, WorldRenderingPipeline pipeline) {
-		if (!canRender(camera, gameRenderer) || !((ItemInHandInterface)gameRenderer.itemInHandRenderer).pryzma$isAnyHandSolid() || !PryzmaShaders.isPackInUseQuick()) {
+		if (!canRender(camera, gameRenderer) || !isAnyHandSolid() || !PryzmaShaders.isPackInUseQuick()) {
 			return;
 		}
-
 		ACTIVE = true;
-
-		PoseStack poseStack = setupGlState(gameRenderer, camera, modelMatrix, tickDelta);
-
-		pipeline.setPhase(WorldRenderingPhase.HAND_SOLID);
-
-		poseStack.pushPose();
-
-		Minecraft.getInstance().getProfiler().push("iris_hand");
-
 		renderingSolid = true;
+		pipeline.setPhase(WorldRenderingPhase.HAND_SOLID);
+	}
 
-		RenderSystem.getModelViewStack().pushMatrix();
-		RenderSystem.getModelViewStack().set(poseStack.last().pose());
-		RenderSystem.applyModelViewMatrix();
-
-		gameRenderer.itemInHandRenderer.renderHandsWithItems(tickDelta, new PoseStack(), bufferSource.getUnflushableWrapper(), Minecraft.getInstance().player, Minecraft.getInstance().getEntityRenderDispatcher().getPackedLightCoords(camera.getEntity(), tickDelta));
-
-		Minecraft.getInstance().getProfiler().pop();
-
-		bufferSource.readyUp();
-		bufferSource.endBatch();
-
-		gameRenderer.resetProjectionMatrix(new Matrix4f(CapturedRenderingState.INSTANCE.getGbufferProjection()));
-
-		poseStack.popPose();
-		RenderSystem.getModelViewStack().popMatrix();
-		RenderSystem.applyModelViewMatrix();
-
+	public void endSolid(WorldRenderingPipeline pipeline) {
 		renderingSolid = false;
-
 		pipeline.setPhase(WorldRenderingPhase.NONE);
-
 		ACTIVE = false;
 	}
 
 	public void renderTranslucent(Matrix4fc modelMatrix, float tickDelta, Camera camera, GameRenderer gameRenderer, WorldRenderingPipeline pipeline) {
-		if (!canRender(camera, gameRenderer) || !((ItemInHandInterface)gameRenderer.itemInHandRenderer).pryzma$isAnyHandTranslucent() || !PryzmaShaders.isPackInUseQuick()) {
+		if (!canRender(camera, gameRenderer) || !isAnyHandTranslucent() || !PryzmaShaders.isPackInUseQuick()) {
 			return;
 		}
-
 		ACTIVE = true;
-
 		pipeline.setPhase(WorldRenderingPhase.HAND_TRANSLUCENT);
+	}
 
-		PoseStack poseStack = setupGlState(gameRenderer, camera, modelMatrix, tickDelta);
-
-		poseStack.pushPose();
-
-		Minecraft.getInstance().getProfiler().push("iris_hand_translucent");
-
-		RenderSystem.getModelViewStack().pushMatrix();
-		RenderSystem.getModelViewStack().set(poseStack.last().pose());
-		RenderSystem.applyModelViewMatrix();
-
-		gameRenderer.itemInHandRenderer.renderHandsWithItems(tickDelta, new PoseStack(), bufferSource, Minecraft.getInstance().player, Minecraft.getInstance().getEntityRenderDispatcher().getPackedLightCoords(camera.getEntity(), tickDelta));
-
-		poseStack.popPose();
-
-		Minecraft.getInstance().getProfiler().pop();
-
-		gameRenderer.resetProjectionMatrix(new Matrix4f(CapturedRenderingState.INSTANCE.getGbufferProjection()));
-
-		bufferSource.endBatch();
-		RenderSystem.getModelViewStack().popMatrix();
-		RenderSystem.applyModelViewMatrix();
-
+	public void endTranslucent(WorldRenderingPipeline pipeline) {
 		pipeline.setPhase(WorldRenderingPhase.NONE);
-
 		ACTIVE = false;
 	}
 
@@ -153,9 +92,5 @@ public class HandRenderer {
 
 	public boolean isRenderingSolid() {
 		return renderingSolid;
-	}
-
-	public FullyBufferedMultiBufferSource getBufferSource() {
-		return bufferSource;
 	}
 }

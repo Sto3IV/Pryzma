@@ -22,10 +22,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -161,9 +162,9 @@ public final class LodWorldScanner {
     public static RawChunk captureChunk(LevelHeightAccessor level, boolean skyLit, @Nullable LevelLightEngine light,
             ChunkAccess chunk, long sequence) {
         ChunkPos pos = chunk.getPos();
-        RawChunk raw = new RawChunk(pos.x, pos.z, sequence);
-        int minY = level.getMinBuildHeight();
-        int maxY = level.getMaxBuildHeight();
+        RawChunk raw = new RawChunk(pos.x(), pos.z(), sequence);
+        int minY = level.getMinY();
+        int maxY = level.getMaxY();
         LayerLightEventListener skyLayer = light != null ? light.getLayerListener(LightLayer.SKY) : null;
         LayerLightEventListener blockLayer = light != null ? light.getLayerListener(LightLayer.BLOCK) : null;
         int baseX = pos.getMinBlockX();
@@ -278,12 +279,11 @@ public final class LodWorldScanner {
     }
 
     /** {@link LodColumnScan} kind of a block state. Any thread: states, tags and fluids are immutable. */
-    @SuppressWarnings("deprecation") // blocksMotion is the predicate of the MOTION_BLOCKING heightmap itself
     static int kind(BlockState state) {
         if (state.isAir()) {
             return LodColumnScan.AIR;
         }
-        boolean motion = state.blocksMotion();
+        boolean motion = state.is(BlockTags.BLOCKS_MOTION_IN_HEIGHTMAP);
         FluidState fluid = state.getFluidState();
         if (!fluid.isEmpty() && !motion) {
             return fluid.is(FluidTags.LAVA) ? LodColumnScan.LAVA : LodColumnScan.WATER;
@@ -303,9 +303,8 @@ public final class LodWorldScanner {
     }
 
     /** The heightmap's own predicate: the block the {@code MOTION_BLOCKING} height stops at. */
-    @SuppressWarnings("deprecation")
     static boolean isHeightmapTop(BlockState state) {
-        return (state.blocksMotion() && !isNonTerrainPlant(state)) || !state.getFluidState().isEmpty();
+        return (state.is(BlockTags.BLOCKS_MOTION_IN_HEIGHTMAP) && !isNonTerrainPlant(state)) || !state.getFluidState().isEmpty();
     }
 
     // ------------------------------------------------------------------ saved chunks
@@ -315,8 +314,8 @@ public final class LodWorldScanner {
     }
 
     static DecodeContext decodeContext(ClientLevel level) {
-        return new DecodeContext(level.getMinBuildHeight(), level.getHeight(), level.dimensionType().hasSkyLight(),
-                BuiltInRegistries.BLOCK.asLookup(), level.registryAccess().registryOrThrow(Registries.BIOME));
+        return new DecodeContext(level.getMinY(), level.getHeight(), level.dimensionType().hasSkyLight(),
+                BuiltInRegistries.BLOCK, level.registryAccess().lookupOrThrow(Registries.BIOME));
     }
 
     /**
@@ -326,10 +325,10 @@ public final class LodWorldScanner {
      */
     @Nullable
     static RawChunk decode(CompoundTag tag, int chunkX, int chunkZ, DecodeContext context) {
-        if (tag.getInt("DataVersion") < MIN_DATA_VERSION || !tag.contains("sections", Tag.TAG_LIST)) {
+        if (tag.getIntOr("DataVersion", 0) < MIN_DATA_VERSION || !tag.contains("sections")) {
             return null;
         }
-        String status = tag.getString("Status");
+        String status = tag.getStringOr("Status", "");
         if (!"minecraft:full".equals(status) && !"full".equals(status)) {
             return null;
         }
@@ -337,10 +336,10 @@ public final class LodWorldScanner {
         int sectionCount = context.height() >> 4;
         NbtSection[] sections = new NbtSection[sectionCount];
         int highest = -1;
-        ListTag list = tag.getList("sections", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("sections");
         for (int s = 0; s < list.size(); s++) {
-            CompoundTag sectionTag = list.getCompound(s);
-            int index = sectionTag.getByte("Y") - minSection;
+            CompoundTag sectionTag = list.getCompoundOrEmpty(s);
+            int index = sectionTag.getByteOr("Y", (byte) -128) - minSection;
             if (index < 0 || index >= sectionCount) {
                 continue;
             }
@@ -356,10 +355,10 @@ public final class LodWorldScanner {
         }
         int heightBits = LodPalette.heightmapBits(context.height());
         long[] heights = null;
-        CompoundTag heightmaps = tag.getCompound("Heightmaps");
-        if (heightmaps.contains("MOTION_BLOCKING", Tag.TAG_LONG_ARRAY)) {
-            long[] data = heightmaps.getLongArray("MOTION_BLOCKING");
-            if (data.length == LodPalette.expectedLongs(LodPalette.HEIGHTMAP_ENTRIES, heightBits)) {
+        CompoundTag heightmaps = tag.getCompoundOrEmpty("Heightmaps");
+        if (heightmaps.contains("MOTION_BLOCKING")) {
+            long[] data = heightmaps.getLongArray("MOTION_BLOCKING").orElse(null);
+            if (data != null && data.length == LodPalette.expectedLongs(LodPalette.HEIGHTMAP_ENTRIES, heightBits)) {
                 heights = data;
             }
         }
@@ -456,28 +455,28 @@ public final class LodWorldScanner {
         }
 
         static NbtSection read(CompoundTag tag, DecodeContext context) {
-            CompoundTag states = tag.getCompound("block_states");
-            ListTag paletteTag = states.getList("palette", Tag.TAG_COMPOUND);
+            CompoundTag states = tag.getCompoundOrEmpty("block_states");
+            ListTag paletteTag = states.getListOrEmpty("palette");
             BlockState[] palette = new BlockState[Math.max(1, paletteTag.size())];
             palette[0] = Blocks.AIR.defaultBlockState();
             for (int p = 0; p < paletteTag.size(); p++) {
-                palette[p] = NbtUtils.readBlockState(context.blocks(), paletteTag.getCompound(p));
+                palette[p] = NbtUtils.readBlockState(context.blocks(), paletteTag.getCompoundOrEmpty(p));
             }
             int bits = LodPalette.blockStateBits(paletteTag.size());
-            long[] data = bits == 0 ? null : states.getLongArray("data");
+            long[] data = bits == 0 ? null : states.getLongArray("data").orElse(null);
             if (data != null && data.length != LodPalette.expectedLongs(LodPalette.SECTION_BLOCKS, bits)) {
                 data = null;
             }
 
-            CompoundTag biomes = tag.getCompound("biomes");
-            ListTag biomeTag = biomes.getList("palette", Tag.TAG_STRING);
+            CompoundTag biomes = tag.getCompoundOrEmpty("biomes");
+            ListTag biomeTag = biomes.getListOrEmpty("palette");
             Object[] biomePalette = new Object[Math.max(1, biomeTag.size())];
             for (int p = 0; p < biomeTag.size(); p++) {
-                ResourceLocation id = ResourceLocation.tryParse(biomeTag.getString(p));
-                biomePalette[p] = id == null ? null : context.biomes().getHolder(id).orElse(null);
+                Identifier id = Identifier.tryParse(biomeTag.getStringOr(p, ""));
+                biomePalette[p] = id == null ? null : context.biomes().get(id).orElse(null);
             }
             int biomeBits = LodPalette.biomeBits(biomeTag.size());
-            long[] biomeData = biomeBits == 0 ? null : biomes.getLongArray("data");
+            long[] biomeData = biomeBits == 0 ? null : biomes.getLongArray("data").orElse(null);
             if (biomeData != null && biomeData.length != LodPalette.expectedLongs(LodPalette.SECTION_BIOMES, biomeBits)) {
                 biomeData = null;
             }
@@ -487,7 +486,7 @@ public final class LodWorldScanner {
 
         @Nullable
         private static byte[] lightLayer(CompoundTag tag, String name) {
-            byte[] layer = tag.contains(name, Tag.TAG_BYTE_ARRAY) ? tag.getByteArray(name) : null;
+            byte[] layer = tag.getByteArray(name).orElse(null);
             return layer != null && layer.length == 2048 ? layer : null;
         }
 
@@ -530,8 +529,8 @@ public final class LodWorldScanner {
     /** A finisher for chunks of {@code level}. Client thread; the finisher itself belongs to one worker task. */
     static Finisher finisher(ClientLevel level) {
         return new Finisher(Minecraft.getInstance().getBlockColors(),
-                new TintGetter(level.getLightEngine(), level.getMinBuildHeight(), level.getHeight()),
-                level.registryAccess().registryOrThrow(Registries.BIOME));
+                new TintGetter(level.getLightEngine(), level.getMinY(), level.getHeight()),
+                level.registryAccess().lookupOrThrow(Registries.BIOME));
     }
 
     /** Resolves block ids and biome tints of a {@link RawChunk}. Not thread-safe: one per task. */
@@ -584,7 +583,7 @@ public final class LodWorldScanner {
             if (holder == null) {
                 return LodChunkData.NO_BIOME;
             }
-            Biome biome = holder.unwrapKey().map(biomes::get).orElse(null);
+            Biome biome = holder.unwrapKey().flatMap(biomes::get).map(Holder.Reference::value).orElse(null);
             int id = biomes.getId(biome != null ? biome : holder.value());
             return id < 0 ? LodChunkData.NO_BIOME : id;
         }
@@ -627,7 +626,9 @@ public final class LodWorldScanner {
             }
             tints.biome = biome;
             try {
-                int color = blockColors.getColor(state, tints, pos, index);
+                var tintSource = blockColors.getTintSource(state, index);
+                if (tintSource == null) return LodChunkData.NO_TINT;
+                int color = tintSource.colorInWorld(state, tints, pos);
                 return color == -1 ? LodChunkData.NO_TINT : color & 0xFFFFFF;
             } catch (RuntimeException e) {
                 // A colour provider that needs a real level: keep the block untinted.
@@ -654,8 +655,8 @@ public final class LodWorldScanner {
         }
 
         @Override
-        public float getShade(Direction direction, boolean shade) {
-            return 1.0F;
+        public CardinalLighting cardinalLighting() {
+            return CardinalLighting.DEFAULT;
         }
 
         @Override
@@ -691,7 +692,7 @@ public final class LodWorldScanner {
         }
 
         @Override
-        public int getMinBuildHeight() {
+        public int getMinY() {
             return minY;
         }
     }

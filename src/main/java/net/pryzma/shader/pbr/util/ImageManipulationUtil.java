@@ -1,7 +1,6 @@
 package net.pryzma.shader.pbr.util;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.util.FastColor;
 
 public class ImageManipulationUtil {
 	public static NativeImage scaleNearestNeighbor(NativeImage image, int newWidth, int newHeight) {
@@ -12,7 +11,7 @@ public class ImageManipulationUtil {
 			for (int x = 0; x < newWidth; ++x) {
 				float unscaledX = (x + 0.5f) / xScale;
 				float unscaledY = (y + 0.5f) / yScale;
-				scaled.setPixelRGBA(x, y, image.getPixelRGBA((int) unscaledX, (int) unscaledY));
+				scaled.setPixelABGR(x, y, image.getPixel((int) unscaledX, (int) unscaledY));
 			}
 		}
 		return scaled;
@@ -61,10 +60,10 @@ public class ImageManipulationUtil {
 					float weightBL = leftWeight * bottomWeight;
 					float weightBR = rightWeight * bottomWeight;
 
-					int colorTL = image.getPixelRGBA(x0, y0);
-					int colorTR = image.getPixelRGBA(x1, y0);
-					int colorBL = image.getPixelRGBA(x0, y1);
-					int colorBR = image.getPixelRGBA(x1, y1);
+					int colorTL = image.getPixel(x0, y0);
+					int colorTR = image.getPixel(x1, y0);
+					int colorBL = image.getPixel(x0, y1);
+					int colorBR = image.getPixel(x1, y1);
 
 					finalColor = blendColor(colorTL, colorTR, colorBL, colorBR, weightTL, weightTR, weightBL, weightBR);
 				} else if (x0valid & x1valid) {
@@ -72,8 +71,8 @@ public class ImageManipulationUtil {
 					float rightWeight = unscaledX - (x0 + 0.5f);
 
 					int validY = y0valid ? y0 : y1;
-					int colorLeft = image.getPixelRGBA(x0, validY);
-					int colorRight = image.getPixelRGBA(x1, validY);
+					int colorLeft = image.getPixel(x0, validY);
+					int colorRight = image.getPixel(x1, validY);
 
 					finalColor = blendColor(colorLeft, colorRight, leftWeight, rightWeight);
 				} else if (y0valid & y1valid) {
@@ -81,25 +80,45 @@ public class ImageManipulationUtil {
 					float bottomWeight = unscaledY - (y0 + 0.5f);
 
 					int validX = x0valid ? x0 : x1;
-					int colorTop = image.getPixelRGBA(validX, y0);
-					int colorBottom = image.getPixelRGBA(validX, y1);
+					int colorTop = image.getPixel(validX, y0);
+					int colorBottom = image.getPixel(validX, y1);
 
 					finalColor = blendColor(colorTop, colorBottom, topWeight, bottomWeight);
 				} else {
-					finalColor = image.getPixelRGBA(x0valid ? x0 : x1, y0valid ? y0 : y1);
+					finalColor = image.getPixel(x0valid ? x0 : x1, y0valid ? y0 : y1);
 				}
-				scaled.setPixelRGBA(x, y, finalColor);
+				scaled.setPixelABGR(x, y, finalColor);
 			}
 		}
 		return scaled;
 	}
 
+	private static int colorABGR(int a, int b, int g, int r) {
+		return (a << 24) | (b << 16) | (g << 8) | r;
+	}
+
+	private static int alphaABGR(int c) {
+		return (c >> 24) & 0xFF;
+	}
+
+	private static int blueABGR(int c) {
+		return (c >> 16) & 0xFF;
+	}
+
+	private static int greenABGR(int c) {
+		return (c >> 8) & 0xFF;
+	}
+
+	private static int redABGR(int c) {
+		return c & 0xFF;
+	}
+
 	private static int blendColor(int c0, int c1, int c2, int c3, float w0, float w1, float w2, float w3) {
-		return FastColor.ABGR32.color(
-			blendChannel(FastColor.ABGR32.alpha(c0), FastColor.ABGR32.alpha(c1), FastColor.ABGR32.alpha(c2), FastColor.ABGR32.alpha(c3), w0, w1, w2, w3),
-			blendChannel(FastColor.ABGR32.blue(c0), FastColor.ABGR32.blue(c1), FastColor.ABGR32.blue(c2), FastColor.ABGR32.blue(c3), w0, w1, w2, w3),
-			blendChannel(FastColor.ABGR32.green(c0), FastColor.ABGR32.green(c1), FastColor.ABGR32.green(c2), FastColor.ABGR32.green(c3), w0, w1, w2, w3),
-			blendChannel(FastColor.ABGR32.red(c0), FastColor.ABGR32.red(c1), FastColor.ABGR32.red(c2), FastColor.ABGR32.red(c3), w0, w1, w2, w3)
+		return colorABGR(
+			blendChannel(alphaABGR(c0), alphaABGR(c1), alphaABGR(c2), alphaABGR(c3), w0, w1, w2, w3),
+			blendChannel(blueABGR(c0), blueABGR(c1), blueABGR(c2), blueABGR(c3), w0, w1, w2, w3),
+			blendChannel(greenABGR(c0), greenABGR(c1), greenABGR(c2), greenABGR(c3), w0, w1, w2, w3),
+			blendChannel(redABGR(c0), redABGR(c1), redABGR(c2), redABGR(c3), w0, w1, w2, w3)
 		);
 	}
 
@@ -108,11 +127,11 @@ public class ImageManipulationUtil {
 	}
 
 	private static int blendColor(int c0, int c1, float w0, float w1) {
-		return FastColor.ABGR32.color(
-			blendChannel(FastColor.ABGR32.alpha(c0), FastColor.ABGR32.alpha(c1), w0, w1),
-			blendChannel(FastColor.ABGR32.blue(c0), FastColor.ABGR32.blue(c1), w0, w1),
-			blendChannel(FastColor.ABGR32.green(c0), FastColor.ABGR32.green(c1), w0, w1),
-			blendChannel(FastColor.ABGR32.red(c0), FastColor.ABGR32.red(c1), w0, w1)
+		return colorABGR(
+			blendChannel(alphaABGR(c0), alphaABGR(c1), w0, w1),
+			blendChannel(blueABGR(c0), blueABGR(c1), w0, w1),
+			blendChannel(greenABGR(c0), greenABGR(c1), w0, w1),
+			blendChannel(redABGR(c0), redABGR(c1), w0, w1)
 		);
 	}
 

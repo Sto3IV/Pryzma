@@ -1,29 +1,29 @@
 package net.pryzma.shader.fantastic;
 
 import net.pryzma.shader.PryzmaShaders;
-import net.minecraft.client.GraphicsStatus;
+import net.minecraft.client.GraphicsPreset;
 import net.minecraft.client.OptionInstance;
 
 public enum SupportedGraphicsMode {
 	FAST,
 	FANCY;
 
-	public static SupportedGraphicsMode fromVanilla(OptionInstance<GraphicsStatus> status) {
+	public static SupportedGraphicsMode fromVanilla(OptionInstance<GraphicsPreset> status) {
 		return switch (status.get()) {
 			case FAST -> FAST;
 			case FANCY -> FANCY;
-			case FABULOUS -> {
-				PryzmaShaders.logger.warn("Detected Fabulous Graphics being used somehow, changing to Fancy!");
-				status.set(GraphicsStatus.FANCY);
+			case FABULOUS, CUSTOM -> {
+				PryzmaShaders.logger.warn("Detected Fabulous/Custom Graphics being used somehow, changing to Fancy!");
+				status.set(GraphicsPreset.FANCY);
 				yield FANCY;
 			}
 		};
 	}
 
-	public GraphicsStatus toVanilla() {
+	public GraphicsPreset toVanilla() {
 		return switch (this) {
-			case FAST -> GraphicsStatus.FAST;
-			case FANCY -> GraphicsStatus.FANCY;
+			case FAST -> GraphicsPreset.FAST;
+			case FANCY -> GraphicsPreset.FANCY;
 		};
 	}
 }

@@ -1,6 +1,6 @@
 package net.pryzma.shader.vertices;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import net.pryzma.shader.api.v0.ShaderTextVertexSink;
 import net.pryzma.shader.uniforms.CapturedRenderingState;
 import net.pryzma.shader.vertices.views.QuadView;
@@ -16,10 +16,10 @@ public class ShaderTextVertexSinkImpl implements ShaderTextVertexSink {
 	private static final int OFFSET_POSITION = 0;
 	private static final int OFFSET_COLOR = 12;
 	private static final int OFFSET_TEXTURE = 16;
-	private static final int OFFSET_MID_TEXTURE = 38;
+	private static final int OFFSET_MID_TEXTURE = 40;
 	private static final int OFFSET_LIGHT = 24;
 	private static final int OFFSET_NORMAL = 28;
-	private static final int OFFSET_TANGENT = 46;
+	private static final int OFFSET_TANGENT = 48;
 	private final ByteBuffer buffer;
 	private final TextQuadView quad = new TextQuadView();
 	private final Vector3f saveNormal = new Vector3f();

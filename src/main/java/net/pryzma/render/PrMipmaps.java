@@ -42,7 +42,7 @@ public final class PrMipmaps {
         // Red:   bits 0..7
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int col = image.getPixelRGBA(x, y);
+                int col = image.getPixel(x, y);
                 int alpha = (col >> 24) & 0xFF;
                 if (alpha >= 16) {
                     redSum += (col & 0xFF);
@@ -61,10 +61,10 @@ public final class PrMipmaps {
 
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    int col = image.getPixelRGBA(x, y);
+                    int col = image.getPixel(x, y);
                     int alpha = (col >> 24) & 0xFF;
                     if (alpha <= 16) {
-                        image.setPixelRGBA(x, y, (alpha << 24) | colAvg);
+                        image.setPixel(x, y, (alpha << 24) | colAvg);
                     }
                 }
             }

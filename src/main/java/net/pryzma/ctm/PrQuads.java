@@ -3,25 +3,16 @@ package net.pryzma.ctm;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.joml.Vector3f;
-
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockElementFace;
-import net.minecraft.client.renderer.block.model.BlockFaceUV;
-import net.minecraft.client.renderer.block.model.FaceBakery;
+import net.minecraft.client.model.geom.builders.UVPair;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.client.model.IQuadTransformer;
+import net.minecraft.util.ARGB;
+import net.neoforged.neoforge.client.model.quad.MutableQuad;
 
 /** Quad copies with another sprite, full-face quads for overlays, and quad shape tests. */
 public final class PrQuads {
-    private static final int STRIDE = IQuadTransformer.STRIDE;
-    private static final int POS = IQuadTransformer.POSITION;
-    private static final int UV = IQuadTransformer.UV0;
-    private static final int COLOR = IQuadTransformer.COLOR;
-    private static final FaceBakery BAKERY = new FaceBakery();
-
     private static final Map<TextureAtlasSprite, Map<BakedQuad, BakedQuad>> REMAPPED = new ConcurrentHashMap<>();
     private static final Map<TextureAtlasSprite, BakedQuad[]> FULL = new ConcurrentHashMap<>();
 
@@ -35,34 +26,49 @@ public final class PrQuads {
 
     /** {@code quad} with its texture coordinates moved from its own sprite onto {@code sprite}. Cached. */
     public static BakedQuad remap(BakedQuad quad, TextureAtlasSprite sprite) {
-        if (quad.getSprite() == sprite) {
+        if (quad.materialInfo().sprite() == sprite) {
             return quad;
         }
         return REMAPPED.computeIfAbsent(sprite, s -> new ConcurrentHashMap<>())
                 .computeIfAbsent(quad, q -> {
-                    int[] data = q.getVertices().clone();
-                    TextureAtlasSprite from = q.getSprite();
-                    for (int v = 0; v < 4; v++) {
-                        int o = v * STRIDE + UV;
-                        float u = Float.intBitsToFloat(data[o]);
-                        float w = Float.intBitsToFloat(data[o + 1]);
-                        data[o] = Float.floatToRawIntBits(sprite.getU(from.getUOffset(u)));
-                        data[o + 1] = Float.floatToRawIntBits(sprite.getV(from.getVOffset(w)));
-                    }
-                    return new BakedQuad(data, q.getTintIndex(), q.getDirection(), sprite, q.isShade(), q.hasAmbientOcclusion());
+                    MutableQuad mq = new MutableQuad();
+                    mq.setFrom(q);
+                    BakedQuad.MaterialInfo mi = q.materialInfo();
+                    mq.setSpriteAndMoveUv(sprite, mi.layer(), mi.itemRenderType(), mi.itemGlintRenderType(), mi.itemGlintSpecialRenderType());
+                    return mq.toBakedQuad();
                 });
+    }
+
+    public static BakedQuad retexture(BakedQuad quad, TextureAtlasSprite sprite, int tintIndex) {
+        if (quad == null) {
+            return null;
+        }
+        MutableQuad mq = new MutableQuad();
+        mq.setFrom(quad);
+        BakedQuad.MaterialInfo mi = quad.materialInfo();
+        if (sprite != null) {
+            mq.setSpriteAndMoveUv(sprite, mi.layer(), mi.itemRenderType(), mi.itemGlintRenderType(), mi.itemGlintSpecialRenderType());
+        }
+        mq.setTintIndex(tintIndex);
+        return mq.toBakedQuad();
     }
 
     /** A full block face with {@code sprite}, culled like a normal face. Cached per face and sprite. */
     public static BakedQuad fullFace(Direction face, TextureAtlasSprite sprite, int tintIndex) {
-        BakedQuad[] faces = FULL.computeIfAbsent(sprite, s -> new BakedQuad[12]);
-        int slot = face.get3DDataValue() + (tintIndex >= 0 ? 6 : 0);
+        return fullFace(face, sprite, tintIndex, ChunkSectionLayer.SOLID);
+    }
+
+    public static BakedQuad fullFace(Direction face, TextureAtlasSprite sprite, int tintIndex, ChunkSectionLayer layer) {
+        BakedQuad[] faces = FULL.computeIfAbsent(sprite, s -> new BakedQuad[36]);
+        int slot = layer.ordinal() * 12 + face.get3DDataValue() + (tintIndex >= 0 ? 6 : 0);
         BakedQuad quad = faces[slot];
         if (quad == null) {
-            BlockElementFace element = new BlockElementFace(face, tintIndex >= 0 ? tintIndex : -1, "#all",
-                    new BlockFaceUV(new float[] {0.0F, 0.0F, 16.0F, 16.0F}, 0));
-            quad = BAKERY.bakeQuad(new Vector3f(0.0F, 0.0F, 0.0F), new Vector3f(16.0F, 16.0F, 16.0F), element, sprite, face,
-                    BlockModelRotation.X0_Y0, null, true);
+            MutableQuad mq = new MutableQuad();
+            mq.setCubeFace(face, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+            mq.setSprite(sprite, layer, null, null, null);
+            mq.setTintIndex(tintIndex >= 0 ? tintIndex : -1);
+            mq.bakeUvsFromPosition();
+            quad = mq.toBakedQuad();
             faces[slot] = quad;
         }
         return quad;
@@ -73,44 +79,56 @@ public final class PrQuads {
         if (yMax >= 15.99F) {
             return fullFace(face, sprite, tintIndex);
         }
-        BlockElementFace element = new BlockElementFace(face, tintIndex >= 0 ? tintIndex : -1, "#all",
-                new BlockFaceUV(new float[] {0.0F, 16.0F - yMax, 16.0F, 16.0F}, 0));
-        return BAKERY.bakeQuad(new Vector3f(0.0F, 0.0F, 0.0F), new Vector3f(16.0F, yMax, 16.0F), element, sprite, face,
-                BlockModelRotation.X0_Y0, null, true);
+        MutableQuad mq = new MutableQuad();
+        mq.setCubeFace(face, 0.0F, 0.0F, 0.0F, 1.0F, yMax / 16.0F, 1.0F);
+        mq.setSprite(sprite, ChunkSectionLayer.SOLID, null, null, null);
+        mq.setTintIndex(tintIndex >= 0 ? tintIndex : -1);
+        mq.bakeUvsFromPosition();
+        return mq.toBakedQuad();
     }
 
     /** {@code quad} with {@code rgb} multiplied into its vertex colours and no tint index. */
     public static BakedQuad withColor(BakedQuad quad, int rgb) {
-        int[] data = quad.getVertices().clone();
+        MutableQuad mq = new MutableQuad();
+        mq.setFrom(quad);
+        mq.setTintIndex(-1);
         int r = rgb >> 16 & 0xFF;
         int g = rgb >> 8 & 0xFF;
         int b = rgb & 0xFF;
         for (int v = 0; v < 4; v++) {
-            int o = v * STRIDE + COLOR;
-            int abgr = data[o];
-            int nr = (abgr & 0xFF) * r / 255;
-            int ng = (abgr >> 8 & 0xFF) * g / 255;
-            int nb = (abgr >> 16 & 0xFF) * b / 255;
-            data[o] = (abgr & 0xFF000000) | nb << 16 | ng << 8 | nr;
+            int current = quad.bakedColors().color(v);
+            int curA = ARGB.alpha(current);
+            int curR = ARGB.red(current) * r / 255;
+            int curG = ARGB.green(current) * g / 255;
+            int curB = ARGB.blue(current) * b / 255;
+            mq.setColor(v, curR, curG, curB, curA);
         }
-        return new BakedQuad(data, -1, quad.getDirection(), quad.getSprite(), quad.isShade(), quad.hasAmbientOcclusion());
+        return mq.toBakedQuad();
     }
 
     public static float x(BakedQuad q, int v) {
-        return Float.intBitsToFloat(q.getVertices()[v * STRIDE + POS]);
+        return q.position(v).x();
     }
 
     public static float y(BakedQuad q, int v) {
-        return Float.intBitsToFloat(q.getVertices()[v * STRIDE + POS + 1]);
+        return q.position(v).y();
     }
 
     public static float z(BakedQuad q, int v) {
-        return Float.intBitsToFloat(q.getVertices()[v * STRIDE + POS + 2]);
+        return q.position(v).z();
+    }
+
+    public static float u(BakedQuad q, int v) {
+        return UVPair.unpackU(q.packedUV(v));
+    }
+
+    public static float v(BakedQuad q, int v) {
+        return UVPair.unpackV(q.packedUV(v));
     }
 
     /** The quad lies on its block face plane (e.g. y == 1 for UP). */
     public static boolean isFaceQuad(BakedQuad q) {
-        Direction d = q.getDirection();
+        Direction d = q.direction();
         float plane = d.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1.0F : 0.0F;
         for (int v = 0; v < 4; v++) {
             float c = switch (d.getAxis()) {
@@ -134,7 +152,7 @@ public final class PrQuads {
         float maxA = 0.0F;
         float minB = 1.0F;
         float maxB = 0.0F;
-        Direction.Axis axis = q.getDirection().getAxis();
+        Direction.Axis axis = q.direction().getAxis();
         for (int v = 0; v < 4; v++) {
             float a = axis == Direction.Axis.X ? y(q, v) : x(q, v);
             float b = axis == Direction.Axis.Z ? y(q, v) : z(q, v);
@@ -148,6 +166,10 @@ public final class PrQuads {
 
     public static float midX(BakedQuad q) {
         return (x(q, 0) + x(q, 1) + x(q, 2) + x(q, 3)) / 4.0F;
+    }
+
+    public static float midY(BakedQuad q) {
+        return (y(q, 0) + y(q, 1) + y(q, 2) + y(q, 3)) / 4.0F;
     }
 
     public static float midZ(BakedQuad q) {

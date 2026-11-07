@@ -1,171 +1,151 @@
 package net.pryzma.shader.pathways;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.MeshData;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShaderInstance;
-import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.GL20C;
+import org.lwjgl.opengl.GL30C;
+
+import java.nio.FloatBuffer;
 
 /**
- * Renders the sky horizon. Vanilla Minecraft simply uses the "clear color" for its horizon, and then draws a plane
- * above the player. This class extends the sky rendering so that an octagonal prism is drawn around the player instead,
- * allowing shaders to perform more advanced sky rendering.
- * <p>
- * However, the horizon rendering is designed so that when sky shaders are not being used, it looks almost exactly the
- * same as vanilla sky rendering, except a few almost entirely imperceptible differences where the walls
- * of the octagonal prism intersect the top plane.
+ * Renders an octagonal prism around the world for custom horizon rendering.
+ * Adapted for Minecraft 26.3 using direct LWJGL OpenGL geometry buffers.
  */
 public class HorizonRenderer {
-	/**
-	 * The Y coordinate of the top skybox plane. Acts as the upper bound for the horizon prism, since the prism lies
-	 * between the bottom and top skybox planes.
-	 */
 	private static final float TOP = 16.0F;
-
-	/**
-	 * The Y coordinate of the bottom skybox plane. Acts as the lower bound for the horizon prism, since the prism lies
-	 * between the bottom and top skybox planes.
-	 */
 	private static final float BOTTOM = -16.0F;
-
-	/**
-	 * Cosine of 22.5 degrees.
-	 */
 	private static final float COS_22_5 = (float) Math.cos(Math.toRadians(22.5));
-
-	/**
-	 * Sine of 22.5 degrees.
-	 */
 	private static final float SIN_22_5 = (float) Math.sin(Math.toRadians(22.5));
-	private VertexBuffer buffer;
+
+	private int vao = 0;
+	private int vbo = 0;
+	private int vertexCount = 0;
 	private int currentRenderDistance;
 
 	public HorizonRenderer() {
 		currentRenderDistance = Minecraft.getInstance().options.getEffectiveRenderDistance();
-
 		rebuildBuffer();
 	}
 
 	private void rebuildBuffer() {
-		if (this.buffer != null) {
-			this.buffer.close();
-		}
+		destroy();
 
-		BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+		// Calculate total vertices needed
+		// 8 prism quads = 32 vertices
+		// Top plane: (384 * 2 / 64 + 1)^2 * 4 ~= 676 * 4 ~= 2704 vertices
+		// Bottom plane: ~= 2704 vertices
+		// Total buffer size: 8192 vertices * 3 floats = 24576 floats
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(32768);
+		vertexCount = 0;
 
-		// Build the horizon quads into a buffer
 		buildHorizon(currentRenderDistance * 16, buffer);
-		MeshData meshData = buffer.build();
+		buffer.flip();
 
-		this.buffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
-		this.buffer.bind();
-		this.buffer.upload(meshData);
-		Tesselator.getInstance().clear();
-		VertexBuffer.unbind();
+		vao = GL30C.glGenVertexArrays();
+		vbo = GL15C.glGenBuffers();
+
+		GL30C.glBindVertexArray(vao);
+		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
+		GL15C.glBufferData(GL15C.GL_ARRAY_BUFFER, buffer, GL15C.GL_STATIC_DRAW);
+
+		// Attribute 0: vec3 position
+		GL20C.glEnableVertexAttribArray(0);
+		GL20C.glVertexAttribPointer(0, 3, GL11C.GL_FLOAT, false, 3 * Float.BYTES, 0);
+
+		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+		GL30C.glBindVertexArray(0);
 	}
 
-	private void buildQuad(VertexConsumer consumer, float x1, float z1, float x2, float z2) {
-		consumer.addVertex(x1, BOTTOM, z1);
-		consumer.addVertex(x1, TOP, z1);
-		consumer.addVertex(x2, TOP, z2);
-		consumer.addVertex(x2, BOTTOM, z2);
+	private void addVertex(FloatBuffer buffer, float x, float y, float z) {
+		buffer.put(x).put(y).put(z);
+		vertexCount++;
 	}
 
-	private void buildHalf(VertexConsumer consumer, float adjacent, float opposite, boolean invert) {
+	private void buildQuad(FloatBuffer buffer, float x1, float z1, float x2, float z2) {
+		addVertex(buffer, x1, BOTTOM, z1);
+		addVertex(buffer, x1, TOP, z1);
+		addVertex(buffer, x2, TOP, z2);
+		addVertex(buffer, x2, BOTTOM, z2);
+	}
+
+	private void buildHalf(FloatBuffer buffer, float adjacent, float opposite, boolean invert) {
 		if (invert) {
 			adjacent = -adjacent;
 			opposite = -opposite;
 		}
 
-		// NB: Make sure that these vertices are being specified in counterclockwise order!
-		// Otherwise back face culling will remove your quads, and you'll be wondering why there's a hole in your horizon.
-		// Don't poke holes in the horizon. Specify vertices in counterclockwise order.
-
-		// +X,-Z face
-		buildQuad(consumer, adjacent, -opposite, opposite, -adjacent);
-		// +X face
-		buildQuad(consumer, adjacent, opposite, adjacent, -opposite);
-		// +X,+Z face
-		buildQuad(consumer, opposite, adjacent, adjacent, opposite);
-		// +Z face
-		buildQuad(consumer, -opposite, adjacent, opposite, adjacent);
+		buildQuad(buffer, adjacent, -opposite, opposite, -adjacent);
+		buildQuad(buffer, adjacent, opposite, adjacent, -opposite);
+		buildQuad(buffer, opposite, adjacent, adjacent, opposite);
+		buildQuad(buffer, -opposite, adjacent, opposite, adjacent);
 	}
 
-	/**
-	 * @param adjacent the adjacent side length of the a triangle with a hypotenuse extending from the center of the
-	 *                 octagon to a given vertex on the perimeter.
-	 * @param opposite the opposite side length of the a triangle with a hypotenuse extending from the center of the
-	 *                 octagon to a given vertex on the perimeter.
-	 */
-	private void buildOctagonalPrism(VertexConsumer consumer, float adjacent, float opposite) {
-		buildHalf(consumer, adjacent, opposite, false);
-		buildHalf(consumer, adjacent, opposite, true);
+	private void buildOctagonalPrism(FloatBuffer buffer, float adjacent, float opposite) {
+		buildHalf(buffer, adjacent, opposite, false);
+		buildHalf(buffer, adjacent, opposite, true);
 	}
 
-	private void buildRegularOctagonalPrism(VertexConsumer consumer, float radius) {
-		buildOctagonalPrism(consumer, radius * COS_22_5, radius * SIN_22_5);
+	private void buildRegularOctagonalPrism(FloatBuffer buffer, float radius) {
+		buildOctagonalPrism(buffer, radius * COS_22_5, radius * SIN_22_5);
 	}
 
-	private void buildBottomPlane(VertexConsumer consumer, int radius) {
+	private void buildBottomPlane(FloatBuffer buffer, int radius) {
 		for (int x = -radius; x <= radius; x += 64) {
 			for (int z = -radius; z <= radius; z += 64) {
-				consumer.addVertex(x + 64, BOTTOM, z);
-				consumer.addVertex(x, BOTTOM, z);
-				consumer.addVertex(x, BOTTOM, z + 64);
-				consumer.addVertex(x + 64, BOTTOM, z + 64);
+				addVertex(buffer, x + 64, BOTTOM, z);
+				addVertex(buffer, x, BOTTOM, z);
+				addVertex(buffer, x, BOTTOM, z + 64);
+				addVertex(buffer, x + 64, BOTTOM, z + 64);
 			}
 		}
 	}
 
-	private void buildTopPlane(VertexConsumer consumer, int radius) {
-		// You might be tempted to try to combine this with buildBottomPlane to avoid code duplication,
-		// but that won't work since the winding order has to be reversed or else one of the planes will be
-		// discarded by back face culling.
+	private void buildTopPlane(FloatBuffer buffer, int radius) {
 		for (int x = -radius; x <= radius; x += 64) {
 			for (int z = -radius; z <= radius; z += 64) {
-				consumer.addVertex(x + 64, TOP, z);
-				consumer.addVertex(x + 64, TOP, z + 64);
-				consumer.addVertex(x, TOP, z + 64);
-				consumer.addVertex(x, TOP, z);
+				addVertex(buffer, x + 64, TOP, z);
+				addVertex(buffer, x + 64, TOP, z + 64);
+				addVertex(buffer, x, TOP, z + 64);
+				addVertex(buffer, x, TOP, z);
 			}
 		}
 	}
 
-	private void buildHorizon(int radius, VertexConsumer consumer) {
+	private void buildHorizon(int radius, FloatBuffer buffer) {
 		if (radius > 256) {
-			// Prevent the prism from getting too large, this causes issues on some shader packs that modify the vanilla
-			// sky if we don't do this.
 			radius = 256;
 		}
 
-		buildRegularOctagonalPrism(consumer, radius);
-
-		// Replicate the vanilla top plane since we can't assume that it'll be rendered.
-		// TODO: Remove vanilla top plane
-		buildTopPlane(consumer, 384);
-
-		// Always make the bottom plane have a radius of 384, to match the top plane.
-		buildBottomPlane(consumer, 384);
+		buildRegularOctagonalPrism(buffer, radius);
+		buildTopPlane(buffer, 384);
+		buildBottomPlane(buffer, 384);
 	}
 
-	public void renderHorizon(Matrix4fc modelView, Matrix4fc projection, ShaderInstance shader) {
+	public void renderHorizon(Matrix4fc modelView, Matrix4fc projection) {
 		if (currentRenderDistance != Minecraft.getInstance().options.getEffectiveRenderDistance()) {
 			currentRenderDistance = Minecraft.getInstance().options.getEffectiveRenderDistance();
 			rebuildBuffer();
 		}
 
-		buffer.bind();
-		buffer.drawWithShader(new Matrix4f(modelView), new Matrix4f(projection), shader);
-		VertexBuffer.unbind();
+		if (vao != 0 && vertexCount > 0) {
+			GL30C.glBindVertexArray(vao);
+			GL11C.glDrawArrays(GL11C.GL_QUADS, 0, vertexCount);
+			GL30C.glBindVertexArray(0);
+		}
 	}
 
 	public void destroy() {
-		buffer.close();
+		if (vao != 0) {
+			GL30C.glDeleteVertexArrays(vao);
+			vao = 0;
+		}
+		if (vbo != 0) {
+			GL15C.glDeleteBuffers(vbo);
+			vbo = 0;
+		}
+		vertexCount = 0;
 	}
 }

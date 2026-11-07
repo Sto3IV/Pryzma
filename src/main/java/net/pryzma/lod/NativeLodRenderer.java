@@ -13,20 +13,20 @@ import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.GL20C;
+import org.lwjgl.opengl.GL30C;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlTexture;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import net.pryzma.Pryzma;
 
@@ -47,7 +47,7 @@ import net.pryzma.Pryzma;
  * <p>Everything here runs on the render thread.
  */
 public final class NativeLodRenderer {
-    public static final ResourceLocation SHADER = ResourceLocation.fromNamespaceAndPath(Pryzma.MODID, "lod_terrain");
+    public static final Identifier SHADER = Identifier.fromNamespaceAndPath(Pryzma.MODID, "lod_terrain");
     /** Water surfaces sit this far below their block top, as vanilla's still water does (14/16 of the block). */
     public static final float WATER_DROP = 0.125F;
 
@@ -58,9 +58,6 @@ public final class NativeLodRenderer {
     private static final Matrix4f VIEW_PROJECTION = new Matrix4f();
     private static final FrustumIntersection FRUSTUM = new FrustumIntersection();
 
-    @Nullable
-    private static ShaderInstance shader;
-    private static boolean shaderFailed;
     private static ByteBuffer staging;
     private static long gpuBytes;
     private static long quadTotal;
@@ -146,11 +143,15 @@ public final class NativeLodRenderer {
                     vao = GlStateManager._glGenVertexArrays();
                     vbo = GlStateManager._glGenBuffers();
                 }
-                BufferUploader.invalidate();
                 GlStateManager._glBindVertexArray(vao);
                 GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
                 GlStateManager._glBufferData(GL15.GL_ARRAY_BUFFER, data, GL15.GL_STATIC_DRAW);
-                LodVertexFormat.FORMAT.setupBufferState();
+                GL20C.glEnableVertexAttribArray(0);
+                GL30C.glVertexAttribIPointer(0, 4, GL11C.GL_UNSIGNED_SHORT, 16, 0L);
+                GL20C.glEnableVertexAttribArray(1);
+                GL20C.glVertexAttribPointer(1, 4, GL11C.GL_UNSIGNED_BYTE, true, 16, 8L);
+                GL20C.glEnableVertexAttribArray(2);
+                GL30C.glVertexAttribIPointer(2, 4, GL11C.GL_UNSIGNED_BYTE, 16, 12L);
                 GlStateManager._glBindVertexArray(0);
                 GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
             }
@@ -161,7 +162,7 @@ public final class NativeLodRenderer {
                 FarlandsGpuEngine.removeSector(key);
             }
             if (vao >= 0) {
-                GlStateManager._glDeleteVertexArrays(vao);
+                GL30C.glDeleteVertexArrays(vao);
                 vao = -1;
             }
             if (vbo >= 0) {
@@ -185,35 +186,10 @@ public final class NativeLodRenderer {
 
     // ------------------------------------------------------------------ shader
 
-    /**
-     * The LOD's core shader, created from the current resources on its first use: with the option off it is never
-     * compiled, and nothing is added to the game's shader reload. Null when it failed to load (logged once per load).
-     */
-    @Nullable
-    private static ShaderInstance shader() {
-        if (shader == null && !shaderFailed) {
-            try {
-                shader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), SHADER, LodVertexFormat.FORMAT);
-            } catch (IOException | RuntimeException e) {
-                shaderFailed = true;
-                Pryzma.LOGGER.error("Farlands LOD shader {} failed to load; distant terrain is not drawn", SHADER, e);
-            }
-        }
-        return shader;
-    }
-
     /** Resources changed: the shader is built again from them when next used. Render thread. */
     static void onResourcesReloaded() {
-        releaseShader();
+        LodProgram.init();
         FarlandsGpuEngine.onResourcesReloaded();
-    }
-
-    private static void releaseShader() {
-        if (shader != null) {
-            shader.close();
-            shader = null;
-        }
-        shaderFailed = false;
     }
 
     // ------------------------------------------------------------------ meshes
@@ -278,7 +254,7 @@ public final class NativeLodRenderer {
         quadTotal = 0;
         drawnLastFrame = 0;
         staging = null;
-        releaseShader();
+        LodProgram.destroy();
     }
 
     static int meshCount() {
@@ -391,7 +367,7 @@ public final class NativeLodRenderer {
      * Draws the opaque or the water quads of {@code mesh} with the bound program, using the shared quad index buffer.
      * The index buffer binding is VAO state; it is bound with the mesh's VAO.
      */
-    static void draw(SectorMesh mesh, boolean water, RenderSystem.AutoStorageIndexBuffer indices) {
+    static void draw(SectorMesh mesh, boolean water) {
         int first = water ? mesh.opaqueQuads : 0;
         int quads = water ? mesh.waterQuads : mesh.opaqueQuads;
         if (quads == 0) {
@@ -403,9 +379,7 @@ public final class NativeLodRenderer {
         }
         if (mesh.vao >= 0) {
             GlStateManager._glBindVertexArray(mesh.vao);
-            indices.bind((first + quads) * 6);
-            VertexFormat.IndexType type = indices.type();
-            GlStateManager._drawElements(GL11.GL_TRIANGLES, quads * 6, type.asGLType, (long) first * 6 * type.bytes);
+            GlStateManager._drawElements(GL11.GL_TRIANGLES, quads * 6, GL11.GL_UNSIGNED_INT, (long) first * 6 * 4);
         }
     }
 
@@ -426,8 +400,7 @@ public final class NativeLodRenderer {
         if (quadTotal == 0) {
             return false;
         }
-        ShaderInstance program = shader();
-        if (program == null) {
+        if (!LodProgram.isAvailable()) {
             return false;
         }
         if (!LodMath.withDepthRange(projection, LodMath.nearPlane(clipRadius), LodMath.farPlane(lodRadiusBlocks), PROJECTION)
@@ -437,7 +410,7 @@ public final class NativeLodRenderer {
         }
 
         if (FarlandsGpuEngine.isSupported()) {
-            drawnLastFrame = FarlandsGpuEngine.render(program, modelView, PROJECTION, camera, clipRadius,
+            drawnLastFrame = FarlandsGpuEngine.render(modelView, PROJECTION, camera, clipRadius,
                     lodRadiusBlocks, fogStart, fogEnd);
             return drawnLastFrame > 0;
         }
@@ -448,88 +421,65 @@ public final class NativeLodRenderer {
         }
 
         Minecraft mc = Minecraft.getInstance();
-        LightTexture lightTexture = mc.gameRenderer.lightTexture();
-        lightTexture.turnOnLightLayer();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthFunc(GL11.GL_LEQUAL);
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
+        GpuTextureView lightTexView = mc.gameRenderer.levelLightmap();
+        int lightTexId = 0;
+        if (lightTexView != null && lightTexView.texture() instanceof GlTexture glt) {
+            lightTexId = glt.glId();
+        }
+        LodProgram.bindLightmap(lightTexId);
 
-        program.setDefaultUniforms(VertexFormat.Mode.QUADS, modelView, PROJECTION, mc.getWindow());
-        if (program.COLOR_MODULATOR != null) {
-            program.COLOR_MODULATOR.set(1.0F, 1.0F, 1.0F, 1.0F);
-        }
-        if (program.FOG_START != null) {
-            program.FOG_START.set(fogStart);
-        }
-        if (program.FOG_END != null) {
-            program.FOG_END.set(fogEnd);
-        }
-        Uniform fogColor = program.getUniform("FogColor");
-        if (fogColor != null) {
-            float[] fc = RenderSystem.getShaderFogColor();
-            fogColor.set(fc[0], fc[1], fc[2], fc.length > 3 ? fc[3] : 1.0F);
-        }
-        Uniform clip = program.getUniform("ClipRadius");
-        if (clip != null) {
-            clip.set(clipRadius);
-        }
-        Uniform inst = program.getUniform("UseInstancedOffset");
-        if (inst != null) {
-            inst.set(0);
-        }
-        program.apply();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthFunc(GL11C.GL_LEQUAL);
+        GlStateManager._depthMask(true);
+        GlStateManager._enableCull();
+        GL11C.glDisable(GL11C.GL_BLEND);
 
-        Uniform offset = program.CHUNK_OFFSET;
-        Uniform origin = program.getUniform("SectorOrigin");
-        RenderSystem.AutoStorageIndexBuffer indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-        BufferUploader.invalidate();
+        LodProgram.use();
+        LodProgram.setModelView(modelView);
+        LodProgram.setProj(PROJECTION);
+        LodProgram.setColorModulator(1.0F, 1.0F, 1.0F, 1.0F);
+        org.joml.Vector3d fc = net.pryzma.shader.uniforms.CapturedRenderingState.INSTANCE.getFogColor();
+        LodProgram.setFog(fogStart, fogEnd, (float) fc.x, (float) fc.y, (float) fc.z, 1.0F);
+        LodProgram.setClipRadius(clipRadius);
+        LodProgram.setUseInstancedOffset(0);
+
         boolean anyWater = false;
         for (SectorMesh mesh : visible) {
-            setSector(offset, origin, mesh, camera, 0.0F);
-            draw(mesh, false, indices);
+            setSector(mesh, camera, 0.0F);
+            draw(mesh, false);
             anyWater |= mesh.waterQuads > 0;
         }
         if (anyWater) {
             // Water over the opaque LOD, nearest sectors last would be ideal; sectors rarely overlap on screen.
-            RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                    GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            RenderSystem.depthMask(false);
+            GL11C.glEnable(GL11C.GL_BLEND);
+            GlStateManager._blendFuncSeparate(GL11C.GL_SRC_ALPHA, GL11C.GL_ONE_MINUS_SRC_ALPHA, GL11C.GL_ONE, GL11C.GL_ONE_MINUS_SRC_ALPHA);
+            GlStateManager._depthMask(false);
             for (int i = visible.size() - 1; i >= 0; i--) {
                 SectorMesh mesh = visible.get(i);
                 if (mesh.waterQuads > 0) {
-                    setSector(offset, origin, mesh, camera, WATER_DROP);
-                    draw(mesh, true, indices);
+                    setSector(mesh, camera, WATER_DROP);
+                    draw(mesh, true);
                 }
             }
-            RenderSystem.depthMask(true);
-            RenderSystem.disableBlend();
-            RenderSystem.defaultBlendFunc();
+            GlStateManager._depthMask(true);
+            GL11C.glDisable(GL11C.GL_BLEND);
+            GlStateManager._blendFuncSeparate(GL11C.GL_ONE, GL11C.GL_ZERO, GL11C.GL_ONE, GL11C.GL_ZERO);
         }
-        if (offset != null) {
-            offset.set(0.0F, 0.0F, 0.0F);
-        }
-        program.clear();
-        VertexBuffer.unbind();
-        lightTexture.turnOffLightLayer();
+        LodProgram.setChunkOffset(0.0F, 0.0F, 0.0F);
+        LodProgram.unuse();
+        LodProgram.unbindLightmap();
+        GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+        GlStateManager._glBindVertexArray(0);
 
         // Vanilla depths start from scratch: nothing after this point can test against an LOD depth.
-        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+        GlStateManager._clear(GL11C.GL_DEPTH_BUFFER_BIT);
         return true;
     }
 
-    /** Points the vanilla program at {@code mesh}: camera-relative offset (y bias removed) and the sector origin. */
-    private static void setSector(@Nullable Uniform offset, @Nullable Uniform origin, SectorMesh mesh, Vec3 camera, float drop) {
-        if (offset != null) {
-            offset.set((float) (mesh.originX() - camera.x), (float) (-NativeLodMesher.Y_BIAS - drop - camera.y),
-                    (float) (mesh.originZ() - camera.z));
-            offset.upload();
-        }
-        if (origin != null) {
-            origin.set(mesh.blockOriginX(), mesh.blockOriginZ());
-            origin.upload();
-        }
+    /** Points the LOD program at {@code mesh}: camera-relative offset (y bias removed) and the sector origin. */
+    private static void setSector(SectorMesh mesh, Vec3 camera, float drop) {
+        LodProgram.setChunkOffset((float) (mesh.originX() - camera.x), (float) (-NativeLodMesher.Y_BIAS - drop - camera.y),
+                (float) (mesh.originZ() - camera.z));
+        LodProgram.setSectorOrigin(mesh.blockOriginX(), mesh.blockOriginZ());
     }
 }

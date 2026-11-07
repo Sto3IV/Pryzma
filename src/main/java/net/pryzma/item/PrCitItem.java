@@ -1,11 +1,11 @@
 package net.pryzma.item;
 
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /** What a CIT rule reads from an item stack. The game wraps an {@code ItemStack}; tests supply their own. */
 public interface PrCitItem {
-    ResourceLocation item();
+    Identifier item();
 
     /** OptiFine's damage: the damage value, or a potion's legacy value; negative for a potion without one. */
     int damage();
@@ -17,7 +17,7 @@ public interface PrCitItem {
     /** Number of enchantments (stored ones for an enchanted book). */
     int enchantments();
 
-    ResourceLocation enchantment(int index);
+    Identifier enchantment(int index);
 
     int enchantmentLevel(int index);
 

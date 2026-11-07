@@ -10,7 +10,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * A node of a CEM model tree. Vanilla parts are rebuilt as {@code PrCemPart}s that keep their
@@ -20,12 +20,12 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class PrCemPart extends ModelPart {
     private final PrCemGeometry.Quad[] quads;
-    private final ResourceLocation texture;
+    private final Identifier texture;
     /** The {@code .jem} id of a custom part; {@code null} for rebuilt vanilla parts. */
     final String id;
     PrCemModel model;
 
-    PrCemPart(List<Cube> cubes, Map<String, ModelPart> children, PrCemGeometry.Quad[] quads, ResourceLocation texture, String id) {
+    PrCemPart(List<Cube> cubes, Map<String, ModelPart> children, PrCemGeometry.Quad[] quads, Identifier texture, String id) {
         super(cubes, children);
         this.quads = quads;
         this.texture = texture;

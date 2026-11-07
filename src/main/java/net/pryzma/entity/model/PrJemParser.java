@@ -13,7 +13,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.pryzma.core.res.PrPaths;
 
 /**
@@ -46,10 +46,10 @@ public final class PrJemParser {
      * @param location the {@code .jem} location, the base of relative paths
      * @param loader   reads another model file ({@code .jpm}); {@code null} when missing
      */
-    public static PrJem parse(JsonObject jem, ResourceLocation location, Function<ResourceLocation, JsonObject> loader) {
+    public static PrJem parse(JsonObject jem, Identifier location, Function<Identifier, JsonObject> loader) {
         String base = PrPaths.parent(location.getPath());
         String textureText = string(jem, "texture");
-        ResourceLocation texture = textureText == null || textureText.isBlank() ? null : resolve(location, base, textureText, ".png");
+        Identifier texture = textureText == null || textureText.isBlank() ? null : resolve(location, base, textureText, ".png");
         int[] size = intArray(jem.get("textureSize"), 2);
         int width = size == null ? DEFAULT_TEXTURE_WIDTH : size[0];
         int height = size == null ? DEFAULT_TEXTURE_HEIGHT : size[1];
@@ -87,13 +87,13 @@ public final class PrJemParser {
         return new PrJem(location, texture, width, height, shadow, List.copyOf(parts));
     }
 
-    private static PrJem.Part part(JsonObject o, String part, ResourceLocation location, String base,
+    private static PrJem.Part part(JsonObject o, String part, Identifier location, String base,
             int parentWidth, int parentHeight, boolean topLevel) {
         int[] ownSize = intArray(o.get("textureSize"), 2);
         int width = ownSize == null ? parentWidth : ownSize[0];
         int height = ownSize == null ? parentHeight : ownSize[1];
         String textureText = string(o, "texture");
-        ResourceLocation texture = textureText == null || textureText.isBlank() ? null : resolve(location, base, textureText, ".png");
+        Identifier texture = textureText == null || textureText.isBlank() ? null : resolve(location, base, textureText, ".png");
         String invert = string(o, "invertAxis", "").toLowerCase(Locale.ROOT);
         boolean ix = invert.contains("x");
         boolean iy = invert.contains("y");
@@ -196,7 +196,7 @@ public final class PrJemParser {
     }
 
     /** OptiFine {@code CustomEntityModelParser.getResourceLocation}, in the model's namespace. */
-    static ResourceLocation resolve(ResourceLocation model, String base, String path, String extension) {
+    static Identifier resolve(Identifier model, String base, String path, String extension) {
         String p = path.trim();
         if (!p.endsWith(extension)) {
             p += extension;
@@ -209,13 +209,13 @@ public final class PrJemParser {
             } else if (p.startsWith("~/")) {
                 p = PrPaths.OPTIFINE + p.substring(2);
             }
-            ResourceLocation loc = ResourceLocation.tryBuild(model.getNamespace(), p);
+            Identifier loc = Identifier.tryBuild(model.getNamespace(), p);
             if (loc == null) {
                 throw new JsonParseException("Invalid path: " + path);
             }
             return PrPaths.logical(loc);
         }
-        ResourceLocation loc = ResourceLocation.tryParse(p);
+        Identifier loc = Identifier.tryParse(p);
         if (loc == null) {
             throw new JsonParseException("Invalid path: " + path);
         }

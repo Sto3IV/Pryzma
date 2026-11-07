@@ -1,6 +1,7 @@
 package net.pryzma.shader.pbr.texture;
 
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.mixin.texture.SpriteContentsAnimatedTextureAccessor;
 import net.pryzma.shader.mixin.texture.SpriteContentsFrameInfoAccessor;
@@ -15,7 +16,7 @@ import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.SpriteContents.FrameInfo;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,41 +33,71 @@ import java.util.Map;
 public class PBRAtlasTexture extends AbstractTexture implements PBRDumpable {
 	protected final TextureAtlas atlasTexture;
 	protected final PBRType type;
-	protected final ResourceLocation id;
-	protected final Map<ResourceLocation, PBRTextureAtlasSprite> texturesByName = new HashMap<>();
-	protected final List<TextureAtlasSprite.Ticker> animatedTextures = new ArrayList<>();
+	protected final Identifier id;
+	protected final Map<Identifier, PBRTextureAtlasSprite> texturesByName = new HashMap<>();
+	protected final List<SpriteContents.AnimationState> animatedTextures = new ArrayList<>();
 	protected int width;
 	protected int height;
 	protected int mipLevel;
+	protected int glId = -1;
 
 	public PBRAtlasTexture(TextureAtlas atlasTexture, PBRType type) {
 		this.atlasTexture = atlasTexture;
 		this.type = type;
-		id = ResourceLocation.fromNamespaceAndPath(atlasTexture.location().getNamespace(), atlasTexture.location().getPath().replace(".png", "") + type.getSuffix() + ".png");
+		id = Identifier.fromNamespaceAndPath(atlasTexture.location().getNamespace(), atlasTexture.location().getPath().replace(".png", "") + type.getSuffix() + ".png");
 	}
 
-	public static void syncAnimation(SpriteContents.Ticker source, SpriteContents.Ticker target) {
+	public int getId() {
+		if (glId == -1) {
+			glId = GlStateManager._genTexture();
+		}
+		return glId;
+	}
+
+	public void bind() {
+		GlStateManager._bindTexture(getId());
+	}
+
+	private static void prepareImage(int glId, int mipLevel, int width, int height) {
+		GlStateManager._bindTexture(glId);
+		for (int level = 0; level <= mipLevel; ++level) {
+			GlStateManager._texImage2D(
+				org.lwjgl.opengl.GL11C.GL_TEXTURE_2D,
+				level,
+				org.lwjgl.opengl.GL11C.GL_RGBA8,
+				Math.max(1, width >> level),
+				Math.max(1, height >> level),
+				0,
+				org.lwjgl.opengl.GL11C.GL_RGBA,
+				org.lwjgl.opengl.GL11C.GL_UNSIGNED_BYTE,
+				null
+			);
+		}
+	}
+
+	public static void syncAnimation(SpriteContents.AnimationState source, SpriteContents.AnimationState target) {
 		SpriteContentsTickerAccessor sourceAccessor = (SpriteContentsTickerAccessor) source;
-		List<FrameInfo> sourceFrames = ((SpriteContentsAnimatedTextureAccessor) sourceAccessor.getAnimationInfo()).getFrames();
+		List<?> sourceFrames = ((SpriteContentsAnimatedTextureAccessor) sourceAccessor.getAnimationInfo()).getFrames();
 
 		int ticks = 0;
 		for (int f = 0; f < sourceAccessor.getFrame(); f++) {
-			ticks += ((SpriteContentsFrameInfoAccessor) sourceFrames.get(f)).getTime();
+			ticks += ((SpriteContentsFrameInfoAccessor) (Object) sourceFrames.get(f)).getTime();
 		}
 
 		SpriteContentsTickerAccessor targetAccessor = (SpriteContentsTickerAccessor) target;
-		List<FrameInfo> targetFrames = ((SpriteContentsAnimatedTextureAccessor) targetAccessor.getAnimationInfo()).getFrames();
+		List<?> targetFrames = ((SpriteContentsAnimatedTextureAccessor) targetAccessor.getAnimationInfo()).getFrames();
 
 		int cycleTime = 0;
-		int frameCount = targetFrames.size();
-		for (FrameInfo frame : targetFrames) {
+		for (Object frame : targetFrames) {
 			cycleTime += ((SpriteContentsFrameInfoAccessor) frame).getTime();
 		}
-		ticks %= cycleTime;
+		if (cycleTime > 0) {
+			ticks %= cycleTime;
+		}
 
 		int targetFrame = 0;
 		while (true) {
-			int time = ((SpriteContentsFrameInfoAccessor) targetFrames.get(targetFrame)).getTime();
+			int time = ((SpriteContentsFrameInfoAccessor) (Object) targetFrames.get(targetFrame)).getTime();
 			if (ticks >= time) {
 				targetFrame++;
 				ticks -= time;
@@ -79,10 +110,10 @@ public class PBRAtlasTexture extends AbstractTexture implements PBRDumpable {
 		targetAccessor.setSubFrame(ticks + sourceAccessor.getSubFrame());
 	}
 
-	protected static void dumpSpriteNames(Path dir, String fileName, Map<ResourceLocation, PBRTextureAtlasSprite> sprites) {
+	protected static void dumpSpriteNames(Path dir, String fileName, Map<Identifier, PBRTextureAtlasSprite> sprites) {
 		Path path = dir.resolve(fileName + ".txt");
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
-			for (Map.Entry<ResourceLocation, PBRTextureAtlasSprite> entry : sprites.entrySet().stream().sorted(Map.Entry.comparingByKey()).toList()) {
+			for (Map.Entry<Identifier, PBRTextureAtlasSprite> entry : sprites.entrySet().stream().sorted(Map.Entry.comparingByKey()).toList()) {
 				PBRTextureAtlasSprite sprite = entry.getValue();
 				writer.write(String.format(Locale.ROOT, "%s\tx=%d\ty=%d\tw=%d\th=%d%n", entry.getKey(), sprite.getX(), sprite.getY(), sprite.contents().width(), sprite.contents().height()));
 			}
@@ -95,7 +126,7 @@ public class PBRAtlasTexture extends AbstractTexture implements PBRDumpable {
 		return type;
 	}
 
-	public ResourceLocation getAtlasId() {
+	public Identifier getAtlasId() {
 		return id;
 	}
 
@@ -104,19 +135,19 @@ public class PBRAtlasTexture extends AbstractTexture implements PBRDumpable {
 	}
 
 	@Nullable
-	public PBRTextureAtlasSprite getSprite(ResourceLocation id) {
+	public PBRTextureAtlasSprite getSprite(Identifier id) {
 		return texturesByName.get(id);
 	}
 
 	public void clear() {
-		animatedTextures.forEach(TextureAtlasSprite.Ticker::close);
+		animatedTextures.forEach(SpriteContents.AnimationState::close);
 		texturesByName.clear();
 		animatedTextures.clear();
 	}
 
 	public void upload(int atlasWidth, int atlasHeight, int mipLevel) {
 		int glId = getId();
-		TextureUtil.prepareImage(glId, mipLevel, atlasWidth, atlasHeight);
+		prepareImage(glId, mipLevel, atlasWidth, atlasHeight);
 		TextureManipulationUtil.fillWithColor(glId, mipLevel, type.getDefaultValue());
 		width = atlasWidth;
 		height = atlasHeight;
@@ -156,35 +187,32 @@ public class PBRAtlasTexture extends AbstractTexture implements PBRDumpable {
 	}
 
 	protected void uploadSprite(PBRTextureAtlasSprite sprite) {
-		TextureAtlasSprite.Ticker spriteTicker = sprite.createTicker();
-		if (spriteTicker != null) {
-			animatedTextures.add(spriteTicker);
-
-			SpriteContents.Ticker sourceTicker = ((net.pryzma.shader.pbr.SpriteContentsExtension) sprite.getBaseSprite().contents()).getCreatedTicker();
-			SpriteContents.Ticker targetTicker = ((net.pryzma.shader.pbr.SpriteContentsExtension) sprite.contents()).getCreatedTicker();
-			if (sourceTicker != null && targetTicker != null) {
-				syncAnimation(sourceTicker, targetTicker);
-
-				SpriteContentsTickerAccessor tickerAccessor = (SpriteContentsTickerAccessor) targetTicker;
-				SpriteContentsAnimatedTextureAccessor infoAccessor = (SpriteContentsAnimatedTextureAccessor) tickerAccessor.getAnimationInfo();
-
-				infoAccessor.invokeUploadFrame(sprite.getX(), sprite.getY(), ((SpriteContentsFrameInfoAccessor) infoAccessor.getFrames().get(tickerAccessor.getFrame())).getIndex());
-				return;
-			}
+		SpriteContents.AnimationState sourceTicker = ((net.pryzma.shader.pbr.SpriteContentsExtension) sprite.getBaseSprite().contents()).getCreatedTicker();
+		SpriteContents.AnimationState targetTicker = ((net.pryzma.shader.pbr.SpriteContentsExtension) sprite.contents()).getCreatedTicker();
+		if (sourceTicker != null && targetTicker != null) {
+			animatedTextures.add(targetTicker);
+			syncAnimation(sourceTicker, targetTicker);
+			return;
 		}
 
-		sprite.uploadFirstFrame();
+		if (getTexture() != null) {
+			sprite.uploadFirstFrame(getTexture(), 0);
+		}
 	}
 
 	public void cycleAnimationFrames() {
 		bind();
-		for (TextureAtlasSprite.Ticker ticker : animatedTextures) {
-			ticker.tickAndUpload();
+		for (SpriteContents.AnimationState ticker : animatedTextures) {
+			ticker.tick();
 		}
 	}
 
 	@Override
 	public void close() {
+		if (glId != -1) {
+			GlStateManager._deleteTexture(glId);
+			glId = -1;
+		}
 		PBRAtlasHolder pbrHolder = ((TextureAtlasExtension) atlasTexture).getPBRHolder();
 		if (pbrHolder != null) {
 			switch (type) {
@@ -200,18 +228,20 @@ public class PBRAtlasTexture extends AbstractTexture implements PBRDumpable {
 	}
 
 	@Override
-	public void load(ResourceManager manager) {
-	}
-
-	@Override
-	public void dumpContents(ResourceLocation id, Path path) {
+	public void dumpContents(Identifier id, Path path) {
 		String fileName = id.toDebugFileName();
-		TextureUtil.writeAsPNG(path, fileName, getId(), mipLevel, width, height);
+		if (getTexture() != null) {
+			try {
+				TextureUtil.writeAsPNG(path, fileName, getTexture(), mipLevel, null);
+			} catch (Exception e) {
+				PryzmaShaders.logger.warn("Failed to dump PBR texture {}", id, e);
+			}
+		}
 		dumpSpriteNames(path, fileName, texturesByName);
 	}
 
 	@Override
-	public ResourceLocation getDefaultDumpLocation() {
+	public Identifier getDefaultDumpLocation() {
 		return id;
 	}
 }

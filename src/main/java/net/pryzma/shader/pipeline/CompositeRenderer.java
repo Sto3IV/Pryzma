@@ -3,7 +3,7 @@ package net.pryzma.shader.pipeline;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import net.pryzma.shader.features.FeatureFlags;
@@ -23,7 +23,6 @@ import net.pryzma.shader.gl.sampler.SamplerLimits;
 import net.pryzma.shader.gl.shader.ShaderCompileException;
 import net.pryzma.shader.gl.state.FogMode;
 import net.pryzma.shader.gl.texture.TextureAccess;
-import net.pryzma.shader.mixin.GlStateManagerAccessor;
 import net.pryzma.shader.pathways.CenterDepthSampler;
 import net.pryzma.shader.pathways.FullScreenQuadRenderer;
 import net.pryzma.shader.pipeline.transform.PatchShaderType;
@@ -46,6 +45,7 @@ import net.pryzma.shader.uniforms.CommonUniforms;
 import net.pryzma.shader.uniforms.FrameUpdateNotifier;
 import net.pryzma.shader.uniforms.custom.CustomUniforms;
 import net.minecraft.client.Minecraft;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
@@ -252,10 +252,10 @@ public class CompositeRenderer {
 
 	public void renderAll() {
 		GLDebug.pushGroup(20 + compositePass.ordinal(), compositePass.name().toLowerCase(Locale.ROOT));
-		RenderSystem.disableBlend();
+		GL11C.glDisable(GL11C.GL_BLEND);
 
 		FullScreenQuadRenderer.INSTANCE.begin();
-		com.mojang.blaze3d.pipeline.RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
+		com.mojang.blaze3d.pipeline.RenderTarget main = Minecraft.getInstance().gameRenderer.mainRenderTarget();
 
 		for (int i = 0, passesSize = passes.size(); i < passesSize; i++) {
 			Pass renderPass = passes.get(i);
@@ -282,7 +282,7 @@ public class CompositeRenderer {
 			}
 
 			if (!renderPass.mipmappedBuffers.isEmpty()) {
-				RenderSystem.activeTexture(GL15C.GL_TEXTURE0);
+				GlStateManager._activeTexture(GL15C.GL_TEXTURE0);
 
 				for (int index : renderPass.mipmappedBuffers) {
 					setupMipmapping(CompositeRenderer.this.renderTargets.get(index), renderPass.stageReadsFromAlt.contains(index));
@@ -293,14 +293,14 @@ public class CompositeRenderer {
 			float scaledHeight = renderPass.viewHeight * renderPass.viewportScale.scale();
 			int beginWidth = (int) (renderPass.viewWidth * renderPass.viewportScale.viewportX());
 			int beginHeight = (int) (renderPass.viewHeight * renderPass.viewportScale.viewportY());
-			RenderSystem.viewport(beginWidth, beginHeight, (int) scaledWidth, (int) scaledHeight);
+			GL11C.glViewport(beginWidth, beginHeight, (int) scaledWidth, (int) scaledHeight);
 
 			renderPass.framebuffer.bind();
 			renderPass.program.use();
 			if (renderPass.blendModeOverride != null) {
 				renderPass.blendModeOverride.apply();
 			} else {
-				RenderSystem.disableBlend();
+				GL11C.glDisable(GL11C.GL_BLEND);
 			}
 
 			// program is the identifier for composite :shrug:
@@ -316,22 +316,19 @@ public class CompositeRenderer {
 
 		// Make sure to reset the viewport to how it was before... Otherwise weird issues could occur.
 		// Also bind the "main" framebuffer if it isn't already bound.
-		Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
+		GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
+		GL11C.glViewport(0, 0, main.width, main.height);
 		ProgramUniforms.clearActiveUniforms();
 		ProgramSamplers.clearActiveSamplers();
 		GlStateManager._glUseProgram(0);
 
 		// NB: Unbinding all of these textures is necessary for proper shaderpack reloading.
 		for (int i = 0; i < SamplerLimits.get().getMaxTextureUnits(); i++) {
-			// Unbind all textures that we may have used.
-			// NB: This is necessary for shader pack reloading to work propely
-			if (GlStateManagerAccessor.getTEXTURES()[i].binding != 0) {
-				RenderSystem.activeTexture(GL15C.GL_TEXTURE0 + i);
-				RenderSystem.bindTexture(0);
-			}
+			GlStateManager._activeTexture(GL15C.GL_TEXTURE0 + i);
+			GlStateManager._bindTexture(0);
 		}
 
-		RenderSystem.activeTexture(GL15C.GL_TEXTURE0);
+		GlStateManager._activeTexture(GL15C.GL_TEXTURE0);
 
 		GLDebug.popGroup();
 	}

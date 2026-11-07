@@ -24,7 +24,7 @@ import cpw.mods.modlauncher.api.TransformerVoteResult;
 
 /**
  * Forge added {@code ItemTags.create(String, String)}. NeoForge only has
- * {@code create(ResourceLocation)}. Pryzma's DyeColor uses the two-string
+ * {@code create(Identifier)}. Pryzma's DyeColor uses the two-string
  * form via Reflector; without it {@code DyeColor.getTag()} is null and
  * {@code Tags.Items.DYES_*} / TagConventionLogWarning NPE.
  */
@@ -35,12 +35,12 @@ public class ItemTagsCreateTransformer implements ITransformer<ClassNode> {
     static final String DESC = "(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/tags/TagKey;";
     static final String SIGNATURE =
             "(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/tags/TagKey<Lnet/minecraft/world/item/Item;>;";
-    static final String RL_OWNER = "net/minecraft/resources/ResourceLocation";
+    static final String RL_OWNER = "net/minecraft/resources/Identifier";
     static final String RL_FROM = "fromNamespaceAndPath";
     static final String RL_DESC =
-            "(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/resources/ResourceLocation;";
+            "(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/resources/Identifier;";
     static final String CREATE_RL_DESC =
-            "(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/tags/TagKey;";
+            "(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/tags/TagKey;";
 
     /**
      * Adds {@code create(String, String)} if missing. Returns true when a method

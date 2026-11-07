@@ -1,7 +1,7 @@
 package net.pryzma.shader.gl.program;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import net.pryzma.shader.gl.state.ValueUpdateNotifier;

@@ -59,7 +59,7 @@ public final class PrEntityCulling {
         for (int i = 0; i < count; i++) {
             SectionRenderDispatcher.RenderSection section = visibleSections.get(i);
             if (section == null) continue;
-            BlockPos origin = section.getOrigin();
+            BlockPos origin = section.getRenderOrigin();
             int secX = SectionPos.blockToSectionCoord(origin.getX());
             int secY = SectionPos.blockToSectionCoord(origin.getY());
             int secZ = SectionPos.blockToSectionCoord(origin.getZ());
@@ -105,7 +105,7 @@ public final class PrEntityCulling {
         Minecraft mc = Minecraft.getInstance();
 
         // Bypass 1: Camera entity and local player (prevents self-culling in 3rd person)
-        if (entity == mc.cameraEntity || entity == mc.player) {
+        if (entity == mc.getCameraEntity() || entity == mc.player) {
             return true;
         }
 

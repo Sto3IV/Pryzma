@@ -22,7 +22,7 @@ abstract class EntityRenderersMixin {
 
     @Inject(method = "createEntityRenderers", at = @At("RETURN"))
     private static void prCemVariants(EntityRendererProvider.Context context,
-            CallbackInfoReturnable<Map<EntityType<?>, EntityRenderer<?>>> cir) {
+            CallbackInfoReturnable<Map<EntityType<?>, EntityRenderer<?, ?>>> cir) {
         PrCemModels.onEntityRenderersCreated(context, PROVIDERS, cir.getReturnValue());
     }
 }

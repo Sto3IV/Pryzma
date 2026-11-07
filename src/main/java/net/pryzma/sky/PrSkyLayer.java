@@ -7,11 +7,11 @@ import java.util.function.Consumer;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.pryzma.core.match.PrBiomeMatcher;
 import net.pryzma.core.match.PrRangeList;
@@ -26,7 +26,7 @@ import net.pryzma.core.res.PrProperties;
 final class PrSkyLayer {
     private static final float[] DEFAULT_AXIS = {1.0F, 0.0F, 0.0F};
 
-    final ResourceLocation texture;
+    final Identifier texture;
     private final int startFadeIn;
     private final int endFadeIn;
     private final int startFadeOut;
@@ -49,7 +49,7 @@ final class PrSkyLayer {
     private float smoothValue;
     private long smoothMillis;
 
-    private PrSkyLayer(ResourceLocation texture, int[] fade, PrSkyBlend blend, boolean rotate, float speed, float[] axis,
+    private PrSkyLayer(Identifier texture, int[] fade, PrSkyBlend blend, boolean rotate, float speed, float[] axis,
             PrRangeList days, int daysLoop, boolean[] weather, PrBiomeMatcher biomes, PrRangeList heights, float transition) {
         this.texture = texture;
         this.startFadeIn = fade[0];
@@ -72,7 +72,7 @@ final class PrSkyLayer {
 
     static Optional<PrSkyLayer> parse(PrProperties p, int index, Consumer<String> warn) {
         String source = p.get("source", "./sky" + index + ".png");
-        ResourceLocation texture = PrPaths.resolveLocation(PrPaths.withExtension(source, ".png"), p.location());
+        Identifier texture = PrPaths.resolveLocation(PrPaths.withExtension(source, ".png"), p.location());
         if (texture == null) {
             warn.accept("Invalid source '" + source + "' in " + p);
             return Optional.empty();
@@ -268,33 +268,33 @@ final class PrSkyLayer {
             dayStart = (float) ((day * (double) (speed % 1.0F)) % 1.0);
         }
         float angle = (float) Math.toRadians(360.0F * (dayStart + celestialAngle * speed));
-        pose.mulPose(new Quaternionf().rotationAxis(angle, axis[0], axis[1], axis[2]));
+        pose.rotate(new Quaternionf().rotationAxis(angle, axis[0], axis[1], axis[2]));
     }
 
     /** Emits the six cube faces; the texture is a 3x2 grid of faces, OptiFine face order. */
-    static void emitCube(PoseStack pose, BufferBuilder buffer) {
+    static void emitCube(PoseStack pose, VertexConsumer buffer) {
         pose.pushPose();
-        pose.mulPose(new Quaternionf().rotationX((float) Math.toRadians(90.0F)));
-        pose.mulPose(new Quaternionf().rotationZ((float) Math.toRadians(-90.0F)));
+        pose.rotate(new Quaternionf().rotationX((float) Math.toRadians(90.0F)));
+        pose.rotate(new Quaternionf().rotationZ((float) Math.toRadians(-90.0F)));
         emitFace(pose, buffer, 4);
         pose.pushPose();
-        pose.mulPose(new Quaternionf().rotationX((float) Math.toRadians(90.0F)));
+        pose.rotate(new Quaternionf().rotationX((float) Math.toRadians(90.0F)));
         emitFace(pose, buffer, 1);
         pose.popPose();
         pose.pushPose();
-        pose.mulPose(new Quaternionf().rotationX((float) Math.toRadians(-90.0F)));
+        pose.rotate(new Quaternionf().rotationX((float) Math.toRadians(-90.0F)));
         emitFace(pose, buffer, 0);
         pose.popPose();
-        pose.mulPose(new Quaternionf().rotationZ((float) Math.toRadians(90.0F)));
+        pose.rotate(new Quaternionf().rotationZ((float) Math.toRadians(90.0F)));
         emitFace(pose, buffer, 5);
-        pose.mulPose(new Quaternionf().rotationZ((float) Math.toRadians(90.0F)));
+        pose.rotate(new Quaternionf().rotationZ((float) Math.toRadians(90.0F)));
         emitFace(pose, buffer, 2);
-        pose.mulPose(new Quaternionf().rotationZ((float) Math.toRadians(90.0F)));
+        pose.rotate(new Quaternionf().rotationZ((float) Math.toRadians(90.0F)));
         emitFace(pose, buffer, 3);
         pose.popPose();
     }
 
-    private static void emitFace(PoseStack pose, BufferBuilder buffer, int side) {
+    private static void emitFace(PoseStack pose, VertexConsumer buffer, int side) {
         float u = (side % 3) / 3.0F;
         float v = (side / 3) / 2.0F;
         Matrix4f m = pose.last().pose();
@@ -309,3 +309,4 @@ final class PrSkyLayer {
         return texture + " " + startFadeIn + "-" + endFadeIn + " " + startFadeOut + "-" + endFadeOut + " " + blend;
     }
 }
+

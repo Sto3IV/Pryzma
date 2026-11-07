@@ -7,10 +7,10 @@ import com.mojang.blaze3d.platform.VideoMode;
 import com.mojang.blaze3d.platform.Window;
 
 import net.minecraft.client.CloudStatus;
-import net.minecraft.client.GraphicsStatus;
+import net.minecraft.client.GraphicsPreset;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
-import net.minecraft.client.ParticleStatus;
+import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.client.PrioritizeChunkUpdates;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -65,7 +65,7 @@ final class PrSettingsScreen extends PrScreen {
                 int left = width / 2 - 155;
                 addRenderableWidget(new PrButton(215, left, bottomY(), 150,
                         Component.translatable("pr.options.farlandsOptions"),
-                        b -> minecraft.setScreen(new PrSettingsScreen(Page.FARLANDS, this))));
+                        b -> minecraft.gui.setScreen(new PrSettingsScreen(Page.FARLANDS, this))));
                 done(width / 2 + 5, 150);
                 onOptionsChanged();
             }
@@ -283,11 +283,11 @@ final class PrSettingsScreen extends PrScreen {
     }
 
     private void confirmReset() {
-        minecraft.setScreen(new ConfirmScreen(yes -> {
+        minecraft.gui.setScreen(new ConfirmScreen(yes -> {
             if (yes) {
                 resetAll();
             }
-            minecraft.setScreen(this);
+            minecraft.gui.setScreen(this);
         }, Component.literal(I18n.get("pr.message.other.reset")), Component.empty()));
     }
 
@@ -301,7 +301,7 @@ final class PrSettingsScreen extends PrScreen {
         o.framerateLimit().set(260);
         o.enableVsync().set(false);
         o.mipmapLevels().set(4);
-        o.graphicsMode().set(GraphicsStatus.FANCY);
+        o.graphicsPreset().set(GraphicsPreset.FANCY);
         o.ambientOcclusion().set(true);
         o.cloudStatus().set(CloudStatus.FANCY);
         o.fov().set(70);
@@ -324,7 +324,7 @@ final class PrSettingsScreen extends PrScreen {
         Window window = minecraft.getWindow();
         Monitor monitor = window.findBestMonitor();
         int current = monitor == null ? -1
-                : window.getPreferredFullscreenVideoMode().map(monitor::getVideoModeIndex).orElse(-1);
+                : window.getPreferredFullscreenVideoMode().map(monitor::indexOfMode).orElse(-1);
         return new OptionInstance<>("options.fullscreen.resolution", OptionInstance.noTooltip(),
                 (caption, value) -> {
                     if (monitor == null) {
@@ -332,13 +332,13 @@ final class PrSettingsScreen extends PrScreen {
                     }
                     return value == -1
                             ? Options.genericValueLabel(caption, Component.translatable("options.fullscreen.current"))
-                            : Options.genericValueLabel(caption, Component.literal(monitor.getMode(value).toString()));
+                            : Options.genericValueLabel(caption, Component.literal(monitor.mode(value).toString()));
                 },
-                new OptionInstance.IntRange(-1, monitor != null ? monitor.getModeCount() - 1 : -1),
+                new OptionInstance.IntRange(-1, monitor != null ? monitor.videoModes().size() - 1 : -1),
                 current,
                 value -> {
                     if (monitor != null) {
-                        Optional<VideoMode> mode = value == -1 ? Optional.empty() : Optional.of(monitor.getMode(value));
+                        Optional<VideoMode> mode = value == -1 ? Optional.empty() : Optional.of(monitor.mode(value));
                         window.setPreferredFullscreenVideoMode(mode);
                     }
                 });

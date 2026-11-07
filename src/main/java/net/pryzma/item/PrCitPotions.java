@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.pryzma.core.res.PrPaths;
 import net.pryzma.core.res.PrProperties;
 
@@ -126,12 +126,12 @@ final class PrCitPotions {
      * would have been written as, or {@code null} for an image that names no potion. {@code _n}
      * and {@code _s} images are skipped; {@code empty} in {@code normal} is the glass bottle.
      */
-    static PrProperties imageRule(ResourceLocation png, String type) {
+    static PrProperties imageRule(Identifier png, String type) {
         String name = PrPaths.baseName(png.getPath());
         if (name.endsWith("_n") || name.endsWith("_s")) {
             return null;
         }
-        ResourceLocation location = png.withPath(PrPaths.stripExtension(png.getPath(), ".png") + ".properties");
+        Identifier location = png.withPath(PrPaths.stripExtension(png.getPath(), ".png") + ".properties");
         Map<String, String> p = new LinkedHashMap<>();
         p.put("type", "item");
         if (name.equals("empty") && type.equals("normal")) {

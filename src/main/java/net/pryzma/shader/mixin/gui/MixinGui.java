@@ -9,9 +9,8 @@ import net.pryzma.shader.gui.screen.HudHideable;
 import net.pryzma.shader.pipeline.WorldRenderingPipeline;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Final;
@@ -21,19 +20,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public class MixinGui {
 	@Shadow
 	@Final
 	private Minecraft minecraft;
 
-	@Shadow
-	@Final
-	private DebugScreenOverlay debugOverlay;
-
-	@WrapMethod(method = "render")
-	public void pryzma$handleHudHidingScreens(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Operation<Void> original) {
-		Screen screen = this.minecraft.screen;
+	@WrapMethod(method = "extractRenderState")
+	public void pryzma$handleHudHidingScreens(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, Operation<Void> original) {
+		Screen screen = this.minecraft.gui.screen();
 
 		if (screen instanceof HudHideable) {
 			return;
@@ -46,15 +41,11 @@ public class MixinGui {
 		GLDebug.popGroup();
 	}
 
-	@Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
-	private void pryzma$disableVignetteRendering(GuiGraphics pGui0, Entity pEntity1, CallbackInfo ci) {
+	@Inject(method = "extractVignette", at = @At("HEAD"), cancellable = true)
+	private void pryzma$disableVignetteRendering(GuiGraphicsExtractor pGui0, Entity pEntity1, CallbackInfo ci) {
 		WorldRenderingPipeline pipeline = PryzmaShaders.getPipelineManager().getPipelineNullable();
 
 		if (pipeline != null && !pipeline.shouldRenderVignette()) {
-			// we need to set up the GUI render state ourselves if we cancel the vignette
-			RenderSystem.enableDepthTest();
-			RenderSystem.defaultBlendFunc();
-
 			ci.cancel();
 		}
 	}

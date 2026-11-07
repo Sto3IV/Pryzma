@@ -3,14 +3,15 @@ package net.pryzma.shader.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.locale.Language;
 import net.minecraft.sounds.SoundEvents;
 
 /**
@@ -23,8 +24,8 @@ import net.minecraft.sounds.SoundEvents;
  * some code that will be changed.
  */
 public final class GuiUtil {
-	public static final ResourceLocation WIDGETS_TEX = ResourceLocation.fromNamespaceAndPath("pryzma", "textures/gui/widgets.png");
-	public static final ResourceLocation IRIS_WIDGETS_TEX = WIDGETS_TEX;
+	public static final Identifier WIDGETS_TEX = Identifier.fromNamespaceAndPath("pryzma", "textures/gui/widgets.png");
+	public static final Identifier IRIS_WIDGETS_TEX = WIDGETS_TEX;
 	private static final Component ELLIPSIS = Component.literal("...");
 
 	private GuiUtil() {
@@ -39,7 +40,6 @@ public final class GuiUtil {
 	 * used for succeeding draw calls.
 	 */
 	public static void bindWidgetsTexture() {
-		RenderSystem.setShaderTexture(0, WIDGETS_TEX);
 	}
 
 	@Deprecated
@@ -48,9 +48,9 @@ public final class GuiUtil {
 	}
 
 	private static final WidgetSprites BUTTON_SPRITES = new WidgetSprites(
-		ResourceLocation.withDefaultNamespace("widget/button"),
-		ResourceLocation.withDefaultNamespace("widget/button_disabled"),
-		ResourceLocation.withDefaultNamespace("widget/button_highlighted")
+		Identifier.withDefaultNamespace("widget/button"),
+		Identifier.withDefaultNamespace("widget/button_disabled"),
+		Identifier.withDefaultNamespace("widget/button_highlighted")
 	);
 
 	/**
@@ -63,10 +63,8 @@ public final class GuiUtil {
 	 * @param hovered  Whether the button is being hovered over with the mouse
 	 * @param disabled Whether the button should use the "disabled" texture
 	 */
-	public static void drawButton(GuiGraphics guiGraphics, int x, int y, int width, int height, boolean hovered, boolean disabled) {
-		RenderSystem.enableBlend();
-		RenderSystem.enableDepthTest();
-		guiGraphics.blitSprite(BUTTON_SPRITES.get(!disabled, hovered), x, y, width, height);
+	public static void drawButton(GuiGraphicsExtractor guiGraphics, int x, int y, int width, int height, boolean hovered, boolean disabled) {
+		guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, BUTTON_SPRITES.get(!disabled, hovered), x, y, width, height);
 	}
 
 	/**
@@ -78,20 +76,20 @@ public final class GuiUtil {
 	 * @param width  The width of the panel
 	 * @param height The height of the panel
 	 */
-	public static void drawPanel(GuiGraphics guiGraphics, int x, int y, int width, int height) {
+	public static void drawPanel(GuiGraphicsExtractor guiGraphics, int x, int y, int width, int height) {
 		int borderColor = 0xDEDEDEDE;
 		int innerColor = 0xDE000000;
 
 		// Top border section
-		guiGraphics.fill(RenderType.guiOverlay(), x, y, x + width, y + 1, borderColor);
+		guiGraphics.fill(x, y, x + width, y + 1, borderColor);
 		// Bottom border section
-		guiGraphics.fill(RenderType.guiOverlay(), x, (y + height) - 1, x + width, y + height, borderColor);
+		guiGraphics.fill(x, (y + height) - 1, x + width, y + height, borderColor);
 		// Left border section
-		guiGraphics.fill(RenderType.guiOverlay(), x, y + 1, x + 1, (y + height) - 1, borderColor);
+		guiGraphics.fill(x, y + 1, x + 1, (y + height) - 1, borderColor);
 		// Right border section
-		guiGraphics.fill(RenderType.guiOverlay(), (x + width) - 1, y + 1, x + width, (y + height) - 1, borderColor);
+		guiGraphics.fill((x + width) - 1, y + 1, x + width, (y + height) - 1, borderColor);
 		// Inner section
-		guiGraphics.fill(RenderType.guiOverlay(), x + 1, y + 1, (x + width) - 1, (y + height) - 1, innerColor);
+		guiGraphics.fill(x + 1, y + 1, (x + width) - 1, (y + height) - 1, innerColor);
 	}
 
 	/**
@@ -101,9 +99,9 @@ public final class GuiUtil {
 	 * @param x    The x position of the panel
 	 * @param y    The y position of the panel
 	 */
-	public static void drawTextPanel(Font font, GuiGraphics guiGraphics, Component text, int x, int y) {
+	public static void drawTextPanel(Font font, GuiGraphicsExtractor guiGraphics, Component text, int x, int y) {
 		drawPanel(guiGraphics, x, y, font.width(text) + 8, 16);
-		guiGraphics.drawString(font, text, x + 4, y + 4, 0xFFFFFF);
+		guiGraphics.text(font, text, x + 4, y + 4, 0xFFFFFF);
 	}
 
 	/**
@@ -135,7 +133,7 @@ public final class GuiUtil {
 	 * @return the translated text if found, otherwise the default provided
 	 */
 	public static MutableComponent translateOrDefault(MutableComponent defaultText, String translationDesc, Object... format) {
-		if (I18n.exists(translationDesc)) {
+		if (Language.getInstance().has(translationDesc)) {
 			return Component.translatable(translationDesc, format);
 		}
 		return defaultText;
@@ -183,12 +181,9 @@ public final class GuiUtil {
 		 * @param x The x position to draw the icon at (left)
 		 * @param y The y position to draw the icon at (top)
 		 */
-		public void draw(GuiGraphics guiGraphics, int x, int y) {
-			// Sets RenderSystem to use solid white as the tint color for blend mode (1.16), and enables blend mode
-			RenderSystem.enableBlend();
-
+		public void draw(GuiGraphicsExtractor guiGraphics, int x, int y) {
 			// Draw the texture to the screen
-			guiGraphics.blit(IRIS_WIDGETS_TEX, x, y, u, v, width, height, 256, 256);
+			guiGraphics.blit(RenderPipelines.GUI_TEXTURED, IRIS_WIDGETS_TEX, x, y, (float) u, (float) v, width, height, 256, 256);
 		}
 
 		public int getWidth() {
@@ -198,5 +193,14 @@ public final class GuiUtil {
 		public int getHeight() {
 			return height;
 		}
+	}
+	public static boolean hasShiftDown() {
+		return com.mojang.blaze3d.platform.InputConstants.isKeyDown(com.mojang.blaze3d.platform.InputConstants.KEY_LSHIFT)
+			|| com.mojang.blaze3d.platform.InputConstants.isKeyDown(com.mojang.blaze3d.platform.InputConstants.KEY_RSHIFT);
+	}
+
+	public static boolean hasControlDown() {
+		return com.mojang.blaze3d.platform.InputConstants.isKeyDown(com.mojang.blaze3d.platform.InputConstants.KEY_LCONTROL)
+			|| com.mojang.blaze3d.platform.InputConstants.isKeyDown(com.mojang.blaze3d.platform.InputConstants.KEY_RCONTROL);
 	}
 }

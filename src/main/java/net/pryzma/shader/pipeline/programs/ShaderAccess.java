@@ -1,42 +1,34 @@
 package net.pryzma.shader.pipeline.programs;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.pipeline.ShaderRenderingPipeline;
 import net.pryzma.shader.pipeline.WorldRenderingPipeline;
 import net.pryzma.shader.shadows.ShadowRenderingState;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ShaderInstance;
 
 public class ShaderAccess {
-	public static final VertexFormat IE_FORMAT = VertexFormat.builder()
-		.add("Position", VertexFormatElement.POSITION)
-		.add("Color", VertexFormatElement.COLOR)
-		.add("UV0", VertexFormatElement.UV0)
-		.add("Normal", VertexFormatElement.NORMAL)
-		.padding(1)
+	public static final VertexFormat IE_FORMAT = VertexFormat.builder(0)
+		.addAttribute("Position", GpuFormat.RGB32_FLOAT)
+		.addAttribute("Color", GpuFormat.RGBA8_UNORM)
+		.addAttribute("UV0", GpuFormat.RG32_FLOAT)
+		.addAttribute("Normal", GpuFormat.RGB32_FLOAT)
 		.build();
 
 	public static ShaderInstance getParticleTranslucentShader() {
 		WorldRenderingPipeline pipeline = PryzmaShaders.getPipelineManager().getPipelineNullable();
 
 		if (pipeline instanceof ShaderRenderingPipeline) {
-			ShaderInstance override = ((ShaderRenderingPipeline) pipeline).getShaderMap().getShader(ShaderKey.PARTICLES_TRANS);
-
-			if (override != null) {
-				return override;
-			}
+			return ((ShaderRenderingPipeline) pipeline).getShaderMap().getShader(ShaderKey.PARTICLES_TRANS);
 		}
 
-		return GameRenderer.getParticleShader();
+		return null;
 	}
 
 	public static ShaderInstance getIEVBOShader() {
 		WorldRenderingPipeline pipeline = PryzmaShaders.getPipelineManager().getPipelineNullable();
 
 		if (pipeline instanceof ShaderRenderingPipeline) {
-
 			return ((ShaderRenderingPipeline) pipeline).getShaderMap().getShader(ShadowRenderingState.areShadowsCurrentlyBeingRendered() ? ShaderKey.IE_COMPAT_SHADOW : ShaderKey.IE_COMPAT);
 		}
 
@@ -47,11 +39,10 @@ public class ShaderAccess {
 		WorldRenderingPipeline pipeline = PryzmaShaders.getPipelineManager().getPipelineNullable();
 
 		if (pipeline instanceof ShaderRenderingPipeline) {
-
 			return ((ShaderRenderingPipeline) pipeline).getShaderMap().getShader(ShadowRenderingState.areShadowsCurrentlyBeingRendered() ? ShaderKey.MEKANISM_FLAME_SHADOW : ShaderKey.MEKANISM_FLAME);
 		}
 
-		return GameRenderer.getPositionTexColorShader();
+		return null;
 	}
 
 	public static ShaderInstance getMekasuitShader() {
@@ -61,7 +52,7 @@ public class ShaderAccess {
 			return ((ShaderRenderingPipeline) pipeline).getShaderMap().getShader(ShadowRenderingState.areShadowsCurrentlyBeingRendered() ? ShaderKey.SHADOW_ENTITIES_CUTOUT : ShaderKey.ENTITIES_TRANSLUCENT);
 		}
 
-		return GameRenderer.getRendertypeEntityCutoutShader();
+		return null;
 	}
 
 	public static ShaderInstance getSPSShader() {
@@ -71,6 +62,6 @@ public class ShaderAccess {
 			return ((ShaderRenderingPipeline) pipeline).getShaderMap().getShader(ShadowRenderingState.areShadowsCurrentlyBeingRendered() ? ShaderKey.SHADOW_ENTITIES_CUTOUT : ShaderKey.SPS);
 		}
 
-		return GameRenderer.getRendertypeEntityCutoutShader();
+		return null;
 	}
 }

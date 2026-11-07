@@ -1,7 +1,5 @@
 package net.pryzma.shader.pipeline.programs;
 
-import net.minecraft.client.renderer.ShaderInstance;
-
 import java.util.function.Function;
 
 /**

@@ -2,7 +2,7 @@ package net.pryzma.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -16,7 +16,7 @@ public interface PrEntityInfo {
 
     BlockPos spawnPos();
 
-    ResourceLocation spawnBiome();
+    Identifier spawnBiome();
 
     /** The custom name, or {@code null}. */
     String name();
@@ -26,7 +26,7 @@ public interface PrEntityInfo {
     int maxHealth();
 
     /** Villager profession id, or {@code null} when the entity has none. */
-    ResourceLocation profession();
+    Identifier profession();
 
     int professionLevel();
 

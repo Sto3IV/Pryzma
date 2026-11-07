@@ -1,7 +1,7 @@
 package net.pryzma.shader.gl.state;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 
 public class ShaderAttributeInputs {
 	private boolean ie;
@@ -24,27 +24,11 @@ public class ShaderAttributeInputs {
 		this.text = text;
 		this.glint = glint;
 
-		format.getElementAttributeNames().forEach(name -> {
-			if ("Color".equals(name)) {
-				color = true;
-			}
-
-			if ("UV0".equals(name)) {
-				tex = true;
-			}
-
-			if ("UV1".equals(name)) {
-				overlay = true;
-			}
-
-			if ("UV2".equals(name) && !isFullbright) {
-				light = true;
-			}
-
-			if ("Normal".equals(name)) {
-				normal = true;
-			}
-		});
+		this.color = format.contains("Color");
+		this.tex = format.contains("UV0");
+		this.overlay = format.contains("UV1");
+		this.light = format.contains("UV2") && !isFullbright;
+		this.normal = format.contains("Normal");
 	}
 
 	public ShaderAttributeInputs(boolean color, boolean tex, boolean overlay, boolean light, boolean normal) {

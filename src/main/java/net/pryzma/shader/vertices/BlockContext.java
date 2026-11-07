@@ -10,11 +10,45 @@ import net.pryzma.shader.shaderpack.materialmap.WorldRenderingSettings;
 /**
  * The per-block context of the extended terrain format: {@code block.properties} id ({@code mc_Entity}),
  * light emission and section-local position ({@code at_midBlock}). Every path that meshes a chunk block
- * through {@code renderBatched} brackets it with {@link #begin} and {@link BlockSensitiveBufferBuilder#endBlock},
- * so a block replayed out of the vertex order (decorator LOD) carries exactly what its in-order mesh would.
+ * brackets it with context so a block carries its shader material and coordinates.
  */
 public final class BlockContext {
     private BlockContext() {
+    }
+
+    public static final class State {
+        public int block = -1;
+        public byte renderType = -1;
+        public byte emission = 0;
+        public int localX;
+        public int localY;
+        public int localZ;
+        public boolean active = false;
+    }
+
+    private static final ThreadLocal<State> CURRENT = ThreadLocal.withInitial(State::new);
+
+    public static State current() {
+        return CURRENT.get();
+    }
+
+    public static void set(int block, byte renderType, byte emission, int localX, int localY, int localZ) {
+        State s = CURRENT.get();
+        s.block = block;
+        s.renderType = renderType;
+        s.emission = emission;
+        s.localX = localX;
+        s.localY = localY;
+        s.localZ = localZ;
+        s.active = true;
+    }
+
+    public static void clear() {
+        State s = CURRENT.get();
+        s.active = false;
+        s.block = -1;
+        s.renderType = -1;
+        s.emission = 0;
     }
 
     /**

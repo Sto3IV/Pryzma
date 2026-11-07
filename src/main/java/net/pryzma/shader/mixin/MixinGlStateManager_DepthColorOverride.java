@@ -1,6 +1,6 @@
 package net.pryzma.shader.mixin;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.gl.blending.DepthColorStorage;
 import net.pryzma.shader.vertices.ImmediateState;
 import org.lwjgl.opengl.GL43C;

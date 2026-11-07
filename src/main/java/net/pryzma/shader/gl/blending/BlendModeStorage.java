@@ -1,9 +1,10 @@
 package net.pryzma.shader.gl.blending;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.gl.ShaderRenderSystem;
-import net.pryzma.shader.mixin.GlStateManagerAccessor;
-import net.pryzma.shader.mixin.statelisteners.BooleanStateAccessor;
+import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL14C;
+import org.lwjgl.opengl.GL20C;
 
 public class BlendModeStorage {
 	private static boolean originalBlendEnable;
@@ -17,18 +18,21 @@ public class BlendModeStorage {
 	public static void overrideBlend(BlendMode override) {
 		if (!blendLocked) {
 			// Only save the previous state if the blend mode wasn't already locked
-			GlStateManager.BlendState blendState = GlStateManagerAccessor.getBLEND();
-
-			originalBlendEnable = ((BooleanStateAccessor) blendState.mode).isEnabled();
-			originalBlend = new BlendMode(blendState.srcRgb, blendState.dstRgb, blendState.srcAlpha, blendState.dstAlpha);
+			originalBlendEnable = GL11C.glIsEnabled(GL11C.GL_BLEND);
+			originalBlend = new BlendMode(
+				GL11C.glGetInteger(GL14C.GL_BLEND_SRC_RGB),
+				GL11C.glGetInteger(GL14C.GL_BLEND_DST_RGB),
+				GL11C.glGetInteger(GL20C.GL_BLEND_SRC_ALPHA),
+				GL11C.glGetInteger(GL20C.GL_BLEND_DST_ALPHA)
+			);
 		}
 
 		blendLocked = false;
 
 		if (override == null) {
-			GlStateManager._disableBlend();
+			GlStateManager._disableBlend(0);
 		} else {
-			GlStateManager._enableBlend();
+			GlStateManager._enableBlend(0);
 			GlStateManager._blendFuncSeparate(override.srcRgb(), override.dstRgb(), override.srcAlpha(), override.dstAlpha());
 		}
 
@@ -38,10 +42,13 @@ public class BlendModeStorage {
 	public static void overrideBufferBlend(int index, BlendMode override) {
 		if (!blendLocked) {
 			// Only save the previous state if the blend mode wasn't already locked
-			GlStateManager.BlendState blendState = GlStateManagerAccessor.getBLEND();
-
-			originalBlendEnable = ((BooleanStateAccessor) blendState.mode).isEnabled();
-			originalBlend = new BlendMode(blendState.srcRgb, blendState.dstRgb, blendState.srcAlpha, blendState.dstAlpha);
+			originalBlendEnable = GL11C.glIsEnabled(GL11C.GL_BLEND);
+			originalBlend = new BlendMode(
+				GL11C.glGetInteger(GL14C.GL_BLEND_SRC_RGB),
+				GL11C.glGetInteger(GL14C.GL_BLEND_DST_RGB),
+				GL11C.glGetInteger(GL20C.GL_BLEND_SRC_ALPHA),
+				GL11C.glGetInteger(GL20C.GL_BLEND_DST_ALPHA)
+			);
 		}
 
 		if (override == null) {
@@ -70,12 +77,14 @@ public class BlendModeStorage {
 		blendLocked = false;
 
 		if (originalBlendEnable) {
-			GlStateManager._enableBlend();
+			GlStateManager._enableBlend(0);
 		} else {
-			GlStateManager._disableBlend();
+			GlStateManager._disableBlend(0);
 		}
 
-		GlStateManager._blendFuncSeparate(originalBlend.srcRgb(), originalBlend.dstRgb(),
-			originalBlend.srcAlpha(), originalBlend.dstAlpha());
+		if (originalBlend != null) {
+			GlStateManager._blendFuncSeparate(originalBlend.srcRgb(), originalBlend.dstRgb(),
+				originalBlend.srcAlpha(), originalBlend.dstAlpha());
+		}
 	}
 }

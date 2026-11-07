@@ -2,7 +2,7 @@ package net.pryzma.shader.mixin.fabulous;
 
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.util.AmdGpuDetector;
-import net.minecraft.client.GraphicsStatus;
+import net.minecraft.client.GraphicsPreset;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -19,8 +19,6 @@ public class MixinDisableFabulousGraphics {
 		pryzma$disableFabulousGraphics();
 	}
 
-	// This method is called whenever the user tries to change the graphics mode.
-	// We can still revert / intercept the change at the head of the method.
 	@Inject(method = "allChanged", at = @At("HEAD"))
 	private void pryzma$disableFabulousGraphicsOnLevelRendererReload(CallbackInfo ci) {
 		pryzma$disableFabulousGraphics();
@@ -42,9 +40,9 @@ public class MixinDisableFabulousGraphics {
 			return;
 		}
 
-		if (options.graphicsMode().get() == GraphicsStatus.FABULOUS) {
+		if (options.graphicsPreset().get() == GraphicsPreset.FABULOUS) {
 			// Disable fabulous graphics when shaders are enabled or running on AMD Windows.
-			options.graphicsMode().set(GraphicsStatus.FANCY);
+			options.graphicsPreset().set(GraphicsPreset.FANCY);
 		}
 	}
 }

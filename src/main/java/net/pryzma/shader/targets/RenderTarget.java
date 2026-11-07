@@ -1,6 +1,6 @@
 package net.pryzma.shader.targets;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.gl.GLDebug;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import net.pryzma.shader.gl.texture.InternalTextureFormat;
@@ -37,7 +37,7 @@ public class RenderTarget {
 		this.height = builder.height;
 
 		int[] textures = new int[2];
-		GlStateManager._genTextures(textures);
+		GL11C.glGenTextures(textures);
 
 		this.mainTexture = textures[0];
 		this.altTexture = textures[1];
@@ -116,7 +116,7 @@ public class RenderTarget {
 		requireValid();
 		isValid = false;
 
-		GlStateManager._deleteTextures(new int[]{mainTexture, altTexture});
+		GL11C.glDeleteTextures(new int[]{mainTexture, altTexture});
 	}
 
 	private void requireValid() {

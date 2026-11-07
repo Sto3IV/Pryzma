@@ -40,9 +40,9 @@ public class ShadowMatrices {
 		target.last().normal().identity();
 		target.last().pose().identity();
 
-		target.mulPose(Axis.XP.rotationDegrees(90.0F));
-		target.mulPose(Axis.ZP.rotationDegrees(skyAngle * -360.0f));
-		target.mulPose(Axis.XP.rotationDegrees(sunPathRotation));
+		target.rotate(Axis.XP.rotationDegrees(90.0F));
+		target.rotate(Axis.ZP.rotationDegrees(skyAngle * -360.0f));
+		target.rotate(Axis.XP.rotationDegrees(sunPathRotation));
 	}
 
 	public static void snapModelViewToGrid(PoseStack target, float shadowIntervalSize, double cameraX, double cameraY, double cameraZ) {

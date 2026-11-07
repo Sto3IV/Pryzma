@@ -3,6 +3,7 @@ package net.pryzma.shader.targets.backed;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.pryzma.shader.gl.texture.TextureAccess;
 import net.pryzma.shader.gl.texture.TextureType;
+import net.pryzma.shader.pbr.TextureTracker;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 
 import java.util.Objects;
@@ -11,7 +12,8 @@ import java.util.function.IntSupplier;
 
 public class NativeImageBackedNoiseTexture extends DynamicTexture implements TextureAccess {
 	public NativeImageBackedNoiseTexture(int size) {
-		super(create(size));
+		super(() -> "pryzma_noise_texture", create(size));
+		upload();
 	}
 
 	private static NativeImage create(int size) {
@@ -22,19 +24,20 @@ public class NativeImageBackedNoiseTexture extends DynamicTexture implements Tex
 			for (int y = 0; y < size; y++) {
 				int color = random.nextInt() | (255 << 24);
 
-				image.setPixelRGBA(x, y, color);
+				image.setPixel(x, y, color);
 			}
 		}
 
 		return image;
 	}
 
+	public int getId() {
+		return TextureTracker.getTextureId(this);
+	}
+
 	@Override
 	public void upload() {
-		NativeImage image = Objects.requireNonNull(getPixels());
-
-		bind();
-		image.upload(0, 0, 0, 0, 0, image.getWidth(), image.getHeight(), true, false, false, false);
+		super.upload();
 	}
 
 	@Override

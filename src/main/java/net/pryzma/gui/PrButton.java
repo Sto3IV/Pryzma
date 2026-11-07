@@ -1,5 +1,6 @@
 package net.pryzma.gui;
 
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -11,6 +12,12 @@ final class PrButton extends Button implements PrOptionControl {
     PrButton(int id, int x, int y, int width, Component text, OnPress onPress) {
         super(x, y, width, 20, text, onPress, DEFAULT_NARRATION);
         this.id = id;
+    }
+
+    @Override
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        this.extractDefaultSprite(graphics);
+        this.extractDefaultLabel(graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
     }
 
     void setTooltipKey(String key) {

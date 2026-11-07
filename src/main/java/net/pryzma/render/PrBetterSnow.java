@@ -2,18 +2,14 @@ package net.pryzma.render;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockQuadOutput;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.ButtonBlock;
@@ -26,7 +22,7 @@ import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.LeverBlock;
-import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.RedstoneWireBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.SugarCaneBlock;
@@ -38,7 +34,6 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
  * Universal Better Snow engine for Vanilla and modded blocks.
@@ -48,7 +43,7 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 public final class PrBetterSnow {
     private static final ThreadLocal<Boolean> RENDERING_SNOW = ThreadLocal.withInitial(() -> false);
     private static volatile BlockState snowLayerState;
-    private static volatile BakedModel snowModel;
+    private static volatile BlockStateModel snowModel;
 
     private PrBetterSnow() {
     }
@@ -72,76 +67,71 @@ public final class PrBetterSnow {
     }
 
     /**
-     * Checks whether {@code state} can receive an auxiliary snow layer beneath it.
+     * Determines whether {@code state} can receive Better Snow underneath/around it.
      */
     public static boolean isSnowEligible(BlockState state, BlockAndTintGetter level, BlockPos pos) {
-        if (state.isSolidRender(level, pos)) {
+        if (state.isAir()) {
             return false;
         }
-        if (state.is(Blocks.SNOW) || state.is(Blocks.SNOW_BLOCK) || state.is(Blocks.POWDER_SNOW)) {
-            return false;
-        }
-
-        BlockPos belowPos = pos.below();
-        BlockState below = level.getBlockState(belowPos);
-        boolean sturdy = below.isFaceSturdy(level, belowPos, Direction.UP)
-                || below.isSolidRender(level, belowPos)
-                || (below.getBlock() instanceof StairBlock && below.getValue(StairBlock.HALF) == Half.TOP)
-                || (below.getBlock() instanceof SlabBlock && below.getValue(SlabBlock.TYPE) == SlabType.TOP);
-        if (!sturdy) {
+        if (state.is(Blocks.SNOW) || state.is(Blocks.SNOW_BLOCK)) {
             return false;
         }
 
-        if (state.getBlock() instanceof BushBlock) {
+        // Fences, walls, glass panes, iron bars
+        if (state.getBlock() instanceof FenceBlock
+                || state.getBlock() instanceof WallBlock
+                || state.getBlock() instanceof IronBarsBlock
+                || state.getBlock() instanceof CrossCollisionBlock
+                || state.getBlock() instanceof FenceGateBlock) {
+            return true;
+        }
+
+        // Stairs & Slabs (must be bottom half)
+        if (state.getBlock() instanceof StairBlock) {
+            return state.hasProperty(BlockStateProperties.HALF) && state.getValue(BlockStateProperties.HALF) == Half.BOTTOM;
+        }
+        if (state.getBlock() instanceof SlabBlock) {
+            return state.hasProperty(BlockStateProperties.SLAB_TYPE) && state.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.BOTTOM;
+        }
+
+        // Plants, flowers, saplings, crops
+        if (state.getBlock() instanceof BushBlock || state.getBlock() instanceof SugarCaneBlock) {
             if (state.getBlock() instanceof DoublePlantBlock) {
-                return state.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.LOWER;
+                return state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)
+                        && state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
             }
             return true;
         }
-        if (state.getBlock() instanceof CrossCollisionBlock
-                || state.getBlock() instanceof FenceBlock
-                || state.getBlock() instanceof FenceGateBlock
-                || state.getBlock() instanceof WallBlock
-                || state.getBlock() instanceof FlowerPotBlock
-                || state.getBlock() instanceof SugarCaneBlock
-                || state.getBlock() instanceof IronBarsBlock) {
+
+        // Floor attachments: levers, buttons, redstone wire, lanterns, flower pots
+        if (state.getBlock() instanceof RedstoneWireBlock || state.getBlock() instanceof FlowerPotBlock) {
             return true;
         }
-        if (state.getBlock() instanceof StairBlock) {
-            return state.getValue(StairBlock.HALF) == Half.TOP;
+        if (state.getBlock() instanceof LeverBlock || state.getBlock() instanceof ButtonBlock) {
+            return state.hasProperty(BlockStateProperties.ATTACH_FACE) && state.getValue(BlockStateProperties.ATTACH_FACE) == AttachFace.FLOOR;
         }
-        if (state.getBlock() instanceof SlabBlock) {
-            return state.getValue(SlabBlock.TYPE) == SlabType.TOP;
+        if (state.getBlock() instanceof DiodeBlock) {
+            return true;
         }
         if (state.getBlock() instanceof LanternBlock) {
-            return !state.getValue(LanternBlock.HANGING);
-        }
-        if (state.getBlock() instanceof LeverBlock) {
-            return state.getValue(LeverBlock.FACE) == AttachFace.FLOOR;
-        }
-        if (state.getBlock() instanceof ButtonBlock) {
-            return state.getValue(ButtonBlock.FACE) == AttachFace.FLOOR;
-        }
-        if (state.getBlock() instanceof RedStoneWireBlock || state.getBlock() instanceof DiodeBlock) {
-            return true;
+            return state.hasProperty(BlockStateProperties.HANGING) && !state.getValue(BlockStateProperties.HANGING);
         }
 
-        return state.is(BlockTags.FLOWERS)
-                || state.is(BlockTags.SAPLINGS)
-                || state.is(BlockTags.CROPS)
-                || state.is(BlockTags.FENCES)
-                || state.is(BlockTags.WALLS);
+        // Tag fallback
+        return state.is(BlockTags.FLOWERS) || state.is(BlockTags.CROPS) || state.is(BlockTags.SAPLINGS);
     }
 
     /**
-     * Checks if any horizontal neighbor has snow, indicating that snow should connect here.
-     * Aligned with OptiFine: only checks horizontal neighbors at the same Y level for snow blocks/layers.
+     * Checks whether at least one horizontal neighbor is a snow block or layer.
      */
     public static boolean hasSnowNeighbours(BlockAndTintGetter level, BlockPos pos) {
         for (Direction dir : Direction.Plane.HORIZONTAL) {
-            BlockPos nPos = pos.relative(dir);
-            BlockState nState = level.getBlockState(nPos);
-            if (nState.is(Blocks.SNOW) || nState.is(Blocks.SNOW_BLOCK) || nState.is(Blocks.POWDER_SNOW)) {
+            BlockPos neighborPos = pos.relative(dir);
+            BlockState neighbor = level.getBlockState(neighborPos);
+            if (neighbor.is(Blocks.SNOW) || neighbor.is(Blocks.SNOW_BLOCK)) {
+                return true;
+            }
+            if (neighbor.hasProperty(BlockStateProperties.SNOWY) && neighbor.getValue(BlockStateProperties.SNOWY)) {
                 return true;
             }
         }
@@ -158,62 +148,32 @@ public final class PrBetterSnow {
      */
     public static void renderSnow(
             ModelBlockRenderer renderer,
+            BlockQuadOutput output,
+            float x,
+            float y,
+            float z,
             BlockAndTintGetter level,
             BlockState hostState,
             BlockPos pos,
-            PoseStack poseStack,
-            VertexConsumer consumer,
-            RandomSource random,
-            long seed,
-            int packedOverlay,
-            @Nullable RenderType renderType
+            long seed
     ) {
         RENDERING_SNOW.set(true);
         try {
             BlockState snowState = getSnowLayerState();
-            BakedModel model = snowModel;
+            BlockStateModel model = snowModel;
             if (model == null) {
-                model = Minecraft.getInstance().getBlockRenderer().getBlockModel(snowState);
+                model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(snowState);
                 snowModel = model;
             }
             if (model != null) {
-                poseStack.pushPose();
-                Vec3 offset = hostState.getOffset(level, pos);
-                if (offset.x != 0.0 || offset.y != 0.0 || offset.z != 0.0) {
-                    poseStack.translate(-offset.x, -offset.y, -offset.z);
-                }
-                renderer.tesselateBlock(
-                        level,
-                        model,
-                        snowState,
-                        pos,
-                        poseStack,
-                        consumer,
-                        true,
-                        random,
-                        seed,
-                        packedOverlay,
-                        ModelData.EMPTY,
-                        null
-                );
-                poseStack.popPose();
+                Vec3 offset = hostState.getOffset(pos);
+                float ox = (float) (x - offset.x);
+                float oy = (float) (y - offset.y);
+                float oz = (float) (z - offset.z);
+                renderer.tesselateBlock(output, ox, oy, oz, level, pos, snowState, model, seed);
             }
         } finally {
             RENDERING_SNOW.set(false);
         }
-    }
-
-    public static void renderSnow(
-            ModelBlockRenderer renderer,
-            BlockAndTintGetter level,
-            BlockPos pos,
-            PoseStack poseStack,
-            VertexConsumer consumer,
-            RandomSource random,
-            long seed,
-            int packedOverlay,
-            @Nullable RenderType renderType
-    ) {
-        renderSnow(renderer, level, level.getBlockState(pos), pos, poseStack, consumer, random, seed, packedOverlay, renderType);
     }
 }

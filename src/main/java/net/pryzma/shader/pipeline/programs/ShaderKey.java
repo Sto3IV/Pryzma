@@ -1,7 +1,7 @@
 package net.pryzma.shader.pipeline.programs;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import net.pryzma.shader.gl.blending.AlphaTest;
 import net.pryzma.shader.gl.blending.AlphaTests;

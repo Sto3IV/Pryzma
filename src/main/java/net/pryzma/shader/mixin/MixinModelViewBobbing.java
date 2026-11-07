@@ -105,7 +105,7 @@ public abstract class MixinModelViewBobbing {
 		PoseStack stack = new PoseStack();
 		stack.last().pose().set(instance);
 
-		float tickDelta = this.mainCamera.getPartialTickTime();
+		float tickDelta = this.mainCamera.getCameraEntityPartialTicks(deltaTracker);
 
 		this.bobHurt(stack, tickDelta);
 		if (this.minecraft.options.bobView().get()) {
@@ -116,9 +116,9 @@ public abstract class MixinModelViewBobbing {
 
 		float f = deltaTracker.getGameTimeDeltaPartialTick(false);
 		float h = this.minecraft.options.screenEffectScale().get().floatValue();
-		float i = Mth.lerp(f, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity) * h * h;
+		float i = Mth.lerp(f, this.minecraft.player.oPortalEffectIntensity, this.minecraft.player.portalEffectIntensity) * h * h;
 		if (i > 0.0F) {
-			int j = this.minecraft.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
+			int j = this.minecraft.player.hasEffect(MobEffects.NAUSEA) ? 7 : 20;
 			float k = 5.0F / (i * i + 5.0F) - i * 0.04F;
 			k *= k;
 			Vector3f vector3f = new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F);

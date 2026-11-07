@@ -1,7 +1,7 @@
 package net.pryzma.shader.pathways.colorspace;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import net.pryzma.shader.gl.framebuffer.GlFramebuffer;
 import net.pryzma.shader.gl.program.Program;

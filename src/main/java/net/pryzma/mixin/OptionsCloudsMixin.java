@@ -7,14 +7,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.CloudStatus;
-import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.pryzma.PryzmaConfig;
 
 /**
  * Clouds: Below 4 chunks render distance clouds are never drawn.
- * Fast, Fancy and Off override vanilla; Default follows graphics mode (Fast -> Fast, Fancy -> Fancy).
+ * Fast, Fancy and Off override vanilla; Default follows cloudStatus setting.
  */
 @Mixin(Options.class)
 abstract class OptionsCloudsMixin {
@@ -22,9 +21,9 @@ abstract class OptionsCloudsMixin {
     public abstract int getEffectiveRenderDistance();
 
     @Shadow
-    public abstract OptionInstance<GraphicsStatus> graphicsMode();
+    public abstract OptionInstance<CloudStatus> cloudStatus();
 
-    @Inject(method = "getCloudsType", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getCloudStatus", at = @At("HEAD"), cancellable = true)
     private void prCloudsType(CallbackInfoReturnable<CloudStatus> cir) {
         if (this.getEffectiveRenderDistance() < 4) {
             cir.setReturnValue(CloudStatus.OFF);
@@ -34,7 +33,7 @@ abstract class OptionsCloudsMixin {
             case 1 -> CloudStatus.FAST;
             case 2 -> CloudStatus.FANCY;
             case 3 -> CloudStatus.OFF;
-            default -> this.graphicsMode().get() == GraphicsStatus.FAST ? CloudStatus.FAST : CloudStatus.FANCY;
+            default -> this.cloudStatus().get();
         };
         cir.setReturnValue(status);
     }

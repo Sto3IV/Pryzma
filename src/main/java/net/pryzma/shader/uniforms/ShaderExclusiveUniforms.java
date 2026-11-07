@@ -52,7 +52,7 @@ public class ShaderExclusiveUniforms {
 		uniforms.uniform1f(UniformUpdateFrequency.PER_TICK, "cloudTime", CapturedRenderingState.INSTANCE::getCloudTime);
 		uniforms.uniform3d(UniformUpdateFrequency.PER_FRAME, "relativeEyePosition", () -> CameraUniforms.getUnshiftedCameraPosition().sub(getEyePosition()));
 		uniforms.uniform3d(UniformUpdateFrequency.PER_FRAME, "playerLookVector", () -> {
-			if (Minecraft.getInstance().cameraEntity instanceof LivingEntity livingEntity) {
+			if (Minecraft.getInstance().getCameraEntity() instanceof LivingEntity livingEntity) {
 				return JomlConversions.fromVec3(livingEntity.getViewVector(CapturedRenderingState.INSTANCE.getTickDelta()));
 			} else {
 				return ZERO;
@@ -64,7 +64,7 @@ public class ShaderExclusiveUniforms {
 			if (Minecraft.getInstance().level != null) {
 				return StreamSupport.stream(Minecraft.getInstance().level.entitiesForRendering().spliterator(), false).filter(bolt -> bolt instanceof LightningBolt).findAny().map(bolt -> {
 					Vector3d unshiftedCameraPosition = CameraUniforms.getUnshiftedCameraPosition();
-					Vec3 vec3 = bolt.getPosition(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true));
+					Vec3 vec3 = bolt.getPosition(Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true));
 					return new Vector4f((float) (vec3.x - unshiftedCameraPosition.x), (float) (vec3.y - unshiftedCameraPosition.y), (float) (vec3.z - unshiftedCameraPosition.z), 1);
 				}).orElse(zero);
 			} else {
@@ -95,7 +95,7 @@ public class ShaderExclusiveUniforms {
 		HitResult hitResult = Minecraft.getInstance().hitResult;
 		if (Minecraft.getInstance().level != null && ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).shouldRenderBlockOutlineA() && hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
 			BlockPos blockPos4 = ((BlockHitResult) hitResult).getBlockPos();
-			return blockPos4.getCenter().subtract(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition()).toVector3f();
+			return net.minecraft.world.phys.Vec3.atCenterOf(blockPos4).subtract(Minecraft.getInstance().gameRenderer.mainCamera().position()).toVector3f();
 		}
 
 		return new Vector3f(-256.0f);
@@ -187,7 +187,7 @@ public class ShaderExclusiveUniforms {
 			});
 			uniforms.uniform1f(UniformUpdateFrequency.PER_FRAME, "cloudHeight", () -> {
 				if (level != null) {
-					return level.effects().getCloudHeight();
+					return (double) level.dimensionType().attributes().applyModifier(net.minecraft.world.attribute.EnvironmentAttributes.CLOUD_HEIGHT, 192.0F);
 				} else {
 					return 192.0;
 				}

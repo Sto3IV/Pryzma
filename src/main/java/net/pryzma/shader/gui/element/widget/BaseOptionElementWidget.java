@@ -1,6 +1,8 @@
 package net.pryzma.shader.gui.element.widget;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.pryzma.shader.gui.GuiUtil;
 import net.pryzma.shader.gui.NavigationController;
 import net.pryzma.shader.gui.screen.ShaderPackScreen;
@@ -8,7 +10,7 @@ import net.pryzma.shader.shaderpack.option.menu.OptionMenuElement;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -16,7 +18,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Optional;
 
@@ -77,7 +78,7 @@ public abstract class BaseOptionElementWidget<T extends OptionMenuElement> exten
 		this.isLabelTrimmed = font.width(this.label) > this.maxLabelWidth;
 	}
 
-	protected final void renderOptionWithValue(GuiGraphics guiGraphics, boolean hovered, float sliderPosition, int sliderWidth) {
+	protected final void renderOptionWithValue(GuiGraphicsExtractor guiGraphics, boolean hovered, float sliderPosition, int sliderWidth) {
 		GuiUtil.bindWidgetsTexture();
 
 		// Draw button background
@@ -100,24 +101,24 @@ public abstract class BaseOptionElementWidget<T extends OptionMenuElement> exten
 		Font font = Minecraft.getInstance().font;
 
 		// Draw the label
-		guiGraphics.drawString(font, this.trimmedLabel, bounds.position().x() + 6, bounds.position().y() + 7, 0xFFFFFF);
+		guiGraphics.text(font, this.trimmedLabel, bounds.position().x() + 6, bounds.position().y() + 7, 0xFFFFFF);
 		// Draw the value label
-		guiGraphics.drawString(font, this.valueLabel, (bounds.getBoundInDirection(ScreenDirection.RIGHT) - 2) - (int) (this.valueSectionWidth * 0.5) - (int) (font.width(this.valueLabel) * 0.5), bounds.position().y() + 7, 0xFFFFFF);
+		guiGraphics.text(font, this.valueLabel, (bounds.getBoundInDirection(ScreenDirection.RIGHT) - 2) - (int) (this.valueSectionWidth * 0.5) - (int) (font.width(this.valueLabel) * 0.5), bounds.position().y() + 7, 0xFFFFFF);
 	}
 
-	protected final void renderOptionWithValue(GuiGraphics guiGraphics, boolean hovered) {
+	protected final void renderOptionWithValue(GuiGraphicsExtractor guiGraphics, boolean hovered) {
 		this.renderOptionWithValue(guiGraphics, hovered, -1, 0);
 	}
 
-	protected final void tryRenderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovered) {
-		if (Screen.hasShiftDown()) {
+	protected final void tryRenderTooltip(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered) {
+		if (GuiUtil.hasShiftDown()) {
 			renderTooltip(guiGraphics, SET_TO_DEFAULT, mouseX, mouseY, hovered);
 		} else if (this.isLabelTrimmed && !this.screen.isDisplayingComment()) {
 			renderTooltip(guiGraphics, this.unmodifiedLabel, mouseX, mouseY, hovered);
 		}
 	}
 
-	protected final void renderTooltip(GuiGraphics guiGraphics, Component text, int mouseX, int mouseY, boolean hovered) {
+	protected final void renderTooltip(GuiGraphicsExtractor guiGraphics, Component text, int mouseX, int mouseY, boolean hovered) {
 		if (hovered) {
 			ShaderPackScreen.TOP_LAYER_RENDER_QUEUE.add(() -> GuiUtil.drawTextPanel(Minecraft.getInstance().font, guiGraphics, text, mouseX + 2, mouseY - 16));
 		}
@@ -160,19 +161,20 @@ public abstract class BaseOptionElementWidget<T extends OptionMenuElement> exten
 
 	@Override
 	public Optional<Component> getCommentBody() {
-		return Optional.ofNullable(getCommentKey()).map(key -> I18n.exists(key) ? Component.translatable(key) : null);
+		return Optional.ofNullable(getCommentKey()).map(key -> net.minecraft.locale.Language.getInstance().has(key) ? Component.translatable(key) : null);
 	}
 
 	@Override
-	public boolean mouseClicked(double mx, double my, int button) {
-		if (button == GLFW.GLFW_MOUSE_BUTTON_1 || button == GLFW.GLFW_MOUSE_BUTTON_2) {
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		int button = event.button();
+		if (button == InputConstants.MOUSE_BUTTON_LEFT || button == InputConstants.MOUSE_BUTTON_RIGHT) {
 			boolean refresh = false;
 
-			if (Screen.hasShiftDown()) {
+			if (GuiUtil.hasShiftDown()) {
 				refresh = applyOriginalValue();
 			}
 			if (!refresh) {
-				if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+				if (button == InputConstants.MOUSE_BUTTON_LEFT) {
 					refresh = applyNextValue();
 				} else {
 					refresh = applyPreviousValue();
@@ -187,15 +189,16 @@ public abstract class BaseOptionElementWidget<T extends OptionMenuElement> exten
 
 			return true;
 		}
-		return super.mouseClicked(mx, my, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean keyPressed(int keycode, int scancode, int modifiers) {
+	public boolean keyPressed(KeyEvent event) {
+		int keycode = event.key();
 		if (keycode == InputConstants.KEY_RETURN) {
-			boolean refresh = Screen.hasControlDown()
+			boolean refresh = GuiUtil.hasControlDown()
 				? applyOriginalValue()
-				: (Screen.hasShiftDown() ? applyPreviousValue() : applyNextValue());
+				: (GuiUtil.hasShiftDown() ? applyPreviousValue() : applyNextValue());
 
 			if (refresh) {
 				this.navigation.refresh();

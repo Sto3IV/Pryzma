@@ -9,26 +9,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BushBlock;
-import net.minecraft.world.level.block.DirtPathBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.NyliumBlock;
-import net.minecraft.world.level.block.SnowyDirtBlock;
-import net.minecraft.world.level.block.SpreadingSnowyDirtBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import net.pryzma.PryzmaConfig;
 import net.pryzma.ctm.PrQuads;
 
@@ -89,10 +85,7 @@ public final class PrBetterGrass {
         if (block instanceof BushBlock || block instanceof DoublePlantBlock) {
             return false;
         }
-        if (block instanceof SpreadingSnowyDirtBlock
-                || block instanceof SnowyDirtBlock
-                || block instanceof NyliumBlock
-                || block instanceof DirtPathBlock) {
+        if (block == Blocks.DIRT_PATH || block instanceof NyliumBlock) {
             return true;
         }
         if (state.hasProperty(BlockStateProperties.SNOWY)) {
@@ -123,11 +116,18 @@ public final class PrBetterGrass {
     private static TextureAtlasSprite getSnowSprite() {
         TextureAtlasSprite s = snowSprite;
         if (s == null) {
-            BakedModel snowModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(Blocks.SNOW.defaultBlockState());
-            List<BakedQuad> quads = snowModel.getQuads(Blocks.SNOW.defaultBlockState(), Direction.UP, RandomSource.create(), ModelData.EMPTY, null);
-            if (!quads.isEmpty()) {
-                s = quads.get(0).getSprite();
-                snowSprite = s;
+            try {
+                BlockStateModel snowModel = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(Blocks.SNOW.defaultBlockState());
+                List<BlockStateModelPart> parts = new ArrayList<>();
+                snowModel.collectParts(RandomSource.create(), parts);
+                if (!parts.isEmpty()) {
+                    List<BakedQuad> quads = parts.get(0).getQuads(Direction.UP);
+                    if (!quads.isEmpty()) {
+                        s = quads.get(0).materialInfo().sprite();
+                        snowSprite = s;
+                    }
+                }
+            } catch (Throwable ignored) {
             }
         }
         return s;
@@ -138,13 +138,10 @@ public final class PrBetterGrass {
      */
     @Nullable
     public static List<BakedQuad> getFaceQuads(
-            BakedModel model,
-            BlockState state,
-            Direction facing,
-            RandomSource random,
-            ModelData modelData,
-            @Nullable RenderType renderType
+            BlockStateModelPart part,
+            Direction facing
     ) {
+        BlockState state = CURRENT_STATE.get();
         if (state == null || facing == null || !facing.getAxis().isHorizontal() || !isGrassLike(state)) {
             return null;
         }
@@ -160,7 +157,7 @@ public final class PrBetterGrass {
         if (PryzmaConfig.isBetterGrassFancy()) {
             BlockPos adjPos = pos.relative(facing);
             BlockState adjState = level.getBlockState(adjPos);
-            if (adjState.isSolidRender(level, adjPos)) {
+            if (adjState.isSolidRender()) {
                 return null;
             }
 
@@ -169,64 +166,45 @@ public final class PrBetterGrass {
             if (snowy) {
                 boolean neighborHasSnow = adjState.is(Blocks.SNOW)
                         || adjState.is(Blocks.SNOW_BLOCK)
-                        || (PryzmaConfig.prBetterSnow && PrBetterSnow.shouldRender(level, adjState, adjPos))
-                        || belowState.is(Blocks.SNOW)
-                        || belowState.is(Blocks.SNOW_BLOCK)
-                        || (belowState.hasProperty(BlockStateProperties.SNOWY) && belowState.getValue(BlockStateProperties.SNOWY))
-                        || (PryzmaConfig.prBetterSnow && PrBetterSnow.shouldRender(level, belowState, belowPos));
-                if (!neighborHasSnow) {
+                        || (PryzmaConfig.prBetterSnow && PrBetterSnow.shouldRender(level, adjState, adjPos));
+                if (!neighborHasSnow && !belowState.is(Blocks.SNOW) && !belowState.is(Blocks.SNOW_BLOCK)) {
                     return null;
                 }
             } else {
-                boolean matches = belowState.getBlock() == state.getBlock() || (isGrassLike(belowState) && isGrassLike(state));
-                if (!matches) {
+                if (adjState.getBlock() != state.getBlock() && belowState.getBlock() != state.getBlock()) {
                     return null;
                 }
             }
         }
 
         CacheKey key = new CacheKey(state, facing, snowy);
-        List<BakedQuad> cached = CACHE.computeIfAbsent(key, k -> bakeQuads(model, state, facing, random, modelData, renderType, snowy));
-        return cached.isEmpty() ? null : cached;
-    }
-
-    private static List<BakedQuad> bakeQuads(
-            BakedModel model,
-            BlockState state,
-            Direction facing,
-            RandomSource random,
-            ModelData modelData,
-            @Nullable RenderType renderType,
-            boolean snowy
-    ) {
-        if (snowy) {
-            TextureAtlasSprite snow = getSnowSprite();
-            if (snow != null) {
-                return List.of(PrQuads.fullFace(facing, snow, -1));
-            }
-            return Collections.emptyList();
+        List<BakedQuad> cached = CACHE.get(key);
+        if (cached != null) {
+            return cached;
         }
 
-        List<BakedQuad> upQuads = model.getQuads(state, Direction.UP, random, modelData, renderType);
-        if (upQuads.isEmpty()) {
-            upQuads = model.getQuads(state, null, random, modelData, renderType);
+        List<BakedQuad> topQuads = snowy ? Collections.emptyList() : part.getQuads(Direction.UP);
+        TextureAtlasSprite topSprite = topQuads.isEmpty() ? (snowy ? getSnowSprite() : null) : topQuads.get(0).materialInfo().sprite();
+        if (topSprite == null && snowy) {
+            topSprite = getSnowSprite();
         }
-        if (upQuads.isEmpty()) {
-            return Collections.emptyList();
+        if (topSprite == null) {
+            return null;
         }
 
-        float yMax = (state.getBlock() instanceof DirtPathBlock) ? 15.0F : 16.0F;
-        List<BakedQuad> sideQuads = new ArrayList<>();
-        for (BakedQuad uq : upQuads) {
-            if (uq.getDirection() == Direction.UP || uq.getDirection() == null) {
-                sideQuads.add(PrQuads.faceQuad(facing, uq.getSprite(), uq.getTintIndex(), yMax));
-            }
-        }
+        int tintIndex = snowy ? -1 : (topQuads.isEmpty() ? -1 : topQuads.get(0).materialInfo().tintIndex());
+        List<BakedQuad> sideQuads = part.getQuads(facing);
         if (sideQuads.isEmpty()) {
-            BakedQuad uq = upQuads.get(0);
-            sideQuads.add(PrQuads.faceQuad(facing, uq.getSprite(), uq.getTintIndex(), yMax));
+            return null;
         }
 
-        return Collections.unmodifiableList(sideQuads);
+        List<BakedQuad> result = new ArrayList<>(sideQuads.size());
+        for (BakedQuad side : sideQuads) {
+            BakedQuad replaced = PrQuads.retexture(side, topSprite, tintIndex);
+            result.add(replaced);
+        }
+
+        CACHE.put(key, result);
+        return result;
     }
 }

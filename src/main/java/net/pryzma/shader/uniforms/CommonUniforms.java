@@ -1,6 +1,6 @@
 package net.pryzma.shader.uniforms;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.pryzma.lod.LodShaderSupport;
 import net.pryzma.shader.gl.state.FogMode;
@@ -10,7 +10,6 @@ import net.pryzma.shader.gl.uniform.UniformHolder;
 import net.pryzma.shader.helpers.JomlConversions;
 import net.pryzma.shader.layer.GbufferPrograms;
 import net.pryzma.shader.mixin.GlStateManagerAccessor;
-import net.pryzma.shader.mixin.statelisteners.BooleanStateAccessor;
 import net.pryzma.shader.mixin.texture.TextureAtlasAccessor;
 import net.pryzma.shader.mixinterface.LocalPlayerInterface;
 import net.pryzma.shader.pbr.TextureInfoCache;
@@ -75,7 +74,7 @@ public final class CommonUniforms {
 		// the shader will always be setup (and therefore uniforms will be re-uploaded)
 		// after the texture is changed and before rendering starts.
 		uniforms.uniform2i("atlasSize", () -> {
-			int glId = RenderSystem.getShaderTexture(0);
+			int glId = net.pryzma.shader.mixin.GlStateManagerAccessor.getBoundTexture(0);
 
 			AbstractTexture texture = TextureTracker.INSTANCE.getTexture(glId);
 			if (texture instanceof TextureAtlas atlas) {
@@ -88,22 +87,14 @@ public final class CommonUniforms {
 		});
 
 		uniforms.uniform2i("gtextureSize", () -> {
-			int glId = GlStateManagerAccessor.getTEXTURES()[0].binding;
+			int glId = GlStateManagerAccessor.getBoundTexture(0);
 
 			TextureInfo info = TextureInfoCache.INSTANCE.getInfo(glId);
 			return new Vector2i(info.getWidth(), info.getHeight());
 
 		}, StateUpdateNotifiers.bindTextureNotifier);
 
-		uniforms.uniform4i("blendFunc", () -> {
-			GlStateManager.BlendState blend = GlStateManagerAccessor.getBLEND();
-
-			if (((BooleanStateAccessor) blend.mode).isEnabled()) {
-				return new Vector4i(blend.srcRgb, blend.dstRgb, blend.srcAlpha, blend.dstAlpha);
-			} else {
-				return ZERO_VECTOR_4i;
-			}
-		}, StateUpdateNotifiers.blendFuncNotifier);
+		uniforms.uniform4i("blendFunc", GlStateManagerAccessor::getBlendFunc, StateUpdateNotifiers.blendFuncNotifier);
 
 		uniforms.uniform1i("renderStage", () -> GbufferPrograms.getCurrentPhase().ordinal(), StateUpdateNotifiers.phaseChangeNotifier);
 	}
@@ -133,7 +124,7 @@ public final class CommonUniforms {
 		SmoothedVec2f eyeBrightnessSmooth = new SmoothedVec2f(directives.getEyeBrightnessHalfLife(), directives.getEyeBrightnessHalfLife(), CommonUniforms::getEyeBrightness, updateNotifier);
 
 		uniforms
-			.uniform1b(PER_FRAME, "hideGUI", () -> client.options.hideGui)
+			.uniform1b(PER_FRAME, "hideGUI", () -> client.gui.hud.isHidden())
 			.uniform1b(PER_FRAME, "isRightHanded", () -> client.options.mainHand().get() == HumanoidArm.RIGHT)
 			.uniform1i(PER_FRAME, "isEyeInWater", CommonUniforms::isEyeInWater)
 			.uniform1f(PER_FRAME, "blindness", CommonUniforms::getBlindness)
@@ -225,12 +216,19 @@ public final class CommonUniforms {
 	}
 
 	private static Vector3d getSkyColor() {
-		if (client.level == null || client.cameraEntity == null) {
+		if (client.level == null || client.getCameraEntity() == null) {
 			return ZERO_VECTOR_3d;
 		}
 
-		return JomlConversions.fromVec3(client.level.getSkyColor(client.cameraEntity.position(),
-			CapturedRenderingState.INSTANCE.getTickDelta()));
+		var probe = client.gameRenderer.mainCamera().attributeProbe();
+		if (probe != null) {
+			org.joml.Vector3fc color = probe.getValue(net.minecraft.world.attribute.EnvironmentAttributes.SKY_COLOR, CapturedRenderingState.INSTANCE.getTickDelta());
+			if (color != null) {
+				return new Vector3d(color.x(), color.y(), color.z());
+			}
+		}
+
+		return ZERO_VECTOR_3d;
 	}
 
 	static float getBlindness() {
@@ -268,21 +266,21 @@ public final class CommonUniforms {
 	}
 
 	private static float getPlayerMood() {
-		if (!(client.cameraEntity instanceof LocalPlayer)) {
+		if (!(client.getCameraEntity() instanceof LocalPlayer)) {
 			return 0.0F;
 		}
 
 		// This should always be 0 to 1 anyways but just making sure
-		return Math.clamp(0.0F, 1.0F, ((LocalPlayer) client.cameraEntity).getCurrentMood());
+		return Math.clamp(0.0F, 1.0F, ((LocalPlayer) client.getCameraEntity()).getCurrentMood());
 	}
 
 	private static float getConstantMood() {
-		if (!(client.cameraEntity instanceof LocalPlayer)) {
+		if (!(client.getCameraEntity() instanceof LocalPlayer)) {
 			return 0.0F;
 		}
 
 		// This should always be 0 to 1 anyways but just making sure
-		return Math.clamp(0.0F, 1.0F, ((LocalPlayerInterface) client.cameraEntity).getCurrentConstantMood());
+		return Math.clamp(0.0F, 1.0F, ((LocalPlayerInterface) client.getCameraEntity()).getCurrentConstantMood());
 	}
 
 	static float getRainStrength() {
@@ -296,12 +294,12 @@ public final class CommonUniforms {
 	}
 
 	private static Vector2i getEyeBrightness() {
-		if (client.cameraEntity == null || client.level == null) {
+		if (client.getCameraEntity() == null || client.level == null) {
 			return ZERO_VECTOR_2i;
 		}
 
-		Vec3 feet = client.cameraEntity.position();
-		Vec3 eyes = new Vec3(feet.x, client.cameraEntity.getEyeY(), feet.z);
+		Vec3 feet = client.getCameraEntity().position();
+		Vec3 eyes = new Vec3(feet.x, client.getCameraEntity().getEyeY(), feet.z);
 		BlockPos eyeBlockPos = BlockPos.containing(eyes);
 
 		int blockLight = client.level.getBrightness(LightLayer.BLOCK, eyeBlockPos);
@@ -324,7 +322,7 @@ public final class CommonUniforms {
 				//
 				// See: https://github.com/apace100/apoli/blob/320b0ef547fbbf703de7154f60909d30366f6500/src/main/java/io/github/apace100/apoli/mixin/GameRendererMixin.java#L153
 				float nightVisionStrength =
-					GameRenderer.getNightVisionScale(livingEntity, CapturedRenderingState.INSTANCE.getTickDelta());
+					GameRenderer.nightVisionScale(livingEntity, CapturedRenderingState.INSTANCE.getTickDelta());
 
 				if (nightVisionStrength > 0) {
 					// Just protecting against potential weird mod behavior
@@ -360,7 +358,7 @@ public final class CommonUniforms {
 		// I'm not sure what the best way to deal with this is, but the current approach seems to be an acceptable one -
 		// after all, disabling the overlay results in the intended effect of it not really looking like you're
 		// underwater on most shaderpacks. For now, I will leave this as-is, but it is something to keep in mind.
-		FogType submersionType = client.gameRenderer.getMainCamera().getFluidInCamera();
+		FogType submersionType = client.gameRenderer.mainCamera().getFluidInCamera();
 
 		if (submersionType == FogType.WATER) {
 			return 1;

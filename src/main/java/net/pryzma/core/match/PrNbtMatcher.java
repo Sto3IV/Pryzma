@@ -137,7 +137,7 @@ public final class PrNbtMatcher {
         String name = path[level];
         if (name.equals("*")) {
             if (tag instanceof CompoundTag compound) {
-                for (String key : compound.getAllKeys()) {
+                for (String key : compound.keySet()) {
                     if (matchesTag(compound.get(key), level + 1)) {
                         return true;
                     }
@@ -212,7 +212,7 @@ public final class PrNbtMatcher {
     /** The comparison text of a tag: numbers as written, strings unquoted, JSON text flattened. */
     static String text(Tag tag, boolean hexColor) {
         if (tag instanceof StringTag string) {
-            String s = string.getAsString();
+            String s = string.value();
             if ((s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[{") && s.endsWith("}]"))) {
                 return mergedJsonText(s);
             }
@@ -222,44 +222,44 @@ public final class PrNbtMatcher {
             return s;
         }
         if (tag instanceof IntTag i) {
-            return hexColor ? "#" + String.format("%06x", i.getAsInt()) : Integer.toString(i.getAsInt());
+            return hexColor ? "#" + String.format("%06x", i.intValue()) : Integer.toString(i.intValue());
         }
         if (tag instanceof ByteTag b) {
-            return Byte.toString(b.getAsByte());
+            return Byte.toString(b.byteValue());
         }
         if (tag instanceof ShortTag s) {
-            return Short.toString(s.getAsShort());
+            return Short.toString(s.shortValue());
         }
         if (tag instanceof LongTag l) {
-            return Long.toString(l.getAsLong());
+            return Long.toString(l.longValue());
         }
         if (tag instanceof FloatTag f) {
-            return Float.toString(f.getAsFloat());
+            return Float.toString(f.floatValue());
         }
         if (tag instanceof DoubleTag d) {
-            return Double.toString(d.getAsDouble());
+            return Double.toString(d.doubleValue());
         }
         return tag.toString();
     }
 
     private static int intValue(Tag tag, int def) {
         if (tag instanceof IntTag i) {
-            return i.getAsInt();
+            return i.intValue();
         }
         if (tag instanceof ByteTag b) {
-            return b.getAsByte();
+            return b.byteValue();
         }
         if (tag instanceof ShortTag s) {
-            return s.getAsShort();
+            return s.shortValue();
         }
         if (tag instanceof LongTag l) {
-            return (int) l.getAsLong();
+            return (int) l.longValue();
         }
         if (tag instanceof FloatTag f) {
-            return (int) f.getAsFloat();
+            return (int) f.floatValue();
         }
         if (tag instanceof DoubleTag d) {
-            return (int) d.getAsDouble();
+            return (int) d.doubleValue();
         }
         return def;
     }

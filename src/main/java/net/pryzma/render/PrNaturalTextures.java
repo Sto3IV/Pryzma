@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.WallBlock;
@@ -117,10 +117,10 @@ public final class PrNaturalTextures {
     public static void reload(@Nullable ResourceManager manager) {
         Map<String, PrNaturalProperties> loaded = null;
         if (manager != null) {
-            ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("minecraft", "optifine/natural.properties");
+            Identifier loc = Identifier.fromNamespaceAndPath("minecraft", "optifine/natural.properties");
             Optional<Resource> res = manager.getResource(loc);
             if (res.isEmpty()) {
-                loc = ResourceLocation.fromNamespaceAndPath("minecraft", "mcpatcher/natural.properties");
+                loc = Identifier.fromNamespaceAndPath("minecraft", "mcpatcher/natural.properties");
                 res = manager.getResource(loc);
             }
             if (res.isPresent()) {
@@ -188,7 +188,7 @@ public final class PrNaturalTextures {
         if (cached != null) {
             return cached == EMPTY ? null : cached;
         }
-        ResourceLocation name = sprite.contents().name();
+        Identifier name = sprite.contents().name();
         String fullPath = name.toString();
         String path = name.getPath();
 
@@ -227,7 +227,7 @@ public final class PrNaturalTextures {
     }
 
     public static BakedQuad getNaturalTexture(BlockState state, BlockPos pos, @Nullable Direction direction, BakedQuad quad) {
-        TextureAtlasSprite sprite = quad.getSprite();
+        TextureAtlasSprite sprite = quad.materialInfo().sprite();
         if (sprite == null) {
             return quad;
         }
@@ -236,7 +236,7 @@ public final class PrNaturalTextures {
             return quad;
         }
 
-        Direction face = quad.getDirection();
+        Direction face = quad.direction();
         int side = face != null ? face.get3DDataValue() : (direction != null ? direction.get3DDataValue() : 0);
         int rand = getRandom(pos, side);
         int rotate = 0;

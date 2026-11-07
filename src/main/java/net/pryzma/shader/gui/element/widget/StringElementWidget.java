@@ -6,7 +6,7 @@ import net.pryzma.shader.gui.NavigationController;
 import net.pryzma.shader.gui.screen.ShaderPackScreen;
 import net.pryzma.shader.shaderpack.option.StringOption;
 import net.pryzma.shader.shaderpack.option.menu.OptionMenuStringOptionElement;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -52,7 +52,7 @@ public class StringElementWidget extends BaseOptionElementWidget<OptionMenuStrin
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float tickDelta, boolean hovered) {
+	public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float tickDelta, boolean hovered) {
 		this.updateRenderParams(0);
 
 		this.renderOptionWithValue(guiGraphics, hovered || isFocused());

@@ -3,8 +3,7 @@ package net.pryzma.item;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
-import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.pryzma.Pryzma;
 import net.pryzma.PryzmaConfig;
@@ -16,9 +15,9 @@ import net.pryzma.PryzmaConfig;
  * and sprites always come from the same resource state.
  */
 public final class PrCitSpriteSource implements SpriteSource {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Pryzma.MODID, "cit");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Pryzma.MODID, "cit");
     public static final PrCitSpriteSource INSTANCE = new PrCitSpriteSource();
-    public static final SpriteSourceType TYPE = new SpriteSourceType(MapCodec.unit(INSTANCE));
+    public static final MapCodec<PrCitSpriteSource> CODEC = MapCodec.unit(INSTANCE);
 
     private PrCitSpriteSource() {
     }
@@ -31,7 +30,7 @@ public final class PrCitSpriteSource implements SpriteSource {
     }
 
     @Override
-    public SpriteSourceType type() {
-        return TYPE;
+    public MapCodec<? extends SpriteSource> codec() {
+        return CODEC;
     }
 }

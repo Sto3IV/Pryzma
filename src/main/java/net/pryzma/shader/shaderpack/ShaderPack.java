@@ -225,13 +225,13 @@ public class ShaderPack {
 		List<String> invalidFeatureFlags = invalidFlagList.stream().map(FeatureFlags::getHumanReadableName).toList();
 
 		if (!invalidFeatureFlags.isEmpty()) {
-			if (Minecraft.getInstance().screen instanceof ShaderPackScreen) {
+			if (Minecraft.getInstance().gui.screen() instanceof ShaderPackScreen) {
 				MutableComponent component = Component.translatable("pryzma.unsupported.pack.description", FeatureFlags.getInvalidStatus(invalidFlagList), invalidFeatureFlags.stream()
 					.collect(Collectors.joining(", ", ": ", ".")));
 				if (SystemUtils.IS_OS_MAC) {
 					component = component.append(Component.translatable("pryzma.unsupported.pack.macos"));
 				}
-				Minecraft.getInstance().setScreen(new FeatureMissingErrorScreen(Minecraft.getInstance().screen, Component.translatable("pryzma.unsupported.pack"), component));
+				Minecraft.getInstance().gui.setScreen(new FeatureMissingErrorScreen(Minecraft.getInstance().gui.screen(), Component.translatable("pryzma.unsupported.pack"), component));
 			}
 			ShaderApi.getInstance().getConfig().setShadersEnabledAndApply(false);
 		}

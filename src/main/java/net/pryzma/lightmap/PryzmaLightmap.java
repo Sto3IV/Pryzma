@@ -6,7 +6,7 @@ import java.util.Map;
 import com.mojang.blaze3d.platform.NativeImage;
 
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
@@ -73,8 +73,8 @@ public final class PryzmaLightmap {
         Map<Integer, PrLightmapImage> clear = new HashMap<>();
         Map<Integer, PrLightmapImage> rain = new HashMap<>();
         Map<Integer, PrLightmapImage> thunder = new HashMap<>();
-        for (Map.Entry<ResourceLocation, Resource> e : res.list("lightmap", ".png").entrySet()) {
-            ResourceLocation loc = e.getKey();
+        for (Map.Entry<Identifier, Resource> e : res.list("lightmap", ".png").entrySet()) {
+            Identifier loc = e.getKey();
             if (!"minecraft".equals(loc.getNamespace()) || !loc.getPath().startsWith(PREFIX)) {
                 continue;
             }
@@ -153,7 +153,7 @@ public final class PryzmaLightmap {
                 f.nightVision(), f.darkLight(), f.gamma());
         for (int sky = 0; sky < 16; sky++) {
             for (int block = 0; block < 16; block++) {
-                pixels.setPixelRGBA(block, sky, abgr[sky * 16 + block]);
+                pixels.setPixelABGR(block, sky, abgr[sky * 16 + block]);
             }
         }
         return true;

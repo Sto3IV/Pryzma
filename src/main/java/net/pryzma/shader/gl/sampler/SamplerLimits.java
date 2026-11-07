@@ -1,6 +1,6 @@
 package net.pryzma.shader.gl.sampler;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL45C;

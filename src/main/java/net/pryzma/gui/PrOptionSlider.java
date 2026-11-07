@@ -2,7 +2,7 @@ package net.pryzma.gui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractSliderButton;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.client.input.KeyEvent;
 
 /**
  * Option slider. While the mouse drags an apply-on-release option the label follows the handle
@@ -33,14 +33,14 @@ final class PrOptionSlider extends AbstractSliderButton implements PrOptionContr
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
+    public void onClick(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
         dragging = true;
-        super.onClick(mouseX, mouseY);
+        super.onClick(event, doubleClick);
     }
 
     @Override
-    public void onRelease(double mouseX, double mouseY) {
-        super.onRelease(mouseX, mouseY);
+    public void onRelease(net.minecraft.client.input.MouseButtonEvent event) {
+        super.onRelease(event);
         if (dragging) {
             dragging = false;
             commit();
@@ -48,19 +48,19 @@ final class PrOptionSlider extends AbstractSliderButton implements PrOptionContr
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (!active || !visible) {
             return false;
         }
-        if (keyCode == GLFW.GLFW_KEY_LEFT) {
+        if (event.isLeft()) {
             step(-1);
             return true;
         }
-        if (keyCode == GLFW.GLFW_KEY_RIGHT) {
+        if (event.isRight()) {
             step(1);
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override

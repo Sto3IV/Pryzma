@@ -12,24 +12,19 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockModelShaper;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.client.resources.model.WeightedBakedModel;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.Nameable;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -40,13 +35,10 @@ import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.neoforged.neoforge.client.ChunkRenderTypeSet;
 import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import net.pryzma.Pryzma;
 import net.pryzma.PryzmaConfig;
 import net.pryzma.color.PrBiomes;
-import net.pryzma.mixin.WeightedBakedModelAccessor;
 
 /**
  * Connected textures engine. Rules come from {@link PrCtmSpriteSource} while the block atlas is
@@ -75,9 +67,9 @@ public final class PryzmaCtm {
      * still running on the old models while resources reload can then only fill the old index.
      */
     private record Index(boolean active, Map<Block, PrCtmRule[]> byBlock, Map<TextureAtlasSprite, PrCtmRule[]> bySprite,
-            boolean multipass, int ruleCount, Map<ModelResourceLocation, BakedModel> models,
-            Map<BlockState, TextureAtlasSprite[]> faceSprites, Map<BlockState, ChunkRenderTypeSet> overlayLayers) {
-        static final Index EMPTY = new Index(false, Map.of(), Map.of(), false, 0, Map.of(), Map.of(), Map.of());
+            boolean multipass, int ruleCount, Map<BlockState, BlockStateModel> models,
+            Map<BlockState, TextureAtlasSprite[]> faceSprites) {
+        static final Index EMPTY = new Index(false, Map.of(), Map.of(), false, 0, Map.of(), Map.of());
     }
 
     static void setPending(PrCtmLoader.Result result) {
@@ -106,39 +98,37 @@ public final class PryzmaCtm {
             index = Index.EMPTY;
             return;
         }
-        Function<Material, TextureAtlasSprite> atlas = event.getTextureGetter();
+        SpriteLoader.Preparations atlas = event.getBlockAtlasPreparations();
         List<PrCtmRule> bound = new ArrayList<>();
         for (PrCtmRule rule : result.rules()) {
             if (bind(rule, atlas)) {
                 bound.add(rule);
             }
         }
-        Map<ModelResourceLocation, BakedModel> models = event.getModels();
+        Map<BlockState, BlockStateModel> models = event.getBakingResult().blockStateModels();
         Index built = buildIndex(bound, models);
         Set<TextureAtlasSprite> spriteKeys = built.bySprite.keySet();
         int wrapped = 0;
-        for (Block block : BuiltInRegistries.BLOCK) {
-            ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(block);
-            boolean byBlock = built.byBlock.containsKey(block) || block instanceof IronBarsBlock;
-            for (BlockState state : block.getStateDefinition().getPossibleStates()) {
-                ModelResourceLocation mrl = BlockModelShaper.stateToModelLocation(blockId, state);
-                BakedModel model = models.get(mrl);
-                if (model == null || model instanceof PrCtmModel || model.isCustomRenderer()) {
-                    continue;
-                }
-                if (byBlock || anyQuad(model, state, q -> spriteKeys.contains(q.getSprite()))) {
-                    built.overlayLayers.put(state, computeOverlayLayers(built, state, model));
-                    models.put(mrl, new PrCtmModel(model));
-                    wrapped++;
-                }
+        Map<BlockState, BlockStateModel> toWrap = new java.util.HashMap<>();
+        for (Map.Entry<BlockState, BlockStateModel> entry : models.entrySet()) {
+            BlockState state = entry.getKey();
+            BlockStateModel model = entry.getValue();
+            if (model instanceof PrCtmModel) {
+                continue;
+            }
+            boolean byBlock = built.byBlock.containsKey(state.getBlock()) || state.getBlock() instanceof IronBarsBlock;
+            if (byBlock || anyQuad(model, state, q -> spriteKeys.contains(q.materialInfo().sprite()))) {
+                toWrap.put(state, new PrCtmModel(model));
+                wrapped++;
             }
         }
+        models.putAll(toWrap);
         index = built;
         Pryzma.LOGGER.info("ConnectedTextures: {} rules bound, {} block models wrapped, multipass={} in {} ms",
                 built.ruleCount, wrapped, built.multipass, (System.nanoTime() - start) / 1_000_000);
     }
 
-    private static boolean bind(PrCtmRule rule, Function<Material, TextureAtlasSprite> atlas) {
+    private static boolean bind(PrCtmRule rule, SpriteLoader.Preparations atlas) {
         int n = rule.tiles.size();
         TextureAtlasSprite[] tiles = new TextureAtlasSprite[n];
         boolean[] keep = new boolean[n];
@@ -162,17 +152,17 @@ public final class PryzmaCtm {
         return rule.matchSprites == null || rule.matchSprites.length > 0;
     }
 
-    private static TextureAtlasSprite sprite(Function<Material, TextureAtlasSprite> atlas, ResourceLocation id) {
-        TextureAtlasSprite sprite = atlas.apply(new Material(InventoryMenu.BLOCK_ATLAS, id));
-        return sprite == null || sprite.contents().name().equals(MissingTextureAtlasSprite.getLocation()) ? null : sprite;
+    private static TextureAtlasSprite sprite(SpriteLoader.Preparations atlas, Identifier id) {
+        TextureAtlasSprite sprite = atlas.getSprite(id);
+        return sprite == null || sprite == atlas.missing() || sprite.contents().name().equals(MissingTextureAtlasSprite.getLocation()) ? null : sprite;
     }
 
-    private static TextureAtlasSprite[] sprites(Function<Material, TextureAtlasSprite> atlas, List<ResourceLocation> ids) {
+    private static TextureAtlasSprite[] sprites(SpriteLoader.Preparations atlas, List<Identifier> ids) {
         if (ids == null) {
             return null;
         }
         List<TextureAtlasSprite> out = new ArrayList<>(ids.size());
-        for (ResourceLocation id : ids) {
+        for (Identifier id : ids) {
             TextureAtlasSprite s = sprite(atlas, id);
             if (s != null) {
                 out.add(s);
@@ -181,7 +171,7 @@ public final class PryzmaCtm {
         return out.toArray(TextureAtlasSprite[]::new);
     }
 
-    private static Index buildIndex(List<PrCtmRule> rules, Map<ModelResourceLocation, BakedModel> models) {
+    private static Index buildIndex(List<PrCtmRule> rules, Map<BlockState, BlockStateModel> models) {
         Map<Block, List<PrCtmRule>> byBlock = new IdentityHashMap<>();
         Map<TextureAtlasSprite, List<PrCtmRule>> bySprite = new IdentityHashMap<>();
         Set<TextureAtlasSprite> matched = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -210,67 +200,32 @@ public final class PryzmaCtm {
         Map<TextureAtlasSprite, PrCtmRule[]> sprites = new IdentityHashMap<>();
         bySprite.forEach((k, v) -> sprites.put(k, v.toArray(PrCtmRule[]::new)));
         return new Index(true, blocks, sprites, !matched.isEmpty(), rules.size(), models,
-                new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+                new ConcurrentHashMap<>());
     }
 
     /**
-     * Tests the quads a model can show for {@code state} on every side, through every variant of
-     * a weighted model (a random variant may carry a sprite the first one does not).
+     * Tests the quads a model can show for {@code state} on every side.
      */
-    private static boolean anyQuad(BakedModel model, BlockState state, Predicate<BakedQuad> test) {
-        if (model instanceof WeightedBakedModel weighted) {
-            for (WeightedEntry.Wrapper<BakedModel> variant : ((WeightedBakedModelAccessor) weighted).prGetList()) {
-                if (anyQuad(variant.data(), state, test)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+    private static boolean anyQuad(BlockStateModel model, BlockState state, Predicate<BakedQuad> test) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
         RandomSource random = RandomSource.create();
-        for (Direction side : SIDES_AND_NULL) {
-            random.setSeed(42L);
-            for (BakedQuad quad : model.getQuads(state, side, random, ModelData.EMPTY, null)) {
-                if (test.test(quad)) {
-                    return true;
+        random.setSeed(42L);
+        model.collectParts(random, parts);
+        for (BlockStateModelPart part : parts) {
+            for (Direction side : SIDES_AND_NULL) {
+                for (BakedQuad quad : part.getQuads(side)) {
+                    if (test.test(quad)) {
+                        return true;
+                    }
                 }
             }
         }
         return false;
     }
 
-    /** Overlay layers any rule may add for {@code state}; the model adds them to its render types. */
-    static ChunkRenderTypeSet overlayLayers(BlockState state) {
-        ChunkRenderTypeSet layers = index.overlayLayers.get(state);
-        return layers != null ? layers : ChunkRenderTypeSet.none();
-    }
-
-    private static ChunkRenderTypeSet computeOverlayLayers(Index idx, BlockState state, BakedModel model) {
-        Set<RenderType> layers = new HashSet<>();
-        PrCtmRule[] blockRules = idx.byBlock.get(state.getBlock());
-        if (blockRules != null) {
-            for (PrCtmRule r : blockRules) {
-                if (r.method.isOverlay()) {
-                    layers.add(r.layer.type());
-                }
-            }
-        }
-        anyQuad(model, state, q -> {
-            PrCtmRule[] rules = idx.bySprite.get(q.getSprite());
-            if (rules != null) {
-                for (PrCtmRule r : rules) {
-                    if (r.method.isOverlay()) {
-                        layers.add(r.layer.type());
-                    }
-                }
-            }
-            return false;
-        });
-        return layers.isEmpty() ? ChunkRenderTypeSet.none() : ChunkRenderTypeSet.of(layers);
-    }
-
     /** Whether the chunk renderer will draw this side at all; culled faces need no evaluation. */
     static boolean faceVisible(PrCtmContext ctx, Direction side) {
-        return Block.shouldRenderFace(ctx.state, ctx.level, ctx.pos, side, SCRATCH.get().setWithOffset(ctx.pos, side));
+        return Block.shouldRenderFace(ctx.state, ctx.level.getBlockState(SCRATCH.get().setWithOffset(ctx.pos, side)), side);
     }
 
     /**
@@ -315,7 +270,7 @@ public final class PryzmaCtm {
     }
 
     private static BakedQuad[] single(Index idx, PrCtmContext ctx, BakedQuad quad, boolean checkBlocks, int pass, int sideSlot) {
-        TextureAtlasSprite sprite = quad.getSprite();
+        TextureAtlasSprite sprite = quad.materialInfo().sprite();
         PrCtmRule[] rules = idx.bySprite.get(sprite);
         if (rules != null) {
             for (PrCtmRule r : rules) {
@@ -348,7 +303,7 @@ public final class PryzmaCtm {
     }
 
     private static BakedQuad[] apply(PrCtmRule r, PrCtmContext ctx, BakedQuad quad, int pass, int sideSlot) {
-        int side = quad.getDirection().get3DDataValue();
+        int side = quad.direction().get3DDataValue();
         int axis = pillarAxis(ctx.state);
         if (r.faces != 63 && !r.hasFace(axis != 0 ? PrCtmLogic.fixSideByAxis(side, axis) : side)) {
             return null;
@@ -365,7 +320,7 @@ public final class PryzmaCtm {
         if (r.name != null && !r.name.matches(blockEntityName(ctx))) {
             return null;
         }
-        TextureAtlasSprite icon = quad.getSprite();
+        TextureAtlasSprite icon = quad.materialInfo().sprite();
         return switch (r.method) {
             case CTM -> tileAt(r, ctmIndex(r, ctx, side, icon), quad);
             case HORIZONTAL -> tileAt(r, horizontalIndex(r, ctx, side, axis, icon), quad);
@@ -531,7 +486,7 @@ public final class PryzmaCtm {
         if (r.linked) {
             BlockPos.MutableBlockPos m = SCRATCH.get().set(pos);
             Block block = ctx.state.getBlock();
-            int minY = ctx.level.getMinBuildHeight();
+            int minY = ctx.level.getMinY();
             while (m.getY() > minY) {
                 m.move(Direction.DOWN);
                 if (ctx.level.getBlockState(m).getBlock() != block) {
@@ -579,13 +534,18 @@ public final class PryzmaCtm {
         if (sprite == null) {
             return;
         }
-        BakedQuad overlay = PrQuads.fullFace(quad.getDirection(), sprite, r.tintIndex);
+        BakedQuad overlay = PrQuads.fullFace(quad.direction(), sprite, r.tintIndex, r.layer.sectionLayer());
         if (r.tintIndex >= 0) {
-            int color = r.tintBlock == null || r.tintBlock.isAir() ? 0xFFFFFF
-                    : Minecraft.getInstance().getBlockColors().getColor(r.tintBlock, ctx.level, ctx.pos, r.tintIndex);
+            int color = 0xFFFFFF;
+            if (r.tintBlock != null && !r.tintBlock.isAir()) {
+                net.minecraft.client.color.block.BlockTintSource source = Minecraft.getInstance().getBlockColors().getTintSource(r.tintBlock, r.tintIndex);
+                if (source != null) {
+                    color = source.colorInWorld(r.tintBlock, ctx.level, ctx.pos);
+                }
+            }
             overlay = PrQuads.withColor(overlay, color == -1 ? 0xFFFFFF : color);
         }
-        ctx.addOverlay(sideSlot, r.layer.type(), overlay);
+        ctx.addOverlay(sideSlot, overlay);
     }
 
     /** OptiFine getConnectedTextureOverlay: 17 tiles, edges drawn where a different block borders this one. */
@@ -701,7 +661,7 @@ public final class PryzmaCtm {
         }
         BlockPos above = pos.relative(front);
         BlockState aboveState = ctx.level.getBlockState(above);
-        if (aboveState.isSolidRender(ctx.level, above)) {
+        if (aboveState.isSolidRender()) {
             return false;
         }
         if (side == 1 && aboveState.getBlock() == Blocks.SNOW) {
@@ -725,7 +685,7 @@ public final class PryzmaCtm {
         }
         BlockPos above = pos.relative(front);
         BlockState aboveState = ctx.level.getBlockState(above);
-        if (aboveState.isSolidRender(ctx.level, above)) {
+        if (aboveState.isSolidRender()) {
             return false;
         }
         return side != 1 || aboveState.getBlock() != Blocks.SNOW;
@@ -758,22 +718,36 @@ public final class PryzmaCtm {
 
     private static TextureAtlasSprite[] computeFaceSprites(Index idx, BlockState state) {
         TextureAtlasSprite[] out = new TextureAtlasSprite[6];
-        BakedModel model = idx.models.get(BlockModelShaper.stateToModelLocation(state));
+        BlockStateModel model = idx.models.get(state);
         if (model == null) {
             return out;
         }
+        List<BlockStateModelPart> parts = new ArrayList<>();
         RandomSource random = RandomSource.create();
+        random.setSeed(0L);
+        model.collectParts(random, parts);
         for (Direction d : Direction.values()) {
-            random.setSeed(0L);
-            List<BakedQuad> quads = model.getQuads(state, d, random, ModelData.EMPTY, null);
-            if (!quads.isEmpty()) {
-                out[d.get3DDataValue()] = quads.get(0).getSprite();
+            boolean found = false;
+            for (BlockStateModelPart part : parts) {
+                List<BakedQuad> quads = part.getQuads(d);
+                if (!quads.isEmpty()) {
+                    out[d.get3DDataValue()] = quads.get(0).materialInfo().sprite();
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
                 continue;
             }
-            random.setSeed(0L);
-            for (BakedQuad q : model.getQuads(state, null, random, ModelData.EMPTY, null)) {
-                if (q.getDirection() == d) {
-                    out[d.get3DDataValue()] = q.getSprite();
+            for (BlockStateModelPart part : parts) {
+                for (BakedQuad q : part.getQuads(null)) {
+                    if (q.direction() == d) {
+                        out[d.get3DDataValue()] = q.materialInfo().sprite();
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
                     break;
                 }
             }
@@ -810,7 +784,7 @@ public final class PryzmaCtm {
         if (!(block instanceof IronBarsBlock)) {
             return false;
         }
-        Direction face = quad.getDirection();
+        Direction face = quad.direction();
         if (face != Direction.UP && face != Direction.DOWN || !PrQuads.isFaceQuad(quad)) {
             return false;
         }

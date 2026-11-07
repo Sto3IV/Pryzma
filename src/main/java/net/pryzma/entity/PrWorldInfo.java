@@ -30,13 +30,13 @@ public interface PrWorldInfo {
         @Override
         public int moonPhase() {
             ClientLevel level = Minecraft.getInstance().level;
-            return level == null ? 0 : level.getMoonPhase();
+            return level == null ? 0 : (int) (level.getDefaultClockTime() / 24000L % 8L + 8L) % 8;
         }
 
         @Override
         public int dayTime() {
             ClientLevel level = Minecraft.getInstance().level;
-            return level == null ? 6000 : (int) (level.getDayTime() % 24000L);
+            return level == null ? 6000 : (int) (level.getDefaultClockTime() % 24000L);
         }
 
         @Override

@@ -1,14 +1,15 @@
 package net.pryzma;
 
 import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+import net.neoforged.neoforge.client.event.RegisterSpriteSourcesEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
@@ -31,6 +32,7 @@ import net.pryzma.gui.PrQuickInfo;
 import net.pryzma.gui.PrVideoSettingsScreen;
 import net.pryzma.gui.PrZoom;
 import net.pryzma.shader.platform.ShaderForgeHelpers;
+import net.pryzma.sky.PrSkyBlend;
 import net.pryzma.item.PrCitModels;
 import net.pryzma.item.PrCitSpriteSource;
 import net.pryzma.lod.PryzmaLod;
@@ -49,12 +51,13 @@ public final class PryzmaClient {
     }
 
     static void register(IEventBus modBus, IEventBus gameBus) {
-        modBus.addListener(RegisterClientReloadListenersEvent.class,
-                event -> event.registerReloadListener(new PrReloadListener()));
-        modBus.addListener(RegisterSpriteSourceTypesEvent.class, event -> {
-            event.register(PrCtmSpriteSource.ID, PrCtmSpriteSource.TYPE);
-            event.register(PrCitSpriteSource.ID, PrCitSpriteSource.TYPE);
+        modBus.addListener(AddClientReloadListenersEvent.class,
+                event -> event.addListener(Identifier.fromNamespaceAndPath("pryzma", "reload_listener"), new PrReloadListener()));
+        modBus.addListener(RegisterSpriteSourcesEvent.class, event -> {
+            event.register(PrCtmSpriteSource.ID, PrCtmSpriteSource.CODEC);
+            event.register(PrCitSpriteSource.ID, PrCitSpriteSource.CODEC);
         });
+        modBus.addListener(RegisterRenderPipelinesEvent.class, PrSkyBlend::registerPipelines);
         modBus.addListener(ModelEvent.ModifyBakingResult.class, PryzmaCtm::onModifyBakingResult);
         modBus.addListener(ModelEvent.ModifyBakingResult.class, PrSmartLeaves::onModifyBakingResult);
         modBus.addListener(ModelEvent.ModifyBakingResult.class, PrCitModels::onModifyBakingResult);
@@ -69,8 +72,8 @@ public final class PryzmaClient {
             ShaderForgeHelpers.KEYLIST.forEach(event::register);
             ShaderForgeHelpers.KEYLIST.clear();
         });
-        modBus.addListener(RegisterGuiLayersEvent.class, event -> event.registerAbove(VanillaGuiLayers.DEBUG_OVERLAY,
-                ResourceLocation.fromNamespaceAndPath(Pryzma.MODID, "quick_info"), PrQuickInfo::render));
+        modBus.addListener(RegisterGuiLayersEvent.class, event -> event.registerAboveAll(
+                Identifier.fromNamespaceAndPath(Pryzma.MODID, "quick_info"), PrQuickInfo::render));
         gameBus.addListener(ViewportEvent.ComputeFov.class, PrZoom::onComputeFov);
         gameBus.addListener(ScreenEvent.Opening.class, PryzmaClient::onScreenOpening);
         gameBus.addListener(ServerStartedEvent.class, event -> PrServerPriority.apply());

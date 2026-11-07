@@ -12,7 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.pryzma.core.res.PrPaths;
 import net.pryzma.core.res.PrResources;
@@ -29,16 +29,16 @@ final class PrCitModelJson {
     }
 
     /** Whether the model's JSON lives in the pack's OptiFine tree rather than under {@code models/}. */
-    static boolean isLocal(ResourceLocation model) {
+    static boolean isLocal(Identifier model) {
         return PrPaths.isOptifine(model);
     }
 
-    static ResourceLocation file(ResourceLocation model) {
+    static Identifier file(Identifier model) {
         return isLocal(model) ? model.withSuffix(".json") : model.withPath("models/" + model.getPath() + ".json");
     }
 
     /** The model's JSON with pack-relative references resolved; {@code null} when missing or malformed. */
-    static JsonObject read(PrResources res, ResourceLocation model, Consumer<String> warn) {
+    static JsonObject read(PrResources res, Identifier model, Consumer<String> warn) {
         Optional<Resource> resource = res.find(file(model));
         if (resource.isEmpty()) {
             return null;
@@ -109,8 +109,8 @@ final class PrCitModelJson {
     }
 
     /** Models a JSON depends on: its parent and its override models. */
-    static List<ResourceLocation> dependencies(JsonObject json) {
-        List<ResourceLocation> out = new ArrayList<>();
+    static List<Identifier> dependencies(JsonObject json) {
+        List<Identifier> out = new ArrayList<>();
         if (json.has("parent") && json.get("parent").isJsonPrimitive()) {
             add(out, json.get("parent").getAsString());
         }
@@ -125,8 +125,8 @@ final class PrCitModelJson {
     }
 
     /** Sprite names a JSON uses directly (texture variables excluded). */
-    static List<ResourceLocation> textures(JsonObject json) {
-        List<ResourceLocation> out = new ArrayList<>();
+    static List<Identifier> textures(JsonObject json) {
+        List<Identifier> out = new ArrayList<>();
         if (json.has("textures") && json.get("textures").isJsonObject()) {
             for (var e : json.getAsJsonObject("textures").entrySet()) {
                 if (e.getValue().isJsonPrimitive() && !e.getValue().getAsString().startsWith("#")) {
@@ -137,8 +137,8 @@ final class PrCitModelJson {
         return out;
     }
 
-    private static void add(List<ResourceLocation> out, String id) {
-        ResourceLocation location = ResourceLocation.tryParse(id);
+    private static void add(List<Identifier> out, String id) {
+        Identifier location = Identifier.tryParse(id);
         if (location != null) {
             out.add(location);
         }

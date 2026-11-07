@@ -1,6 +1,6 @@
 package net.pryzma.shader.gl.buffer;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.gl.ShaderRenderSystem;

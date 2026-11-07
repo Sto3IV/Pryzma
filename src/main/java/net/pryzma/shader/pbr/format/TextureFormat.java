@@ -45,13 +45,14 @@ public interface TextureFormat {
 	boolean canInterpolateValues(PBRType pbrType);
 
 	default void setupTextureParameters(PBRType pbrType, AbstractTexture texture) {
-		if (!canInterpolateValues(pbrType)) {
-			int minFilter = ShaderRenderSystem.getTexParameteri(texture.getId(), GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER);
+		if (!canInterpolateValues(pbrType) && texture.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture glTexture) {
+			int glId = glTexture.glId();
+			int minFilter = ShaderRenderSystem.getTexParameteri(glId, GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER);
 			// Non-mipped filters begin at 0x2600 whereas mipped filters begin at 0x2700,
 			// so this bit mask can be used to check if the filter is mipped or not
 			boolean mipmap = minFilter >= 0x2700;
-			ShaderRenderSystem.texParameteri(texture.getId(), GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, mipmap ? GL11.GL_NEAREST_MIPMAP_NEAREST : GL11.GL_NEAREST);
-			ShaderRenderSystem.texParameteri(texture.getId(), GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+			ShaderRenderSystem.texParameteri(glId, GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, mipmap ? GL11.GL_NEAREST_MIPMAP_NEAREST : GL11.GL_NEAREST);
+			ShaderRenderSystem.texParameteri(glId, GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		}
 	}
 

@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -120,7 +120,7 @@ public final class PrBlockMatcher {
             nameIndex = 1;
         }
         String name = parts[nameIndex];
-        ResourceLocation id = ResourceLocation.tryBuild(namespace, name);
+        Identifier id = Identifier.tryBuild(namespace, name);
         if (id == null) {
             warn.accept("Invalid block name: " + token);
             return false;
@@ -186,7 +186,7 @@ public final class PrBlockMatcher {
             return;
         }
         for (PrLegacyBlocks.ModernState state : states) {
-            ResourceLocation blockId = ResourceLocation.tryParse(state.block());
+            Identifier blockId = Identifier.tryParse(state.block());
             Optional<Block> block = blockId == null ? Optional.empty() : BuiltInRegistries.BLOCK.getOptional(blockId);
             if (block.isEmpty()) {
                 continue;

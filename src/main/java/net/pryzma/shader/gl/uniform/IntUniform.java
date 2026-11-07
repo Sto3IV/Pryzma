@@ -34,7 +34,7 @@ public class IntUniform extends Uniform {
 
 		if (cachedValue != newValue) {
 			cachedValue = newValue;
-			RenderSystem.glUniform1i(location, newValue);
+			org.lwjgl.opengl.GL20C.glUniform1i(location, newValue);
 		}
 	}
 }

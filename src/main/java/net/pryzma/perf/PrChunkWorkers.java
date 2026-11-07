@@ -64,6 +64,10 @@ public final class PrChunkWorkers {
     }
 
     public static Executor executor() {
+        return pool();
+    }
+
+    public static ThreadPoolExecutor pool() {
         ThreadPoolExecutor current = pool;
         return current != null ? current : start();
     }

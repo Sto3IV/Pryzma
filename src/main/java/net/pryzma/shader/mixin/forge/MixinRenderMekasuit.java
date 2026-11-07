@@ -4,7 +4,7 @@ import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.api.v0.ShaderApi;
 import net.pryzma.shader.pathways.LightningHandler;
 import net.pryzma.shader.vertices.ImmediateState;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;

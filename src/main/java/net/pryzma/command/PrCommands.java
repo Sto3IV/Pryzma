@@ -10,6 +10,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.level.ChunkPos;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.pryzma.world.PrPregenTask;
@@ -27,7 +28,7 @@ public final class PrCommands {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("pryzma")
-                .requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2));
+                .requires(source -> source.getServer().isSingleplayer() || source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
 
         // Subcommand: pregen
         root.then(Commands.literal("pregen")
@@ -80,11 +81,11 @@ public final class PrCommands {
     private static int startPregen(CommandSourceStack source, int radius, String modeStr) {
         ServerLevel level = source.getLevel();
         BlockPos pos = BlockPos.containing(source.getPosition());
-        ChunkPos origin = new ChunkPos(pos);
+        ChunkPos origin = ChunkPos.containing(pos);
         PrPregenTask.Mode mode = "lod".equalsIgnoreCase(modeStr) || "surface".equalsIgnoreCase(modeStr)
                 ? PrPregenTask.Mode.LOD
                 : PrPregenTask.Mode.FULL;
-        PrPregenTask.start(source, level, origin.x, origin.z, radius, mode);
+        PrPregenTask.start(source, level, origin.x(), origin.z(), radius, mode);
         return Command.SINGLE_SUCCESS;
     }
 

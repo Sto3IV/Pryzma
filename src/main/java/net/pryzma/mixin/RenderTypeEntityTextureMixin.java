@@ -6,8 +6,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.resources.Identifier;
 import net.pryzma.entity.texture.PrEntityTextures;
 
 /**
@@ -16,37 +17,34 @@ import net.pryzma.entity.texture.PrEntityTextures;
  * texture (OptiFine's {@code RenderType.getCustomTexture}). One-argument overloads that delegate to
  * the two-argument ones are left alone so a texture is mapped exactly once.
  */
-@Mixin(RenderType.class)
+@Mixin(RenderTypes.class)
 abstract class RenderTypeEntityTextureMixin {
     @ModifyVariable(method = {
-            "armorCutoutNoCull",
-            "createArmorDecalCutoutNoCull",
-            "entitySolid",
-            "entityCutout",
-            "entityCutoutNoCull(Lnet/minecraft/resources/ResourceLocation;Z)Lnet/minecraft/client/renderer/RenderType;",
-            "entityCutoutNoCullZOffset(Lnet/minecraft/resources/ResourceLocation;Z)Lnet/minecraft/client/renderer/RenderType;",
-            "itemEntityTranslucentCull",
+            "armorCutoutNoCull(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;",
+            "armorTrim(Lnet/minecraft/resources/Identifier;Z)Lnet/minecraft/client/renderer/rendertype/RenderType;",
+            "wolfArmorCracks",
+            "entitySolid(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;",
+            "entityCutout(Lnet/minecraft/resources/Identifier;Z)Lnet/minecraft/client/renderer/rendertype/RenderType;",
+            "entityCutoutCull",
+            "entityCutoutZOffset(Lnet/minecraft/resources/Identifier;Z)Lnet/minecraft/client/renderer/rendertype/RenderType;",
+            "entityTranslucent(Lnet/minecraft/resources/Identifier;Z)Lnet/minecraft/client/renderer/rendertype/RenderType;",
             "entityTranslucentCull",
-            "entityTranslucent(Lnet/minecraft/resources/ResourceLocation;Z)Lnet/minecraft/client/renderer/RenderType;",
-            "entityTranslucentEmissive(Lnet/minecraft/resources/ResourceLocation;Z)Lnet/minecraft/client/renderer/RenderType;",
-            "entitySmoothCutout",
-            "entityDecal",
-            "entityNoOutline",
-            "dragonExplosionAlpha",
+            "entityTranslucentEmissive(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;",
+            "entityShadow",
             "eyes",
             "breezeEyes",
             "breezeWind",
             "energySwirl"
     }, at = @At("HEAD"), argsOnly = true)
-    private static ResourceLocation prEntityTexture(ResourceLocation texture) {
+    private static Identifier prEntityTexture(Identifier texture) {
         return PrEntityTextures.remap(texture);
     }
 
     /** OptiFine draws the emissive layer of a solid entity with cutout, so transparent pixels stay empty. */
-    @Inject(method = "entitySolid", at = @At("HEAD"), cancellable = true)
-    private static void prEmissiveSolid(ResourceLocation texture, CallbackInfoReturnable<RenderType> cir) {
+    @Inject(method = "entitySolid(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;", at = @At("HEAD"), cancellable = true)
+    private static void prEmissiveSolid(Identifier texture, CallbackInfoReturnable<RenderType> cir) {
         if (PrEntityTextures.isEmissivePass()) {
-            cir.setReturnValue(RenderType.entityCutout(texture));
+            cir.setReturnValue(RenderTypes.entityCutout(texture));
         }
     }
 }

@@ -1,8 +1,8 @@
 package net.pryzma.shader.vertices;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
-import net.pryzma.shader.PryzmaShaders;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormatElement;
 
 public class ShaderVertexFormats {
 	public static final VertexFormatElement ENTITY_ELEMENT;
@@ -17,85 +17,51 @@ public class ShaderVertexFormats {
 	public static final VertexFormat CLOUDS;
 
 	static {
-		int LAST_UV = 0;
-
-		for (int i = 0; i < VertexFormatElement.MAX_COUNT; i++) {
-			VertexFormatElement element = VertexFormatElement.byId(i);
-			if (element != null && element.usage() == VertexFormatElement.Usage.UV) {
-				LAST_UV = Math.max(LAST_UV, element.index());
-			}
-		}
-
-		ENTITY_ELEMENT = VertexFormatElement.register(getNextVertexFormatElementId(), 0, VertexFormatElement.Type.SHORT, VertexFormatElement.Usage.GENERIC, 2);
-		ENTITY_ID_ELEMENT = VertexFormatElement.register(getNextVertexFormatElementId(), LAST_UV + 1, VertexFormatElement.Type.USHORT, VertexFormatElement.Usage.UV, 3);
-		MID_TEXTURE_ELEMENT = VertexFormatElement.register(getNextVertexFormatElementId(), 0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.GENERIC, 2);
-		TANGENT_ELEMENT = VertexFormatElement.register(getNextVertexFormatElementId(), 0, VertexFormatElement.Type.BYTE, VertexFormatElement.Usage.GENERIC, 4);
-		// xyz: offset to the block centre (x64); w: block light emission, as on the terrain chunk path.
-		MID_BLOCK_ELEMENT = VertexFormatElement.register(getNextVertexFormatElementId(), 0, VertexFormatElement.Type.BYTE, VertexFormatElement.Usage.GENERIC, 4);
-
-		TERRAIN = VertexFormat.builder()
-			.add("Position", VertexFormatElement.POSITION)
-			.add("Color", VertexFormatElement.COLOR)
-			.add("UV0", VertexFormatElement.UV0)
-			.add("UV2", VertexFormatElement.UV2)
-			.add("Normal", VertexFormatElement.NORMAL)
-			.padding(1)
-			.add("mc_Entity", ENTITY_ELEMENT)
-			.add("mc_midTexCoord", MID_TEXTURE_ELEMENT)
-			.add("at_tangent", TANGENT_ELEMENT)
-			.add("at_midBlock", MID_BLOCK_ELEMENT)
+		TERRAIN = VertexFormat.builder(0)
+			.addAttribute("Position", GpuFormat.RGB32_FLOAT)
+			.addAttribute("Color", GpuFormat.RGBA8_UNORM)
+			.addAttribute("UV0", GpuFormat.RG32_FLOAT)
+			.addAttribute("UV2", GpuFormat.RG16_SINT)
+			.addAttribute("Normal", GpuFormat.RGBA8_SNORM)
+			.addAttribute("mc_Entity", GpuFormat.RG16_SINT)
+			.addAttribute("mc_midTexCoord", GpuFormat.RG32_FLOAT)
+			.addAttribute("at_tangent", GpuFormat.RGBA8_SNORM)
+			.addAttribute("at_midBlock", GpuFormat.RGBA8_SNORM)
 			.build();
 
-		ENTITY = VertexFormat.builder()
-			.add("Position", VertexFormatElement.POSITION)
-			.add("Color", VertexFormatElement.COLOR)
-			.add("UV0", VertexFormatElement.UV0)
-			.add("UV1", VertexFormatElement.UV1)
-			.add("UV2", VertexFormatElement.UV2)
-			.add("Normal", VertexFormatElement.NORMAL)
-			.padding(1)
-			.add("iris_Entity", ENTITY_ID_ELEMENT)
-			.add("mc_midTexCoord", MID_TEXTURE_ELEMENT)
-			.add("at_tangent", TANGENT_ELEMENT)
+		ENTITY = VertexFormat.builder(0)
+			.addAttribute("Position", GpuFormat.RGB32_FLOAT)
+			.addAttribute("Color", GpuFormat.RGBA8_UNORM)
+			.addAttribute("UV0", GpuFormat.RG32_FLOAT)
+			.addAttribute("UV1", GpuFormat.RG16_SINT)
+			.addAttribute("UV2", GpuFormat.RG16_SINT)
+			.addAttribute("Normal", GpuFormat.RGBA8_SNORM)
+			.addAttribute("iris_Entity", 8, GpuFormat.RGB16_UINT)
+			.addAttribute("mc_midTexCoord", GpuFormat.RG32_FLOAT)
+			.addAttribute("at_tangent", GpuFormat.RGBA8_SNORM)
 			.build();
 
-		GLYPH = VertexFormat.builder()
-			.add("Position", VertexFormatElement.POSITION)
-			.add("Color", VertexFormatElement.COLOR)
-			.add("UV0", VertexFormatElement.UV0)
-			.add("UV2", VertexFormatElement.UV2)
-			.add("Normal", VertexFormatElement.NORMAL)
-			.padding(1)
-			.add("iris_Entity", ENTITY_ID_ELEMENT)
-			.add("mc_midTexCoord", MID_TEXTURE_ELEMENT)
-			.add("at_tangent", TANGENT_ELEMENT)
-			.padding(1)
+		GLYPH = VertexFormat.builder(0)
+			.addAttribute("Position", GpuFormat.RGB32_FLOAT)
+			.addAttribute("Color", GpuFormat.RGBA8_UNORM)
+			.addAttribute("UV0", GpuFormat.RG32_FLOAT)
+			.addAttribute("UV2", GpuFormat.RG16_SINT)
+			.addAttribute("Normal", GpuFormat.RGBA8_SNORM)
+			.addAttribute("iris_Entity", 8, GpuFormat.RGB16_UINT)
+			.addAttribute("mc_midTexCoord", GpuFormat.RG32_FLOAT)
+			.addAttribute("at_tangent", GpuFormat.RGBA8_SNORM)
 			.build();
 
-		CLOUDS = VertexFormat.builder()
-			.add("Position", VertexFormatElement.POSITION)
-			.add("Color", VertexFormatElement.COLOR)
-			.add("Normal", VertexFormatElement.NORMAL)
-			.padding(1)
+		CLOUDS = VertexFormat.builder(0)
+			.addAttribute("Position", GpuFormat.RGB32_FLOAT)
+			.addAttribute("Color", GpuFormat.RGBA8_UNORM)
+			.addAttribute("Normal", GpuFormat.RGBA8_SNORM)
 			.build();
-	}
 
-	private static void debug(VertexFormat format) {
-		PryzmaShaders.logger.info("Vertex format: " + format + " with byte size " + format.getVertexSize());
-		int byteIndex = 0;
-		for (VertexFormatElement element : format.getElements()) {
-			PryzmaShaders.logger.info(element + " @ " + byteIndex + " is " + element.type() + " " + element.usage());
-			byteIndex += element.byteSize();
-		}
-	}
-
-	private static int getNextVertexFormatElementId() {
-		int id = 0;
-		while (VertexFormatElement.byId(id) != null) {
-			if (++id >= VertexFormatElement.MAX_COUNT) {
-				throw new RuntimeException("Too many mods registering VertexFormatElements");
-			}
-		}
-		return id;
+		ENTITY_ELEMENT = TERRAIN.getElement("mc_Entity");
+		ENTITY_ID_ELEMENT = ENTITY.getElement("iris_Entity");
+		MID_TEXTURE_ELEMENT = TERRAIN.getElement("mc_midTexCoord");
+		TANGENT_ELEMENT = TERRAIN.getElement("at_tangent");
+		MID_BLOCK_ELEMENT = TERRAIN.getElement("at_midBlock");
 	}
 }

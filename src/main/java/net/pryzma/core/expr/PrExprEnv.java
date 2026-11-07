@@ -45,7 +45,7 @@ public interface PrExprEnv {
         }
 
         private static float partialTick() {
-            return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+            return Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
         }
 
         @Override
@@ -57,13 +57,13 @@ public interface PrExprEnv {
         @Override
         public float dayTime() {
             ClientLevel level = Minecraft.getInstance().level;
-            return level == null ? 0.0F : (float) (level.getDayTime() % 24000L) + partialTick();
+            return level == null ? 0.0F : (float) (level.getDefaultClockTime() % 24000L) + partialTick();
         }
 
         @Override
         public float dayCount() {
             ClientLevel level = Minecraft.getInstance().level;
-            return level == null ? 0.0F : (float) (level.getDayTime() / 24000L);
+            return level == null ? 0.0F : (float) (level.getDefaultClockTime() / 24000L);
         }
 
         @Override

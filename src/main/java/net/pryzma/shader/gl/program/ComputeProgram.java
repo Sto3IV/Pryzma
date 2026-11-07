@@ -1,7 +1,7 @@
 package net.pryzma.shader.gl.program;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.shaders.ProgramManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
+import org.lwjgl.opengl.GL20C;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.gl.GlResource;
 import net.pryzma.shader.gl.ShaderRenderSystem;
@@ -36,7 +36,7 @@ public final class ComputeProgram extends GlResource {
 
 	public static void unbind() {
 		ProgramUniforms.clearActiveUniforms();
-		ProgramManager.glUseProgram(0);
+		GL20C.glUseProgram(0);
 	}
 
 	public void setWorkGroupInfo(Vector2f relativeWorkGroups, Vector3i absoluteWorkGroups, FilledIndirectPointer indirectPointer) {
@@ -65,7 +65,7 @@ public final class ComputeProgram extends GlResource {
 	}
 
 	public void use() {
-		ProgramManager.glUseProgram(getGlId());
+		GlStateManager._glUseProgram(getGlId());
 
 		uniforms.update();
 		samplers.update();

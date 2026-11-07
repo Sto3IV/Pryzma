@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import net.pryzma.shader.gl.texture.TextureAccess;
 import net.pryzma.shader.gl.texture.TextureType;
+import net.pryzma.shader.pbr.TextureTracker;
 import net.pryzma.shader.shaderpack.texture.CustomTextureData;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import org.lwjgl.opengl.GL11C;
@@ -16,7 +17,8 @@ import java.util.function.IntSupplier;
 
 public class NativeImageBackedCustomTexture extends DynamicTexture implements TextureAccess {
 	public NativeImageBackedCustomTexture(CustomTextureData.PngData textureData) throws IOException {
-		super(create(textureData.getContent()));
+		super(() -> "pryzma_custom_texture", create(textureData.getContent()));
+		upload();
 
 		// By default, images are unblurred and not clamped.
 
@@ -39,12 +41,13 @@ public class NativeImageBackedCustomTexture extends DynamicTexture implements Te
 		return NativeImage.read(buffer);
 	}
 
+	public int getId() {
+		return TextureTracker.getTextureId(this);
+	}
+
 	@Override
 	public void upload() {
-		NativeImage image = Objects.requireNonNull(getPixels());
-
-		bind();
-		image.upload(0, 0, 0, 0, 0, image.getWidth(), image.getHeight(), false, false, false, false);
+		super.upload();
 	}
 
 	@Override

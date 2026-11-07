@@ -12,21 +12,22 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.GL20C;
+import org.lwjgl.opengl.GL30C;
 import org.lwjgl.opengl.GL43C;
 import org.lwjgl.system.MemoryStack;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Ints;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.shaders.ProgramManager;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.world.phys.Vec3;
 import net.pryzma.Pryzma;
 import net.pryzma.PryzmaConfig;
@@ -126,7 +127,7 @@ public final class LodShaderSupport {
     private LodShaderSupport(ShadedWorldRenderingPipeline pipeline) {
         this.pipeline = pipeline;
         this.dhPrograms = pipeline.getDHTerrainShader().isPresent();
-        RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
+        RenderTarget main = Minecraft.getInstance().gameRenderer.mainRenderTarget();
         this.width = main.width;
         this.height = main.height;
         this.mainDepthVersion = ((Blaze3dRenderTargetExt) main).pryzma$getDepthBufferVersion();
@@ -227,7 +228,7 @@ public final class LodShaderSupport {
      */
     public void beginFrame() {
         opaqueDrawnThisFrame = false;
-        RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
+        RenderTarget main = Minecraft.getInstance().gameRenderer.mainRenderTarget();
         boolean reattach = false;
         if (main.width != width || main.height != height) {
             width = main.width;
@@ -249,12 +250,11 @@ public final class LodShaderSupport {
         if (reattach && dhPrograms) {
             attachDepth();
         }
-        RenderSystem.depthMask(true);
-        RenderSystem.clearDepth(1.0);
+        GlStateManager._depthMask(true);
         depthTarget.bind();
-        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+        GlStateManager._clear(GL11C.GL_DEPTH_BUFFER_BIT);
         depthNoWaterTarget.bind();
-        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+        GlStateManager._clear(GL11C.GL_DEPTH_BUFFER_BIT);
     }
 
     /**
@@ -276,11 +276,11 @@ public final class LodShaderSupport {
             return;
         }
         pipeline.setPhase(WorldRenderingPhase.TERRAIN_SOLID);
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthFunc(GL11.GL_LEQUAL);
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthFunc(GL11C.GL_LEQUAL);
+        GlStateManager._depthMask(true);
+        GlStateManager._enableCull();
+        GL11C.glDisable(GL11C.GL_BLEND);
         draw(program, target, visible, camera, clipRadius, projection, false);
         pipeline.setPhase(WorldRenderingPhase.NONE);
         opaqueDrawnThisFrame = true;
@@ -307,17 +307,18 @@ public final class LodShaderSupport {
         if (!anyWater) {
             return;
         }
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthFunc(GL11.GL_LEQUAL);
-        RenderSystem.depthMask(true);
-        RenderSystem.disableCull();
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthFunc(GL11C.GL_LEQUAL);
+        GlStateManager._depthMask(true);
+        GlStateManager._disableCull();
+        GL11C.glEnable(GL11C.GL_BLEND);
+        GlStateManager._blendFuncSeparate(GL11C.GL_SRC_ALPHA, GL11C.GL_ONE_MINUS_SRC_ALPHA,
+                GL11C.GL_ONE, GL11C.GL_ONE_MINUS_SRC_ALPHA);
         draw(program, target, visible, camera, clipRadius, projection, true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
-        RenderSystem.defaultBlendFunc();
+        GlStateManager._enableCull();
+        GL11C.glDisable(GL11C.GL_BLEND);
+        GlStateManager._blendFuncSeparate(GL11C.GL_SRC_ALPHA, GL11C.GL_ONE_MINUS_SRC_ALPHA,
+                GL11C.GL_ONE, GL11C.GL_ZERO);
     }
 
     /** The projection of the pass: the LOD's depth range with Distant Horizons programs, the game's own otherwise. */
@@ -330,9 +331,6 @@ public final class LodShaderSupport {
 
     private void draw(LodProgram program, GlFramebuffer target, List<NativeLodRenderer.SectorMesh> visible, Vec3 camera, float clipRadius,
             Matrix4fc projection, boolean waterPass) {
-        Minecraft mc = Minecraft.getInstance();
-        LightTexture lightTexture = mc.gameRenderer.lightTexture();
-        lightTexture.turnOnLightLayer();
         if (!dhPrograms) {
             // The pack samples normals and specular at the LOD's texture coordinate: give it the neutral maps.
             pipeline.useNeutralPbrTextures();
@@ -340,11 +338,12 @@ public final class LodShaderSupport {
             GlStateManager._polygonOffset(0.0F, FALLBACK_DEPTH_UNITS);
         }
         program.bind();
-        ShaderRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), ShaderSamplers.LIGHTMAP_TEXTURE_UNIT, RenderSystem.getShaderTexture(2));
+        GpuTextureView lightTexView = Minecraft.getInstance().gameRenderer.levelLightmap();
+        int lightTexId = lightTexView != null ? ((GlTexture) lightTexView.texture()).glId() : 0;
+        ShaderRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), ShaderSamplers.LIGHTMAP_TEXTURE_UNIT, lightTexId);
         program.update(modelView, projection, clipRadius, width, height);
         program.setGenericAttributes(true);
         target.bind();
-        RenderSystem.AutoStorageIndexBuffer indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
         float drop = waterPass ? NativeLodRenderer.WATER_DROP : 0.0F;
         int count = visible.size();
         for (int k = 0; k < count; k++) {
@@ -355,17 +354,17 @@ public final class LodShaderSupport {
             }
             program.setModelOffset((float) (mesh.originX() - camera.x), (float) (-NativeLodMesher.Y_BIAS - drop - camera.y),
                     (float) (mesh.originZ() - camera.z));
-            NativeLodRenderer.draw(mesh, waterPass, indices);
+            NativeLodRenderer.draw(mesh, waterPass);
         }
         program.setGenericAttributes(false);
         program.unbind();
-        VertexBuffer.unbind();
+        GL30C.glBindVertexArray(0);
+        GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
         if (!dhPrograms) {
             GlStateManager._polygonOffset(0.0F, 0.0F);
             GlStateManager._disablePolygonOffset();
         }
-        lightTexture.turnOffLightLayer();
-        Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
+        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
     }
 
     /** Frees the programs and depth buffers; the colour framebuffers belong to the pipeline's render targets. */
@@ -461,7 +460,7 @@ public final class LodShaderSupport {
                 }
             }
 
-            ProgramManager.glUseProgram(id);
+            GL20C.glUseProgram(id);
             customUniforms = pipeline.getCustomUniforms();
             ProgramUniforms.Builder uniformBuilder = ProgramUniforms.builder(name, id);
             ProgramSamplers.Builder samplerBuilder = ProgramSamplers.builder(id, ShaderSamplers.WORLD_RESERVED_TEXTURE_UNITS);
@@ -501,7 +500,7 @@ public final class LodShaderSupport {
             midTexCoordAttribute = GL20C.glGetAttribLocation(id, "mc_midTexCoord");
             tangentAttribute = GL20C.glGetAttribLocation(id, "at_tangent");
             midBlockAttribute = GL20C.glGetAttribLocation(id, "at_midBlock");
-            ProgramManager.glUseProgram(0);
+            GL20C.glUseProgram(0);
         }
 
         static LodProgram create(String name, ProgramSource source, boolean translucent, ShadedWorldRenderingPipeline pipeline) {
@@ -527,7 +526,7 @@ public final class LodShaderSupport {
         }
 
         void bind() {
-            ProgramManager.glUseProgram(id);
+            GL20C.glUseProgram(id);
             if (blend != null) {
                 blend.apply();
             }
@@ -587,7 +586,7 @@ public final class LodShaderSupport {
         }
 
         void unbind() {
-            ProgramManager.glUseProgram(0);
+            GL20C.glUseProgram(0);
             ProgramUniforms.clearActiveUniforms();
             ProgramSamplers.clearActiveSamplers();
             BlendModeOverride.restore();

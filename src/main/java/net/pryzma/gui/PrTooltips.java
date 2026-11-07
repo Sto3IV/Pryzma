@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -30,7 +30,7 @@ final class PrTooltips {
     }
 
     /** @param keyOf tooltip key of a widget, or {@code null} when it has none */
-    void render(GuiGraphics g, int x, int y, List<AbstractWidget> widgets, Function<AbstractWidget, String> keyOf) {
+    void render(GuiGraphicsExtractor g, int x, int y, List<AbstractWidget> widgets, Function<AbstractWidget, String> keyOf) {
         if (Math.abs(x - lastX) > 5 || Math.abs(y - lastY) > 5) {
             lastX = x;
             lastY = y;
@@ -57,21 +57,19 @@ final class PrTooltips {
         if (y <= y1 + panelHeight + 4) {
             y1 += panelHeight + 11;
         }
-        g.pose().pushPose();
-        g.pose().translate(0.0F, 0.0F, 400.0F);
+        g.nextStratum();
         g.fill(x1, y1, x1 + panelWidth, y1 + panelHeight, PANEL);
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
-            g.drawString(screen.getMinecraft().font, line, x1 + 7, y1 + 6 + i * 11, line.endsWith("!") ? WARNING : TEXT, true);
+            g.text(screen.getMinecraft().font, line, x1 + 7, y1 + 6 + i * 11, line.endsWith("!") ? WARNING : TEXT, true);
         }
-        g.pose().popPose();
     }
 
     static List<String> lines(String key) {
         List<String> lines = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             String lineKey = key + ".tooltip." + i;
-            if (!I18n.exists(lineKey)) {
+            if (!net.minecraft.locale.Language.getInstance().has(lineKey)) {
                 break;
             }
             lines.add(I18n.get(lineKey));

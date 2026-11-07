@@ -1,14 +1,15 @@
 package net.pryzma.shader.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class OldImageButton extends Button {
-	protected final ResourceLocation resourceLocation;
+	protected final Identifier resourceLocation;
 	protected final int xTexStart;
 	protected final int yTexStart;
 	protected final int yDiffTex;
@@ -16,7 +17,7 @@ public class OldImageButton extends Button {
 	protected final int textureHeight;
 
 	public OldImageButton(
-		int pImageButton0, int pInt1, int pInt2, int pInt3, int pInt4, int pInt5, ResourceLocation pResourceLocation6, Button.OnPress pButton$OnPress7
+		int pImageButton0, int pInt1, int pInt2, int pInt3, int pInt4, int pInt5, Identifier pResourceLocation6, Button.OnPress pButton$OnPress7
 	) {
 		this(pImageButton0, pInt1, pInt2, pInt3, pInt4, pInt5, pInt3, pResourceLocation6, 256, 256, pButton$OnPress7);
 	}
@@ -29,7 +30,7 @@ public class OldImageButton extends Button {
 		int pInt4,
 		int pInt5,
 		int pInt6,
-		ResourceLocation pResourceLocation7,
+		Identifier pResourceLocation7,
 		Button.OnPress pButton$OnPress8
 	) {
 		this(pImageButton0, pInt1, pInt2, pInt3, pInt4, pInt5, pInt6, pResourceLocation7, 256, 256, pButton$OnPress8);
@@ -43,7 +44,7 @@ public class OldImageButton extends Button {
 		int pInt4,
 		int pInt5,
 		int pInt6,
-		ResourceLocation pResourceLocation7,
+		Identifier pResourceLocation7,
 		int pInt8,
 		int pInt9,
 		Button.OnPress pButton$OnPress10
@@ -59,7 +60,7 @@ public class OldImageButton extends Button {
 		int pInt4,
 		int pInt5,
 		int pInt6,
-		ResourceLocation pResourceLocation7,
+		Identifier pResourceLocation7,
 		int pInt8,
 		int pInt9,
 		Button.OnPress pButton$OnPress10,
@@ -75,7 +76,7 @@ public class OldImageButton extends Button {
 	}
 
 	@Override
-	public void renderWidget(GuiGraphics pImageButton0, int pInt1, int pInt2, float pFloat3) {
+	protected void extractContents(GuiGraphicsExtractor pImageButton0, int pInt1, int pInt2, float pFloat3) {
 		this.renderTexture(
 			pImageButton0,
 			this.resourceLocation,
@@ -92,8 +93,8 @@ public class OldImageButton extends Button {
 	}
 
 	public void renderTexture(
-		GuiGraphics pAbstractWidget0,
-		ResourceLocation pResourceLocation1,
+		GuiGraphicsExtractor pAbstractWidget0,
+		Identifier pResourceLocation1,
 		int pInt2,
 		int pInt3,
 		int pInt4,
@@ -111,7 +112,6 @@ public class OldImageButton extends Button {
 			lvInt12 = pInt5 + pInt6;
 		}
 
-		RenderSystem.enableDepthTest();
-		pAbstractWidget0.blit(pResourceLocation1, pInt2, pInt3, (float) pInt4, (float) lvInt12, pInt7, pInt8, pInt9, pInt10);
+		pAbstractWidget0.blit(RenderPipelines.GUI_TEXTURED, pResourceLocation1, pInt2, pInt3, (float) pInt4, (float) lvInt12, pInt7, pInt8, pInt9, pInt10);
 	}
 }

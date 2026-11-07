@@ -52,7 +52,7 @@ public final class DistantHorizonsBridge {
         } catch (Throwable ignored) {
         }
         try {
-            net.neoforged.fml.loading.LoadingModList loading = net.neoforged.fml.loading.LoadingModList.get();
+            net.neoforged.fml.loading.LoadingModList loading = net.neoforged.fml.loading.FMLLoader.getCurrent().getLoadingModList();
             if (loading != null && loading.getModFileById("distanthorizons") != null) {
                 return true;
             }

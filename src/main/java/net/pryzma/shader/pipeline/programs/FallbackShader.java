@@ -1,19 +1,18 @@
 package net.pryzma.shader.pipeline.programs;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.shaders.ProgramManager;
-import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.pryzma.shader.gl.ShaderRenderSystem;
 import net.pryzma.shader.gl.blending.BlendModeOverride;
 import net.pryzma.shader.gl.framebuffer.GlFramebuffer;
 import net.pryzma.shader.gl.texture.TextureType;
+import net.pryzma.shader.pbr.TextureTracker;
 import net.pryzma.shader.pipeline.ShadedWorldRenderingPipeline;
+import org.lwjgl.opengl.GL30C;
 import net.pryzma.shader.samplers.ShaderSamplers;
 import net.pryzma.shader.uniforms.CapturedRenderingState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,7 +67,7 @@ public class FallbackShader extends ShaderInstance {
 			BlendModeOverride.restore();
 		}
 
-		Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
+		GL30C.glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
 	}
 
 	@Override
@@ -85,11 +84,11 @@ public class FallbackShader extends ShaderInstance {
 			}
 		}
 
-		ShaderRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), ShaderSamplers.ALBEDO_TEXTURE_UNIT, RenderSystem.getShaderTexture(0));
-		ShaderRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), ShaderSamplers.OVERLAY_TEXTURE_UNIT, RenderSystem.getShaderTexture(1));
-		ShaderRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), ShaderSamplers.LIGHTMAP_TEXTURE_UNIT, RenderSystem.getShaderTexture(2));
+		ShaderRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), ShaderSamplers.ALBEDO_TEXTURE_UNIT, TextureTracker.INSTANCE.getShaderTexture(0));
+		ShaderRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), ShaderSamplers.OVERLAY_TEXTURE_UNIT, TextureTracker.INSTANCE.getShaderTexture(1));
+		ShaderRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), ShaderSamplers.LIGHTMAP_TEXTURE_UNIT, TextureTracker.INSTANCE.getShaderTexture(2));
 
-		ProgramManager.glUseProgram(this.getId());
+		GlStateManager._glUseProgram(this.getId());
 
 		List<Uniform> uniformList = super.uniforms;
 		for (Uniform uniform : uniformList) {

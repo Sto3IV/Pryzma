@@ -2,7 +2,7 @@ package net.pryzma.shader.shadows;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.SubmitNodeStorage;
 
 public class ShadowRenderingState {
 	private static BlockEntityRenderFunction function = (ShadowRenderer::renderBlockEntities);
@@ -15,8 +15,8 @@ public class ShadowRenderingState {
 		ShadowRenderingState.function = function;
 	}
 
-	public static int renderBlockEntities(ShadowRenderer shadowRenderer, RenderBuffers bufferSource, PoseStack modelView, Camera camera, double cameraX, double cameraY, double cameraZ, float tickDelta, boolean hasEntityFrustum, boolean lightsOnly) {
-		return function.renderBlockEntities(shadowRenderer, bufferSource, modelView, camera, cameraX, cameraY, cameraZ, tickDelta, hasEntityFrustum, lightsOnly);
+	public static int renderBlockEntities(ShadowRenderer shadowRenderer, SubmitNodeStorage storage, PoseStack modelView, Camera camera, double cameraX, double cameraY, double cameraZ, float tickDelta, boolean hasEntityFrustum, boolean lightsOnly) {
+		return function.renderBlockEntities(shadowRenderer, storage, modelView, camera, cameraX, cameraY, cameraZ, tickDelta, hasEntityFrustum, lightsOnly);
 	}
 
 	public static int getRenderDistance() {
@@ -24,6 +24,6 @@ public class ShadowRenderingState {
 	}
 
 	public interface BlockEntityRenderFunction {
-		int renderBlockEntities(ShadowRenderer shadowRenderer, RenderBuffers bufferSource, PoseStack modelView, Camera camera, double cameraX, double cameraY, double cameraZ, float tickDelta, boolean hasEntityFrustum, boolean lightsOnly);
+		int renderBlockEntities(ShadowRenderer shadowRenderer, SubmitNodeStorage storage, PoseStack modelView, Camera camera, double cameraX, double cameraY, double cameraZ, float tickDelta, boolean hasEntityFrustum, boolean lightsOnly);
 	}
 }

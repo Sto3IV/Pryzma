@@ -64,7 +64,7 @@ public class HardcodedCustomUniforms {
 				return 0;
 			} else {
 				// Easiest way to check for "swamp" on 1.19.
-				return storedBiome.is(BiomeTags.HAS_CLOSER_WATER_FOG) ? 1 : 0;
+				return storedBiome.is(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BIOME, net.minecraft.resources.Identifier.withDefaultNamespace("has_closer_water_fog"))) ? 1 : 0;
 			}
 		}, updateNotifier));
 		holder.uniform1f(UniformUpdateFrequency.PER_FRAME, "BiomeTemp", () -> {
@@ -119,12 +119,12 @@ public class HardcodedCustomUniforms {
 	}
 
 	private static float getEyeSkyBrightness() {
-		if (client.cameraEntity == null || client.level == null) {
+		if (client.getCameraEntity() == null || client.level == null) {
 			return 0;
 		}
 
-		Vec3 feet = client.cameraEntity.position();
-		Vec3 eyes = new Vec3(feet.x, client.cameraEntity.getEyeY(), feet.z);
+		Vec3 feet = client.getCameraEntity().position();
+		Vec3 eyes = new Vec3(feet.x, client.getCameraEntity().getEyeY(), feet.z);
 		BlockPos eyeBlockPos = BlockPos.containing(eyes);
 
 		int skyLight = client.level.getBrightness(LightLayer.SKY, eyeBlockPos);
@@ -157,8 +157,8 @@ public class HardcodedCustomUniforms {
 
 	private static int getWorldDayTime() {
 		Level level = Minecraft.getInstance().level;
-		long timeOfDay = level.getDayTime();
-		long dayTime = level.dimensionType().fixedTime().orElse(timeOfDay % 24000L);
+		long timeOfDay = level.getDefaultClockTime();
+		long dayTime = timeOfDay % 24000L;
 
 		return (int) dayTime;
 	}
@@ -183,7 +183,7 @@ public class HardcodedCustomUniforms {
 		if (storedBiome == null) {
 			return 0;
 		}
-		Biome.Precipitation precipitation = storedBiome.value().getPrecipitationAt(Minecraft.getInstance().cameraEntity.blockPosition());
+		Biome.Precipitation precipitation = storedBiome.value().getPrecipitationAt(Minecraft.getInstance().getCameraEntity().blockPosition(), Minecraft.getInstance().level.getSeaLevel());
 		return switch (precipitation) {
 			case RAIN -> 1;
 			case SNOW -> 2;

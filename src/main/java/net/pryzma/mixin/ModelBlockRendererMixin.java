@@ -10,19 +10,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockQuadOutput;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import net.pryzma.PryzmaConfig;
 import net.pryzma.render.PrBetterGrass;
 import net.pryzma.render.PrBetterSnow;
@@ -34,7 +31,7 @@ import net.pryzma.render.PrNaturalTextures;
 @Mixin(ModelBlockRenderer.class)
 abstract class ModelBlockRendererMixin {
     @ModifyVariable(
-        method = "tesselateBlock(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;JILnet/neoforged/neoforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V",
+        method = "tesselateBlock(Lnet/minecraft/client/renderer/block/BlockQuadOutput;FFFLnet/minecraft/client/renderer/block/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/client/renderer/block/dispatch/BlockStateModel;J)V",
         at = @At("HEAD"),
         argsOnly = true
     )
@@ -43,49 +40,43 @@ abstract class ModelBlockRendererMixin {
     }
 
     @Inject(
-        method = "tesselateBlock(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;JILnet/neoforged/neoforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V",
+        method = "tesselateBlock(Lnet/minecraft/client/renderer/block/BlockQuadOutput;FFFLnet/minecraft/client/renderer/block/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/client/renderer/block/dispatch/BlockStateModel;J)V",
         at = @At("HEAD")
     )
     private void prCaptureContext(
+        BlockQuadOutput output,
+        float x,
+        float y,
+        float z,
         BlockAndTintGetter level,
-        BakedModel model,
-        BlockState state,
         BlockPos pos,
-        PoseStack poseStack,
-        VertexConsumer consumer,
-        boolean checkSides,
-        RandomSource random,
+        BlockState state,
+        BlockStateModel model,
         long seed,
-        int packedOverlay,
-        ModelData modelData,
-        RenderType renderType,
         CallbackInfo ci
     ) {
         PrBetterGrass.setContext(level, pos, state);
     }
 
     @Inject(
-        method = "tesselateBlock(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;JILnet/neoforged/neoforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V",
+        method = "tesselateBlock(Lnet/minecraft/client/renderer/block/BlockQuadOutput;FFFLnet/minecraft/client/renderer/block/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/client/renderer/block/dispatch/BlockStateModel;J)V",
         at = @At("RETURN")
     )
     private void prRenderBetterSnowAndClear(
+        BlockQuadOutput output,
+        float x,
+        float y,
+        float z,
         BlockAndTintGetter level,
-        BakedModel model,
-        BlockState state,
         BlockPos pos,
-        PoseStack poseStack,
-        VertexConsumer consumer,
-        boolean checkSides,
-        RandomSource random,
+        BlockState state,
+        BlockStateModel model,
         long seed,
-        int packedOverlay,
-        ModelData modelData,
-        RenderType renderType,
         CallbackInfo ci
     ) {
         try {
             if (PryzmaConfig.prBetterSnow && !PrBetterSnow.isRenderingSnow() && PrBetterSnow.shouldRender(level, state, pos)) {
-                PrBetterSnow.renderSnow((ModelBlockRenderer) (Object) this, level, state, pos, poseStack, consumer, random, seed, packedOverlay, renderType);
+                PrBetterSnow.renderSnow((ModelBlockRenderer) (Object) this, output, x, y, z, level, state, pos, seed);
             }
         } finally {
             PrBetterGrass.clearContext();
@@ -94,18 +85,14 @@ abstract class ModelBlockRendererMixin {
 
     @WrapOperation(
         method = {
-            "tesselateWithAO(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;JILnet/neoforged/neoforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V",
-            "tesselateWithoutAO(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;JILnet/neoforged/neoforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V"
+            "tesselateAmbientOcclusion",
+            "tesselateFlat"
         },
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/BakedModel;getQuads(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;Lnet/minecraft/util/RandomSource;Lnet/neoforged/neoforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)Ljava/util/List;")
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/dispatch/BlockStateModelPart;getQuads(Lnet/minecraft/core/Direction;)Ljava/util/List;")
     )
     private List<BakedQuad> prBetterGrassQuads(
-        BakedModel model,
-        BlockState state,
+        BlockStateModelPart part,
         Direction direction,
-        RandomSource random,
-        ModelData modelData,
-        RenderType renderType,
         Operation<List<BakedQuad>> original
     ) {
         if (PrBetterSnow.isRenderingSnow()) {
@@ -120,17 +107,17 @@ abstract class ModelBlockRendererMixin {
                     }
                 }
             }
-            return original.call(model, state, direction, random, modelData, renderType);
+            return original.call(part, direction);
         }
         List<BakedQuad> quads = null;
         if (direction != null && direction.getAxis().isHorizontal() && PryzmaConfig.isBetterGrass()) {
-            quads = PrBetterGrass.getFaceQuads(model, state, direction, random, modelData, renderType);
+            quads = PrBetterGrass.getFaceQuads(part, direction);
         }
         if (quads == null) {
-            quads = original.call(model, state, direction, random, modelData, renderType);
+            quads = original.call(part, direction);
         }
         if (PryzmaConfig.prNaturalTextures) {
-            quads = PrNaturalTextures.processQuads(state, PrBetterGrass.getCurrentPos(), direction, quads);
+            quads = PrNaturalTextures.processQuads(PrBetterGrass.getCurrentState(), PrBetterGrass.getCurrentPos(), direction, quads);
         }
         return quads;
     }

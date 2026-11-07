@@ -11,19 +11,19 @@ import org.junit.jupiter.api.Test;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.pryzma.core.res.PrProperties;
 
 class PrRandomPropertiesTest {
-    record Mob(int randomId, BlockPos spawnPos, ResourceLocation spawnBiome, String name, int health, int maxHealth,
-            ResourceLocation profession, int professionLevel, DyeColor color, Boolean baby, int size, CompoundTag nbt,
+    record Mob(int randomId, BlockPos spawnPos, Identifier spawnBiome, String name, int health, int maxHealth,
+            Identifier profession, int professionLevel, DyeColor color, Boolean baby, int size, CompoundTag nbt,
             BlockState blockState) implements PrEntityInfo {
         /** A full-health adult nitwit: a profession no test rule lists, so profession rules apply and fail. */
         static Mob at(int id, String biome, int y) {
-            return new Mob(id, new BlockPos(0, y, 0), ResourceLocation.withDefaultNamespace(biome), null, 20, 20,
-                    ResourceLocation.withDefaultNamespace("nitwit"), 1, null, false, -1, new CompoundTag(), null);
+            return new Mob(id, new BlockPos(0, y, 0), Identifier.withDefaultNamespace(biome), null, 20, 20,
+                    Identifier.withDefaultNamespace("nitwit"), 1, null, false, -1, new CompoundTag(), null);
         }
 
         Mob named(String n) {
@@ -35,7 +35,7 @@ class PrRandomPropertiesTest {
         }
 
         Mob villager(String prof, int level) {
-            return new Mob(randomId, spawnPos, spawnBiome, name, health, maxHealth, ResourceLocation.withDefaultNamespace(prof), level,
+            return new Mob(randomId, spawnPos, spawnBiome, name, health, maxHealth, Identifier.withDefaultNamespace(prof), level,
                     color, baby, size, nbt, blockState);
         }
 
@@ -51,7 +51,7 @@ class PrRandomPropertiesTest {
     private final List<String> warnings = new ArrayList<>();
 
     private PrRandomProperties<String> parse(String text) {
-        PrProperties props = PrProperties.parse(ResourceLocation.withDefaultNamespace("optifine/random/entity/test.properties"), text);
+        PrProperties props = PrProperties.parse(Identifier.withDefaultNamespace("optifine/random/entity/test.properties"), text);
         return PrRandomProperties.parse(props, new String[] {"textures", "skins"},
                 i -> i >= 1 && i <= 10 ? "tex" + i : null, id -> true, warnings::add);
     }
@@ -126,7 +126,7 @@ class PrRandomPropertiesTest {
         assertEquals("tex3", p.select(Mob.at(0, "plains", 64).hurt(8), NOON, "base", null), "8 of 20 is 40 percent");
         assertEquals("base", p.select(Mob.at(0, "plains", 64).villager("librarian", 2), NOON, "base", null),
                 "level 2 is not listed and the villager is at full health");
-        Mob noProfession = new Mob(0, new BlockPos(0, 64, 0), ResourceLocation.withDefaultNamespace("plains"), null, 20, 20,
+        Mob noProfession = new Mob(0, new BlockPos(0, 64, 0), Identifier.withDefaultNamespace("plains"), null, 20, 20,
                 null, 0, null, false, -1, new CompoundTag(), null);
         assertEquals("tex2", p.select(noProfession, NOON, "base", null), "a profession rule does not apply to non-villagers");
         assertEquals("tex4", p.select(Mob.at(0, "plains", 64), new World(4, 18000, PrWorldInfo.Weather.RAIN), "base", null));

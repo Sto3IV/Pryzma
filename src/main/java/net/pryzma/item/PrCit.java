@@ -11,10 +11,9 @@ import java.util.WeakHashMap;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.pryzma.core.res.PrPaths;
@@ -28,12 +27,6 @@ import net.pryzma.entity.model.PrCemContext;
  * renamed items costs one comparison per item per frame. All state is render-thread only.
  */
 public final class PrCit {
-    /** The vanilla override resolution, handed in by the item model hook. */
-    @FunctionalInterface
-    public interface Resolver {
-        BakedModel resolve(ItemOverrides overrides, BakedModel model);
-    }
-
     /** What an item or armor render replaced, restored when it ends. */
     public record Scope(ItemStack glintStack, ItemDisplayContext itemContext) {
     }
@@ -85,31 +78,23 @@ public final class PrCit {
 
     // ------------------------------------------------------------------ items
 
-    /** Whether any item rule names the stack's item; a cheap test before {@link #resolve}. */
+    /** Whether any item rule names the stack's item; a cheap test before {@link #resolveModel}. */
     public static boolean hasRules(ItemStack stack) {
         return !stack.isEmpty() && index.items.containsKey(stack.getItem());
     }
 
     /**
-     * The model to draw for {@code stack}, around vanilla's override resolution. A sub-model named
-     * after the resolved override ({@code model.shield_blocking}) wins; otherwise a replacement
-     * model resolves its own overrides; otherwise a texture rule re-skins the resolved model.
+     * Resolves the custom CIT model to draw for {@code stack}, or null if no CIT item rule matches.
      */
-    public static BakedModel resolve(ItemStack stack, ItemOverrides overrides, BakedModel model, Resolver vanilla) {
+    public static ItemModel resolveModel(ItemStack stack) {
         PrCitEntry entry = find(stack, PrCitRule.Type.ITEM);
-        BakedModel resolved = vanilla.resolve(overrides, model);
-        if (entry == null || resolved == null) {
-            return resolved;
-        }
-        ResourceLocation location = PrCitOverrides.location(resolved, model);
-        BakedModel sub = entry.subModel(location);
-        if (sub != null) {
-            return sub;
+        if (entry == null) {
+            return null;
         }
         if (entry.model != null) {
-            return vanilla.resolve(entry.model.getOverrides(), entry.model);
+            return entry.model;
         }
-        return entry.textured(resolved, location);
+        return entry.texture;
     }
 
     /** Called around every item drawn by the hand renderer: which hand rules with {@code hand=} see. */
@@ -146,19 +131,19 @@ public final class PrCit {
      * vanilla layer's file name ({@code diamond_layer_1}, {@code leather_layer_2_overlay}), else
      * {@code texture}.
      */
-    public static ResourceLocation armorTexture(ItemStack stack, ResourceLocation original) {
+    public static Identifier armorTexture(ItemStack stack, Identifier original) {
         PrCitEntry entry = find(stack, PrCitRule.Type.ARMOR);
         if (entry == null) {
             return original;
         }
-        ResourceLocation texture = entry.plainTextures.get(PrPaths.baseName(original.getPath()));
+        Identifier texture = entry.plainTextures.get(PrPaths.baseName(original.getPath()));
         if (texture == null) {
             texture = entry.plainTexture;
         }
         return texture != null ? texture : original;
     }
 
-    public static ResourceLocation elytraTexture(ItemStack stack, ResourceLocation original) {
+    public static Identifier elytraTexture(ItemStack stack, Identifier original) {
         PrCitEntry entry = find(stack, PrCitRule.Type.ELYTRA);
         return entry == null || entry.plainTexture == null ? original : entry.plainTexture;
     }
@@ -226,7 +211,7 @@ public final class PrCit {
             return PrCitGlint.Effects.NONE;
         }
         Map<PrCitEntry, Integer> levels = new IdentityHashMap<>();
-        ResourceLocation item = view.item();
+        Identifier item = view.item();
         for (int i = 0; i < n; i++) {
             PrCitEntry[] entries = current.enchantments.get(view.enchantment(i));
             if (entries == null) {

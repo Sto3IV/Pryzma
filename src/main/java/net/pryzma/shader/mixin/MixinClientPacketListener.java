@@ -23,13 +23,13 @@ public class MixinClientPacketListener {
 		}
 
 		PryzmaShaders.getStoredError().ifPresent(e ->
-			Minecraft.getInstance().player.displayClientMessage(Component.translatable(e instanceof ShaderCompileException ? "pryzma.load.failure.shader" : "pryzma.load.failure.generic").append(Component.literal("Copy Info").withStyle(arg -> arg.withUnderlined(true).withColor(ChatFormatting.BLUE).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, e.getMessage())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))))), false));
+			Minecraft.getInstance().player.sendSystemMessage(Component.translatable(e instanceof ShaderCompileException ? "pryzma.load.failure.shader" : "pryzma.load.failure.generic").append(Component.literal("Copy Info").withStyle(arg -> arg.withUnderlined(true).withColor(ChatFormatting.BLUE).withClickEvent(new ClickEvent.CopyToClipboard(e.getMessage())).withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.copy.click")))))));
 
 		if (PryzmaShaders.loadedIncompatiblePack()) {
-			Minecraft.getInstance().gui.setTimes(10, 70, 140);
+			Minecraft.getInstance().gui.hud.setTimes(10, 70, 140);
 			PryzmaShaders.logger.warn("Incompatible pack for DH!");
-			Minecraft.getInstance().player.displayClientMessage(Component.literal("This pack doesn't have DH support.").withStyle(ChatFormatting.BOLD, ChatFormatting.RED), false);
-			Minecraft.getInstance().player.displayClientMessage(Component.literal("Distant Horizons (DH) chunks won't show up. This isn't a bug, get another shader.").withStyle(ChatFormatting.RED), false);
+			Minecraft.getInstance().player.sendSystemMessage(Component.literal("This pack doesn't have DH support.").withStyle(ChatFormatting.BOLD, ChatFormatting.RED));
+			Minecraft.getInstance().player.sendSystemMessage(Component.literal("Distant Horizons (DH) chunks won't show up. This isn't a bug, get another shader.").withStyle(ChatFormatting.RED));
 		}
 	}
 }

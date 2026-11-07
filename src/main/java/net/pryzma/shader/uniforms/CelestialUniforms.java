@@ -69,7 +69,13 @@ public final class CelestialUniforms {
 	}
 
 	private static float getSkyAngle() {
-		return getWorld().getTimeOfDay(CapturedRenderingState.INSTANCE.getTickDelta());
+		long time = getWorld().getDefaultClockTime();
+		float partialTick = CapturedRenderingState.INSTANCE.getTickDelta();
+		double d = (double)(time % 24000L) / 24000.0 - 0.25 + (double) partialTick / 24000.0;
+		if (d < 0.0) d += 1.0;
+		if (d > 1.0) d -= 1.0;
+		double e = 0.5 - Math.cos(d * Math.PI) / 2.0;
+		return (float) (d * 2.0 + e) / 3.0F;
 	}
 
 	public void addCelestialUniforms(UniformHolder uniforms) {

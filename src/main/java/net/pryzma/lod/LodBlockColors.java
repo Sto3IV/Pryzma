@@ -13,10 +13,11 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -28,7 +29,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MapColor;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import net.pryzma.Pryzma;
 
 /**
@@ -221,7 +221,7 @@ public final class LodBlockColors {
     /** Computes queued colours within a time budget. Render thread, once per client tick. */
     public static void tick() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.getOverlay() != null) {
+        if (mc.gui.overlay() != null) {
             return;
         }
         if (reloadPending) {
@@ -270,7 +270,7 @@ public final class LodBlockColors {
             return LodMaterial.AIR;
         }
         FluidState fluid = state.getFluidState();
-        if (!fluid.isEmpty() && !state.blocksMotion()) {
+        if (!fluid.isEmpty() && (state.canBeReplaced() || state.isAir())) {
             return fluid.is(FluidTags.LAVA) ? LodMaterial.LAVA : LodMaterial.WATER;
         }
         if (LodWorldScanner.isFoliage(state)) {
@@ -306,7 +306,7 @@ public final class LodBlockColors {
         if (state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.STONE_ORE_REPLACEABLES)) {
             return LodMaterial.STONE;
         }
-        if (state.is(Blocks.IRON_BLOCK) || state.is(Blocks.GOLD_BLOCK) || state.is(Blocks.COPPER_BLOCK)
+        if (state.is(Blocks.IRON_BLOCK) || state.is(Blocks.GOLD_BLOCK) || Blocks.COPPER_BLOCK.asList().contains(state.getBlock())
                 || state.is(Blocks.NETHERITE_BLOCK)) {
             return LodMaterial.METAL;
         }
@@ -333,20 +333,23 @@ public final class LodBlockColors {
      */
     private static int compute(BlockState state) {
         try {
-            BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
-            List<BakedQuad> quads = topQuads(model, state);
+            BlockStateModel model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(state);
+            List<BakedQuad> quads = topQuads(model);
             boolean anyTinted = false;
             for (BakedQuad quad : quads) {
-                anyTinted |= quad.isTinted();
+                anyTinted |= quad.materialInfo().isTinted();
             }
             long[] sum = new long[5];
             for (BakedQuad quad : quads) {
-                if (!anyTinted || quad.isTinted()) {
-                    addSprite(quad.getSprite(), sum);
+                if (!anyTinted || quad.materialInfo().isTinted()) {
+                    addSprite(quad.materialInfo().sprite(), sum);
                 }
             }
             if (sum[3] == 0) {
-                addSprite(model.getParticleIcon(ModelData.EMPTY), sum);
+                var particleMat = Minecraft.getInstance().getModelManager().getBlockStateModelSet().getParticleMaterial(state);
+                if (particleMat != null) {
+                    addSprite(particleMat.sprite(), sum);
+                }
             }
             if (sum[3] > 0) {
                 int rgb = (int) (sum[0] / sum[3]) << 16 | (int) (sum[1] / sum[3]) << 8 | (int) (sum[2] / sum[3]);
@@ -386,7 +389,7 @@ public final class LodBlockColors {
         for (int y = 0; y < height; y += step) {
             for (int x = 0; x < width; x += step) {
                 total++;
-                int abgr = image.getPixelRGBA(x, y);
+                int abgr = image.getPixel(x, y);
                 if (abgr >>> 24 < 16) {
                     continue;
                 }
@@ -408,14 +411,14 @@ public final class LodBlockColors {
 
     private static int topTintIndex(BlockState state) {
         try {
-            BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
-            List<BakedQuad> quads = topQuads(model, state);
+            BlockStateModel model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(state);
+            List<BakedQuad> quads = topQuads(model);
             if (quads.isEmpty()) {
                 return 0;
             }
             for (BakedQuad quad : quads) {
-                if (quad.isTinted()) {
-                    return quad.getTintIndex();
+                if (quad.materialInfo().isTinted()) {
+                    return quad.materialInfo().tintIndex();
                 }
             }
             return -1;
@@ -425,11 +428,18 @@ public final class LodBlockColors {
     }
 
     /** The upward quads of a block model: the culled top face and unculled quads facing up. */
-    private static List<BakedQuad> topQuads(BakedModel model, BlockState state) {
-        List<BakedQuad> quads = new ArrayList<>(model.getQuads(state, Direction.UP, RandomSource.create(MODEL_SEED), ModelData.EMPTY, null));
-        for (BakedQuad quad : model.getQuads(state, null, RandomSource.create(MODEL_SEED), ModelData.EMPTY, null)) {
-            if (quad.getDirection() == Direction.UP) {
+    private static List<BakedQuad> topQuads(BlockStateModel model) {
+        List<BakedQuad> quads = new ArrayList<>();
+        List<BlockStateModelPart> parts = new ArrayList<>();
+        model.collectParts(RandomSource.create(MODEL_SEED), parts);
+        for (BlockStateModelPart part : parts) {
+            for (BakedQuad quad : part.getQuads(Direction.UP)) {
                 quads.add(quad);
+            }
+            for (BakedQuad quad : part.getQuads(null)) {
+                if (quad.direction() == Direction.UP) {
+                    quads.add(quad);
+                }
             }
         }
         return quads;

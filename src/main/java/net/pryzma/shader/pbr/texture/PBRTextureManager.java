@@ -1,6 +1,6 @@
 package net.pryzma.shader.pbr.texture;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.pryzma.shader.PryzmaShaders;
@@ -14,7 +14,7 @@ import net.pryzma.shader.targets.backed.NativeImageBackedSingleColorTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.Dumpable;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class PBRTextureManager {
 	private PBRTextureManager() {
 	}
 
-	private static void dumpTexture(Dumpable dumpable, ResourceLocation id, Path path) {
+	private static void dumpTexture(Dumpable dumpable, Identifier id, Path path) {
 		try {
 			dumpable.dumpContents(id, path);
 		} catch (IOException e) {
@@ -67,7 +67,6 @@ public class PBRTextureManager {
 		} catch (Exception e) {
 			//
 		}
-		texture.releaseId();
 	}
 
 	public static void notifyPBRTexturesChanged() {

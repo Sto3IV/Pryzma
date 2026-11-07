@@ -1,12 +1,13 @@
 package net.pryzma.shader.pipeline;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.shaderpack.materialmap.NamespacedId;
 import net.pryzma.shader.shaderpack.materialmap.WorldRenderingSettings;
 import net.pryzma.shader.uniforms.SystemTimeUniforms;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL20C;
 
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public class PipelineManager {
 
 			if (WorldRenderingSettings.INSTANCE.isReloadRequired()) {
 				if (Minecraft.getInstance().levelRenderer != null) {
-					Minecraft.getInstance().levelRenderer.allChanged();
+					Minecraft.getInstance().levelRenderer.resetLevelRenderData();
 				}
 
 				WorldRenderingSettings.INSTANCE.clearReloadRequired();
@@ -101,13 +102,13 @@ public class PipelineManager {
 		//
 		// Without this code, there will be weird issues when reloading certain shaderpacks.
 		for (int i = 0; i < 16; i++) {
-			GlStateManager.glActiveTexture(GL20C.GL_TEXTURE0 + i);
-			GlStateManager._bindTexture(0);
+			GL20C.glActiveTexture(GL20C.GL_TEXTURE0 + i);
+			GL11C.glBindTexture(GL11C.GL_TEXTURE_2D, 0);
 		}
 
 		// Set the active texture unit to unit 0
 		//
 		// This seems to be what most code expects. It's a sane default in any case.
-		GlStateManager.glActiveTexture(GL20C.GL_TEXTURE0);
+		GL20C.glActiveTexture(GL20C.GL_TEXTURE0);
 	}
 }

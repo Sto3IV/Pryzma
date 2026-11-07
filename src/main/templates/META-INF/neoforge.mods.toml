@@ -1,4 +1,4 @@
-# NeoForge 1.21.1 mod metadata for Pryzma.
+# NeoForge 26.3 mod metadata for Pryzma.
 modLoader="javafml"
 loaderVersion="${loader_version_range}"
 license="${mod_license}"
@@ -20,16 +20,13 @@ config="${mod_id}.mixins.json"
 [[mixins]]
 config="${mod_id}-shader.mixins.json"
 
-[[mixins]]
-config="${mod_id}-shader-batching.mixins.json"
-
 [[accessTransformers]]
 file="META-INF/accesstransformer.cfg"
 
 [[dependencies.${mod_id}]]
     modId="neoforge"
     type="required"
-    versionRange="[21.1,)"
+    versionRange="[26.3,)"
     ordering="NONE"
     side="CLIENT"
 
@@ -88,4 +85,3 @@ file="META-INF/accesstransformer.cfg"
     versionRange="[2.0.0,)"
     ordering="NONE"
     side="CLIENT"
-

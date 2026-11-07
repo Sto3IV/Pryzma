@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -30,8 +30,8 @@ class PrResourcesTest {
     @TempDir
     Path tmp;
 
-    private static ResourceLocation mc(String path) {
-        return ResourceLocation.withDefaultNamespace(path);
+    private static Identifier mc(String path) {
+        return Identifier.withDefaultNamespace(path);
     }
 
     private PathPackResources pack(String id, Map<String, String> files) throws IOException {
@@ -87,9 +87,9 @@ class PrResourcesTest {
                 "assets/othermod/optifine/sky/world0/sky9.properties", "source=./e.png",
                 "assets/minecraft/mcpatcher/sky/world0/cloud.png", "not a properties file"));
         PrResources res = resources(low, high);
-        Map<ResourceLocation, Resource> found = res.list("sky", ".properties");
+        Map<Identifier, Resource> found = res.list("sky", ".properties");
         assertEquals(List.of(
-                ResourceLocation.fromNamespaceAndPath("othermod", "optifine/sky/world0/sky9.properties"),
+                Identifier.fromNamespaceAndPath("othermod", "optifine/sky/world0/sky9.properties"),
                 mc("optifine/sky/world0/sky1.properties"),
                 mc("optifine/sky/world0/sky2.properties"),
                 mc("optifine/sky/world0/sky3.properties")).stream().sorted().toList(), List.copyOf(found.keySet()));
@@ -145,8 +145,8 @@ class PrResourcesTest {
 
     @Test
     void locationResolutionFoldsMcpatcherAndKeepsNamespace() {
-        ResourceLocation props = ResourceLocation.fromNamespaceAndPath("othermod", "optifine/sky/world0/sky1.properties");
-        assertEquals(ResourceLocation.fromNamespaceAndPath("othermod", "optifine/sky/world0/a.png"),
+        Identifier props = Identifier.fromNamespaceAndPath("othermod", "optifine/sky/world0/sky1.properties");
+        assertEquals(Identifier.fromNamespaceAndPath("othermod", "optifine/sky/world0/a.png"),
                 PrPaths.resolveLocation("./a.png", props));
         assertEquals(mc("textures/b.png"), PrPaths.resolveLocation("minecraft:textures/b.png", props));
         assertEquals(mc("optifine/c.png"), PrPaths.resolveLocation("minecraft:mcpatcher/c.png", props));

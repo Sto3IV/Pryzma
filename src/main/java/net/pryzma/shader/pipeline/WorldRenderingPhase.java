@@ -1,6 +1,7 @@
 package net.pryzma.shader.pipeline;
 
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 
 public enum WorldRenderingPhase {
 	NONE,
@@ -28,19 +29,15 @@ public enum WorldRenderingPhase {
 	WORLD_BORDER,
 	HAND_TRANSLUCENT;
 
-	public static WorldRenderingPhase fromTerrainRenderType(RenderType renderType) {
-		if (renderType == RenderType.solid()) {
+	public static WorldRenderingPhase fromTerrainLayer(ChunkSectionLayer layer) {
+		if (layer == ChunkSectionLayer.SOLID) {
 			return WorldRenderingPhase.TERRAIN_SOLID;
-		} else if (renderType == RenderType.cutout()) {
+		} else if (layer == ChunkSectionLayer.CUTOUT) {
 			return WorldRenderingPhase.TERRAIN_CUTOUT;
-		} else if (renderType == RenderType.cutoutMipped()) {
-			return WorldRenderingPhase.TERRAIN_CUTOUT_MIPPED;
-		} else if (renderType == RenderType.translucent()) {
+		} else if (layer == ChunkSectionLayer.TRANSLUCENT) {
 			return WorldRenderingPhase.TERRAIN_TRANSLUCENT;
-		} else if (renderType == RenderType.tripwire()) {
-			return WorldRenderingPhase.TRIPWIRE;
 		} else {
-			throw new IllegalStateException("Illegal render type!");
+			return WorldRenderingPhase.TERRAIN_SOLID;
 		}
 	}
 }

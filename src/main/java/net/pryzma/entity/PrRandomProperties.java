@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.pryzma.core.match.PrBiomeMatcher;
@@ -90,7 +90,7 @@ public final class PrRandomProperties<T> {
      * @param professionOk validates a profession id (the game checks its registry)
      */
     public static <T> PrRandomProperties<T> parse(PrProperties props, String[] keys, IntFunction<T> makeResource,
-            Predicate<ResourceLocation> professionOk, Consumer<String> warn) {
+            Predicate<Identifier> professionOk, Consumer<String> warn) {
         List<Rule<T>> rules = new ArrayList<>();
         int max = 10;
         for (int i = 0; i < max; i++) {
@@ -142,8 +142,8 @@ public final class PrRandomProperties<T> {
         private PrBlockMatcher blocks;
 
         /** A villager profession with optional levels ({@code librarian:1,3-4}). */
-        record Profession(ResourceLocation id, int[] levels) {
-            boolean matches(ResourceLocation profession, int level) {
+        record Profession(Identifier id, int[] levels) {
+            boolean matches(Identifier profession, int level) {
                 if (!id.equals(profession)) {
                     return false;
                 }
@@ -189,7 +189,7 @@ public final class PrRandomProperties<T> {
 
         @SuppressWarnings("unchecked")
         static <T> Rule<T> parse(PrProperties p, int n, String list, IntFunction<T> makeResource,
-                Predicate<ResourceLocation> professionOk, Consumer<String> warn) {
+                Predicate<Identifier> professionOk, Consumer<String> warn) {
             String where = p.location() + " rule " + n;
             int[] indices = parseIntList(list, warn);
             if (indices.length == 0) {
@@ -403,7 +403,7 @@ public final class PrRandomProperties<T> {
         return PrRangeList.of(lo, hi);
     }
 
-    private static Rule.Profession[] parseProfessions(String text, Predicate<ResourceLocation> ok) {
+    private static Rule.Profession[] parseProfessions(String text, Predicate<Identifier> ok) {
         if (text == null) {
             return null;
         }
@@ -422,7 +422,7 @@ public final class PrRandomProperties<T> {
                     levels = after.isEmpty() ? null : parseIntList(after, msg -> { });
                 }
             }
-            ResourceLocation id = ResourceLocation.tryParse(name.toLowerCase(Locale.ROOT));
+            Identifier id = Identifier.tryParse(name.toLowerCase(Locale.ROOT));
             if (id == null || !ok.test(id)) {
                 return INVALID_PROFESSIONS;
             }

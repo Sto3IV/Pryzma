@@ -2,11 +2,11 @@ package net.pryzma.shader.targets.backed;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 
 public class NativeImageBackedSingleColorTexture extends DynamicTexture {
 	public NativeImageBackedSingleColorTexture(int red, int green, int blue, int alpha) {
-		super(create(FastColor.ABGR32.color(alpha, blue, green, red)));
+		super(() -> "pryzma_single_color", create(ARGB.toABGR(ARGB.color(alpha, red, green, blue))));
 	}
 
 	public NativeImageBackedSingleColorTexture(int rgba) {
@@ -16,7 +16,7 @@ public class NativeImageBackedSingleColorTexture extends DynamicTexture {
 	private static NativeImage create(int color) {
 		NativeImage image = new NativeImage(NativeImage.Format.RGBA, 1, 1, false);
 
-		image.setPixelRGBA(0, 0, color);
+		image.setPixelABGR(0, 0, color);
 
 		return image;
 	}

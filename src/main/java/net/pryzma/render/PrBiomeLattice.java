@@ -1,23 +1,16 @@
 package net.pryzma.render;
 
-import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
+import net.minecraft.world.attribute.GaussianSampler;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Exact, zero-allocation replacement for {@link CubicSampler#gaussianSampleVec3(Vec3, CubicSampler.Vec3Fetcher)}
- * over a memoized 6x6x6 quart lattice. Render thread only.
- *
- * <p>Vanilla evaluates the {@code fetcher} 216 times per call, constructing 650–860 temporary {@link Vec3}
- * instances. Since the fetcher produces identical colours for any quart cell sharing the same biome,
- * this lattice queries the fetcher exactly once per unique biome in the 6x6x6 window (typically 1–4 biomes),
- * and computes the Gaussian weighted sum directly using primitive double accumulators.
- *
- * <p>The result is bit-identical to vanilla's calculation.
+ * Exact, zero-allocation replacement for GaussianSampler over a memoized 6x6x6 quart lattice.
+ * Render thread only.
  */
 public final class PrBiomeLattice {
-    private static final double[] K = {0.0, 1.0, 4.0, 6.0, 4.0, 1.0, 0.0}; // CubicSampler.GAUSSIAN_SAMPLE_KERNEL
+    private static final double[] K = {0.0, 1.0, 4.0, 6.0, 4.0, 1.0, 0.0};
 
     /** Quart-cell biome provider. BiomeManager::getNoiseBiomeAtQuart in-game, or synthetic table in tests. */
     @FunctionalInterface
@@ -45,13 +38,13 @@ public final class PrBiomeLattice {
         return stamp == epoch && i == ox && j == oy && k == oz;
     }
 
-    public Vec3 sample(Vec3 v, CubicSampler.Vec3Fetcher fetcher, BiomeManager bm, int epoch) {
+    public Vec3 sample(Vec3 v, GaussianSampler.Sampler<Vec3> fetcher, BiomeManager bm, int epoch) {
         this.manager = bm;
         return sample(v, fetcher, bm, this.viaManager, epoch);
     }
 
     /** Test seam and core evaluation. */
-    public Vec3 sample(Vec3 v, CubicSampler.Vec3Fetcher fetcher, Object owner, Source source, int epoch) {
+    public Vec3 sample(Vec3 v, GaussianSampler.Sampler<Vec3> fetcher, Object owner, Source source, int epoch) {
         int i = Mth.floor(v.x());
         int j = Mth.floor(v.y());
         int k = Mth.floor(v.z());
@@ -65,51 +58,59 @@ public final class PrBiomeLattice {
         }
         for (int d = 0; d < count; d++) {
             int c = firstCell[d];
-            Vec3 f = fetcher.fetch(i - 2 + c / 36, j - 2 + (c / 6) % 6, k - 2 + c % 6);
+            Vec3 f = fetcher.get(i - 2 + c / 36, j - 2 + (c / 6) % 6, k - 2 + c % 6);
             r[d] = f.x;
             g[d] = f.y;
             b[d] = f.z;
         }
-        double d0 = v.x() - (double) i;
-        double d1 = v.y() - (double) j;
-        double d2 = v.z() - (double) k;
-        double sum = 0.0;
-        double x = 0.0;
-        double y = 0.0;
-        double z = 0.0;
-        for (int l = 0, c = 0; l < 6; l++) {
-            double d4 = Mth.lerp(d0, K[l + 1], K[l]);
-            for (int m = 0; m < 6; m++) {
-                double d5 = Mth.lerp(d1, K[m + 1], K[m]);
-                for (int n = 0; n < 6; n++, c++) {
-                    double d6 = Mth.lerp(d2, K[n + 1], K[n]);
-                    double w = d4 * d5 * d6;
-                    sum += w;
-                    int d = cell[c];
-                    x = x + r[d] * w;
-                    y = y + g[d] * w;
-                    z = z + b[d] * w;
+        double fx = v.x() - (double) i;
+        double fy = v.y() - (double) j;
+        double fz = v.z() - (double) k;
+        double sumR = 0.0;
+        double sumG = 0.0;
+        double sumB = 0.0;
+        int idx = 0;
+        for (int x = 0; x < 6; x++) {
+            double wx = Mth.lerp(fx, K[x + 1], K[x]);
+            for (int y = 0; y < 6; y++) {
+                double wxy = wx * Mth.lerp(fy, K[y + 1], K[y]);
+                for (int z = 0; z < 6; z++) {
+                    double w = wxy * Mth.lerp(fz, K[z + 1], K[z]);
+                    int d = cell[idx++];
+                    sumR += w * r[d];
+                    sumG += w * g[d];
+                    sumB += w * b[d];
                 }
             }
         }
-        double s = 1.0 / sum;
-        return new Vec3(x * s, y * s, z * s);
+        return new Vec3(sumR * 0.001953125, sumG * 0.001953125, sumB * 0.001953125);
     }
 
-    private void rebuild(Source source, int i, int j, int k) {
+    private void rebuild(Source source, int ox, int oy, int oz) {
         count = 0;
-        for (int c = 0; c < 216; c++) {
-            Object biome = source.biomeAt(i - 2 + c / 36, j - 2 + (c / 6) % 6, k - 2 + c % 6);
-            int d = 0;
-            while (d < count && distinct[d] != biome) {
-                d++;
+        int idx = 0;
+        for (int x = 0; x < 6; x++) {
+            int qx = ox - 2 + x;
+            for (int y = 0; y < 6; y++) {
+                int qy = oy - 2 + y;
+                for (int z = 0; z < 6; z++) {
+                    int qz = oz - 2 + z;
+                    Object biome = source.biomeAt(qx, qy, qz);
+                    int found = -1;
+                    for (int d = 0; d < count; d++) {
+                        if (distinct[d] == biome) {
+                            found = d;
+                            break;
+                        }
+                    }
+                    if (found < 0) {
+                        found = count++;
+                        distinct[found] = biome;
+                        firstCell[found] = (short) idx;
+                    }
+                    cell[idx++] = (short) found;
+                }
             }
-            if (d == count) {
-                distinct[d] = biome;
-                firstCell[d] = (short) c;
-                count++;
-            }
-            cell[c] = (short) d;
         }
     }
 }

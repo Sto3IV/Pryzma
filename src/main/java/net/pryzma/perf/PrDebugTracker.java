@@ -24,7 +24,8 @@ public final class PrDebugTracker {
     private static final Int2LongOpenHashMap BUFFER_BYTES = new Int2LongOpenHashMap();
     private static final Int2LongOpenHashMap TEXTURE_BYTES = new Int2LongOpenHashMap();
 
-    private static String window;
+    private static Object window;
+    private static long windowStartNs;
     private static long lastFrameNs;
     private static long worstFrameNs;
     private static int chunkUpdates;
@@ -42,15 +43,19 @@ public final class PrDebugTracker {
 
     /** Once per frame, before it is drawn. */
     public static void tick() {
-        tick(System.nanoTime(), Minecraft.getInstance().fpsString);
+        long now = System.nanoTime();
+        if (now - windowStartNs >= 1_000_000_000L) {
+            windowStartNs = now;
+            window = new Object();
+        }
+        tick(now, window);
     }
 
     /**
-     * {@code fpsWindow} is replaced by Minecraft once per second, so a new instance closes the
-     * window. The frame measured here ended before that replacement and belongs to the old window,
-     * where Minecraft counted it.
+     * {@code fpsWindow} is replaced once per second, so a new instance closes the
+     * window. The frame measured here ended before that replacement and belongs to the old window.
      */
-    static void tick(long now, String fpsWindow) {
+    static void tick(long now, Object fpsWindow) {
         if (lastFrameNs != 0L) {
             worstFrameNs = Math.max(worstFrameNs, now - lastFrameNs);
         }

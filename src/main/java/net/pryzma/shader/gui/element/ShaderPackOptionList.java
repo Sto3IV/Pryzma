@@ -15,22 +15,25 @@ import net.pryzma.shader.shaderpack.option.menu.OptionMenuContainer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import com.mojang.blaze3d.platform.InputConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +45,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<ShaderPackOptionList.BaseEntry> {
-	private static final ResourceLocation MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/menu_background.png");
+	private static final Identifier MENU_LIST_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/menu_background.png");
 	private final List<AbstractElementWidget<?>> elementWidgets = new ArrayList<>();
 	private final ShaderPackScreen screen;
 	private final NavigationController navigation;
@@ -76,39 +79,31 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 	}
 
 	@Override
-	protected void renderListBackground(GuiGraphics pAbstractSelectionList0) {
+	protected void extractListBackground(GuiGraphicsExtractor pAbstractSelectionList0) {
 		if (screen.listTransition.getAsFloat() < 0.02f) return;
-		RenderSystem.enableBlend();
-		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, screen.listTransition.getAsFloat());
 		pAbstractSelectionList0.blit(
+			RenderPipelines.GUI_TEXTURED,
 			MENU_LIST_BACKGROUND,
 			this.getX(),
 			this.getY() + 3,
 			(float) this.getRight(),
-			(float) (this.getBottom() + (int) this.getScrollAmount()),
+			(float) (this.getBottom() + (int) this.scrollAmount()),
 			this.getWidth(),
 			this.getHeight(),
 			32,
 			32
 		);
-
-		RenderSystem.disableBlend();
-		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	@Override
-	protected void renderListSeparators(GuiGraphics pAbstractSelectionList0) {
-		RenderSystem.enableBlend();
-		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, screen.listTransition.getAsFloat());
-		pAbstractSelectionList0.blit(CreateWorldScreen.HEADER_SEPARATOR, this.getX(), this.getY() + 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
-		pAbstractSelectionList0.blit(CreateWorldScreen.FOOTER_SEPARATOR, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
-		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-		RenderSystem.disableBlend();
+	protected void extractListSeparators(GuiGraphicsExtractor pAbstractSelectionList0) {
+		pAbstractSelectionList0.blit(RenderPipelines.GUI_TEXTURED, Screen.HEADER_SEPARATOR, this.getX(), this.getY() + 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
+		pAbstractSelectionList0.blit(RenderPipelines.GUI_TEXTURED, Screen.FOOTER_SEPARATOR, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
 	}
 
 	@Override
-	protected boolean isValidMouseClick(int i) {
-		return i == GLFW.GLFW_MOUSE_BUTTON_1 || i == GLFW.GLFW_MOUSE_BUTTON_2;
+	protected boolean isValidClickButton(MouseButtonInfo info) {
+		return info.button() == InputConstants.MOUSE_BUTTON_LEFT || info.button() == InputConstants.MOUSE_BUTTON_RIGHT;
 	}
 
 	public void addHeader(Component text, boolean backButton) {
@@ -164,7 +159,12 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 		}
 
 		@Override
-		public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+		public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			int x = getX();
+			int y = getY();
+			int entryWidth = getWidth();
+			int entryHeight = getHeight();
+
 			this.cachedWidth = entryWidth;
 			this.cachedPosX = x;
 
@@ -194,13 +194,13 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 		}
 
 		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button) {
-			return this.widgets.get(getHoveredWidget((int) mouseX)).mouseClicked(mouseX, mouseY, button);
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+			return this.widgets.get(getHoveredWidget((int) event.x())).mouseClicked(event, doubleClick);
 		}
 
 		@Override
-		public boolean mouseReleased(double mouseX, double mouseY, int button) {
-			return this.widgets.get(getHoveredWidget((int) mouseX)).mouseReleased(mouseX, mouseY, button);
+		public boolean mouseReleased(MouseButtonEvent event) {
+			return this.widgets.get(getHoveredWidget((int) event.x())).mouseReleased(event);
 		}
 
 		@Override
@@ -266,14 +266,19 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 		}
 
 		@Override
-		public void render(GuiGraphics guiGraphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+		public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+			int x = getX();
+			int y = getY();
+			int entryWidth = getWidth();
+			int entryHeight = getHeight();
+
 			// Draw dividing line
 			guiGraphics.fill(x - 3, (y + entryHeight) - 2, x + entryWidth, (y + entryHeight) - 1, 0x66BEBEBE);
 
 			Font font = Minecraft.getInstance().font;
 
 			// Draw header text
-			renderScrollingString(guiGraphics, font, text, x + (int) (entryWidth * 0.5), x + 5, y + 5, ((x + entryWidth) - 10) - utilityButtons.getWidth(), y + 15, 0xFFFFFF);
+			guiGraphics.centeredText(font, text, x + (int) (entryWidth * 0.5), y + 5, 0xFFFFFF);
 
 			GuiUtil.bindWidgetsTexture();
 
@@ -282,7 +287,7 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 				backButton.render(guiGraphics, x, y, BUTTON_HEIGHT, mouseX, mouseY, tickDelta, hovered);
 			}
 
-			boolean shiftDown = Screen.hasShiftDown();
+			boolean shiftDown = GuiUtil.hasShiftDown();
 
 			// Set the appearance of the reset button
 			this.resetButton.disabled = !shiftDown && !resetButton.isFocused();
@@ -305,7 +310,7 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 			}
 		}
 
-		private void queueBottomRightAnchoredTooltip(GuiGraphics guiGraphics, int x, int y, Font font, Component text) {
+		private void queueBottomRightAnchoredTooltip(GuiGraphicsExtractor guiGraphics, int x, int y, Font font, Component text) {
 			ShaderPackScreen.TOP_LAYER_RENDER_QUEUE.add(() -> GuiUtil.drawTextPanel(
 				font, guiGraphics, text,
 				x - (font.width(text) + 10), y - 16
@@ -320,20 +325,20 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 		}
 
 		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button) {
-			boolean backButtonResult = backButton != null && backButton.mouseClicked(mouseX, mouseY, button);
-			boolean utilButtonResult = utilityButtons.mouseClicked(mouseX, mouseY, button);
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+			boolean backButtonResult = backButton != null && backButton.mouseClicked(event, doubleClick);
+			boolean utilButtonResult = utilityButtons.mouseClicked(event, doubleClick);
 
 			return backButtonResult || utilButtonResult;
 		}
 
 		@Override
-		public boolean keyPressed(int keycode, int scancode, int modifiers) {
-			if (backButton != null && backButton.keyPressed(keycode, scancode, modifiers)) {
+		public boolean keyPressed(KeyEvent event) {
+			if (backButton != null && backButton.keyPressed(event)) {
 				return true;
 			}
 
-			return utilityButtons.keyPressed(keycode, scancode, modifiers);
+			return utilityButtons.keyPressed(event);
 		}
 
 		@Override
@@ -349,7 +354,7 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 		}
 
 		private boolean resetButtonClicked(ShaderElementRow.TextButtonElement button) {
-			if (Screen.hasShiftDown()) {
+			if (GuiUtil.hasShiftDown()) {
 				PryzmaShaders.resetShaderPackOptionsOnNextReload();
 				this.screen.applyChanges();
 				GuiUtil.playButtonClickSound();
@@ -370,7 +375,7 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 
 			// Displaying a dialog when the game is full-screened can cause severe issues
 			// upstream issue #1258
-			if (Minecraft.getInstance().getWindow().isFullscreen()) {
+			if (Minecraft.getInstance().getWindow().isExclusiveFullscreen()) {
 				this.screen.displayNotification(
 					Component.translatable("options.pryzma.mustDisableFullscreen")
 						.withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
@@ -390,7 +395,7 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 						return;
 					}
 
-					if (Minecraft.getInstance().screen == originalScreen) {
+					if (Minecraft.getInstance().gui.screen() == originalScreen) {
 						path.ifPresent(originalScreen::importPackOptions);
 					}
 				});
@@ -408,7 +413,7 @@ public class ShaderPackOptionList extends ShaderContainerObjectSelectionList<Sha
 
 			// Displaying a dialog when the game is full-screened can cause severe issues
 			// upstream issue #1258
-			if (Minecraft.getInstance().getWindow().isFullscreen()) {
+			if (Minecraft.getInstance().getWindow().isExclusiveFullscreen()) {
 				this.screen.displayNotification(
 					Component.translatable("options.pryzma.mustDisableFullscreen")
 						.withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
@@ -18,13 +17,11 @@ import net.minecraft.nbt.visitors.CollectFields;
 import net.minecraft.nbt.visitors.FieldSelector;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ChunkResult;
-import net.minecraft.server.level.ChunkTaskPriorityQueueSorter;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -41,8 +38,8 @@ public final class PrPregenTask {
     private static final Logger LOGGER = LoggerFactory.getLogger("Pryzma-Pregen");
     private static final int BATCH_SIZE = 32;
     private static final int QUEUE_THRESHOLD = 8;
-    private static final TicketType<ChunkPos> PREGEN_TICKET =
-            TicketType.create("pryzma_pregen", Comparator.comparingLong(ChunkPos::toLong));
+    private static final TicketType PREGEN_TICKET =
+            new TicketType(0L, TicketType.FLAG_LOADING);
 
     private static volatile PrPregenTask activeTask;
 
@@ -207,7 +204,7 @@ public final class PrPregenTask {
                 onProgressUpdate(false);
                 continue;
             }
-            chunks.add(pos.toLong());
+            chunks.add(pos.pack());
         }
         return chunks;
     }
@@ -224,26 +221,21 @@ public final class PrPregenTask {
 
         chunkSource.tick(() -> false, true);
 
-        ChunkMap chunkMap = chunkSource.chunkMap;
-        ChunkStatus targetStatus = mode == Mode.LOD ? ChunkStatus.SURFACE : ChunkStatus.FULL;
+        ChunkStatus targetStatus = mode == Mode.LOD ? ChunkStatus.TERRAIN : ChunkStatus.FULL;
 
         for (int i = 0; i < chunks.size(); i++) {
             long chunkLongPos = chunks.getLong(i);
-            ChunkHolder holder = chunkMap.getVisibleChunkIfPresent(chunkLongPos);
-            if (holder == null) {
-                acceptChunkResult(chunkLongPos, ChunkHolder.UNLOADED_CHUNK);
-                continue;
-            }
+            int cx = ChunkPos.getX(chunkLongPos);
+            int cz = ChunkPos.getZ(chunkLongPos);
 
-            holder.scheduleChunkGenerationTask(targetStatus, chunkMap).whenCompleteAsync((result, throwable) -> {
+            chunkSource.getChunkFuture(cx, cz, targetStatus, true).whenCompleteAsync((result, throwable) -> {
                 if (throwable == null) {
                     acceptChunkResult(chunkLongPos, result);
                 } else {
-                    LOGGER.warn("Pryzma pregen: chunk [{}, {}] error",
-                            ChunkPos.getX(chunkLongPos), ChunkPos.getZ(chunkLongPos), throwable);
-                    acceptChunkResult(chunkLongPos, ChunkHolder.UNLOADED_CHUNK);
+                    LOGGER.warn("Pryzma pregen: chunk [{}, {}] error", cx, cz, throwable);
+                    acceptChunkResult(chunkLongPos, ChunkResult.error("Chunk load failed"));
                 }
-            }, runnable -> chunkMap.scheduleOnMainThreadMailbox(ChunkTaskPriorityQueueSorter.message(holder, runnable)));
+            }, server);
         }
     }
 
@@ -255,7 +247,7 @@ public final class PrPregenTask {
             ChunkAccess chunkAccess = result.orElse(null);
             if (chunkAccess != null) {
                 PryzmaLod.injectChunk(chunkAccess, serverLevel, serverLevel.dimensionType().hasSkyLight(), serverLevel.getLightEngine());
-                PryzmaLod.unmarkMissing(chunkAccess.getPos().x, chunkAccess.getPos().z);
+                PryzmaLod.unmarkMissing(chunkAccess.getPos().x(), chunkAccess.getPos().z());
             }
         } else {
             errorCount.incrementAndGet();
@@ -320,13 +312,13 @@ public final class PrPregenTask {
     }
 
     private void acquireChunk(long chunk) {
-        ChunkPos pos = new ChunkPos(chunk);
-        chunkSource.addRegionTicket(PREGEN_TICKET, pos, 0, pos);
+        ChunkPos pos = ChunkPos.unpack(chunk);
+        chunkSource.addTicketWithRadius(PREGEN_TICKET, pos, 0);
     }
 
     private void releaseChunk(long chunk) {
-        ChunkPos pos = new ChunkPos(chunk);
-        chunkSource.removeRegionTicket(PREGEN_TICKET, pos, 0, pos);
+        ChunkPos pos = ChunkPos.unpack(chunk);
+        chunkSource.removeTicketWithRadius(PREGEN_TICKET, pos, 0);
     }
 
     private boolean isChunkFullyGenerated(ChunkPos pos) {
@@ -334,9 +326,10 @@ public final class PrPregenTask {
         chunkSource.chunkScanner().scanChunk(pos, collectFields).join();
 
         if (collectFields.getResult() instanceof CompoundTag compoundTag) {
-            String status = compoundTag.getString("Status");
+            String status = compoundTag.getString("Status").orElse("");
             if (mode == Mode.LOD) {
-                return "minecraft:full".equals(status) || "minecraft:surface".equals(status)
+                return "minecraft:full".equals(status) || "minecraft:terrain".equals(status)
+                        || "minecraft:surface".equals(status)
                         || "minecraft:carvers".equals(status) || "minecraft:features".equals(status)
                         || "minecraft:initialize_light".equals(status) || "minecraft:light".equals(status)
                         || "minecraft:spawn".equals(status);

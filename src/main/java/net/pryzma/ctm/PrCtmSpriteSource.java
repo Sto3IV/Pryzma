@@ -3,8 +3,7 @@ package net.pryzma.ctm;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
-import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.pryzma.Pryzma;
 import net.pryzma.PryzmaConfig;
@@ -16,9 +15,9 @@ import net.pryzma.PryzmaConfig;
  * from the same resource state; the rules are handed to {@link PryzmaCtm} for model baking.
  */
 public final class PrCtmSpriteSource implements SpriteSource {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Pryzma.MODID, "ctm");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Pryzma.MODID, "ctm");
     public static final PrCtmSpriteSource INSTANCE = new PrCtmSpriteSource();
-    public static final SpriteSourceType TYPE = new SpriteSourceType(MapCodec.unit(INSTANCE));
+    public static final MapCodec<PrCtmSpriteSource> CODEC = MapCodec.unit(INSTANCE);
 
     private PrCtmSpriteSource() {
     }
@@ -35,7 +34,7 @@ public final class PrCtmSpriteSource implements SpriteSource {
     }
 
     @Override
-    public SpriteSourceType type() {
-        return TYPE;
+    public MapCodec<? extends SpriteSource> codec() {
+        return CODEC;
     }
 }

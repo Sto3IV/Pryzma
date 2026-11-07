@@ -182,7 +182,7 @@ public class IdMap {
 			for (String part : value.split("\\s+")) {
 				if (part.contains("=")) {
 					// Avoid tons of logspam for now
-					PryzmaShaders.logger.warn("Failed to parse an ResourceLocation in " + fileName + " for the key " + key + ": state properties are currently not supported: " + part);
+					PryzmaShaders.logger.warn("Failed to parse an Identifier in " + fileName + " for the key " + key + ": state properties are currently not supported: " + part);
 					continue;
 				}
 
