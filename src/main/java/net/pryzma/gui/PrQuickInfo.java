@@ -19,7 +19,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.pryzma.PryzmaConfig;
-import net.pryzma.mixin.LevelRendererStatsAccessor;
 import net.pryzma.perf.PrDebugTracker;
 
 /**
@@ -107,7 +106,7 @@ public final class PrQuickInfo {
         }
         if (PryzmaConfig.prQuickInfoEntities) {
             next(sb).append(full ? "Entities: " : "E: ")
-                    .append(((LevelRendererStatsAccessor) mc.levelRenderer).prGetRenderedEntities())
+                    .append((mc.gameRenderer != null && mc.gameRenderer.gameRenderState() != null && mc.gameRenderer.gameRenderState().levelRenderState != null ? mc.gameRenderer.gameRenderState().levelRenderState.lastEntityRenderStateCount : 0))
                     .append('+').append(PrQuickInfoStats.blockEntitiesRendered);
         }
         if (full) {

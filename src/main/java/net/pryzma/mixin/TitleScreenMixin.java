@@ -37,7 +37,7 @@ public abstract class TitleScreenMixin extends Screen {
     }
 
     /** Singleplayer and Multiplayer pass through; the Realms button is returned without being added. */
-    @WrapOperation(method = "createNormalMenuOptions(II)V", at = @At(value = "INVOKE",
+    @WrapOperation(method = "createNormalMenuOptions(II)I", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;"))
     private GuiEventListener prFilterRealmsButton(TitleScreen screen, GuiEventListener widget, Operation<GuiEventListener> original) {
         if (PryzmaConfig.prRemoveRealms && widget instanceof AbstractWidget button

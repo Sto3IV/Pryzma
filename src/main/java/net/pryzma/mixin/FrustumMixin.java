@@ -22,7 +22,7 @@ abstract class FrustumMixin {
     @Shadow private double camZ;
 
     @Shadow
-    private boolean cubeInFrustum(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+    private int cubeInFrustum(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
         throw new AssertionError();
     }
 
@@ -35,8 +35,9 @@ abstract class FrustumMixin {
             cir.setReturnValue(true);
             return;
         }
-        cir.setReturnValue(cubeInFrustum(
+        int res = cubeInFrustum(
                 PrFrustumCulling.clamp(box.minX, camX), PrFrustumCulling.clamp(box.minY, camY), PrFrustumCulling.clamp(box.minZ, camZ),
-                PrFrustumCulling.clamp(box.maxX, camX), PrFrustumCulling.clamp(box.maxY, camY), PrFrustumCulling.clamp(box.maxZ, camZ)));
+                PrFrustumCulling.clamp(box.maxX, camX), PrFrustumCulling.clamp(box.maxY, camY), PrFrustumCulling.clamp(box.maxZ, camZ));
+        cir.setReturnValue(res == -2 || res == -1);
     }
 }

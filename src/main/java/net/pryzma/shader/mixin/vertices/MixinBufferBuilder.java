@@ -86,7 +86,7 @@ public abstract class MixinBufferBuilder implements VertexConsumer, BlockSensiti
 	public abstract VertexConsumer setNormal(float f, float g, float h);
 
 	@ModifyVariable(method = "<init>", at = @At("HEAD"), argsOnly = true)
-	private VertexFormat pryzma$extendFormat(VertexFormat format) {
+	private static VertexFormat pryzma$extendFormat(VertexFormat format) {
 		if (ImmediateState.skipExtension.get() || !PryzmaShaders.isPackInUseQuick()) {
 			return format;
 		}

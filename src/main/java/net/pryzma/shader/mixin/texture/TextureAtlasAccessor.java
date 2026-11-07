@@ -14,7 +14,7 @@ public interface TextureAtlasAccessor {
 	@Accessor("texturesByName")
 	Map<Identifier, TextureAtlasSprite> getTexturesByName();
 
-	@Accessor("mipLevel")
+	@Accessor("maxMipLevel")
 	int getMipLevel();
 
 	@Invoker("getWidth")

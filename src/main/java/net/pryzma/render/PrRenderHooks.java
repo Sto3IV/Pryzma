@@ -36,7 +36,10 @@ public final class PrRenderHooks {
 
     /** Trees: Default follows the graphics mode; Fancy and Smart keep leaves transparent, Fast makes them opaque. */
     public static boolean isTreesFancy(boolean fancyGraphics) {
-        return PryzmaConfig.prTrees == 0 ? fancyGraphics : PryzmaConfig.prTrees != 1;
+        return switch (PryzmaConfig.prTrees) {
+            case 1 -> false;
+            default -> fancyGraphics;
+        };
     }
 
     public static boolean isTreesSmart() {
@@ -100,14 +103,10 @@ public final class PrRenderHooks {
             return;
         }
         if (net.pryzma.lod.DistantHorizonsBridge.isDhActive()) {
-            // When Distant Horizons is active, allow DH's fog renderer and mixins to manage
-            // fog distance unhindered so distant LODs are not occluded by vanilla fog.
             return;
         }
         if (PryzmaConfig.isFarlandsActive() && net.pryzma.lod.PryzmaLod.isRunning()) {
             if (net.pryzma.lod.PryzmaLod.isActiveThisFrame()) {
-                // The native pass already clamped its window to the terrain it drew: vanilla terrain and the LOD
-                // must fade at the same distance or the seam between them shows.
                 event.setNearPlaneDistance(net.pryzma.lod.PryzmaLod.frameFogStart());
                 event.setFarPlaneDistance(net.pryzma.lod.PryzmaLod.frameFogEnd());
                 return;
@@ -139,8 +138,8 @@ public final class PrRenderHooks {
     }
 
     /** Smooth FPS: wait for the GPU before the terrain, as 1.x did, to even out frame times. */
-    public static void onRenderStage(RenderLevelStageEvent event) {
-        if (PryzmaConfig.prSmoothFps && event instanceof RenderLevelStageEvent.AfterSky) {
+    public static void onRenderStageAfterSky(RenderLevelStageEvent.AfterSky event) {
+        if (PryzmaConfig.prSmoothFps) {
             GL11.glFinish();
         }
     }

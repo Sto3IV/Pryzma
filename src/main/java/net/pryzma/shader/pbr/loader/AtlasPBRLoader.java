@@ -2,7 +2,7 @@ package net.pryzma.shader.pbr.loader;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.pryzma.shader.PryzmaShaders;
-import net.pryzma.shader.mixin.texture.AnimationMetadataSectionAccessor;
+// Removed unused import
 import net.pryzma.shader.mixin.texture.TextureAtlasAccessor;
 import net.pryzma.shader.pbr.format.TextureFormat;
 import net.pryzma.shader.pbr.format.TextureFormatLoader;

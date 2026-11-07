@@ -1,7 +1,6 @@
 package net.pryzma.mixin;
 
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,9 +40,9 @@ abstract class GlStateManagerMemoryMixin {
     }
 
     /** Texture storage is allocated rarely, so the bound texture is read back instead of tracking every bind. */
-    @Inject(method = "_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", at = @At("HEAD"))
+    @Inject(method = "_texImage2D(IIIIIIIILjava/nio/ByteBuffer;)V", at = @At("HEAD"))
     private static void prTexImage(int target, int level, int internalFormat, int width, int height, int border,
-            int format, int type, IntBuffer pixels, CallbackInfo ci) {
+            int format, int type, ByteBuffer pixels, CallbackInfo ci) {
         if (target == GL11.GL_TEXTURE_2D) {
             PrDebugTracker.onTexImage(GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D), level, internalFormat, width, height);
         }

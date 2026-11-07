@@ -79,7 +79,7 @@ public final class PryzmaClient {
         gameBus.addListener(ServerStartedEvent.class, event -> PrServerPriority.apply());
         gameBus.addListener(ServerTickEvent.Post.class, PrWorldControl::onServerTick);
         gameBus.addListener(ViewportEvent.RenderFog.class, PrRenderHooks::onRenderFog);
-        gameBus.addListener(RenderLevelStageEvent.class, PrRenderHooks::onRenderStage);
+        gameBus.addListener(RenderLevelStageEvent.AfterSky.class, PrRenderHooks::onRenderStageAfterSky);
         gameBus.addListener(RenderFrameEvent.Pre.class, PrQuickInfo::onFrameStart);
         gameBus.addListener(RenderFrameEvent.Post.class, PrQuickInfo::onFrameEnd);
         gameBus.addListener(RenderFrameEvent.Pre.class, event -> {

@@ -12,9 +12,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GlStateManager.class)
 public class MixinGlStateManager_DepthColorOverride {
-	@Inject(method = "_colorMask", at = @At("HEAD"), cancellable = true, remap = false)
-	private static void pryzma$colorMaskLock(boolean red, boolean green, boolean blue, boolean alpha, CallbackInfo ci) {
+	@Inject(method = "_colorMask(I)V", at = @At("HEAD"), cancellable = true, remap = false)
+	private static void pryzma$colorMaskLock(int mask, CallbackInfo ci) {
 		if (DepthColorStorage.isDepthColorLocked()) {
+			boolean red = (mask & 1) != 0;
+			boolean green = (mask & 2) != 0;
+			boolean blue = (mask & 4) != 0;
+			boolean alpha = (mask & 8) != 0;
+			DepthColorStorage.deferColorMask(red, green, blue, alpha);
+			ci.cancel();
+		}
+	}
+
+	@Inject(method = "_colorMask(II)V", at = @At("HEAD"), cancellable = true, remap = false)
+	private static void pryzma$colorMaskLockIndexed(int index, int mask, CallbackInfo ci) {
+		if (DepthColorStorage.isDepthColorLocked()) {
+			boolean red = (mask & 1) != 0;
+			boolean green = (mask & 2) != 0;
+			boolean blue = (mask & 4) != 0;
+			boolean alpha = (mask & 8) != 0;
 			DepthColorStorage.deferColorMask(red, green, blue, alpha);
 			ci.cancel();
 		}
@@ -28,13 +44,12 @@ public class MixinGlStateManager_DepthColorOverride {
 		}
 	}
 
-	@Redirect(method = "_drawElements", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glDrawElements(IIIJ)V"), remap = false)
-	private static void pryzma$modify(int mode, int count, int type, long indices) {
+	@Inject(method = "_drawElements", at = @At("HEAD"), cancellable = true, remap = false)
+	private static void pryzma$modify(int mode, int count, int type, long indices, CallbackInfo ci) {
 		if (mode == GL43C.GL_TRIANGLES && ImmediateState.usingTessellation) {
-			mode = GL43C.GL_PATCHES;
+			GL43C.glDrawElements(GL43C.GL_PATCHES, count, type, indices);
+			ci.cancel();
 		}
-
-		GL43C.glDrawElements(mode, count, type, indices);
 	}
 
 	@Inject(method = "_glUseProgram", at = @At("TAIL"), remap = false)

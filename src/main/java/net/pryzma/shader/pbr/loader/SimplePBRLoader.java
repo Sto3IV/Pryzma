@@ -1,6 +1,5 @@
 package net.pryzma.shader.pbr.loader;
 
-import net.pryzma.shader.mixin.texture.SimpleTextureAccessor;
 import net.pryzma.shader.pbr.texture.PBRType;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.SimpleTexture;
@@ -13,7 +12,7 @@ import java.io.IOException;
 public class SimplePBRLoader implements PBRTextureLoader<SimpleTexture> {
 	@Override
 	public void load(SimpleTexture texture, ResourceManager resourceManager, PBRTextureConsumer pbrTextureConsumer) {
-		Identifier location = ((SimpleTextureAccessor) texture).getLocation();
+		Identifier location = texture.resourceId();
 
 		AbstractTexture normalTexture = createPBRTexture(location, resourceManager, PBRType.NORMAL);
 		AbstractTexture specularTexture = createPBRTexture(location, resourceManager, PBRType.SPECULAR);

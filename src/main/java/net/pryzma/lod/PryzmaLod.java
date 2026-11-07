@@ -92,7 +92,8 @@ public final class PryzmaLod {
     private static final Consumer<ChunkEvent.Unload> CHUNK_UNLOAD = PryzmaLod::onChunkUnload;
     private static final Consumer<LevelEvent.Unload> LEVEL_UNLOAD = PryzmaLod::onLevelUnload;
     private static final Consumer<RenderFrameEvent.Pre> FRAME_START = event -> frameActive = false;
-    private static final Consumer<RenderLevelStageEvent> RENDER_STAGE = PryzmaLod::onRenderStage;
+    private static final Consumer<RenderLevelStageEvent.AfterSky> RENDER_STAGE_AFTER_SKY = PryzmaLod::onRenderStageAfterSky;
+    private static final Consumer<RenderLevelStageEvent.AfterTranslucentBlocks> RENDER_STAGE_AFTER_TRANSLUCENT = PryzmaLod::onRenderStageAfterTranslucent;
 
     private static volatile LodDataStore store = new LodDataStore();
     private static IEventBus gameBus;
@@ -276,13 +277,15 @@ public final class PryzmaLod {
             gameBus.addListener(ChunkEvent.Unload.class, CHUNK_UNLOAD);
             gameBus.addListener(LevelEvent.Unload.class, LEVEL_UNLOAD);
             gameBus.addListener(RenderFrameEvent.Pre.class, FRAME_START);
-            gameBus.addListener(RenderLevelStageEvent.class, RENDER_STAGE);
+            gameBus.addListener(RenderLevelStageEvent.AfterSky.class, RENDER_STAGE_AFTER_SKY);
+            gameBus.addListener(RenderLevelStageEvent.AfterTranslucentBlocks.class, RENDER_STAGE_AFTER_TRANSLUCENT);
         } else {
             gameBus.unregister(CHUNK_LOAD);
             gameBus.unregister(CHUNK_UNLOAD);
             gameBus.unregister(LEVEL_UNLOAD);
             gameBus.unregister(FRAME_START);
-            gameBus.unregister(RENDER_STAGE);
+            gameBus.unregister(RENDER_STAGE_AFTER_SKY);
+            gameBus.unregister(RENDER_STAGE_AFTER_TRANSLUCENT);
         }
     }
 
@@ -581,11 +584,15 @@ public final class PryzmaLod {
      * After the sky: the LOD pass; under a shader pack also after the translucent terrain, for the LOD's water.
      * Skipped where the camera's surroundings hide the distance anyway.
      */
-    private static void onRenderStage(RenderLevelStageEvent event) {
-        boolean sky = event instanceof RenderLevelStageEvent.AfterSky;
-        if (!sky && !(event instanceof RenderLevelStageEvent.AfterTranslucentBlocks)) {
-            return;
-        }
+    private static void onRenderStageAfterSky(RenderLevelStageEvent.AfterSky event) {
+        onRenderStage(event, true);
+    }
+
+    private static void onRenderStageAfterTranslucent(RenderLevelStageEvent.AfterTranslucentBlocks event) {
+        onRenderStage(event, false);
+    }
+
+    private static void onRenderStage(RenderLevelStageEvent event, boolean sky) {
         Minecraft mc = Minecraft.getInstance();
         if (!running || mc.level == null || mc.level != trackedLevel) {
             return;

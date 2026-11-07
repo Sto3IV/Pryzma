@@ -21,7 +21,7 @@ abstract class CloudRendererMixin {
     @Shadow
     public abstract void markForRebuild();
 
-    @Inject(method = "prepare", at = @At("HEAD"))
+    @Inject(method = "prepare(ILnet/minecraft/client/CloudStatus;FILnet/minecraft/world/phys/Vec3;JF)V", at = @At("HEAD"))
     private void prCheckDirty(int color, CloudStatus cloudStatus, float bottomY, int range, Vec3 cameraPosition,
             long gameTime, float partialTicks, CallbackInfo ci) {
         if (PrCloudRenderer.consumeDirty()) {
@@ -29,7 +29,7 @@ abstract class CloudRendererMixin {
         }
     }
 
-    @ModifyVariable(method = "prepare", at = @At("HEAD"), argsOnly = true, ordinal = 1)
+    @ModifyVariable(method = "prepare(ILnet/minecraft/client/CloudStatus;FILnet/minecraft/world/phys/Vec3;JF)V", at = @At("HEAD"), argsOnly = true, ordinal = 1)
     private int prInfiniteCloudRange(int range) {
         if (PryzmaConfig.prInfiniteClouds) {
             return Math.max(range, 64);

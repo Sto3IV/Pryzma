@@ -28,14 +28,14 @@ public class MixinBiomeAmbientSoundsHandler implements BiomeAmbienceInterface {
 	@SuppressWarnings("UnresolvedMixinReference")
 	@Inject(method = {
 		"method_26271",
-		"lambda$tick$3"
+		"lambda$tick$1"
 	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getBrightness(Lnet/minecraft/world/level/LightLayer;Lnet/minecraft/core/BlockPos;)I", ordinal = 0), require = 1)
-	private void calculateConstantMoodiness(AmbientMoodSettings ambientMoodSettings, CallbackInfo ci, @Local BlockPos blockPos) {
-		int j = this.player.level().getBrightness(LightLayer.SKY, blockPos);
+	private void calculateConstantMoodiness(net.minecraft.world.level.Level level, AmbientMoodSettings ambientMoodSettings, CallbackInfo ci, @Local BlockPos blockPos) {
+		int j = level.getBrightness(LightLayer.SKY, blockPos);
 		if (j > 0) {
 			this.constantMoodiness -= (float) j / 15.0F * 0.001F;
 		} else {
-			this.constantMoodiness -= (float) (this.player.level().getBrightness(LightLayer.BLOCK, blockPos) - 1) / (float) ambientMoodSettings.tickDelay();
+			this.constantMoodiness -= (float) (level.getBrightness(LightLayer.BLOCK, blockPos) - 1) / (float) ambientMoodSettings.tickDelay();
 		}
 
 		this.constantMoodiness = Mth.clamp(constantMoodiness, 0.0f, 1.0f);

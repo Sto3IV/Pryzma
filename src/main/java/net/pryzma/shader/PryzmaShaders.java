@@ -389,7 +389,7 @@ public class PryzmaShaders {
 			success = GLDebug.setupDebugMessageCallback();
 		} else {
 			GLDebug.reloadDebugState();
-			GlDebug.enableDebugCallback(Minecraft.getInstance().options.glDebugVerbosity, false, java.util.Collections.emptySet());
+			GlDebug.enableDebugCallback(Minecraft.getInstance().options.glDebugVerbosity, false, new java.util.HashSet<>());
 			success = 1;
 		}
 

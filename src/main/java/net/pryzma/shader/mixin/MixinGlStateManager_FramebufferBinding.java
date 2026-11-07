@@ -16,12 +16,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(GlStateManager.class)
 public class MixinGlStateManager_FramebufferBinding {
-	@WrapWithCondition(method = "_glBindFramebuffer(II)V", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL30;glBindFramebuffer(II)V"), remap = false)
+	@WrapWithCondition(method = "_glBindFramebuffer(II)V", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL33C;glBindFramebuffer(II)V"), remap = false)
 	private static boolean pryzma$avoidRedundantBind(int target, int framebuffer) {
 		return GlBindingCache.INSTANCE.bindFramebuffer(target, framebuffer);
 	}
 
-	@WrapWithCondition(method = "_glUseProgram", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL20;glUseProgram(I)V"), remap = false)
+	@WrapWithCondition(method = "_glUseProgram", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL33C;glUseProgram(I)V"), remap = false)
 	private static boolean pryzma$avoidRedundantBind2(int program) {
 		return GlBindingCache.INSTANCE.useProgram(program);
 	}

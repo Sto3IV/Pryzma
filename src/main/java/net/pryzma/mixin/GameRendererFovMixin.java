@@ -6,16 +6,15 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.util.Mth;
 import net.pryzma.PryzmaConfig;
 
 /** Dynamic FOV off: speed, sprint and bow no longer change the field of view; a spyglass still does. */
-@Mixin(GameRenderer.class)
+@Mixin(Camera.class)
 abstract class GameRendererFovMixin {
-    @WrapOperation(method = "getFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F"))
+    @WrapOperation(method = "calculateFov", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F"))
     private float prDynamicFov(float delta, float start, float end, Operation<Float> original) {
         if (!PryzmaConfig.prDynamicFov
                 && !(Minecraft.getInstance().getCameraEntity() instanceof AbstractClientPlayer player && player.isScoping())) {
