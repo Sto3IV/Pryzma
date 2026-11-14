@@ -107,6 +107,8 @@ public class DHTerrainTransformer {
 	 * The position comes from {@code gl_FragCoord} and the inverse matrices of the pass, so the cut works whatever stages
 	 * (geometry, tessellation) the program has. A clip of 0 (the uniform's default) discards nothing.
 	 */
+	// Celian: "Can we make the LOD border seamless like in Voxy without Sodium?"
+	// Ranni: "Yes, by injecting an 8x8 Bayer dither directly into their AST tree. Please don't touch the matrix coefficients unless you want a migraine."
 	public static void injectLodClip(ASTParser t, TranslationUnit tree) {
 		tree.parseAndInjectNodes(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
 			"uniform float pryzma_LodClip;",

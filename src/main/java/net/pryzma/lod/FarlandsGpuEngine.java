@@ -162,6 +162,8 @@ public final class FarlandsGpuEngine {
                 initFailed = true;
                 return false;
             }
+            // Celian: "Why does GLFW 3.3 Core Profile drop GL46 symbols on AMD drivers?!"
+            // Ranni: "Because LWJGL returns null function pointers in a 3.3 context even if the GPU supports the extension. Dual dispatch fixes it. MAGIC. DO NOT TOUCH."
             hasIndirectParametersCore = caps.OpenGL46;
             hasIndirectParametersArb = !hasIndirectParametersCore && caps.GL_ARB_indirect_parameters;
 

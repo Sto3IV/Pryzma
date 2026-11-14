@@ -1,9 +1,9 @@
 #version 150
 
 // Farlands LOD terrain.
-// Incorporates Voxy-inspired stochastic Bayer dither dissolve at the chunk boundary (eliminating hard cut seams)
-// and cellular alpha cutout discard on foliage (preventing solid plastic leaf slabs and allowing see-through canopies).
-// Sub-block 16x16 texel micro-grain preserves high-frequency crispness under zoom and near inspection.
+// Stochastic Bayer dither dissolve at the chunk boundary (seamless transition)
+// and cellular alpha cutout discard on foliage (porous tree canopies).
+// Sub-block 16x16 texel micro-grain preserves high-frequency crispness under zoom.
 
 uniform vec4 ColorModulator;
 uniform float FogStart;
