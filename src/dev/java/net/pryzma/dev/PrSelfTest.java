@@ -351,6 +351,12 @@ public final class PrSelfTest {
                     mc.options.framerateLimit().set(260);
                 }
             }
+            case "transparency" -> {
+                boolean on = "on".equalsIgnoreCase(a[1]) || "improved".equalsIgnoreCase(a[1]) || "oit".equalsIgnoreCase(a[1]);
+                mc.options.improvedTransparency().set(on);
+                mc.options.save();
+                LOG.info("PRYZMA-SELFTEST improvedTransparency set to {}", on);
+            }
             case "leave" -> {
                 // As the pause menu's Save and Quit: back to the title screen.
                 mc.disconnect(new TitleScreen(), false);

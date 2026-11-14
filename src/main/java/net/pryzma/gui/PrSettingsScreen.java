@@ -113,7 +113,8 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.SMOOTH_FPS, PrOptions.SMOOTH_WORLD,
                         PrOptions.CHUNK_UPDATES, vanilla("options.prioritizeChunkUpdates", o.prioritizeChunkUpdates()),
                         PrOptions.FAST_PAINTINGS, PrOptions.ENTITY_CULLING,
-                        PrOptions.INFINITE_CLOUDS, PrOptions.WEATHER_RADIUS);
+                        PrOptions.INFINITE_CLOUDS, PrOptions.WEATHER_RADIUS,
+                        vanilla("options.chunkFade", o.chunkSectionFadeInTime()), null);
                 done(width / 2 - 100, 200);
             }
             case OTHER -> {
@@ -157,7 +158,7 @@ final class PrSettingsScreen extends PrScreen {
             case NEW_OPTIONS -> {
                 grid(vanilla("options.graphicsApi", o.preferredGraphicsBackend()),
                         vanilla("options.improvedTransparency", o.improvedTransparency()),
-                        vanilla("options.chunkFade", o.chunkSectionFadeInTime()), null);
+                        null, null);
                 done(width / 2 - 100, 200);
                 onOptionsChanged();
             }
