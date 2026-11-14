@@ -28,6 +28,7 @@ import net.pryzma.entity.PrEntityInfos;
 import net.pryzma.entity.model.PrCemContext;
 import net.pryzma.ctm.PrCtmSpriteSource;
 import net.pryzma.ctm.PryzmaCtm;
+import net.pryzma.gui.PrOptions;
 import net.pryzma.gui.PrQuickInfo;
 import net.pryzma.gui.PrVideoSettingsScreen;
 import net.pryzma.gui.PrZoom;
@@ -100,6 +101,7 @@ public final class PryzmaClient {
     /** The vanilla video settings are replaced by the Pryzma screen, which returns to the same parent. */
     private static void onScreenOpening(ScreenEvent.Opening event) {
         if (event.getNewScreen() instanceof VideoSettingsScreen vanilla) {
+            PrOptions.syncLeavesTransparency();
             event.setNewScreen(new PrVideoSettingsScreen(((OptionsSubScreenAccessor) vanilla).prGetLastScreen()));
         }
     }

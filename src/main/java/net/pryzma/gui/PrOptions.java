@@ -76,6 +76,7 @@ public final class PrOptions {
                 }
                 o.graphicsPreset().set(next);
                 o.save();
+                syncLeavesTransparency();
                 allChanged();
             });
 
@@ -182,8 +183,10 @@ public final class PrOptions {
                 case 2, 4 -> true;
                 default -> mc.options.graphicsPreset().get() != GraphicsPreset.FAST;
             };
-            mc.options.cutoutLeaves().set(cutout);
-            mc.options.save();
+            if (mc.options.cutoutLeaves().get() != cutout) {
+                mc.options.cutoutLeaves().set(cutout);
+                mc.options.save();
+            }
         }
     }
     public static final PrOption.Cycle RAIN = cycle("pr.options.RAIN",

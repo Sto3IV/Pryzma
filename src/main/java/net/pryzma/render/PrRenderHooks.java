@@ -38,6 +38,7 @@ public final class PrRenderHooks {
     public static boolean isTreesFancy(boolean fancyGraphics) {
         return switch (PryzmaConfig.prTrees) {
             case 1 -> false;
+            case 2, 4 -> true;
             default -> fancyGraphics;
         };
     }
