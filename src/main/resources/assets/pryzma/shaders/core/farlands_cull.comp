@@ -55,7 +55,8 @@ void main() {
         vec3 mx = mn + vec3(float(SectorBlocks), float(s.box.w - s.box.z), float(SectorBlocks));
 
         vec2 far2 = max(abs(mn.xz), abs(mx.xz));
-        bool outsideClip = dot(far2, far2) >= ClipRadius * ClipRadius;
+        float minClip = max(0.0, ClipRadius - 16.0);
+        bool outsideClip = dot(far2, far2) >= minClip * minClip;
 
         bool insideFrustum = outsideClip;
         for (int p = 0; p < 6 && insideFrustum; p++) {

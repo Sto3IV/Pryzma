@@ -182,7 +182,8 @@ public final class LodMath {
      * {@code clipRadius}, the cylinder the LOD shader discards. Such a sector cannot produce a fragment.
      */
     public static boolean insideClip(double cameraX, double cameraZ, int sectorX, int sectorZ, float clipRadius) {
-        return sectorFarthest(cameraX, cameraZ, sectorX, sectorZ) < clipRadius;
+        float minClip = Math.max(0.0F, clipRadius - 16.0F);
+        return sectorFarthest(cameraX, cameraZ, sectorX, sectorZ) < minClip;
     }
 
     /**

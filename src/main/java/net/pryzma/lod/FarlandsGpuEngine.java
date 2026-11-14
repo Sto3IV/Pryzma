@@ -61,7 +61,8 @@ public final class FarlandsGpuEngine {
 
     private static boolean supported = true;
     private static boolean initialized;
-    private static boolean hasIndirectParameters;
+    private static boolean hasIndirectParametersCore;
+    private static boolean hasIndirectParametersArb;
     private static boolean initFailed;
 
     // OpenGL objects
@@ -161,7 +162,8 @@ public final class FarlandsGpuEngine {
                 initFailed = true;
                 return false;
             }
-            hasIndirectParameters = caps.OpenGL46 || caps.GL_ARB_indirect_parameters;
+            hasIndirectParametersCore = caps.OpenGL46;
+            hasIndirectParametersArb = !hasIndirectParametersCore && caps.GL_ARB_indirect_parameters;
 
             // Compile compute shader
             cullProgram = createComputeProgram("/assets/pryzma/shaders/core/farlands_cull.comp");
@@ -245,8 +247,8 @@ public final class FarlandsGpuEngine {
             freeCount = 1;
 
             initialized = true;
-            Pryzma.LOGGER.info("Farlands GPU-driven MDI engine initialized successfully (GL 4.3+ Core, indirectParameters={})",
-                    hasIndirectParameters);
+            Pryzma.LOGGER.info("Farlands GPU-driven MDI engine initialized successfully (GL 4.3+ Core, indirectParametersCore={}, indirectParametersArb={})",
+                    hasIndirectParametersCore, hasIndirectParametersArb);
             return true;
         } catch (Exception e) {
             Pryzma.LOGGER.error("Failed to initialize Farlands GPU-driven engine", e);
@@ -587,9 +589,12 @@ public final class FarlandsGpuEngine {
 
             // Opaque pass
             GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, opaqueCmdBuf);
-            if (hasIndirectParameters) {
+            if (hasIndirectParametersCore) {
                 GL15C.glBindBuffer(GL46C.GL_PARAMETER_BUFFER, countBuf);
                 GL46C.glMultiDrawElementsIndirectCount(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, 0L, activeSectorCount, CMD_BYTES);
+            } else if (hasIndirectParametersArb) {
+                GL15C.glBindBuffer(org.lwjgl.opengl.ARBIndirectParameters.GL_PARAMETER_BUFFER_ARB, countBuf);
+                org.lwjgl.opengl.ARBIndirectParameters.glMultiDrawElementsIndirectCountARB(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, 0L, activeSectorCount, CMD_BYTES);
             } else {
                 GL15C.glBindBuffer(GL43C.GL_SHADER_STORAGE_BUFFER, countBuf);
                 GL15C.glGetBufferSubData(GL43C.GL_SHADER_STORAGE_BUFFER, 0L, countReadback);
@@ -605,9 +610,12 @@ public final class FarlandsGpuEngine {
             LodProgram.setCameraFrac(fracX, fracY + NativeLodRenderer.WATER_DROP, fracZ);
 
             GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, waterCmdBuf);
-            if (hasIndirectParameters) {
+            if (hasIndirectParametersCore) {
                 GL15C.glBindBuffer(GL46C.GL_PARAMETER_BUFFER, countBuf);
                 GL46C.glMultiDrawElementsIndirectCount(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, 4L, activeSectorCount, CMD_BYTES);
+            } else if (hasIndirectParametersArb) {
+                GL15C.glBindBuffer(org.lwjgl.opengl.ARBIndirectParameters.GL_PARAMETER_BUFFER_ARB, countBuf);
+                org.lwjgl.opengl.ARBIndirectParameters.glMultiDrawElementsIndirectCountARB(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, 4L, activeSectorCount, CMD_BYTES);
             } else {
                 if (countReadback[1] > 0) {
                     GL43C.glMultiDrawElementsIndirect(GL11C.GL_TRIANGLES, GL11C.GL_UNSIGNED_INT, 0L, countReadback[1], CMD_BYTES);
@@ -620,8 +628,10 @@ public final class FarlandsGpuEngine {
         } finally {
             // 6. Complete state cleanup and 100% restoration
             GL15C.glBindBuffer(GL40C.GL_DRAW_INDIRECT_BUFFER, 0);
-            if (hasIndirectParameters) {
+            if (hasIndirectParametersCore) {
                 GL15C.glBindBuffer(GL46C.GL_PARAMETER_BUFFER, 0);
+            } else if (hasIndirectParametersArb) {
+                GL15C.glBindBuffer(org.lwjgl.opengl.ARBIndirectParameters.GL_PARAMETER_BUFFER_ARB, 0);
             }
             GL30C.glBindBufferBase(GL43C.GL_SHADER_STORAGE_BUFFER, 0, 0);
             GL30C.glBindBufferBase(GL43C.GL_SHADER_STORAGE_BUFFER, 1, 0);
