@@ -32,19 +32,28 @@ public final class PrTextureFilter {
     /** Sets the anisotropy of the bound texture; level 1 is off. Render thread. */
     public static void applyAnisotropy() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc != null && mc.options != null && mc.options.mipmapLevels().get() == 0) {
-            return;
-        }
-        if (anisotropy < 0) {
-            GLCapabilities caps = GL.getCapabilities();
-            anisotropy = caps.GL_EXT_texture_filter_anisotropic || caps.GL_ARB_texture_filter_anisotropic ? 1 : 0;
-            if (anisotropy == 1) {
-                maxAnisotropy = GL11.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+        if (mc != null && mc.options != null) {
+            if (mc.options.mipmapLevels().get() == 0) {
+                return;
+            }
+            if (mc.options.textureFiltering().get() != net.minecraft.client.TextureFilteringMethod.ANISOTROPIC) {
+                return;
             }
         }
-        if (anisotropy == 1) {
-            float level = Math.max(1.0F, Math.min(PryzmaConfig.prAfLevel, maxAnisotropy));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, level);
+        try {
+            if (anisotropy < 0) {
+                GLCapabilities caps = GL.getCapabilities();
+                anisotropy = caps != null && (caps.GL_EXT_texture_filter_anisotropic || caps.GL_ARB_texture_filter_anisotropic) ? 1 : 0;
+                if (anisotropy == 1) {
+                    maxAnisotropy = GL11.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+                }
+            }
+            if (anisotropy == 1) {
+                float level = Math.max(1.0F, Math.min(PryzmaConfig.prAfLevel, maxAnisotropy));
+                GL11.glTexParameterf(GL11.GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, level);
+            }
+        } catch (Throwable ignored) {
+            // Renderpearl Vulkan backend or headless environment where OpenGL context is absent
         }
     }
 }

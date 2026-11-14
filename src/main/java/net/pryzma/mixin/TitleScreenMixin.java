@@ -71,6 +71,9 @@ public abstract class TitleScreenMixin extends Screen {
     /**
      * Runs before {@code ScreenEvent.Init.Post}, so buttons other mods add there see the final
      * layout. Demo menus never drop Realms, so they are left alone.
+     * In 26.3, NeoForge places ModsButton (20x20) in the 4-icon row alongside Friends, Language,
+     * and Accessibility. When Realms is removed, the entire lower block (the 4 icon buttons and
+     * Options/Quit) shifts up by rowHeight (24 px) to fill the vacant Realms slot cleanly.
      */
     @Inject(method = "init()V", at = @At("RETURN"))
     private void prAdjustTitleScreenLayout(CallbackInfo ci) {
@@ -79,19 +82,26 @@ public abstract class TitleScreenMixin extends Screen {
         }
         this.pryzma$realmsRemoved = false;
         int rowHeight = 24;
-        int bottomShift = 22;
-        // NeoForge 21.1: l = height / 4 + 32, then l += 22; the bottom row sits at l + 72 + 12.
-        int oldBottomY = this.height / 4 + 32 + bottomShift + 72 + 12;
+
+        AbstractWidget multiplayerButton = null;
         for (GuiEventListener child : this.children()) {
-            if (!(child instanceof AbstractWidget widget)) {
-                continue;
+            if (child instanceof AbstractWidget widget
+                    && widget.getMessage().getContents() instanceof TranslatableContents contents
+                    && "menu.multiplayer".equals(contents.getKey())) {
+                multiplayerButton = widget;
+                break;
             }
-            if (widget instanceof ModsButton || (widget.getMessage().getContents() instanceof TranslatableContents contents
-                    && "fml.menu.mods".equals(contents.getKey()))) {
-                widget.setY(widget.getY() - rowHeight);
-            } else if (widget.getY() == oldBottomY && !(widget instanceof PlainTextButton)) {
-                // The copyright link is anchored to the screen bottom, which meets this row at height 197.
-                widget.setY(oldBottomY - bottomShift);
+        }
+        if (multiplayerButton == null) {
+            return;
+        }
+
+        int multiplayerY = multiplayerButton.getY();
+        for (GuiEventListener child : this.children()) {
+            if (child instanceof AbstractWidget widget && !(widget instanceof PlainTextButton)) {
+                if (widget.getY() > multiplayerY && widget.getY() < this.height - 20) {
+                    widget.setY(widget.getY() - rowHeight);
+                }
             }
         }
     }

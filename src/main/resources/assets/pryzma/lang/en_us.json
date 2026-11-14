@@ -966,5 +966,18 @@
   "options.glintStrength.tooltip.1": "Glint Strength",
   "options.glintStrength.tooltip.2": "Brightness and visibility of the enchantment glint.",
   "options.menuBackgroundBlurriness.tooltip.1": "Menu Background Blur",
-  "options.menuBackgroundBlurriness.tooltip.2": "Blur intensity of the game background when menus are open."
+  "options.menuBackgroundBlurriness.tooltip.2": "Blur intensity of the game background when menus are open.",
+  "options.graphics": "Graphics",
+  "options.weatherRadius": "Weather Radius",
+  "pr.options.new": "New...",
+  "pr.options.newTitle": "New Options",
+  "pr.options.MIPMAP_LEVELS.maximum": "4",
+  "pr.options.WINDOW_MODE": "Window Type",
+  "pr.options.windowMode.fullscreen": "Fullscreen",
+  "pr.options.windowMode.borderless": "Borderless",
+  "pr.options.windowMode.bordered": "Bordered",
+  "pr.options.WINDOW_MODE.tooltip.1": "Window Type",
+  "pr.options.WINDOW_MODE.tooltip.2": "Fullscreen - hardware exclusive capture, FreeSync/G-Sync active",
+  "pr.options.WINDOW_MODE.tooltip.3": "Borderless - borderless window over desktop, instant Alt+Tab",
+  "pr.options.WINDOW_MODE.tooltip.4": "Bordered - standard resizable desktop window"
 }

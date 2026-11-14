@@ -48,11 +48,7 @@ public final class PrRenderHooks {
 
     /** Vignette: Default follows the graphics mode, Fast hides it, Fancy always draws it. */
     public static boolean isVignetteEnabled(boolean fancyGraphics) {
-        return switch (PryzmaConfig.prVignette) {
-            case 1 -> false;
-            case 2 -> true;
-            default -> fancyGraphics;
-        };
+        return net.minecraft.client.Minecraft.getInstance().options.vignette().get();
     }
 
     /** Smooth Lighting Level: vanilla's 0.2 occlusion shade scaled towards 1 (no shadow). */

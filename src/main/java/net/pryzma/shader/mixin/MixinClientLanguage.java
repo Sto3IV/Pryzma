@@ -49,9 +49,43 @@ public class MixinClientLanguage {
 
 	@Inject(method = "appendFrom", at = @At(value = "HEAD"))
 	private static void injectFrom(String string, List<Resource> list, Map<String, String> map, CallbackInfo ci) {
+		// 1. Always load OptiFine en_us baseline into the map
+		loadOptifineLang("en_us", map);
+		// 2. If the current locale is not en_us, overlay the current language's OptiFine translations
+		if (!"en_us".equals(string)) {
+			loadOptifineLang(string, map);
+		}
+
+		// 3. Load mod-specific JSON translations
 		String json = String.format(Locale.ROOT, "lang/%s.json", string);
 		if (PryzmaShaders.class.getResource("/assets/pryzma/" + json) != null) {
 			Language.loadFromJson(PryzmaShaders.class.getResourceAsStream("/assets/pryzma/" + json), map::put);
+		}
+	}
+
+	@Unique
+	private static void loadOptifineLang(String langCode, Map<String, String> map) {
+		String path = "/assets/minecraft/optifine/lang/" + langCode + ".lang";
+		try (var in = MixinClientLanguage.class.getResourceAsStream(path)) {
+			if (in != null) {
+				try (var reader = new java.io.BufferedReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8))) {
+					String line;
+					while ((line = reader.readLine()) != null) {
+						line = line.strip();
+						if (line.isEmpty() || line.startsWith("#")) {
+							continue;
+						}
+						int eq = line.indexOf('=');
+						if (eq > 0) {
+							String key = line.substring(0, eq).trim();
+							String value = line.substring(eq + 1);
+							map.put(key, value);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			// Ignore read failure and allow default language mapping
 		}
 	}
 

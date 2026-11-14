@@ -19,6 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.PauseScreen;
@@ -527,6 +528,9 @@ public final class PrSelfTest {
         }
         double x = target.getX() + target.getWidth() / 2.0;
         double y = target.getY() + target.getHeight() / 2.0;
+        if (target instanceof Button b) {
+            b.onPress(new MouseButtonInfo(button, 0));
+        }
         MouseButtonEvent event = new MouseButtonEvent(x, y, new MouseButtonInfo(button, 0));
         screen.mouseClicked(event, false);
         if (mc.gui.screen() != null) {

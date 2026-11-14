@@ -50,8 +50,10 @@ public final class PrVideoSettingsScreen extends PrScreen {
                 PrOptions.DYNAMIC_LIGHTS, null);
         guiScale = cells.get(6);
 
-        addRenderableWidget(new PrButton(225, cellX(7), cellY(7), 150, Component.translatable("pr.options.items"),
+        addRenderableWidget(new PrButton(225, cellX(7), cellY(7), 74, Component.translatable("pr.options.items"),
                 b -> open(PrSettingsScreen.Page.ITEMS)));
+        addRenderableWidget(new PrButton(226, cellX(7) + 76, cellY(7), 74, Component.translatable("pr.options.new"),
+                b -> open(PrSettingsScreen.Page.NEW_OPTIONS)));
         addRenderableWidget(new PrButton(220, cellX(11), cellY(11), 150, Component.translatable("pr.options.quickInfo"),
                 b -> open(PrSettingsScreen.Page.QUICK_INFO)));
         int y = cellY(12);

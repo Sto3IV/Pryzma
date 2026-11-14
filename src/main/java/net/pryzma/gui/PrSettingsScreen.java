@@ -7,9 +7,11 @@ import com.mojang.blaze3d.platform.VideoMode;
 import com.mojang.blaze3d.platform.Window;
 
 import net.minecraft.client.CloudStatus;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.GraphicsPreset;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
+import net.minecraft.client.TextureFilteringMethod;
 import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.client.PrioritizeChunkUpdates;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -31,7 +33,8 @@ final class PrSettingsScreen extends PrScreen {
         OTHER("pr.options.otherTitle"),
         QUICK_INFO("pr.options.quickInfoTitle"),
         FARLANDS("pr.options.farlandsTitle"),
-        ITEMS("pr.options.itemsTitle");
+        ITEMS("pr.options.itemsTitle"),
+        NEW_OPTIONS("pr.options.newTitle");
 
         final String title;
 
@@ -75,7 +78,8 @@ final class PrSettingsScreen extends PrScreen {
                 onOptionsChanged();
             }
             case QUALITY -> {
-                grid(PrOptions.MIPMAP_LEVELS, PrOptions.MIPMAP_TYPE,
+                grid(split(PrOptions.MIPMAP_LEVELS, PrOptions.MIPMAP_TYPE),
+                        vanilla("options.textureFiltering", o.textureFiltering()),
                         PrOptions.AF_LEVEL, PrOptions.DYNAMIC_FOV,
                         PrOptions.EMISSIVE_TEXTURES, PrOptions.RANDOM_ENTITIES,
                         PrOptions.BETTER_GRASS, PrOptions.BETTER_SNOW,
@@ -109,20 +113,21 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.SMOOTH_FPS, PrOptions.SMOOTH_WORLD,
                         PrOptions.CHUNK_UPDATES, vanilla("options.prioritizeChunkUpdates", o.prioritizeChunkUpdates()),
                         PrOptions.FAST_PAINTINGS, PrOptions.ENTITY_CULLING,
-                        PrOptions.INFINITE_CLOUDS, null);
+                        PrOptions.INFINITE_CLOUDS, PrOptions.WEATHER_RADIUS);
                 done(width / 2 - 100, 200);
             }
             case OTHER -> {
                 grid(PrOptions.LAGOMETER, PrOptions.PROFILER,
                         vanilla("options.attackIndicator", o.attackIndicator()), PrOptions.ADVANCED_TOOLTIPS,
                         PrOptions.WEATHER, PrOptions.TIME,
-                        vanilla("options.fullscreen", o.fullscreen()), PrOptions.AUTOSAVE_TICKS,
+                        PrOptions.WINDOW_MODE, PrOptions.AUTOSAVE_TICKS,
                         PrOptions.SCREENSHOT_SIZE, PrOptions.SHOW_GL_ERRORS,
                         PrOptions.FEEDBACK_BUTTONS, PrOptions.REMOVE_REALMS,
                         PrOptions.TELEMETRY_ATTRIBUTION, vanilla("options.fullscreen.resolution", fullscreenResolution()),
                         vanilla("options.autosaveIndicator", o.showAutosaveIndicator()), null);
                 addRenderableWidget(new PrButton(210, width / 2 - 155, bottomY(), 150,
                         Component.translatable("pr.options.other.reset"), b -> confirmReset()));
+                onOptionsChanged();
                 addRenderableWidget(new PrButton(200, width / 2 + 5, bottomY(), 150, CommonComponents.GUI_DONE, b -> {
                     minecraft.getWindow().changeFullscreenVideoMode();
                     onClose();
@@ -149,6 +154,13 @@ final class PrSettingsScreen extends PrScreen {
                 done(width / 2 - 100, 200);
                 onOptionsChanged();
             }
+            case NEW_OPTIONS -> {
+                grid(vanilla("options.graphicsApi", o.preferredGraphicsBackend()),
+                        vanilla("options.improvedTransparency", o.improvedTransparency()),
+                        vanilla("options.chunkFade", o.chunkSectionFadeInTime()), null);
+                done(width / 2 - 100, 200);
+                onOptionsChanged();
+            }
         }
     }
 
@@ -170,9 +182,49 @@ final class PrSettingsScreen extends PrScreen {
         done(width / 2 + 5, 150);
     }
 
-    /** Quick Info and Details: dependent options only respond when their master option allows it. */
+    /** Quick Info, Quality and Details: dependent options only respond when their master option allows it. */
     @Override
     void onOptionsChanged() {
+        if (page == Page.QUALITY) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc != null && mc.options != null) {
+                boolean isAniso = mc.options.textureFiltering().get() == TextureFilteringMethod.ANISOTROPIC;
+                boolean hasMipmaps = mc.options.mipmapLevels().get() > 0;
+                boolean active = isAniso && hasMipmaps;
+                if (isAniso && PryzmaConfig.prAfLevel <= 1) {
+                    int bit = mc.options.maxAnisotropyBit().get();
+                    PryzmaConfig.prAfLevel = bit > 0 ? (1 << bit) : 4;
+                    mc.options.maxAnisotropyBit().set(Integer.numberOfTrailingZeros(PryzmaConfig.prAfLevel));
+                }
+                for (AbstractWidget w : widgets()) {
+                    if (w instanceof PrOptionSlider s && s.option() == PrOptions.AF_LEVEL) {
+                        s.active = active;
+                        if (!active) {
+                            s.setMessage(Component.translatable("pr.options.AF_LEVEL")
+                                    .append(": ")
+                                    .append(CommonComponents.OPTION_OFF));
+                        } else {
+                            s.refresh();
+                        }
+                    }
+                }
+            }
+            return;
+        }
+        if (page == Page.OTHER) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc != null && mc.options != null) {
+                boolean isFullscreen = mc.options.fullscreen().get();
+                boolean isExclusive = mc.options.exclusiveFullscreen().get();
+                boolean isExclusiveFullscreen = isFullscreen && isExclusive;
+                for (AbstractWidget w : widgets()) {
+                    if ("options.fullscreen.resolution".equals(vanillaKeys.get(w))) {
+                        w.active = isExclusiveFullscreen;
+                    }
+                }
+            }
+            return;
+        }
         if (page == Page.DETAILS) {
             boolean farlandsOn = PryzmaConfig.isFarlandsActive();
             boolean cloudsOff = PrOptions.isCloudsOff();

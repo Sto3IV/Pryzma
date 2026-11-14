@@ -55,6 +55,7 @@
     "OptionsSubScreenAccessor",
     "PaintingRendererMixin",
     "ParticleEngineMixin",
+    "PauseScreenMixin",
     "QuickInfoCountersMixin",
     "RedStoneWireBlockMixin",
     "RenderTypeEntityTextureMixin",

@@ -28,7 +28,7 @@ abstract class PrScreen extends Screen {
 
     protected final Screen parent;
     private final PrTooltips tooltips = new PrTooltips(this);
-    private final Map<AbstractWidget, String> vanillaKeys = new IdentityHashMap<>();
+    final Map<AbstractWidget, String> vanillaKeys = new IdentityHashMap<>();
 
     PrScreen(Component title, Screen parent) {
         super(title);
@@ -39,8 +39,15 @@ abstract class PrScreen extends Screen {
         return new Vanilla(key, option);
     }
 
+    record Split(Object left, Object right) {
+    }
+
     static Wide wide(Object option) {
         return new Wide(option);
+    }
+
+    static Split split(Object left, Object right) {
+        return new Split(left, right);
     }
 
     /** Grid cell {@code i}: two columns 160 apart, rows 21 apart, as every 1.x settings page. */
@@ -65,6 +72,13 @@ abstract class PrScreen extends Screen {
                 added.add(null);
             } else if (entries[i] instanceof Wide w) {
                 added.add(addOption(w.option(), cellX(i), cellY(i), 310));
+            } else if (entries[i] instanceof Split s) {
+                int cx = cellX(i);
+                int cy = cellY(i);
+                AbstractWidget w1 = addOption(s.left(), cx, cy, 74);
+                AbstractWidget w2 = addOption(s.right(), cx + 76, cy, 74);
+                added.add(w1);
+                added.add(w2);
             } else {
                 added.add(addOption(entries[i], cellX(i), cellY(i), 150));
             }
@@ -114,7 +128,11 @@ abstract class PrScreen extends Screen {
                 return true;
             }
         }
-        return super.mouseClicked(event, doubleClick);
+        boolean handled = super.mouseClicked(event, doubleClick);
+        if (handled) {
+            refreshOptions();
+        }
+        return handled;
     }
 
     List<AbstractWidget> widgets() {

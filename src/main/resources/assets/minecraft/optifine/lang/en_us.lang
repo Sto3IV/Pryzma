@@ -77,6 +77,8 @@ pr.message.capeOF.error2=Error: %s
 pr.message.capePryzma.error2=Error: %s
 # Video settings
 
+options.graphics=Graphics
+pr.options.MIPMAP_LEVELS.maximum=4
 options.graphics.tooltip.1=Visual quality
 options.graphics.tooltip.2=  Fast - lower quality, faster
 options.graphics.tooltip.3=  Fancy - higher quality, slower
@@ -534,9 +536,8 @@ options.entityShadows.tooltip.3=  OFF - do not show entity shadows
 
 pr.options.VIGNETTE=Vignette
 pr.options.VIGNETTE.tooltip.1=Visual effect which slightly darkens the screen corners
-pr.options.VIGNETTE.tooltip.2=  Default - as set by the setting Graphics (default)
-pr.options.VIGNETTE.tooltip.3=  Fast - vignette disabled (faster)
-pr.options.VIGNETTE.tooltip.4=  Fancy - vignette enabled (slower)
+pr.options.VIGNETTE.tooltip.2=  OFF - vignette disabled (faster)
+pr.options.VIGNETTE.tooltip.3=  ON - vignette enabled (slower)
 pr.options.VIGNETTE.tooltip.5=The vignette may have a significant effect on the FPS,
 pr.options.VIGNETTE.tooltip.6=especially when playing fullscreen.
 pr.options.VIGNETTE.tooltip.7=The vignette effect is very subtle and can safely
@@ -882,3 +883,14 @@ pr.options.FAST_PAINTINGS.tooltip.2= OFF - standard multi-quad painting renderin
 pr.options.FAST_PAINTINGS.tooltip.3= ON - optimized single-mesh painting rendering (faster)
 pr.options.FAST_PAINTINGS.tooltip.4=Accelerates rendering of all paintings (vanilla and modded)
 pr.options.FAST_PAINTINGS.tooltip.5=by baking them into 6 consolidated faces with single-pass lighting.
+
+# Window Type
+pr.options.WINDOW_MODE=Window Type
+pr.options.WINDOW_MODE.tooltip.1=Window display mode
+pr.options.WINDOW_MODE.tooltip.2=  Fullscreen - hardware exclusive capture, FreeSync/G-Sync active
+pr.options.WINDOW_MODE.tooltip.3=  Borderless - borderless window over desktop, instant Alt+Tab
+pr.options.WINDOW_MODE.tooltip.4=  Bordered - standard resizable desktop window
+
+options.weatherRadius=Weather Radius
+options.weatherRadius.tooltip.1=Weather Radius
+options.weatherRadius.tooltip.2=Radius around the player where rain and snow fall.

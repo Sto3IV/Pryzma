@@ -83,6 +83,8 @@ pr.message.capeOF.error2=Ошибка: %s
 pr.message.capePryzma.error2=Ошибка: %s
 # Video settings
 
+options.graphics=Графика
+pr.options.MIPMAP_LEVELS.maximum=4
 options.graphics.tooltip.1=Качество графики
 options.graphics.tooltip.2=  Быстро - низкое качество (быстрее)
 options.graphics.tooltip.3=  Детально - высокое качество (медленнее)
@@ -540,9 +542,8 @@ options.entityShadows.tooltip.3=  Выкл - тени сущностей не в
 
 pr.options.VIGNETTE=Виньетка
 pr.options.VIGNETTE.tooltip.1=Виньетирование
-pr.options.VIGNETTE.tooltip.2=  §oПо умолчанию§r - согласно настройкам графики
-pr.options.VIGNETTE.tooltip.3=  Быстро - виньетирование отключено (быстрее)
-pr.options.VIGNETTE.tooltip.4=  Детально - виньетирование включено (медленнее)
+pr.options.VIGNETTE.tooltip.2=  ВЫКЛ - виньетирование отключено (быстрее)
+pr.options.VIGNETTE.tooltip.3=  ВКЛ - виньетирование включено (медленнее)
 pr.options.VIGNETTE.tooltip.5=Слегка затемняет края экрана.
 pr.options.VIGNETTE.tooltip.6=Может оказывать значительное влияние на частоту
 pr.options.VIGNETTE.tooltip.7=кадров, особенно при игре в полноэкранном режиме.
@@ -905,3 +906,14 @@ pr.options.FAST_PAINTINGS.tooltip.2= ВЫКЛ - стандартный мног�
 pr.options.FAST_PAINTINGS.tooltip.3= ВКЛ - оптимизированный монолитный рендеринг (быстрее)
 pr.options.FAST_PAINTINGS.tooltip.4=Ускоряет отрисовку всех картин (ванильных и из других модов),
 pr.options.FAST_PAINTINGS.tooltip.5=объединяя полигоны в 6 граней с расчётом освещения за один проход.
+
+# Window Type
+pr.options.WINDOW_MODE=Тип окна
+pr.options.WINDOW_MODE.tooltip.1=Режим отображения окна
+pr.options.WINDOW_MODE.tooltip.2=  Полный экран - аппаратный монопольный захват, FreeSync/G-Sync активен
+pr.options.WINDOW_MODE.tooltip.3=  Без рамок - полноэкранное окно без рамок, мгновенный Alt+Tab
+pr.options.WINDOW_MODE.tooltip.4=  В окне - классическое оконное приложение с рамками
+
+options.weatherRadius=Радиус осадков
+options.weatherRadius.tooltip.1=Радиус осадков
+options.weatherRadius.tooltip.2=Радиус вокруг игрока, в котором отображаются дождь и снег.

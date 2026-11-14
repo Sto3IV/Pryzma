@@ -28,6 +28,25 @@ public abstract sealed class PrOption permits PrOption.Cycle, PrOption.Slider {
 
     /** {@code "<caption>: "}, the prefix of every 1.x option label. */
     String caption() {
+        if ("options.graphics".equals(key)) {
+            String label = I18n.get("options.graphics");
+            if (label.equals("options.graphics")) {
+                label = net.minecraft.client.Minecraft.getInstance().options.languageCode.startsWith("ru") ? "Графика" : "Graphics";
+            }
+            return label + ": ";
+        }
+        if ("pr.options.MIPMAP_LEVELS".equals(key)) {
+            boolean ru = net.minecraft.client.Minecraft.getInstance().options.languageCode.startsWith("ru");
+            return ru ? "Мипмап: " : "Mipmap: ";
+        }
+        if ("pr.options.MIPMAP_TYPE".equals(key)) {
+            boolean ru = net.minecraft.client.Minecraft.getInstance().options.languageCode.startsWith("ru");
+            return ru ? "Тип: " : "Type: ";
+        }
+        if ("pr.options.WINDOW_MODE".equals(key)) {
+            boolean ru = net.minecraft.client.Minecraft.getInstance().options.languageCode.startsWith("ru");
+            return ru ? "Тип окна: " : "Window Type: ";
+        }
         return I18n.get(key) + ": ";
     }
 

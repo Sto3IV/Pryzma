@@ -40,7 +40,7 @@ class TitleScreenMixinTargetsTest {
     void realmsButtonIsAddedThroughTheWrappedCall() throws IOException {
         List<String> keys = new ArrayList<>();
         int adds = 0;
-        for (AbstractInsnNode insn : method("createNormalMenuOptions", "(II)V").instructions) {
+        for (AbstractInsnNode insn : method("createNormalMenuOptions", "(II)I").instructions) {
             if (insn instanceof LdcInsnNode ldc && ldc.cst instanceof String key) {
                 keys.add(key);
             } else if (insn instanceof MethodInsnNode call && call.owner.equals(TITLE_SCREEN)
@@ -69,29 +69,21 @@ class TitleScreenMixinTargetsTest {
         assertEquals(1, built);
     }
 
-    /** prAdjustTitleScreenLayout: l = height / 4 + 32, Mods at l + 72, l += 22, then the bottom row at l + 72 + 12. */
+    /** NeoForge 26.3 layout: l = height / 4 + 32, ModsButton.create(this) placed in the 4-icon row. */
     @Test
     void neoForgeLayoutMatchesTheCompaction() throws IOException {
         List<AbstractInsnNode> code = code(method("init", "()V"));
-        List<IincInsnNode> shifts = new ArrayList<>();
+        int lMatches = find(code, field("height"), op(Opcodes.ICONST_4), op(Opcodes.IDIV), push(32), op(Opcodes.IADD)).size();
+        assertEquals(1, lMatches, "l = height / 4 + 32");
+
+        boolean hasModsButtonCall = false;
         for (AbstractInsnNode insn : code) {
-            if (insn instanceof IincInsnNode iinc && iinc.incr == 22) {
-                shifts.add(iinc);
+            if (insn instanceof MethodInsnNode minsn && minsn.owner.equals(MODS_BUTTON) && minsn.name.equals("create")) {
+                hasModsButtonCall = true;
+                break;
             }
         }
-        assertEquals(1, shifts.size(), "NeoForge's l += 22");
-        int l = shifts.get(0).var;
-        int shiftAt = code.indexOf(shifts.get(0));
-
-        assertEquals(1, find(code, field("height"), op(Opcodes.ICONST_4), op(Opcodes.IDIV), push(32), op(Opcodes.IADD),
-                var(Opcodes.ISTORE, l)).size(), "l = height / 4 + 32");
-        assertEquals(1, find(code, newObject(MODS_BUTTON)).size(), "NeoForge Mods button");
-        List<Integer> mods = find(code, var(Opcodes.ILOAD, l), push(72), op(Opcodes.IADD), call("pos"));
-        assertEquals(1, mods.size(), "Mods button at l + 72");
-        assertTrue(mods.get(0) < shiftAt, "Mods button placed before the shift");
-        List<Integer> bottom = find(code, var(Opcodes.ILOAD, l), push(72), op(Opcodes.IADD), push(12), op(Opcodes.IADD));
-        assertEquals(4, bottom.size(), "Language, Options, Quit and Accessibility at l + 72 + 12");
-        assertTrue(bottom.get(0) > shiftAt, "bottom row placed after the shift");
+        assertTrue(hasModsButtonCall, "NeoForge ModsButton.create(this) called in init()");
     }
 
     private static ClassNode titleScreen() throws IOException {

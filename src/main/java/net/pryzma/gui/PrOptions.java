@@ -13,6 +13,7 @@ import net.minecraft.client.CloudStatus;
 import net.minecraft.client.GraphicsPreset;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.client.TextureFilteringMethod;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -169,8 +170,22 @@ public final class PrOptions {
             },
             dir -> {
                 PryzmaConfig.prTrees = nextValue(PryzmaConfig.prTrees, PryzmaConfig.TREES_VALUES);
+                syncLeavesTransparency();
                 allChanged();
             });
+
+    public static void syncLeavesTransparency() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc != null && mc.options != null) {
+            boolean cutout = switch (PryzmaConfig.prTrees) {
+                case 1 -> false;
+                case 2, 4 -> true;
+                default -> mc.options.graphicsPreset().get() != GraphicsPreset.FAST;
+            };
+            mc.options.cutoutLeaves().set(cutout);
+            mc.options.save();
+        }
+    }
     public static final PrOption.Cycle RAIN = cycle("pr.options.RAIN",
             () -> defaultFastFancyOff(PryzmaConfig.prRain),
             dir -> PryzmaConfig.prRain = PryzmaConfig.prRain + 1 > 3 ? 0 : PryzmaConfig.prRain + 1);
@@ -214,13 +229,14 @@ public final class PrOptions {
                 PryzmaConfig.prSwampColors = v;
                 allChanged();
             });
-    public static final PrOption.Cycle VIGNETTE = cycle("pr.options.VIGNETTE",
-            () -> switch (PryzmaConfig.prVignette) {
-                case 1 -> fast();
-                case 2 -> fancy();
-                default -> byDefault();
-            },
-            dir -> PryzmaConfig.prVignette = PryzmaConfig.prVignette + 1 > 2 ? 0 : PryzmaConfig.prVignette + 1);
+    public static final PrOption.Cycle VIGNETTE = bool("pr.options.VIGNETTE",
+            () -> options().vignette().get(),
+            v -> {
+                options().vignette().set(v);
+                PryzmaConfig.prVignette = v ? 2 : 1;
+                options().save();
+                PryzmaConfig.save();
+            });
     public static final PrOption.Cycle ALTERNATE_BLOCKS = bool("pr.options.ALTERNATE_BLOCKS",
             () -> PryzmaConfig.prAlternateBlocks, v -> {
                 PryzmaConfig.prAlternateBlocks = v;
@@ -234,9 +250,10 @@ public final class PrOptions {
             () -> options().mipmapLevels().get(), v -> options().mipmapLevels().set((int) v),
             p -> (double) Math.round(p * 4), v -> v / 4.0,
             v -> {
-                Component caption = Component.translatable("options.mipmapLevels");
+                boolean ru = Minecraft.getInstance().options.languageCode.startsWith("ru");
+                Component caption = Component.literal(ru ? "Мипмап" : "Mipmap");
                 if (v >= 4) {
-                    return Options.genericValueLabel(caption, Component.translatable("pr.general.max"));
+                    return Options.genericValueLabel(caption, Component.translatable("pr.options.MIPMAP_LEVELS.maximum"));
                 }
                 return v == 0 ? CommonComponents.optionStatus(caption, false)
                         : Options.genericValueLabel(caption, Component.literal(Integer.toString((int) v)));
@@ -255,13 +272,38 @@ public final class PrOptions {
                 PryzmaConfig.prMipmapType = PryzmaConfig.prMipmapType + dir & 3;
             });
     public static final PrOption.Slider AF_LEVEL = steppedSlider("pr.options.AF_LEVEL", AF_VALUES,
-            () -> PryzmaConfig.prAfLevel, v -> {
+            () -> {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc != null && mc.options != null
+                        && mc.options.textureFiltering().get() != TextureFilteringMethod.ANISOTROPIC) {
+                    return 1;
+                }
+                return PryzmaConfig.prAfLevel;
+            },
+            v -> {
                 if (options().mipmapLevels().get() == 0) {
                     return;
                 }
                 PryzmaConfig.prAfLevel = v;
+                syncVanillaAnisotropy();
             },
             v -> v == 1 ? off() : Integer.toString(v));
+
+    public static void syncVanillaAnisotropy() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc != null && mc.options != null) {
+            if (PryzmaConfig.prAfLevel > 1) {
+                mc.options.textureFiltering().set(TextureFilteringMethod.ANISOTROPIC);
+                int bit = Integer.numberOfTrailingZeros(PryzmaConfig.prAfLevel);
+                mc.options.maxAnisotropyBit().set(bit);
+            } else {
+                if (mc.options.textureFiltering().get() == TextureFilteringMethod.ANISOTROPIC) {
+                    mc.options.textureFiltering().set(TextureFilteringMethod.NONE);
+                }
+                mc.options.maxAnisotropyBit().set(0);
+            }
+        }
+    }
     public static final PrOption.Cycle EMISSIVE_TEXTURES = bool("pr.options.EMISSIVE_TEXTURES",
             () -> PryzmaConfig.prEmissiveTextures, v -> {
                 PryzmaConfig.prEmissiveTextures = v;
@@ -428,6 +470,25 @@ public final class PrOptions {
                 PryzmaConfig.prInfiniteClouds = v;
                 net.pryzma.render.PrCloudRenderer.markDirty();
             });
+    public static final PrOption.Slider WEATHER_RADIUS = new PrOption.Slider("options.weatherRadius", 32, false,
+            () -> options().weatherRadius().get(),
+            v -> {
+                options().weatherRadius().set((int) v);
+                options().save();
+            },
+            p -> (double) Math.round(p * 32),
+            v -> v / 32.0,
+            v -> {
+                int blocks = (int) v;
+                Component caption = Component.translatable("options.weatherRadius");
+                if (blocks == 0) {
+                    return CommonComponents.optionStatus(caption, false);
+                }
+                boolean ru = Minecraft.getInstance().options.languageCode.startsWith("ru");
+                String unit = ru ? (blocks == 1 ? " блок" : (blocks >= 2 && blocks <= 4 ? " блока" : " блоков"))
+                        : (blocks == 1 ? " Block" : " Blocks");
+                return Options.genericValueLabel(caption, Component.literal(blocks + unit));
+            });
     /** Crossing 0 changes how sections are meshed, so they are rebuilt; other steps only move the draw cut. */
     public static final PrOption.Slider DETAIL_DISTANCE = steppedSlider("pr.options.DETAIL_DISTANCE",
             PryzmaConfig.DETAIL_DISTANCE_VALUES,
@@ -498,6 +559,56 @@ public final class PrOptions {
     public static final PrOption.Cycle ADVANCED_TOOLTIPS = bool("pr.options.ADVANCED_TOOLTIPS",
             () -> options().advancedItemTooltips, v -> options().advancedItemTooltips = v);
     public static final PrOption.Cycle WEATHER = bool("pr.options.WEATHER", () -> PryzmaConfig.prWeather, v -> PryzmaConfig.prWeather = v);
+    public static final PrOption.Cycle WINDOW_MODE = cycle("pr.options.WINDOW_MODE",
+            () -> {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc == null || mc.options == null) {
+                    return "Bordered";
+                }
+                boolean ru = mc.options.languageCode.startsWith("ru");
+                boolean fs = mc.options.fullscreen().get();
+                if (!fs) {
+                    return ru ? "В окне" : "Bordered";
+                }
+                boolean ex = mc.options.exclusiveFullscreen().get();
+                if (ex) {
+                    return ru ? "Полный экран" : "Fullscreen";
+                }
+                return ru ? "Без рамок" : "Borderless";
+            },
+            dir -> {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc == null || mc.options == null) {
+                    return;
+                }
+                boolean fs = mc.options.fullscreen().get();
+                boolean ex = mc.options.exclusiveFullscreen().get();
+                // 0: Fullscreen (Exclusive), 1: Borderless, 2: Bordered
+                int current = !fs ? 2 : (ex ? 0 : 1);
+                int next = Math.floorMod(current + dir, 3);
+                switch (next) {
+                    case 0 -> { // Fullscreen
+                        mc.options.fullscreen().set(true);
+                        mc.options.exclusiveFullscreen().set(true);
+                        mc.getWindow().setExclusiveFullscreen(true);
+                        mc.getWindow().setFullscreen(true);
+                        mc.getWindow().updateFullscreenIfChanged();
+                    }
+                    case 1 -> { // Borderless
+                        mc.options.fullscreen().set(true);
+                        mc.options.exclusiveFullscreen().set(false);
+                        mc.getWindow().setExclusiveFullscreen(false);
+                        mc.getWindow().setFullscreen(true);
+                        mc.getWindow().updateFullscreenIfChanged();
+                    }
+                    case 2 -> { // Bordered
+                        mc.options.fullscreen().set(false);
+                        mc.getWindow().setFullscreen(false);
+                        mc.getWindow().updateFullscreenIfChanged();
+                    }
+                }
+                mc.options.save();
+            });
     public static final PrOption.Cycle TIME = cycle("pr.options.TIME",
             () -> switch (PryzmaConfig.prTime) {
                 case 1 -> I18n.get("pr.options.time.dayOnly");

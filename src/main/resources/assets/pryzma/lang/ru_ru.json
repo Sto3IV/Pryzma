@@ -985,5 +985,18 @@
   "options.glintStrength.tooltip.1": "Сила блеска",
   "options.glintStrength.tooltip.2": "Яркость и выраженность блеска зачарованных предметов.",
   "options.menuBackgroundBlurriness.tooltip.1": "Размытие фона меню",
-  "options.menuBackgroundBlurriness.tooltip.2": "Степень размытия игрового мира при открытии меню."
+  "options.menuBackgroundBlurriness.tooltip.2": "Степень размытия игрового мира при открытии меню.",
+  "options.graphics": "Графика",
+  "options.weatherRadius": "Радиус осадков",
+  "pr.options.new": "Новое...",
+  "pr.options.newTitle": "Новые настройки",
+  "pr.options.MIPMAP_LEVELS.maximum": "4",
+  "pr.options.WINDOW_MODE": "Тип окна",
+  "pr.options.windowMode.fullscreen": "Полный экран",
+  "pr.options.windowMode.borderless": "Без рамок",
+  "pr.options.windowMode.bordered": "В окне",
+  "pr.options.WINDOW_MODE.tooltip.1": "Тип окна",
+  "pr.options.WINDOW_MODE.tooltip.2": "Полный экран - аппаратный монопольный захват, FreeSync/G-Sync активен",
+  "pr.options.WINDOW_MODE.tooltip.3": "Без рамок - полноэкранное окно без рамок, мгновенный Alt+Tab",
+  "pr.options.WINDOW_MODE.tooltip.4": "В окне - классическое оконное приложение с рамками"
 }
