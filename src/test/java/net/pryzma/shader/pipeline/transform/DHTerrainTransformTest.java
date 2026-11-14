@@ -55,7 +55,7 @@ class DHTerrainTransformTest {
         int main = out.indexOf(compact("void main() {"));
         int position = out.indexOf(compact("vec4 pryzma_lodPos = iris_ProjectionMatrixInverse *"));
         int toPlayer = out.indexOf(compact("pryzma_lodPos = iris_ModelViewMatrixInverse * (pryzma_lodPos / pryzma_lodPos.w);"));
-        int cut = out.indexOf(compact("if (dot(pryzma_lodPos.xz, pryzma_lodPos.xz) < pryzma_LodClip * pryzma_LodClip) discard;"));
+        int cut = out.indexOf(compact("if (pryzma_LodClip > 0.0) {"));
         int packCode = out.indexOf(compact("vec4 lit = color * texture(lightmap, lmcoord);"));
         assertTrue(main >= 0, out);
         assertEquals(main + compact("void main() {").length(), position, "the screen position is unprojected first in main: " + out);
@@ -63,6 +63,8 @@ class DHTerrainTransformTest {
         assertTrue(cut > toPlayer, "then tested against the clip radius, and discarded: " + out);
         assertTrue(packCode > cut, "before any of the pack's code: " + out);
         assertTrue(out.indexOf(compact("uniform float pryzma_LodClip;")) < main, "declared before main: " + out);
+        assertTrue(out.contains(compact("const float pryzma_Bayer8[64]")), "bayer matrix declared before main: " + out);
+        assertTrue(out.indexOf(compact("const float pryzma_Bayer8[64]")) < main, "bayer matrix before main: " + out);
     }
 
     @Test

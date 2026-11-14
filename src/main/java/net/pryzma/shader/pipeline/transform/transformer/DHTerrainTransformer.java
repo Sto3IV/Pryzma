@@ -103,18 +103,44 @@ public class DHTerrainTransformer {
 
 	/**
 	 * Farlands LOD: fragments horizontally closer to the camera than {@code pryzma_LodClip} lie where vanilla terrain
-	 * is drawn and are discarded. The position comes from {@code gl_FragCoord} and the inverse matrices of the pass,
-	 * so the cut works whatever stages (geometry, tessellation) the program has. A clip of 0 (the uniform's default)
-	 * discards nothing.
+	 * is drawn and are discarded with an 8x8 Bayer matrix stochastic dissolve across the transition boundary (16-block band).
+	 * The position comes from {@code gl_FragCoord} and the inverse matrices of the pass, so the cut works whatever stages
+	 * (geometry, tessellation) the program has. A clip of 0 (the uniform's default) discards nothing.
 	 */
 	public static void injectLodClip(ASTParser t, TranslationUnit tree) {
 		tree.parseAndInjectNodes(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
 			"uniform float pryzma_LodClip;",
-			"uniform vec2 pryzma_LodInvViewport;");
+			"uniform vec2 pryzma_LodInvViewport;",
+			"""
+			const float pryzma_Bayer8[64] = float[](
+				0.0/64.0, 32.0/64.0,  8.0/64.0, 40.0/64.0,  2.0/64.0, 34.0/64.0, 10.0/64.0, 42.0/64.0,
+				48.0/64.0, 16.0/64.0, 56.0/64.0, 24.0/64.0, 50.0/64.0, 18.0/64.0, 58.0/64.0, 26.0/64.0,
+				12.0/64.0, 44.0/64.0,  4.0/64.0, 36.0/64.0, 14.0/64.0, 46.0/64.0,  6.0/64.0, 38.0/64.0,
+				60.0/64.0, 28.0/64.0, 52.0/64.0, 20.0/64.0, 62.0/64.0, 30.0/64.0, 54.0/64.0, 22.0/64.0,
+				 3.0/64.0, 35.0/64.0, 11.0/64.0, 43.0/64.0,  1.0/64.0, 33.0/64.0,  9.0/64.0, 41.0/64.0,
+				51.0/64.0, 19.0/64.0, 59.0/64.0, 27.0/64.0, 49.0/64.0, 17.0/64.0, 57.0/64.0, 25.0/64.0,
+				15.0/64.0, 47.0/64.0,  7.0/64.0, 39.0/64.0, 13.0/64.0, 45.0/64.0,  5.0/64.0, 37.0/64.0,
+				63.0/64.0, 31.0/64.0, 55.0/64.0, 23.0/64.0, 61.0/64.0, 29.0/64.0, 53.0/64.0, 21.0/64.0
+			);
+			""");
 		tree.prependMainFunctionBody(t,
 			"vec4 pryzma_lodPos = iris_ProjectionMatrixInverse * vec4(gl_FragCoord.xy * pryzma_LodInvViewport * 2.0 - 1.0, gl_FragCoord.z * 2.0 - 1.0, 1.0);",
 			"pryzma_lodPos = iris_ModelViewMatrixInverse * (pryzma_lodPos / pryzma_lodPos.w);",
-			"if (dot(pryzma_lodPos.xz, pryzma_lodPos.xz) < pryzma_LodClip * pryzma_LodClip) discard;");
+			"""
+			if (pryzma_LodClip > 0.0) {
+				float pryzma_horiz = length(pryzma_lodPos.xz);
+				float pryzma_inner = max(0.0, pryzma_LodClip - 16.0);
+				if (pryzma_horiz < pryzma_inner) {
+					discard;
+				} else if (pryzma_horiz < pryzma_LodClip + 16.0) {
+					float pryzma_blend = (pryzma_horiz - pryzma_inner) / 32.0;
+					int pryzma_ditherIdx = int(mod(gl_FragCoord.x, 8.0)) + int(mod(gl_FragCoord.y, 8.0)) * 8;
+					if (pryzma_blend < pryzma_Bayer8[pryzma_ditherIdx]) {
+						discard;
+					}
+				}
+			}
+			""");
 	}
 
 	public static void injectVertInit(
