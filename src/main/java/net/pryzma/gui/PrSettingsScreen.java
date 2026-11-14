@@ -33,8 +33,7 @@ final class PrSettingsScreen extends PrScreen {
         OTHER("pr.options.otherTitle"),
         QUICK_INFO("pr.options.quickInfoTitle"),
         FARLANDS("pr.options.farlandsTitle"),
-        ITEMS("pr.options.itemsTitle"),
-        NEW_OPTIONS("pr.options.newTitle");
+        ITEMS("pr.options.itemsTitle");
 
         final String title;
 
@@ -89,7 +88,8 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.CUSTOM_ENTITY_MODELS, PrOptions.CUSTOM_GUIS,
                         vanilla("options.screenEffectScale", o.screenEffectScale()),
                         vanilla("options.fovEffectScale", o.fovEffectScale()));
-                done(width / 2 - 100, 200);
+                addOption(vanilla("options.improvedTransparency", o.improvedTransparency()), width / 2 - 155, bottomY(), 150);
+                done(width / 2 + 5, 150);
                 onOptionsChanged();
             }
             case ANIMATIONS -> {
@@ -125,7 +125,8 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.SCREENSHOT_SIZE, PrOptions.SHOW_GL_ERRORS,
                         PrOptions.FEEDBACK_BUTTONS, PrOptions.REMOVE_REALMS,
                         PrOptions.TELEMETRY_ATTRIBUTION, vanilla("options.fullscreen.resolution", fullscreenResolution()),
-                        vanilla("options.autosaveIndicator", o.showAutosaveIndicator()), null);
+                        vanilla("options.autosaveIndicator", o.showAutosaveIndicator()),
+                        vanilla("options.graphicsApi", o.preferredGraphicsBackend()));
                 addRenderableWidget(new PrButton(210, width / 2 - 155, bottomY(), 150,
                         Component.translatable("pr.options.other.reset"), b -> confirmReset()));
                 onOptionsChanged();
@@ -152,13 +153,6 @@ final class PrSettingsScreen extends PrScreen {
                 // Ranni: Swapped. Now both menus look intentional rather than accidental.
                 grid(PrOptions.DROPPED_ITEMS, vanilla("options.entityShadows", o.entityShadows()),
                         vanilla("options.glintSpeed", o.glintSpeed()), vanilla("options.glintStrength", o.glintStrength()));
-                done(width / 2 - 100, 200);
-                onOptionsChanged();
-            }
-            case NEW_OPTIONS -> {
-                grid(vanilla("options.graphicsApi", o.preferredGraphicsBackend()),
-                        vanilla("options.improvedTransparency", o.improvedTransparency()),
-                        null, null);
                 done(width / 2 - 100, 200);
                 onOptionsChanged();
             }
@@ -206,6 +200,15 @@ final class PrSettingsScreen extends PrScreen {
                                     .append(CommonComponents.OPTION_OFF));
                         } else {
                             s.refresh();
+                        }
+                    } else if (w instanceof PrOptionButton b && b.option() == PrOptions.MIPMAP_TYPE) {
+                        b.active = hasMipmaps;
+                        if (!hasMipmaps) {
+                            b.setMessage(Component.translatable("pr.options.MIPMAP_TYPE")
+                                    .append(": ")
+                                    .append(CommonComponents.OPTION_OFF));
+                        } else {
+                            b.refresh();
                         }
                     }
                 }
@@ -295,31 +298,6 @@ final class PrSettingsScreen extends PrScreen {
                                 .append(Component.translatable("pr.options.farlands.dh_active")));
                     } else {
                         b.refresh();
-                    }
-                }
-            }
-            return;
-        }
-        if (page == Page.QUALITY) {
-            boolean mipmapsOff = minecraft.options.mipmapLevels().get() == 0;
-            for (AbstractWidget w : widgets()) {
-                if (w instanceof PrOptionButton b && b.option() == PrOptions.MIPMAP_TYPE) {
-                    b.active = !mipmapsOff;
-                    if (mipmapsOff) {
-                        b.setMessage(Component.translatable("pr.options.MIPMAP_TYPE")
-                                .append(": ")
-                                .append(CommonComponents.OPTION_OFF));
-                    } else {
-                        b.refresh();
-                    }
-                } else if (w instanceof PrOptionSlider s && s.option() == PrOptions.AF_LEVEL) {
-                    s.active = !mipmapsOff;
-                    if (mipmapsOff) {
-                        s.setMessage(Component.translatable("pr.options.AF_LEVEL")
-                                .append(": ")
-                                .append(CommonComponents.OPTION_OFF));
-                    } else {
-                        s.refresh();
                     }
                 }
             }
