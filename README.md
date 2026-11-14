@@ -19,7 +19,7 @@ Pryzma restores the full beauty of classic resource packs — connected textures
 Installation
 ============
 
-1. Install [NeoForge 1.21.1](https://neoforged.net/) (build 21.1.250 or newer recommended).
+1. Install [NeoForge](https://neoforged.net/).
 2. Download the latest release of **Pryzma** from our [CurseForge](https://curseforge.com/minecraft/mc-mods/pryzma) or [GitHub Releases](https://github.com/Sto3IV/Pryzma/releases) page.
 3. Place `pryzma-x.x.X.jar` into your `.minecraft/mods/` directory.
 4. Drop your favorite resource packs and shaderpacks into their respective folders, and enjoy!
@@ -42,8 +42,8 @@ Feature Matrix
 | Feature | Vanilla | Fragmented Setup | Pryzma |
 | :--- | :---: | :---: | :---: |
 | **Shaders (GLSL)** | ❌ None | ⚠️ Extra loaders | ✅ Built-in Native |
-| **OptiFine Packs** | ❌ None | ⚠️ 8+ separate mods | ✅ 100% Native |
-| **MCPatcher Format** | ❌ None | ❌ Unsupported | ✅ Auto-Aliasing |
+| **OptiFine Textures format** | ❌ None | ⚠️ 8+ separate mods | ✅ 100% Native |
+| **MCPatcher Format** | ❌ None | ❌ Unsupported | ✅ Supported |
 | **Connected Textures (CTM)** | ❌ None | ⚠️ Continuity / Fusion | ✅ Native Full CTM |
 | **Custom Items (CIT)** | ❌ None | ⚠️ CIT Resewn | ✅ Native Full CIT |
 | **Custom Entity Models (CEM)**| ❌ None | ⚠️ EMF | ✅ Native CEM |
@@ -51,35 +51,13 @@ Feature Matrix
 | **Custom Skies & Domes** | ❌ Vanilla | ⚠️ Skyboxes Mod | ✅ Native Multi-Layer |
 | **Custom Biome Colormaps** | ❌ Static | ⚠️ Polytone | ✅ Native Colormaps |
 | **Custom Lightmaps** | ❌ Static | ⚠️ Polytone (partial) | ✅ Native Dynamic |
-| **Handheld Dynamic Lights** | ❌ None | ⚠️ LambDynamicLights | ✅ Native (Zero Lag) |
+| **Handheld Dynamic Lights** | ❌ None | ⚠️ LambDynamicLights | ✅ Included |
 | **Cinematic Smooth Zoom** | ⚠️ Spyglass | ⚠️ Zoomify | ✅ Native ('C' Key) |
 | **Better Grass & Snow** | ❌ None | ⚠️ 2 separate mods | ✅ Native Options |
-| **Fast Paintings** | ❌ Laggy | ⚠️ FastPaintings | ✅ Native Batched |
-| **Clean Menus & No Realms** | ❌ Cluttered | ⚠️ Separate tweaks | ✅ Native Setting |
+| **No Realms button** | ❌ Cluttered | ⚠️ Separate tweaks | ✅ Included |
 | **Multithread Meshing** | ⚠️ Basic | ✅ External renderer | ✅ Native Worker Pool |
-| **Zero-Stall VBO Compaction** | ❌ Freezes | ⚠️ Stutter-prone | ✅ Native On-Demand |
-| **Hardware F3 RenderCache** | ❌ FPS Drop | ❌ CPU Overhead | ✅ 1800+ FPS Cache |
 | **Total JARs Needed** | **0** | **15–20+ JARs** | **1 Single JAR** |
 | **Architecture** | Baseline | Competing mixins | **Clean Monolith** |
-
-Building from Source
-====================
-
-Pryzma builds with Gradle and requires Java 21 LTS:
-
-```bash
-# Clone the repository
-git clone https://github.com/Sto3IV/Pryzma.git
-cd Pryzma
-
-# Run the full 316-test verification suite
-./gradlew test
-
-# Compile and package release JAR
-./gradlew build
-```
-
-The compiled mod JAR will be located at `build/libs`.
 
 Support & Philosophy
 ====================
@@ -100,7 +78,7 @@ Both of us have regular full-time jobs, and we never expect anything in return. 
 Modpacks
 ========
 
-Pryzma can be used freely in any public or private modpack without requiring special permission. 100% offline, privacy-first, zero telemetry.
+Pryzma can be used freely in any public or private modpack without requiring special permission. But paywall modpacks are highly prohibited!
 
 Licensing
 =========
