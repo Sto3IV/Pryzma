@@ -252,9 +252,34 @@ public final class PrSelfTest {
             });
             case "press" -> click(mc, arg, 0);
             case "rpress" -> click(mc, arg, 1);
+            case "hover" -> {
+                Screen screen = mc.gui.screen();
+                if (screen != null) {
+                    AbstractWidget target = findWidget(screen, arg);
+                    if (target != null) {
+                        double scale = mc.getWindow().getGuiScale();
+                        double x = target.getX() + target.getWidth() / 2.0;
+                        double y = target.getY() + target.getHeight() / 2.0;
+                        SDLMouse.SDL_WarpMouseInWindow(mc.getWindow().handle(), (float)(x * scale), (float)(y * scale));
+                        mc.mouseHandler.onMove(mc.getWindow().handle(), x * scale, y * scale, 0, 0);
+                    } else {
+                        StringBuilder sb = new StringBuilder("no widget matching '").append(arg)
+                                .append("' on ").append(screen.getClass().getSimpleName()).append(". Available: ");
+                        for (GuiEventListener child : screen.children()) {
+                            if (child instanceof AbstractWidget w) {
+                                sb.append("'").append(w.getMessage().getString()).append("', ");
+                            }
+                        }
+                        throw new IllegalArgumentException(sb.toString());
+                    }
+                }
+            }
             case "mouse" -> {
                 double scale = mc.getWindow().getGuiScale();
-                SDLMouse.SDL_WarpMouseInWindow(mc.getWindow().handle(), (float)(Double.parseDouble(a[1]) * scale), (float)(Double.parseDouble(a[2]) * scale));
+                double x = Double.parseDouble(a[1]) * scale;
+                double y = Double.parseDouble(a[2]) * scale;
+                SDLMouse.SDL_WarpMouseInWindow(mc.getWindow().handle(), (float)x, (float)y);
+                mc.mouseHandler.onMove(mc.getWindow().handle(), x, y, 0, 0);
             }
             case "close" -> {
                 if (mc.gui.screen() != null) {
@@ -518,19 +543,59 @@ public final class PrSelfTest {
                 && mc.levelRenderer.hasRenderedAllSections();
     }
 
+    private static AbstractWidget findWidget(Screen screen, String query) {
+        if (screen == null) return null;
+        // 1. Exact startsWith
+        for (GuiEventListener child : screen.children()) {
+            if (child instanceof AbstractWidget w && w.getMessage().getString().startsWith(query)) {
+                return w;
+            }
+        }
+        // 2. Case-insensitive startsWith
+        String qLower = query.toLowerCase();
+        for (GuiEventListener child : screen.children()) {
+            if (child instanceof AbstractWidget w && w.getMessage().getString().toLowerCase().startsWith(qLower)) {
+                return w;
+            }
+        }
+        // 3. Case-insensitive contains
+        for (GuiEventListener child : screen.children()) {
+            if (child instanceof AbstractWidget w && w.getMessage().getString().toLowerCase().contains(qLower)) {
+                return w;
+            }
+        }
+        // 4. Aliases
+        if (query.equalsIgnoreCase("AO Level") || query.equalsIgnoreCase("AO_LEVEL")) {
+            for (GuiEventListener child : screen.children()) {
+                if (child instanceof AbstractWidget w && w.getMessage().getString().toLowerCase().contains("smooth lighting level")) {
+                    return w;
+                }
+            }
+        }
+        if (query.equalsIgnoreCase("Mipmap Type") || query.startsWith("Mipmap Type")) {
+            for (GuiEventListener child : screen.children()) {
+                if (child instanceof AbstractWidget w && w.getMessage().getString().toLowerCase().startsWith("type:")) {
+                    return w;
+                }
+            }
+        }
+        return null;
+    }
+
     /** Clicks through the screen's own mouse handling, so the whole press path runs. */
     private static void click(Minecraft mc, String label, int button) {
         Screen screen = mc.gui.screen();
         if (screen == null) return;
-        AbstractWidget target = null;
-        for (GuiEventListener child : screen.children()) {
-            if (child instanceof AbstractWidget w && w.getMessage().getString().startsWith(label)) {
-                target = w;
-                break;
-            }
-        }
+        AbstractWidget target = findWidget(screen, label);
         if (target == null) {
-            throw new IllegalArgumentException("no widget starting with '" + label + "' on " + screen.getClass().getSimpleName());
+            StringBuilder sb = new StringBuilder("no widget matching '").append(label)
+                    .append("' on ").append(screen.getClass().getSimpleName()).append(". Available: ");
+            for (GuiEventListener child : screen.children()) {
+                if (child instanceof AbstractWidget w) {
+                    sb.append("'").append(w.getMessage().getString()).append("', ");
+                }
+            }
+            throw new IllegalArgumentException(sb.toString());
         }
         double x = target.getX() + target.getWidth() / 2.0;
         double y = target.getY() + target.getHeight() / 2.0;

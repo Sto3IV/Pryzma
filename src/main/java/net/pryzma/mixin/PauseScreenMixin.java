@@ -72,20 +72,20 @@ public abstract class PauseScreenMixin extends Screen {
     }
 
     private static boolean isFeedbackOrBugWidget(AbstractWidget w) {
-        Component msg = w.getMessage();
-        if (msg != null) {
-            String str = msg.getString();
-            if ("Report Bugs".equalsIgnoreCase(str) || "Give Feedback".equalsIgnoreCase(str)
-                    || "Сообщить об ошибках".equalsIgnoreCase(str) || "Оставить отзыв".equalsIgnoreCase(str)) {
+        return matchesFeedbackOrBug(w.getMessage());
+    }
+
+    private static boolean matchesFeedbackOrBug(Component msg) {
+        if (msg == null) {
+            return false;
+        }
+        if (msg.getContents() instanceof TranslatableContents tc) {
+            String key = tc.getKey().toLowerCase();
+            if (key.contains("feedback") || key.contains("reportbugs") || key.contains("report_bugs")) {
                 return true;
             }
-            if (msg.getContents() instanceof TranslatableContents tc) {
-                String key = tc.getKey();
-                if ("menu.feedback".equals(key) || "menu.sendFeedback".equals(key) || "menu.reportBugs".equals(key)) {
-                    return true;
-                }
-            }
         }
-        return false;
+        String str = msg.getString().toLowerCase();
+        return str.contains("feedback") || str.contains("report bug") || str.contains("отзыв") || str.contains("ошибк");
     }
 }

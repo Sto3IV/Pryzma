@@ -14,7 +14,7 @@ import net.minecraft.client.resources.language.I18n;
  * {@code <key>.tooltip.1..10} lines appear in a fixed 300 x 94 panel above or below the grid.
  */
 final class PrTooltips {
-    private static final int DELAY_MS = 700;
+    private static final int DELAY_MS = System.getProperty("pryzma.selftest") != null ? 0 : 700;
     private static final int MAX_LINES = 10;
     private static final int PANEL = 0xE0000000;
     private static final int TEXT = 0xFFDDDDDD;
@@ -31,7 +31,7 @@ final class PrTooltips {
 
     /** @param keyOf tooltip key of a widget, or {@code null} when it has none */
     void render(GuiGraphicsExtractor g, int x, int y, List<AbstractWidget> widgets, Function<AbstractWidget, String> keyOf) {
-        if (Math.abs(x - lastX) > 5 || Math.abs(y - lastY) > 5) {
+        if (DELAY_MS > 0 && (Math.abs(x - lastX) > 5 || Math.abs(y - lastY) > 5)) {
             lastX = x;
             lastY = y;
             stillSince = System.currentTimeMillis();
@@ -48,7 +48,7 @@ final class PrTooltips {
         }
 
         net.minecraft.client.gui.Font font = screen.getMinecraft().font;
-        int maxAllowedLineWidth = Math.max(180, Math.min(280, screen.width - 32));
+        int maxAllowedLineWidth = Math.max(200, Math.min(320, screen.width - 32));
         List<String> lines = wrapLines(font, rawLines, maxAllowedLineWidth);
         if (lines.size() > MAX_LINES) {
             lines = new ArrayList<>(lines.subList(0, MAX_LINES));
@@ -59,21 +59,26 @@ final class PrTooltips {
         for (String line : lines) {
             maxTextWidth = Math.max(maxTextWidth, font.width(line));
         }
-        int panelWidth = Math.min(Math.max(280, maxTextWidth + 14), screen.width - 16);
-        int panelHeight = Math.max(70, 10 + lines.size() * 11);
+        int panelWidth = Math.min(Math.max(200, maxTextWidth + 14), screen.width - 16);
+        int panelHeight = 8 + lines.size() * 11;
         int x1 = Math.max(8, Math.min(screen.width / 2 - panelWidth / 2, screen.width - panelWidth - 8));
-        int y1 = screen.height / 6 - 7;
-        if (y <= y1 + panelHeight + 4) {
-            y1 += panelHeight + 11;
+        
+        // Position panel at top or bottom half opposite to the hovered cursor so it never covers the button
+        int y1;
+        if (y < screen.height / 2) {
+            y1 = screen.height - panelHeight - 6;
+        } else {
+            y1 = 6;
         }
-        if (y1 + panelHeight > screen.height - 4) {
-            y1 = screen.height - panelHeight - 4;
-        }
+        y1 = Math.max(4, Math.min(y1, screen.height - panelHeight - 4));
+
         g.nextStratum();
         g.fill(x1, y1, x1 + panelWidth, y1 + panelHeight, PANEL);
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
-            g.text(font, line, x1 + 7, y1 + 6 + i * 11, line.endsWith("!") ? WARNING : TEXT, true);
+            if (!line.isEmpty()) {
+                g.text(font, line, x1 + 7, y1 + 5 + i * 11, line.endsWith("!") ? WARNING : TEXT, true);
+            }
         }
     }
 

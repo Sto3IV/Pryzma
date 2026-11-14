@@ -65,9 +65,11 @@ final class PrSettingsScreen extends PrScreen {
                         vanilla("options.entityDistanceScaling", o.entityDistanceScaling()),
                         vanilla("options.biomeBlendRadius", o.biomeBlendRadius()));
                 int left = width / 2 - 155;
-                addRenderableWidget(new PrButton(215, left, bottomY(), 150,
+                PrButton farlandsBtn = new PrButton(215, left, bottomY(), 150,
                         Component.translatable("pr.options.farlandsOptions"),
-                        b -> minecraft.gui.setScreen(new PrSettingsScreen(Page.FARLANDS, this))));
+                        b -> minecraft.gui.setScreen(new PrSettingsScreen(Page.FARLANDS, this)));
+                farlandsBtn.setTooltipKey("pr.options.farlandsOptions");
+                addRenderableWidget(farlandsBtn);
                 done(width / 2 + 5, 150);
                 onOptionsChanged();
             }
@@ -127,8 +129,10 @@ final class PrSettingsScreen extends PrScreen {
                         PrOptions.TELEMETRY_ATTRIBUTION, vanilla("options.fullscreen.resolution", fullscreenResolution()),
                         vanilla("options.autosaveIndicator", o.showAutosaveIndicator()),
                         vanilla("options.graphicsApi", o.preferredGraphicsBackend()));
-                addRenderableWidget(new PrButton(210, width / 2 - 155, bottomY(), 150,
-                        Component.translatable("pr.options.other.reset"), b -> confirmReset()));
+                PrButton resetBtn = new PrButton(210, width / 2 - 155, bottomY(), 150,
+                        Component.translatable("pr.options.other.reset"), b -> confirmReset());
+                resetBtn.setTooltipKey("pr.options.other.reset");
+                addRenderableWidget(resetBtn);
                 onOptionsChanged();
                 addRenderableWidget(new PrButton(200, width / 2 + 5, bottomY(), 150, CommonComponents.GUI_DONE, b -> {
                     minecraft.getWindow().changeFullscreenVideoMode();
@@ -272,7 +276,7 @@ final class PrSettingsScreen extends PrScreen {
                         pb.setTooltipKey("pr.options.farlands.locked_dh");
                     } else {
                         pb.setMessage(Component.translatable("pr.options.farlandsOptions"));
-                        pb.setTooltipKey(null);
+                        pb.setTooltipKey("pr.options.farlandsOptions");
                     }
                 }
             }
