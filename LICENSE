@@ -116,3 +116,29 @@ Pryzma is not affiliated with, sponsored by, or endorsed by Mojang Studios,
 Microsoft Corporation, or predecessor closed-source modification authors.
 Minecraft is a trademark of Mojang AB. OptiFine is a trademark/project of sp614x.
 All trademarks are used exclusively in a nominative capacity to declare format compatibility.
+
+================================================================================
+6. TRADEMARKS, BRANDING & PLATFORM DISTRIBUTION RESTRICTIONS
+================================================================================
+
+The name "Pryzma", the Pryzma logo, graphical assets, documentation, and the
+compiled binary release packages (`.jar` distributions) are the intellectual
+property and protected trademarks/brand assets of Sto3IV & Ranni.
+
+While the underlying source code of original components is licensed under MIT
+and the shader subsystem under LGPL-3.0, neither license grants any rights or
+permissions to:
+1. Re-host, mirror, redistribute, or publish compiled binary distributions or
+   packaged archives of Pryzma on third-party mod hosting or distribution platforms
+   (specifically including, but not limited to, Modrinth) without explicit prior
+   written consent from the authors.
+2. Use the name "Pryzma", logos, or confusingly similar branding for any
+   unauthorized third-party distribution, mirror, or repackaged fork.
+
+Pryzma binaries are officially provided exclusively via GitHub Releases
+(https://github.com/Sto3IV/Pryzma/releases) and CurseForge
+(https://curseforge.com/minecraft/mc-mods/pryzma).
+
+Any unauthorized upload, mirror, or redistribution on Modrinth or other
+platforms is a direct violation of these terms and applicable copyright laws,
+and will be subject to immediate DMCA takedown enforcement.

@@ -78,12 +78,24 @@ Modpacks
 
 Pryzma can be used freely in any public or private modpack without requiring special permission. But paywall modpacks are highly prohibited!
 
-Licensing
-=========
+Platform Distribution Notice
+============================
+
+Pryzma is officially published and maintained exclusively on [CurseForge](https://curseforge.com/minecraft/mc-mods/pryzma) and [GitHub Releases](https://github.com/Sto3IV/Pryzma/releases).
+
+> [!CAUTION]
+> **Strict Prohibition on Re-uploading & Third-Party Platforms:**
+> Redistribution, re-hosting, mirroring, or publishing Pryzma (including binary JAR releases, the project name "Pryzma", icons, and branding) to third-party distribution platforms — **specifically including Modrinth** — is strictly forbidden without our prior written consent.
+> 
+> We have not authorized, and do not endorse, any "unofficial" ports, mirrors, or re-uploads on Modrinth or other sites. Any unauthorized uploads will be treated as copyright infringement and will receive an immediate DMCA takedown notice.
+
+Licensing & Brand Policy
+========================
 
 Pryzma is released under an open-source composite license:
 * **Pryzma Core, Emulation & Optimizations:** [MIT License](LICENSE)
 * **Native GLSL Shader Pipeline (`net.pryzma.shader`):** GNU LGPL-3.0-only
+* **Project Name, Branding, Logos & Binary Distribution:** All Rights Reserved. See [Section 6 of LICENSE](LICENSE) for our platform distribution and re-upload restrictions.
 
 ---
 <p align="center">
