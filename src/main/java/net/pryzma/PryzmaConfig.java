@@ -94,7 +94,7 @@ public final class PryzmaConfig {
     /** Farlands Quality: 0 = Low, 1 = Medium, 2 = High, 3 = Ultra. */
     public static int prFarlandsQuality = 2;
     /** Farlands Threads: 1 .. maxThreads. */
-    public static int prFarlandsThreads = net.pryzma.farlands.FarlandsSettings.defaultThreads();
+    public static int prFarlandsThreads = 0; // 0 = Sync with Performance
     /** Farlands Terrain Generation: true = generate missing terrain, false = only saved chunks. */
     public static boolean prFarlandsGenerate = true;
     /** Farlands Distant Vegetation: trees, flora, structures. */
@@ -224,7 +224,10 @@ public final class PryzmaConfig {
             case 3 -> net.pryzma.farlands.FarlandsSettings.Quality.ULTRA;
             default -> net.pryzma.farlands.FarlandsSettings.Quality.HIGH;
         };
-        net.pryzma.farlands.FarlandsSettings.threads = Math.max(1, Math.min(net.pryzma.farlands.FarlandsSettings.maxThreads(), prFarlandsThreads));
+        int effectiveThreads = prFarlandsThreads == 0
+                ? net.pryzma.farlands.FarlandsSettings.syncThreadsFor(prChunkUpdates)
+                : Math.max(1, Math.min(net.pryzma.farlands.FarlandsSettings.maxThreads(), prFarlandsThreads));
+        net.pryzma.farlands.FarlandsSettings.threads = effectiveThreads;
         net.pryzma.farlands.FarlandsSettings.generate = prFarlandsGenerate;
         net.pryzma.farlands.FarlandsSettings.vegetation = prFarlandsVegetation;
         net.pryzma.farlands.FarlandsSettings.textures = prFarlandsTextures;
@@ -377,7 +380,7 @@ public final class PryzmaConfig {
         prDetailDistance = oneOf(v, "prDetailDistance", prDetailDistance, DETAIL_DISTANCE_VALUES);
         prFarlandsDistance = oneOf(v, "prFarlandsDistance", prFarlandsDistance, FARLANDS_DISTANCE_VALUES);
         prFarlandsQuality = clampInt(v, "prFarlandsQuality", prFarlandsQuality, 0, 3);
-        prFarlandsThreads = clampInt(v, "prFarlandsThreads", prFarlandsThreads, 1, net.pryzma.farlands.FarlandsSettings.maxThreads());
+        prFarlandsThreads = clampInt(v, "prFarlandsThreads", prFarlandsThreads, 0, net.pryzma.farlands.FarlandsSettings.maxThreads());
         prFarlandsGenerate = bool(v, "prFarlandsGenerate", prFarlandsGenerate);
         prFarlandsVegetation = bool(v, "prFarlandsVegetation", prFarlandsVegetation);
         prFarlandsTextures = bool(v, "prFarlandsTextures", prFarlandsTextures);
@@ -583,7 +586,7 @@ public final class PryzmaConfig {
         prDetailDistance = 96;
         prFarlandsDistance = 0;
         prFarlandsQuality = 2;
-        prFarlandsThreads = net.pryzma.farlands.FarlandsSettings.defaultThreads();
+        prFarlandsThreads = 0;
         prFarlandsGenerate = true;
         prFarlandsVegetation = true;
         prFarlandsTextures = true;

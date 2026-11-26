@@ -599,10 +599,13 @@ public final class PrSelfTest {
         }
         double x = target.getX() + target.getWidth() / 2.0;
         double y = target.getY() + target.getHeight() / 2.0;
+        MouseButtonEvent event = new MouseButtonEvent(x, y, new MouseButtonInfo(button, 0));
         if (target instanceof Button b) {
             b.onPress(new MouseButtonInfo(button, 0));
+        } else if (target instanceof net.minecraft.client.gui.components.AbstractSliderButton s) {
+            s.onClick(event, false);
+            s.onRelease(event);
         }
-        MouseButtonEvent event = new MouseButtonEvent(x, y, new MouseButtonInfo(button, 0));
         screen.mouseClicked(event, false);
         if (mc.gui.screen() != null) {
             mc.gui.screen().mouseReleased(event);

@@ -119,6 +119,8 @@ public final class FarlandsClient {
       this.shaderNear = 16.0F;
       this.warmTiles = new ConcurrentHashMap<>();
       this.renderer.setShaderPath(this.shaderPath);
+      net.pryzma.Pryzma.LOGGER.info("Farlands initialized: {} worker threads at priority 2 (budget mode: {})",
+              this.threads, PryzmaConfig.prFarlandsThreads == 0 ? "Sync" : "Manual");
    }
 
    private static @Nullable ShaderPath createShaderPath() {
@@ -209,6 +211,8 @@ public final class FarlandsClient {
          if (this.threads != FarlandsSettings.threads) {
             this.threads = FarlandsSettings.threads;
             this.pool.resize(this.threads);
+            net.pryzma.Pryzma.LOGGER.info("Farlands worker pool resized to {} threads (budget mode: {})",
+                    this.threads, PryzmaConfig.prFarlandsThreads == 0 ? "Sync" : "Manual");
          }
 
          String generation = FarlandsSettings.generate + "|" + FarlandsSettings.vegetation;

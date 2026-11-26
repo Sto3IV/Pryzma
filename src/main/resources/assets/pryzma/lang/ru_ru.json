@@ -1021,9 +1021,9 @@
   "pr.options.FARLANDS_QUALITY.tooltip.2": "Управляет детализацией геометрии и плотностью ячеек дальнего ландшафта.",
   "pr.options.FARLANDS_THREADS": "Потоки",
   "pr.options.FARLANDS_THREADS.tooltip.1": "Потоки генерации Farlands",
-  "pr.options.FARLANDS_THREADS.tooltip.2": "Количество фоновых потоков для асинхронного мешинга и шума LOD.",
-  "pr.options.FARLANDS_THREADS.tooltip.3": "Работают с низким приоритетом (2), не мешая рендеру и сборке чанков.",
-  "pr.options.FARLANDS_THREADS.tooltip.4": "Увеличьте для быстрого появления гор при быстром полете на элитрах.",
+  "pr.options.FARLANDS_THREADS.tooltip.2": "0 / Синхронно: авто-расчёт без борьбы за ядра (баланс с чанками).",
+  "pr.options.FARLANDS_THREADS.tooltip.3": "1..N: ручное фиксированное количество рабочих потоков.",
+  "pr.options.FARLANDS_THREADS.tooltip.4": "Низкий приоритет (2) гарантирует плавность FPS и рендера.",
   "pr.options.FARLANDS_GENERATE": "Генерация рельефа",
   "pr.options.FARLANDS_GENERATE.tooltip.1": "Генерация дальнего рельефа",
   "pr.options.FARLANDS_GENERATE.tooltip.2": "  ВКЛ - генерировать рельеф на лету за пределами сохранённых чанков",
@@ -1039,5 +1039,6 @@
   "pr.options.FARLANDS_SCALE_MOD_FOG": "Масштаб тумана модов",
   "pr.options.FARLANDS_SCALE_MOD_FOG.tooltip.1": "Масштабирование тумана модов",
   "pr.options.FARLANDS_SCALE_MOD_FOG.tooltip.2": "  ВКЛ - отодвигает плотный туман из других измерений/модов к горизонту LOD",
-  "pr.options.FARLANDS_SCALE_MOD_FOG.tooltip.3": "  ВЫКЛ - сохраняет оригинальную дистанцию тумана модов"
+  "pr.options.FARLANDS_SCALE_MOD_FOG.tooltip.3": "  ВЫКЛ - сохраняет оригинальную дистанцию тумана модов",
+  "pr.options.farlandsThreads.sync": "Синхронно (%s)"
 }

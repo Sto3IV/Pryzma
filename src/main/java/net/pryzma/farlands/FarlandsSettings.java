@@ -19,8 +19,23 @@ public final class FarlandsSettings {
    }
 
    public static int defaultThreads() {
+      return syncThreadsFor(net.pryzma.PryzmaConfig.prChunkUpdates);
+   }
+
+   public static int syncThreadsFor(int chunkUpdates) {
       int cores = Runtime.getRuntime().availableProcessors();
-      return Math.max(1, Math.min(6, cores / 3));
+      int chunkThreads = net.pryzma.perf.PrChunkWorkers.threadsFor(chunkUpdates);
+      int max = maxThreads();
+      int available = Math.max(1, cores - chunkThreads - 2);
+      int target = switch (Math.clamp(chunkUpdates, 1, 5)) {
+         case 1 -> 1;
+         case 2 -> Math.min(2, available);
+         case 3 -> Math.min(Math.max(2, cores / 4), available);
+         case 4 -> Math.min(Math.max(3, cores / 3), available);
+         case 5 -> Math.min(Math.max(2, cores / 4), Math.max(1, available));
+         default -> Math.min(6, available);
+      };
+      return Math.clamp(target, 1, max);
    }
 
    public static int maxThreads() {

@@ -82,6 +82,7 @@ public final class PrChunkWorkers {
             Pryzma.LOGGER.info("Chunk workers: {} threads at priority {} ({} cores)",
                     threads, WORKER_PRIORITY, Runtime.getRuntime().availableProcessors());
             net.pryzma.farlands.DistantHorizonsBridge.applyThreadBudget();
+            PryzmaConfig.syncFarlandsSettings();
         }
         return pool;
     }
@@ -103,6 +104,7 @@ public final class PrChunkWorkers {
         }
         Pryzma.LOGGER.info("Chunk workers: {} threads", threads);
         net.pryzma.farlands.DistantHorizonsBridge.applyThreadBudget();
+        PryzmaConfig.syncFarlandsSettings();
     }
 
     private static final class Workers implements ThreadFactory {

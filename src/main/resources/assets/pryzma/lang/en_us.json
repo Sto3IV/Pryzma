@@ -1002,9 +1002,9 @@
   "pr.options.FARLANDS_QUALITY.tooltip.2": "Controls LOD geometric detail and mesh cell resolution.",
   "pr.options.FARLANDS_THREADS": "Threads",
   "pr.options.FARLANDS_THREADS.tooltip.1": "Farlands Worker Threads",
-  "pr.options.FARLANDS_THREADS.tooltip.2": "Number of background threads allocated for distant terrain meshing and noise.",
-  "pr.options.FARLANDS_THREADS.tooltip.3": "Operates at background priority (2) without starving near chunk builders.",
-  "pr.options.FARLANDS_THREADS.tooltip.4": "Increase for faster horizon generation during rapid flight.",
+  "pr.options.FARLANDS_THREADS.tooltip.2": "0 / Sync: auto-budgeted without CPU core contention with chunk workers.",
+  "pr.options.FARLANDS_THREADS.tooltip.3": "1..N: manual override for fixed worker thread count.",
+  "pr.options.FARLANDS_THREADS.tooltip.4": "Operates at background priority (2) to guarantee render & server tick smoothness.",
   "pr.options.FARLANDS_GENERATE": "Terrain Gen",
   "pr.options.FARLANDS_GENERATE.tooltip.1": "Terrain Generation",
   "pr.options.FARLANDS_GENERATE.tooltip.2": "  ON - generate distant terrain on the fly beyond saved chunks",
@@ -1020,5 +1020,6 @@
   "pr.options.FARLANDS_SCALE_MOD_FOG": "Scale Modded Fog",
   "pr.options.FARLANDS_SCALE_MOD_FOG.tooltip.1": "Scale Modded Fog",
   "pr.options.FARLANDS_SCALE_MOD_FOG.tooltip.2": "  ON - scales dense fog from mods and dimensions out to LOD horizon",
-  "pr.options.FARLANDS_SCALE_MOD_FOG.tooltip.3": "  OFF - keep original mod fog distance"
+  "pr.options.FARLANDS_SCALE_MOD_FOG.tooltip.3": "  OFF - keep original mod fog distance",
+  "pr.options.farlandsThreads.sync": "Sync (%s)"
 }

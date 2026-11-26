@@ -114,6 +114,9 @@ final class PrOptionSlider extends AbstractSliderButton implements PrOptionContr
         if (option == PrOptions.FARLANDS_DISTANCE && net.pryzma.farlands.DistantHorizonsBridge.isDhActive()) {
             return "pr.options.farlands.locked_dh";
         }
+        if (option == PrOptions.FARLANDS_THREADS && net.pryzma.farlands.DistantHorizonsBridge.isDhActive()) {
+            return "pr.options.farlands.locked_dh";
+        }
         return option.key();
     }
 

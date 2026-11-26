@@ -522,16 +522,25 @@ public final class PrOptions {
                 PryzmaConfig.syncFarlandsSettings();
             });
 
-    /** Farlands Worker Threads: 1 .. maxThreads. */
-    public static final PrOption.Cycle FARLANDS_THREADS = cycle("pr.options.FARLANDS_THREADS",
-            () -> Integer.toString(PryzmaConfig.prFarlandsThreads),
-            dir -> {
-                int max = net.pryzma.farlands.FarlandsSettings.maxThreads();
-                int next = PryzmaConfig.prFarlandsThreads + dir;
-                if (next > max) next = 1;
-                if (next < 1) next = max;
-                PryzmaConfig.prFarlandsThreads = next;
+    /** Farlands Worker Threads: 0 (Sync) or 1 .. maxThreads. */
+    public static final PrOption.Slider FARLANDS_THREADS = new PrOption.Slider("pr.options.FARLANDS_THREADS",
+            net.pryzma.farlands.FarlandsSettings.maxThreads(), true,
+            () -> (double) PryzmaConfig.prFarlandsThreads,
+            v -> {
+                PryzmaConfig.prFarlandsThreads = (int) Math.round(v);
                 PryzmaConfig.syncFarlandsSettings();
+            },
+            p -> (double) Math.round(p * net.pryzma.farlands.FarlandsSettings.maxThreads()),
+            v -> (double) Math.clamp((int) Math.round(v), 0, net.pryzma.farlands.FarlandsSettings.maxThreads())
+                    / (double) net.pryzma.farlands.FarlandsSettings.maxThreads(),
+            v -> {
+                int threads = (int) Math.round(v);
+                Component caption = Component.translatable("pr.options.FARLANDS_THREADS");
+                if (threads == 0) {
+                    int synced = net.pryzma.farlands.FarlandsSettings.syncThreadsFor(PryzmaConfig.prChunkUpdates);
+                    return Options.genericValueLabel(caption, Component.translatable("pr.options.farlandsThreads.sync", synced));
+                }
+                return Options.genericValueLabel(caption, Component.literal(Integer.toString(threads)));
             });
 
     /** Farlands Terrain Generation: ON / OFF. */

@@ -275,6 +275,15 @@ final class PrSettingsScreen extends PrScreen {
                     } else {
                         s.refresh();
                     }
+                } else if (w instanceof PrOptionSlider s && s.option() == PrOptions.FARLANDS_THREADS) {
+                    s.active = !dhActive;
+                    if (dhActive) {
+                        s.setMessage(Component.translatable("pr.options.FARLANDS_THREADS")
+                                .append(": ")
+                                .append(Component.translatable("pr.options.farlands.dh_active")));
+                    } else {
+                        s.refresh();
+                    }
                 } else if (w instanceof PrOptionButton b) {
                     b.active = !dhActive;
                 }
