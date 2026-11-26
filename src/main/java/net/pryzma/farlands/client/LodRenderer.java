@@ -1800,6 +1800,7 @@ public final class LodRenderer {
          Minecraft mc = Minecraft.getInstance();
          AbstractTexture atlas = mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
          pass.pushDebugGroup(() -> "Farlands");
+         RenderSystem.bindDefaultUniforms(pass);
          AutoStorageIndexBuffer indices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
          if (!this.draws.isEmpty()) {
             pass.setPipeline(RenderSystem.getCompiledPipeline(FarlandsPipelines.TERRAIN));
@@ -1834,6 +1835,7 @@ public final class LodRenderer {
    }
 
    private void bind(RenderPass pass, Minecraft mc, AbstractTexture atlas, AutoStorageIndexBuffer indices, boolean clip) {
+      RenderSystem.bindDefaultUniforms(pass);
       pass.setUniform("Sampler0", atlas.getTextureView(), this.atlasSampler);
       pass.setUniform("Sampler2", mc.gameRenderer.lightmap(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
       pass.setUniform("FarlandsInfo", this.infoRing.currentBuffer());
@@ -2082,6 +2084,7 @@ public final class LodRenderer {
             int clip = i >= this.compactSplit ? 1 : 0;
             if (bound != clip) {
                pass.setPipeline(RenderSystem.getCompiledPipeline(clip == 1 ? FarlandsPipelines.TERRAIN_COMPACT_CLIP : FarlandsPipelines.TERRAIN_COMPACT));
+               RenderSystem.bindDefaultUniforms(pass);
                pass.setUniform("Sampler0", atlas.getTextureView(), this.atlasSampler);
                pass.setUniform("Sampler2", mc.gameRenderer.lightmap(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
                pass.setUniform("FarlandsInfo", this.infoRing.currentBuffer());
