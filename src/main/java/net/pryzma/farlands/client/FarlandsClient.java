@@ -704,7 +704,8 @@ public final class FarlandsClient {
          SkyFog.remember(fog);
 
          int mode = FarlandsSettings.fogMode;
-         float total = vanilla + FarlandsSettings.lodChunks * 16.0F;
+         int effectiveLodChunks = Math.max(1, FarlandsSettings.lodChunks - 3);
+         float total = vanilla + effectiveLodChunks * 16.0F;
 
          if (PryzmaConfig.isFogOff()) {
             if (mode == 3) {

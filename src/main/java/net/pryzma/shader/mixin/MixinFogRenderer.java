@@ -32,7 +32,11 @@ public class MixinFogRenderer {
 			boolean isClearAir = camera.getFluidInCamera() == FogType.NONE
 					&& !(entity instanceof LivingEntity living && (living.hasEffect(MobEffects.BLINDNESS) || living.hasEffect(MobEffects.DARKNESS)));
 
-			if (isClearAir) {
+			boolean isFarlandsActive = net.pryzma.farlands.FarlandsSettings.enabled
+					&& net.pryzma.farlands.client.FarlandsClient.peek() != null
+					&& net.pryzma.farlands.client.FarlandsClient.peek().world() != null;
+
+			if (isClearAir && !isFarlandsActive) {
 				float far = renderDistanceChunks * 16.0F;
 				if (PryzmaConfig.isFogOff()) {
 					fogData.renderDistanceStart = 1000000.0F;

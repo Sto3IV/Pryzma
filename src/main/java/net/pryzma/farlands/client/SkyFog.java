@@ -38,7 +38,7 @@ public final class SkyFog {
    public static GpuBufferSlice swap(GpuBufferSlice fog, FogData last) {
       finalEnvironmentalStart = last.environmentalStart;
       finalEnvironmentalEnd = last.environmentalEnd;
-      if (!pending || net.pryzma.PryzmaConfig.isFogOff()) {
+      if (!pending) {
          return fog;
       }
 

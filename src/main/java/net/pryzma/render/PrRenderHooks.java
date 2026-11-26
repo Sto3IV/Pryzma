@@ -104,6 +104,11 @@ public final class PrRenderHooks {
         if (net.pryzma.farlands.DistantHorizonsBridge.isDhActive()) {
             return;
         }
+        if (net.pryzma.farlands.FarlandsSettings.enabled
+                && net.pryzma.farlands.client.FarlandsClient.peek() != null
+                && net.pryzma.farlands.client.FarlandsClient.peek().world() != null) {
+            return;
+        }
         float far = event.getFarPlaneDistance();
         if (PryzmaConfig.isFogOff()) {
             event.setNearPlaneDistance(far * 16.0F);
