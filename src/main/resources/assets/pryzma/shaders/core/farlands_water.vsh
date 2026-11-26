@@ -88,7 +88,9 @@ void main() {
     sphericalVertexDistance = fog_spherical_distance(pos);
     cylindricalVertexDistance = fog_cylindrical_distance(pos);
     vec4 color = vec4(float((quad.y >> 16) & 255u), float((quad.y >> 8) & 255u), float(quad.y & 255u), 255.0) / 255.0;
-    vertexColor = color * sample_lightmap(Sampler2, ivec2(int(light & 15u) * 16, int(light >> 4) * 16));
+    uint rawSky = (light >> 4) & 15u;
+    uint skyLight = face == 1u ? 15u : max(rawSky, 4u);
+    vertexColor = color * sample_lightmap(Sampler2, ivec2(int(light & 15u) * 16, int(skyLight) * 16));
     texCoord0 = uv;
 
     const float chunkFullyVisibleRange = 16.0;

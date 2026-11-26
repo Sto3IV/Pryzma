@@ -185,7 +185,7 @@ public final class ChunkIngest {
                            if (drained && Block.stateById(skipId).getBlock() instanceof LiquidBlock && Block.stateById(id).canOcclude()) {
                               builder.add(Span.pack(skipTop, y + 1, skipId, biome, spanSky, 0));
                               total++;
-                              spanSky = Math.max(0, spanSky - (skipTop - y - 1));
+                              spanSky = Math.max(4, spanSky - (skipTop - y - 1));
                               skipId = id;
                               skipTop = y + 1;
                               drained = false;
@@ -216,7 +216,7 @@ public final class ChunkIngest {
                      }
 
                      if (id != lastId || y + 1 != lastY) {
-                        spanSky = Math.max(0, sky - covered);
+                        spanSky = Math.max(4, sky - covered);
                      }
 
                      if (!state.getFluidState().isEmpty() || state.is(BlockTags.ICE)) {

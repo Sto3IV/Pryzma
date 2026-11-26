@@ -45,6 +45,7 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 	private final PinnedEntry downloadButton;
 	private boolean keyValid;
 	private ShaderPackEntry applied = null;
+	private @Nullable ShaderPackEntry selectedPack = null;
 
 	public ShaderPackSelectionList(ShaderPackScreen screen, Minecraft client, int width, int height, int top, int bottom, int left, int right) {
 		super(client, width, bottom, top + 4, bottom, left, right, 20);
@@ -154,9 +155,21 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 	 * {@link ShaderPackScreen#applyChanges()} drop the chosen pack after the toggle was clicked.
 	 */
 	@Override
+	public @Nullable BaseEntry getSelected() {
+		BaseEntry entry = super.getSelected();
+		if (entry instanceof ShaderPackEntry) {
+			return entry;
+		}
+		return this.selectedPack != null ? this.selectedPack : this.applied;
+	}
+
+	@Override
 	public void setSelected(@Nullable BaseEntry entry) {
-		if (entry == null || entry instanceof ShaderPackEntry) {
+		if (entry instanceof ShaderPackEntry spe) {
+			this.selectedPack = spe;
 			super.setSelected(entry);
+		} else if (entry == null) {
+			super.setSelected(null);
 		}
 	}
 
@@ -454,7 +467,11 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 			if (event.button() != 0) {
 				return false;
 			}
-			return doThing();
+			boolean res = doThing();
+			if (doubleClick) {
+				ShaderPackSelectionList.this.screen.applyChanges();
+			}
+			return res;
 		}
 
 		@Override
@@ -478,12 +495,10 @@ public class ShaderPackSelectionList extends ShaderObjectSelectionList<ShaderPac
 				didAnything = true;
 			}
 
-			if (!this.isSelected()) {
-				this.list.select(this.index);
-				didAnything = true;
-			}
-
-			ShaderPackSelectionList.this.screen.setFocused(ShaderPackSelectionList.this.screen.getBottomRowOption());
+			this.list.setSelected(this);
+			this.list.setApplied(this);
+			this.list.selectedPack = this;
+			didAnything = true;
 
 			return didAnything;
 		}

@@ -1112,7 +1112,7 @@ public final class LodMesher {
 
       int sky = light >> 4 & 15;
       int depth = (water16 - y16 + 8) / 16;
-      return Math.min(sky, Math.max(0, 15 - depth)) << 4 | light & 15;
+      return Math.min(sky, Math.max(4, 15 - depth)) << 4 | light & 15;
    }
 
    private int spanTop16(long span) {

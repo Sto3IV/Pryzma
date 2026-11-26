@@ -586,32 +586,35 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 
 	public void applyChanges() {
 		ShaderPackSelectionList.BaseEntry base = this.shaderPackList.getSelected();
+		if (!(base instanceof ShaderPackSelectionList.ShaderPackEntry)) {
+			base = this.shaderPackList.getApplied();
+		}
+
 		boolean enabled = this.shaderPackList.getTopButtonRow().shadersEnabled;
 		boolean previousShadersEnabled = PryzmaShaders.getShaderConfig().areShadersEnabled();
 
-		if (enabled != previousShadersEnabled) {
-			ShaderApi.getInstance().getConfig().setShadersEnabledAndApply(enabled);
-		}
+		if (base instanceof ShaderPackSelectionList.ShaderPackEntry entry) {
+			this.shaderPackList.setApplied(entry);
+			String name = entry.getPackName();
 
-		if (!(base instanceof ShaderPackSelectionList.ShaderPackEntry entry)) {
-			return;
-		}
+			// If the pack is being changed, clear pending options from the previous pack to
+			// avoid possible undefined behavior from applying one pack's options to another pack
+			if (!name.equals(PryzmaShaders.getCurrentPackName())) {
+				PryzmaShaders.clearShaderPackOptionQueue();
+			}
 
-		this.shaderPackList.setApplied(entry);
+			String previousPackName = PryzmaShaders.getShaderConfig().getShaderPackName().orElse(null);
 
-		String name = entry.getPackName();
+			boolean packChanged = !name.equals(previousPackName);
+			boolean toggled = enabled != previousShadersEnabled;
+			boolean queueNonEmpty = !PryzmaShaders.getShaderPackOptionQueue().isEmpty();
+			boolean resetOptions = PryzmaShaders.shouldResetShaderPackOptionsOnNextReload();
 
-		// If the pack is being changed, clear pending options from the previous pack to
-		// avoid possible undefined behavior from applying one pack's options to another pack
-		if (!name.equals(PryzmaShaders.getCurrentPackName())) {
-			PryzmaShaders.clearShaderPackOptionQueue();
-		}
-
-		String previousPackName = PryzmaShaders.getShaderConfig().getShaderPackName().orElse(null);
-
-		// Only reload if the pack would be different from before, or shaders were toggled, or options were changed, or if we're about to reset options.
-		if (!name.equals(previousPackName) || !PryzmaShaders.getShaderPackOptionQueue().isEmpty() || PryzmaShaders.shouldResetShaderPackOptionsOnNextReload()) {
-			PryzmaShaders.getShaderConfig().setShaderPackName(name);
+			if (packChanged || toggled || queueNonEmpty || resetOptions) {
+				PryzmaShaders.getShaderConfig().setShaderPackName(name);
+				ShaderApi.getInstance().getConfig().setShadersEnabledAndApply(enabled);
+			}
+		} else if (enabled != previousShadersEnabled) {
 			ShaderApi.getInstance().getConfig().setShadersEnabledAndApply(enabled);
 		}
 

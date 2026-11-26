@@ -109,7 +109,9 @@ void main() {
     if (!upper) {
         light = (light & 15u) | ((quad.x >> 28) << 4);
     }
-    ivec2 lightUv = ivec2(int(light & 15u) * 16, int(light >> 4) * 16);
+    uint rawSky = (light >> 4) & 15u;
+    uint skyLight = face == 1u ? max(rawSky, 15u) : max(rawSky, 4u);
+    ivec2 lightUv = ivec2(int(light & 15u) * 16, int(skyLight) * 16);
     vec4 lit = sample_lightmap(Sampler2, lightUv);
     uint flags = quad.w >> 26;
     float ao = 1.0;
