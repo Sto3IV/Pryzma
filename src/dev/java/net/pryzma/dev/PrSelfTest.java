@@ -46,7 +46,7 @@ import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.pryzma.PryzmaConfig;
 import net.pryzma.detail.PrDetailClassifier;
 import net.pryzma.gui.PrZoom;
-import net.pryzma.lod.PryzmaLod;
+import net.pryzma.farlands.client.FarlandsClient;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.gui.screen.ShaderPackScreen;
 import net.pryzma.render.PrF3RenderCache;
@@ -305,7 +305,7 @@ public final class PrSelfTest {
                     throw new IllegalStateException("shader pack " + arg + " did not load");
                 }
             }
-            case "farlands" -> LOG.info("PRYZMA-SELFTEST farlands {}", PryzmaLod.debugLine());
+            case "farlands" -> LOG.info("PRYZMA-SELFTEST farlands {}", FarlandsClient.peek() != null ? FarlandsClient.peek().debugLine() : "Farlands: null");
             case "shaderinfo" -> {
                 List<String> lines = new ArrayList<>();
                 PryzmaShaders.getPipelineManager().getPipeline().ifPresent(p -> p.addDebugText(lines));
