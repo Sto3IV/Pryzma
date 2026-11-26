@@ -96,13 +96,12 @@ public final class PrRenderHooks {
      * starts beyond anything rendered. Water, lava, snow, blindness and foggy biomes keep theirs.
      */
     public static void onRenderFog(ViewportEvent.RenderFog event) {
-        if (!(event.getEnvironment() instanceof AtmosphericFogEnvironment) || event.getType() != FogType.NONE || !isClearAir(event.getCamera())) {
+        if (!(event.getEnvironment() instanceof AtmosphericFogEnvironment)
+                || (event.getType() != FogType.NONE && event.getType() != FogType.ATMOSPHERIC)
+                || !isClearAir(event.getCamera())) {
             return;
         }
         if (net.pryzma.farlands.DistantHorizonsBridge.isDhActive()) {
-            return;
-        }
-        if (PryzmaConfig.isFarlandsActive()) {
             return;
         }
         float far = event.getFarPlaneDistance();

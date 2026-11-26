@@ -39,8 +39,6 @@ public class MixinFogRenderer {
 					fogData.renderDistanceEnd = 1000001.0F;
 					fogData.environmentalStart = 1000000.0F;
 					fogData.environmentalEnd = 1000001.0F;
-					fogData.skyEnd = 1000000.0F;
-					fogData.cloudEnd = 1000000.0F;
 				} else if (PryzmaConfig.isFogFast()) {
 					fogData.renderDistanceStart = far * 0.25F;
 					fogData.renderDistanceEnd = far;

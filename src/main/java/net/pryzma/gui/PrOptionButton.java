@@ -49,14 +49,6 @@ final class PrOptionButton extends Button implements PrOptionControl {
 
     @Override
     public String tooltipKey() {
-        if (PryzmaConfig.isFarlandsActive()) {
-            if (option == PrOptions.FOG_FANCY) {
-                return "pr.options.fog.locked";
-            }
-            if (option == PrOptions.FOG_START) {
-                return "pr.options.fogStart.locked";
-            }
-        }
         if (option == PrOptions.MIPMAP_TYPE && Minecraft.getInstance().options.mipmapLevels().get() == 0) {
             return "pr.options.mipmapType.locked";
         }

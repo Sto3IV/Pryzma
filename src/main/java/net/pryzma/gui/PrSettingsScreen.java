@@ -236,31 +236,10 @@ final class PrSettingsScreen extends PrScreen {
             return;
         }
         if (page == Page.DETAILS) {
-            boolean farlandsOn = PryzmaConfig.isFarlandsActive();
             boolean cloudsOff = PrOptions.isCloudsOff();
             boolean dhActive = net.pryzma.farlands.DistantHorizonsBridge.isDhActive();
             for (AbstractWidget w : widgets()) {
-                if (w instanceof PrOptionButton b) {
-                    if (b.option() == PrOptions.FOG_FANCY) {
-                        b.active = !farlandsOn;
-                        if (farlandsOn) {
-                            b.setMessage(Component.translatable("pr.options.FOG_FANCY")
-                                    .append(": ")
-                                    .append(CommonComponents.OPTION_OFF));
-                        } else {
-                            b.refresh();
-                        }
-                    } else if (b.option() == PrOptions.FOG_START) {
-                        b.active = !farlandsOn;
-                        if (farlandsOn) {
-                            b.setMessage(Component.translatable("pr.options.FOG_START")
-                                    .append(": ")
-                                    .append(CommonComponents.OPTION_OFF));
-                        } else {
-                            b.refresh();
-                        }
-                    }
-                } else if (w instanceof PrOptionSlider s && s.option() == PrOptions.CLOUD_HEIGHT) {
+                if (w instanceof PrOptionSlider s && s.option() == PrOptions.CLOUD_HEIGHT) {
                     s.active = !cloudsOff;
                     if (cloudsOff) {
                         s.setMessage(Component.translatable("pr.options.CLOUD_HEIGHT")

@@ -3,6 +3,7 @@ package net.pryzma.farlands.client;
 import com.mojang.renderpearl.api.commands.RenderPass;
 import net.pryzma.farlands.Farlands;
 import net.pryzma.farlands.FarlandsSettings;
+import net.pryzma.PryzmaConfig;
 import net.pryzma.farlands.client.iris.IrisLodPath;
 import net.pryzma.farlands.client.iris.IrisState;
 import net.pryzma.farlands.gen.BaseColumnTerrain;
@@ -694,9 +695,29 @@ public final class FarlandsClient {
    }
 
    public void adjustFog(FogData fog, FogType type, boolean atmospheric) {
-      if (FarlandsSettings.enabled && this.world != null && type == FogType.ATMOSPHERIC && atmospheric) {
+      if (FarlandsSettings.enabled && this.world != null && (type == FogType.ATMOSPHERIC || type == FogType.NONE) && atmospheric) {
          float vanilla = Minecraft.getInstance().options.getEffectiveRenderDistance() * 16.0F;
          SkyFog.remember(fog);
+
+         if (PryzmaConfig.isFogOff()) {
+            if (!FarlandsSettings.fog) {
+               fog.renderDistanceStart = 1000000.0F;
+               fog.renderDistanceEnd = 1000001.0F;
+               fog.environmentalStart = 1000000.0F;
+               fog.environmentalEnd = 1000001.0F;
+               SkyFog.legacy = false;
+               return;
+            } else {
+               float total = vanilla + FarlandsSettings.lodChunks * 16.0F;
+               fog.renderDistanceStart = Math.max(vanilla, total * 0.9F);
+               fog.renderDistanceEnd = total;
+               fog.environmentalStart = Math.max(vanilla, total * 0.9F);
+               fog.environmentalEnd = total;
+               SkyFog.legacy = false;
+               return;
+            }
+         }
+
          float total = vanilla + FarlandsSettings.lodChunks * 16.0F;
          boolean foreign = fog.renderDistanceEnd < vanilla - 0.5F
             || fog.environmentalEnd < (Float)EnvironmentAttributes.FOG_END_DISTANCE.defaultValue() - 256.0F;
