@@ -1,5 +1,7 @@
 package net.pryzma.shader.uniforms;
 
+import net.pryzma.PryzmaConfig;
+
 import net.pryzma.shader.gl.uniform.UniformHolder;
 import net.pryzma.shader.gl.uniform.UniformUpdateFrequency;
 import net.pryzma.shader.gui.option.ShaderVideoSettings;
@@ -187,9 +189,9 @@ public class ShaderExclusiveUniforms {
 			});
 			uniforms.uniform1f(UniformUpdateFrequency.PER_FRAME, "cloudHeight", () -> {
 				if (level != null) {
-					return (double) level.dimensionType().attributes().applyModifier(net.minecraft.world.attribute.EnvironmentAttributes.CLOUD_HEIGHT, 192.0F);
+					return (double) level.dimensionType().attributes().applyModifier(net.minecraft.world.attribute.EnvironmentAttributes.CLOUD_HEIGHT, 192.0F) + (PryzmaConfig.prCloudsHeight * 128.0);
 				} else {
-					return 192.0;
+					return 192.0 + (PryzmaConfig.prCloudsHeight * 128.0);
 				}
 			});
 

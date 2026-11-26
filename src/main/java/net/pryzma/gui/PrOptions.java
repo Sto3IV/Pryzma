@@ -128,6 +128,7 @@ public final class PrOptions {
                     return;
                 }
                 PryzmaConfig.prCloudsHeight = v;
+                net.pryzma.render.PrCloudRenderer.markDirty();
             });
 
     public static void syncVanillaClouds() {
@@ -154,7 +155,13 @@ public final class PrOptions {
             try {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc != null && mc.options != null) {
-                    return mc.options.getEffectiveRenderDistance() < 4;
+                    if (mc.options.cloudStatus().get() == CloudStatus.OFF) {
+                        return true;
+                    }
+                    if (!PryzmaConfig.prInfiniteClouds && mc.options.getEffectiveRenderDistance() < 4) {
+                        return true;
+                    }
+                    return false;
                 }
             } catch (Throwable ignored) {
             }

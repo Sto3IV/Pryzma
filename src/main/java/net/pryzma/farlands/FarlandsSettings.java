@@ -11,6 +11,7 @@ public final class FarlandsSettings {
    public static volatile boolean vegetation = true;
    public static volatile boolean textures = true;
    public static volatile boolean fog = true;
+   public static volatile int fogMode = 2;
    public static volatile boolean scaleModFog;
    public static volatile String serverSeed = "";
    private static volatile int version;

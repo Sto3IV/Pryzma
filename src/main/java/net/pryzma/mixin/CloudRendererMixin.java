@@ -29,6 +29,11 @@ abstract class CloudRendererMixin {
         }
     }
 
+    @ModifyVariable(method = "prepare(ILnet/minecraft/client/CloudStatus;FILnet/minecraft/world/phys/Vec3;JF)V", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+    private float prCloudHeight(float bottomY) {
+        return bottomY + (float) (PryzmaConfig.prCloudsHeight * 128.0);
+    }
+
     @ModifyVariable(method = "prepare(ILnet/minecraft/client/CloudStatus;FILnet/minecraft/world/phys/Vec3;JF)V", at = @At("HEAD"), argsOnly = true, ordinal = 1)
     private int prInfiniteCloudRange(int range) {
         if (PryzmaConfig.prInfiniteClouds) {

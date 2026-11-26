@@ -703,54 +703,75 @@ public final class FarlandsClient {
          float vanilla = Minecraft.getInstance().options.getEffectiveRenderDistance() * 16.0F;
          SkyFog.remember(fog);
 
+         int mode = FarlandsSettings.fogMode;
+         float total = vanilla + FarlandsSettings.lodChunks * 16.0F;
+
          if (PryzmaConfig.isFogOff()) {
-            if (!FarlandsSettings.fog) {
+            if (mode == 3) {
                fog.renderDistanceStart = 1000000.0F;
                fog.renderDistanceEnd = 1000001.0F;
                fog.environmentalStart = 1000000.0F;
                fog.environmentalEnd = 1000001.0F;
                SkyFog.legacy = false;
                return;
-            } else {
-               float total = vanilla + FarlandsSettings.lodChunks * 16.0F;
-               fog.renderDistanceStart = Math.max(vanilla, total * 0.9F);
+            } else if (mode == 1) {
+               float start = Math.max(vanilla, total * 0.85F);
+               fog.renderDistanceStart = start;
                fog.renderDistanceEnd = total;
-               fog.environmentalStart = Math.max(vanilla, total * 0.9F);
+               fog.environmentalStart = start;
+               fog.environmentalEnd = total;
+               SkyFog.legacy = false;
+               return;
+            } else {
+               float start = vanilla;
+               if (total <= start + 16.0F) {
+                  start = total * 0.8F;
+               }
+               start = Math.min(total - 1.0F, start);
+               fog.renderDistanceStart = start;
+               fog.renderDistanceEnd = total;
+               fog.environmentalStart = start;
                fog.environmentalEnd = total;
                SkyFog.legacy = false;
                return;
             }
          }
 
-         float total = vanilla + FarlandsSettings.lodChunks * 16.0F;
+         if (mode == 3) {
+            fog.renderDistanceStart = 1000000.0F;
+            fog.renderDistanceEnd = 1000001.0F;
+            fog.environmentalStart = 1000000.0F;
+            fog.environmentalEnd = 1000001.0F;
+            SkyFog.legacy = false;
+            return;
+         }
+
          boolean foreign = fog.renderDistanceEnd < vanilla - 0.5F
             || fog.environmentalEnd < (Float)EnvironmentAttributes.FOG_END_DISTANCE.defaultValue() - 256.0F;
-         boolean legacy = !FarlandsSettings.fog || this.renderer.shaderMode() || FarlandsSettings.scaleModFog && foreign;
+         boolean legacy = this.renderer.shaderMode() || FarlandsSettings.scaleModFog && foreign;
          SkyFog.legacy = legacy;
-         if (fog.renderDistanceEnd < vanilla - 0.5F) {
-            if (FarlandsSettings.fog && legacy) {
-               float scale = total / Math.max(1.0F, vanilla);
-               fog.renderDistanceStart *= scale;
-               fog.renderDistanceEnd *= scale;
-            }
-         } else if (!legacy) {
-            if (fog.renderDistanceEnd < total) {
-               fog.renderDistanceStart = Math.max(fog.renderDistanceStart, Math.max(vanilla, total * 0.9F));
-               fog.renderDistanceEnd = total;
-            }
+
+         float start;
+         if (mode == 1) {
+            start = Math.max(vanilla, total * 0.85F);
          } else {
-            float span = Math.max(32.0F, total * 0.08F);
-            fog.renderDistanceStart = total - span;
+            start = vanilla;
+            if (total <= start + 16.0F) {
+               start = total * 0.8F;
+            }
+         }
+         start = Math.min(total - 1.0F, start);
+
+         if (fog.renderDistanceEnd < vanilla - 0.5F && legacy) {
+            float scale = total / Math.max(1.0F, vanilla);
+            fog.renderDistanceStart *= scale;
+            fog.renderDistanceEnd *= scale;
+         } else {
+            fog.renderDistanceStart = start;
             fog.renderDistanceEnd = total;
-            if (FarlandsSettings.fog) {
-               if (fog.environmentalEnd >= vanilla * 0.9F) {
-                  float scale = total / Math.max(1.0F, vanilla);
-                  fog.environmentalStart *= scale;
-                  fog.environmentalEnd *= scale;
-               }
-            } else if (fog.environmentalEnd >= vanilla * 0.9F) {
-               fog.environmentalStart = Math.max(fog.environmentalStart, total);
-               fog.environmentalEnd = Math.max(fog.environmentalEnd, total * 2.0F);
+            if (fog.environmentalEnd >= vanilla * 0.9F) {
+               fog.environmentalStart = start;
+               fog.environmentalEnd = total;
             }
          }
       } else {

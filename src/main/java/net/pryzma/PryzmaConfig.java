@@ -232,6 +232,7 @@ public final class PryzmaConfig {
         net.pryzma.farlands.FarlandsSettings.vegetation = prFarlandsVegetation;
         net.pryzma.farlands.FarlandsSettings.textures = prFarlandsTextures;
         net.pryzma.farlands.FarlandsSettings.fog = prFarlandsFog != 3;
+        net.pryzma.farlands.FarlandsSettings.fogMode = prFarlandsFog;
         net.pryzma.farlands.FarlandsSettings.scaleModFog = prFarlandsScaleModFog;
         net.pryzma.farlands.FarlandsSettings.changed();
     }
