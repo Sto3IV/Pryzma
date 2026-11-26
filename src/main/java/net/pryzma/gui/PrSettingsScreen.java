@@ -21,7 +21,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.pryzma.PryzmaConfig;
-import net.pryzma.lod.PryzmaLod;
 
 /** The six Pryzma 1.x settings pages, each with its own grid and bottom row. */
 final class PrSettingsScreen extends PrScreen {
@@ -74,7 +73,10 @@ final class PrSettingsScreen extends PrScreen {
                 onOptionsChanged();
             }
             case FARLANDS -> {
-                grid(PrOptions.FARLANDS_DISTANCE, PrOptions.FARLANDS_FOG, PrOptions.FARLANDS_SOURCE);
+                grid(PrOptions.FARLANDS_DISTANCE, PrOptions.FARLANDS_QUALITY,
+                        PrOptions.FARLANDS_THREADS, PrOptions.FARLANDS_GENERATE,
+                        PrOptions.FARLANDS_VEGETATION, PrOptions.FARLANDS_TEXTURES,
+                        PrOptions.FARLANDS_FOG, PrOptions.FARLANDS_SCALE_MOD_FOG);
                 done(width / 2 - 100, 200);
                 onOptionsChanged();
             }
@@ -236,7 +238,7 @@ final class PrSettingsScreen extends PrScreen {
         if (page == Page.DETAILS) {
             boolean farlandsOn = PryzmaConfig.isFarlandsActive();
             boolean cloudsOff = PrOptions.isCloudsOff();
-            boolean dhActive = net.pryzma.lod.DistantHorizonsBridge.isDhActive();
+            boolean dhActive = net.pryzma.farlands.DistantHorizonsBridge.isDhActive();
             for (AbstractWidget w : widgets()) {
                 if (w instanceof PrOptionButton b) {
                     if (b.option() == PrOptions.FOG_FANCY) {
@@ -283,7 +285,7 @@ final class PrSettingsScreen extends PrScreen {
             return;
         }
         if (page == Page.FARLANDS) {
-            boolean dhActive = net.pryzma.lod.DistantHorizonsBridge.isDhActive();
+            boolean dhActive = net.pryzma.farlands.DistantHorizonsBridge.isDhActive();
             for (AbstractWidget w : widgets()) {
                 if (w instanceof PrOptionSlider s && s.option() == PrOptions.FARLANDS_DISTANCE) {
                     s.active = !dhActive;
@@ -294,15 +296,8 @@ final class PrSettingsScreen extends PrScreen {
                     } else {
                         s.refresh();
                     }
-                } else if (w instanceof PrOptionButton b && b.option() == PrOptions.FARLANDS_FOG) {
+                } else if (w instanceof PrOptionButton b) {
                     b.active = !dhActive;
-                    if (dhActive) {
-                        b.setMessage(Component.translatable("pr.options.FARLANDS_FOG")
-                                .append(": ")
-                                .append(Component.translatable("pr.options.farlands.dh_active")));
-                    } else {
-                        b.refresh();
-                    }
                 }
             }
             return;
@@ -348,7 +343,7 @@ final class PrSettingsScreen extends PrScreen {
         o.biomeBlendRadius().set(2);
         PryzmaConfig.resetToDefaults();
         // Farlands LOD resets to Off: free its data and rebuild a shader pack built with its Distant Horizons contract.
-        PryzmaLod.onSettingsChanged();
+        PryzmaConfig.syncFarlandsSettings();
         o.save();
         PryzmaConfig.save();
         minecraft.delayTextureReload();

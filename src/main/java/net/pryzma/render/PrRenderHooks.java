@@ -99,21 +99,10 @@ public final class PrRenderHooks {
         if (!(event.getEnvironment() instanceof AtmosphericFogEnvironment) || event.getType() != FogType.NONE || !isClearAir(event.getCamera())) {
             return;
         }
-        if (net.pryzma.lod.DistantHorizonsBridge.isDhActive()) {
+        if (net.pryzma.farlands.DistantHorizonsBridge.isDhActive()) {
             return;
         }
-        if (PryzmaConfig.isFarlandsActive() && net.pryzma.lod.PryzmaLod.isRunning()) {
-            if (net.pryzma.lod.PryzmaLod.isActiveThisFrame()) {
-                event.setNearPlaneDistance(net.pryzma.lod.PryzmaLod.frameFogStart());
-                event.setFarPlaneDistance(net.pryzma.lod.PryzmaLod.frameFogEnd());
-                return;
-            }
-            Minecraft mc = Minecraft.getInstance();
-            int vanillaBlocks = mc.options.getEffectiveRenderDistance() << 4;
-            int radiusBlocks = PryzmaConfig.prFarlandsDistance << 4;
-            float[] fog = net.pryzma.lod.LodMath.farlandsFogRange(vanillaBlocks, radiusBlocks, PryzmaConfig.prFarlandsFog);
-            event.setNearPlaneDistance(fog[0]);
-            event.setFarPlaneDistance(fog[1]);
+        if (PryzmaConfig.isFarlandsActive()) {
             return;
         }
         float far = event.getFarPlaneDistance();

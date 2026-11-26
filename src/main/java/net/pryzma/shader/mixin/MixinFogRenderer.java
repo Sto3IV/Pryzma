@@ -1,5 +1,6 @@
 package net.pryzma.shader.mixin;
 
+import net.pryzma.PryzmaConfig;
 import net.pryzma.shader.uniforms.CapturedRenderingState;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -11,7 +12,9 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.material.FogType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,6 +28,32 @@ public class MixinFogRenderer {
 	private void pryzma$captureFog(Camera camera, int renderDistanceChunks, DeltaTracker deltaTracker, float farPlane, ClientLevel level, CallbackInfoReturnable<FogData> cir) {
 		FogData fogData = cir.getReturnValue();
 		if (fogData != null) {
+			Entity entity = camera.entity();
+			boolean isClearAir = camera.getFluidInCamera() == FogType.NONE
+					&& !(entity instanceof LivingEntity living && (living.hasEffect(MobEffects.BLINDNESS) || living.hasEffect(MobEffects.DARKNESS)));
+
+			if (isClearAir) {
+				float far = renderDistanceChunks * 16.0F;
+				if (PryzmaConfig.isFogOff()) {
+					fogData.renderDistanceStart = 1000000.0F;
+					fogData.renderDistanceEnd = 1000001.0F;
+					fogData.environmentalStart = 1000000.0F;
+					fogData.environmentalEnd = 1000001.0F;
+					fogData.skyEnd = 1000000.0F;
+					fogData.cloudEnd = 1000000.0F;
+				} else if (PryzmaConfig.isFogFast()) {
+					fogData.renderDistanceStart = far * 0.25F;
+					fogData.renderDistanceEnd = far;
+					fogData.environmentalStart = Math.min(fogData.environmentalStart, far * 0.25F);
+					fogData.environmentalEnd = Math.min(fogData.environmentalEnd, far);
+				} else if (PryzmaConfig.isFogFancy()) {
+					fogData.renderDistanceStart = far * PryzmaConfig.prFogStart;
+					fogData.renderDistanceEnd = far;
+					fogData.environmentalStart = Math.min(fogData.environmentalStart, far * PryzmaConfig.prFogStart);
+					fogData.environmentalEnd = Math.min(fogData.environmentalEnd, far);
+				}
+			}
+
 			if (fogData.color != null) {
 				CapturedRenderingState.INSTANCE.setFogColor(fogData.color.x, fogData.color.y, fogData.color.z);
 			}

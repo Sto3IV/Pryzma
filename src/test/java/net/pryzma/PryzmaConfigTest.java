@@ -171,30 +171,23 @@ class PryzmaConfigTest {
     }
 
     @Test
-    void farlandsSourceAcceptsDiskAndGenerateModes() {
-        int saved = PryzmaConfig.prFarlandsSource;
+    void farlandsGenerateAcceptsModes() {
+        int saved = PryzmaConfig.prFarlandsGenerate;
         try {
-            assertEquals(0, saved, "Farlands Source defaults to 0 (Disk Only)");
-            assertTrue(PryzmaConfig.isFarlandsSourceDisk());
-            assertFalse(PryzmaConfig.isFarlandsSourceGenerate());
+            assertEquals(1, saved, "Farlands Generate defaults to 1 (On)");
+            PryzmaConfig.apply(Map.of("prFarlandsGenerate", "0"));
+            assertEquals(0, PryzmaConfig.prFarlandsGenerate);
 
-            PryzmaConfig.apply(Map.of("prFarlandsSource", "1"));
-            assertEquals(1, PryzmaConfig.prFarlandsSource);
-            assertFalse(PryzmaConfig.isFarlandsSourceDisk());
-            assertTrue(PryzmaConfig.isFarlandsSourceGenerate());
-
-            PryzmaConfig.apply(Map.of("prFarlandsSource", "0"));
-            assertEquals(0, PryzmaConfig.prFarlandsSource);
-            assertTrue(PryzmaConfig.isFarlandsSourceDisk());
-            assertFalse(PryzmaConfig.isFarlandsSourceGenerate());
+            PryzmaConfig.apply(Map.of("prFarlandsGenerate", "1"));
+            assertEquals(1, PryzmaConfig.prFarlandsGenerate);
 
             // Clamping
-            PryzmaConfig.apply(Map.of("prFarlandsSource", "-1"));
-            assertEquals(0, PryzmaConfig.prFarlandsSource);
-            PryzmaConfig.apply(Map.of("prFarlandsSource", "5"));
-            assertEquals(1, PryzmaConfig.prFarlandsSource);
+            PryzmaConfig.apply(Map.of("prFarlandsGenerate", "-1"));
+            assertEquals(0, PryzmaConfig.prFarlandsGenerate);
+            PryzmaConfig.apply(Map.of("prFarlandsGenerate", "5"));
+            assertEquals(1, PryzmaConfig.prFarlandsGenerate);
         } finally {
-            PryzmaConfig.prFarlandsSource = saved;
+            PryzmaConfig.prFarlandsGenerate = saved;
         }
     }
 

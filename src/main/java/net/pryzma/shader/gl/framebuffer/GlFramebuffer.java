@@ -39,6 +39,11 @@ public class GlFramebuffer extends GlResource {
 		this.hasDepthAttachment = true;
 	}
 
+	public void addDepthAttachmentBypass(int texture) {
+		ShaderRenderSystem.framebufferTexture2D(getGlId(), GL30C.GL_FRAMEBUFFER, GL30C.GL_DEPTH_ATTACHMENT, GL30C.GL_TEXTURE_2D, texture, 0);
+		this.hasDepthAttachment = true;
+	}
+
 	public void addColorAttachment(int index, int texture) {
 		int fb = getGlId();
 

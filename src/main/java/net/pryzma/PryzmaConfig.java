@@ -90,13 +90,21 @@ public final class PryzmaConfig {
     public static final int[] DETAIL_DISTANCE_VALUES = {0, 48, 64, 96, 128};
     /** Farlands LOD: radius in chunks of the native distant terrain drawn beyond the render distance; 0 = off. */
     public static int prFarlandsDistance = 0;
-    public static final int[] FARLANDS_DISTANCE_VALUES = {0, 32, 64, 96, 128, 192, 256, 384, 512, 768, 1024};
+    public static final int[] FARLANDS_DISTANCE_VALUES = {0, 16, 32, 48, 64, 96, 128, 160, 192, 256, 384, 512, 768, 1024};
+    /** Farlands Quality: 0 = Low, 1 = Medium, 2 = High, 3 = Ultra. */
+    public static int prFarlandsQuality = 2;
+    /** Farlands Threads: 1 .. maxThreads. */
+    public static int prFarlandsThreads = net.pryzma.farlands.FarlandsSettings.defaultThreads();
+    /** Farlands Terrain Generation: true = generate missing terrain, false = only saved chunks. */
+    public static boolean prFarlandsGenerate = true;
+    /** Farlands Distant Vegetation: trees, flora, structures. */
+    public static boolean prFarlandsVegetation = true;
+    /** Farlands LOD Textures: full block textures instead of flat colors. */
+    public static boolean prFarlandsTextures = true;
     /** Farlands Fog mode: 1 = Fast (dense edge fog), 2 = Fancy (gradient from render distance), 3 = OFF. */
     public static int prFarlandsFog = 2;
-    /** Farlands Data Source: 0 = Disk Only (saved world / pregen), 1 = Surface Gen (on-the-fly surface generation). */
-    public static final int FARLANDS_SOURCE_DISK = 0;
-    public static final int FARLANDS_SOURCE_GENERATE = 1;
-    public static int prFarlandsSource = FARLANDS_SOURCE_DISK;
+    /** Farlands Scale Modded Fog: scale dimension/mod fog to Farlands radius. */
+    public static boolean prFarlandsScaleModFog = false;
     public static boolean prDynamicFov = true;
     public static int prDroppedItems = DROPPED_ITEMS_DEFAULT;
     public static boolean prAlternateBlocks = true;
@@ -202,19 +210,39 @@ public final class PryzmaConfig {
     }
 
     public static boolean isFarlandsActive() {
-        return prFarlandsDistance > 0 && !net.pryzma.lod.DistantHorizonsBridge.isDhActive();
+        return prFarlandsDistance > 0 && !net.pryzma.farlands.DistantHorizonsBridge.isDhActive();
+    }
+
+    public static void syncFarlandsSettings() {
+        boolean active = isFarlandsActive();
+        net.pryzma.farlands.FarlandsSettings.enabled = active;
+        net.pryzma.farlands.FarlandsSettings.requestedLodChunks = prFarlandsDistance;
+        net.pryzma.farlands.FarlandsSettings.lodChunks = Math.min(prFarlandsDistance, net.pryzma.farlands.FarlandsSettings.serverLodLimit);
+        net.pryzma.farlands.FarlandsSettings.quality = switch (prFarlandsQuality) {
+            case 0 -> net.pryzma.farlands.FarlandsSettings.Quality.LOW;
+            case 1 -> net.pryzma.farlands.FarlandsSettings.Quality.MEDIUM;
+            case 3 -> net.pryzma.farlands.FarlandsSettings.Quality.ULTRA;
+            default -> net.pryzma.farlands.FarlandsSettings.Quality.HIGH;
+        };
+        net.pryzma.farlands.FarlandsSettings.threads = Math.max(1, Math.min(net.pryzma.farlands.FarlandsSettings.maxThreads(), prFarlandsThreads));
+        net.pryzma.farlands.FarlandsSettings.generate = prFarlandsGenerate;
+        net.pryzma.farlands.FarlandsSettings.vegetation = prFarlandsVegetation;
+        net.pryzma.farlands.FarlandsSettings.textures = prFarlandsTextures;
+        net.pryzma.farlands.FarlandsSettings.fog = prFarlandsFog != 3;
+        net.pryzma.farlands.FarlandsSettings.scaleModFog = prFarlandsScaleModFog;
+        net.pryzma.farlands.FarlandsSettings.changed();
     }
 
     public static boolean isFogOff() {
-        return isFarlandsActive() || prFogType == 3;
+        return prFogType == 3;
     }
 
     public static boolean isFogFast() {
-        return !isFarlandsActive() && prFogType == 1;
+        return prFogType == 1;
     }
 
     public static boolean isFogFancy() {
-        return !isFarlandsActive() && prFogType == 2;
+        return prFogType == 2;
     }
 
     public static boolean isFarlandsFogOff() {
@@ -229,13 +257,7 @@ public final class PryzmaConfig {
         return prFarlandsFog == 2;
     }
 
-    public static boolean isFarlandsSourceDisk() {
-        return prFarlandsSource == FARLANDS_SOURCE_DISK;
-    }
 
-    public static boolean isFarlandsSourceGenerate() {
-        return prFarlandsSource == FARLANDS_SOURCE_GENERATE;
-    }
 
     // ---------------------------------------------------------------- persistence
 
@@ -354,6 +376,11 @@ public final class PryzmaConfig {
         prFastRender = bool(v, "prFastRender", prFastRender);
         prDetailDistance = oneOf(v, "prDetailDistance", prDetailDistance, DETAIL_DISTANCE_VALUES);
         prFarlandsDistance = oneOf(v, "prFarlandsDistance", prFarlandsDistance, FARLANDS_DISTANCE_VALUES);
+        prFarlandsQuality = clampInt(v, "prFarlandsQuality", prFarlandsQuality, 0, 3);
+        prFarlandsThreads = clampInt(v, "prFarlandsThreads", prFarlandsThreads, 1, net.pryzma.farlands.FarlandsSettings.maxThreads());
+        prFarlandsGenerate = bool(v, "prFarlandsGenerate", prFarlandsGenerate);
+        prFarlandsVegetation = bool(v, "prFarlandsVegetation", prFarlandsVegetation);
+        prFarlandsTextures = bool(v, "prFarlandsTextures", prFarlandsTextures);
         if (v.containsKey("prFarlandsFog")) {
             String f = v.get("prFarlandsFog");
             if ("true".equalsIgnoreCase(f)) {
@@ -364,7 +391,8 @@ public final class PryzmaConfig {
                 prFarlandsFog = clampInt(v, "prFarlandsFog", prFarlandsFog, 1, 3);
             }
         }
-        prFarlandsSource = clampInt(v, "prFarlandsSource", prFarlandsSource, 0, 1);
+        prFarlandsScaleModFog = bool(v, "prFarlandsScaleModFog", prFarlandsScaleModFog);
+        syncFarlandsSettings();
         if (v.containsKey("prChatBackground")) {
             prChatBackground = parseInt(v.get("prChatBackground"), prChatBackground);
         }
@@ -500,8 +528,13 @@ public final class PryzmaConfig {
         m.put("prFastRender", str(prFastRender));
         m.put("prDetailDistance", str(prDetailDistance));
         m.put("prFarlandsDistance", str(prFarlandsDistance));
+        m.put("prFarlandsQuality", str(prFarlandsQuality));
+        m.put("prFarlandsThreads", str(prFarlandsThreads));
+        m.put("prFarlandsGenerate", str(prFarlandsGenerate));
+        m.put("prFarlandsVegetation", str(prFarlandsVegetation));
+        m.put("prFarlandsTextures", str(prFarlandsTextures));
         m.put("prFarlandsFog", str(prFarlandsFog));
-        m.put("prFarlandsSource", str(prFarlandsSource));
+        m.put("prFarlandsScaleModFog", str(prFarlandsScaleModFog));
         m.put("prChatBackground", str(prChatBackground));
         m.put("prChatShadow", str(prChatShadow));
         m.put("prTelemetry", str(prTelemetry));
@@ -549,8 +582,14 @@ public final class PryzmaConfig {
         prFastRender = false;
         prDetailDistance = 96;
         prFarlandsDistance = 0;
+        prFarlandsQuality = 2;
+        prFarlandsThreads = net.pryzma.farlands.FarlandsSettings.defaultThreads();
+        prFarlandsGenerate = true;
+        prFarlandsVegetation = true;
+        prFarlandsTextures = true;
         prFarlandsFog = 2;
-        prFarlandsSource = FARLANDS_SOURCE_DISK;
+        prFarlandsScaleModFog = false;
+        syncFarlandsSettings();
         prDynamicFov = true;
         prDroppedItems = DROPPED_ITEMS_DEFAULT;
         prAlternateBlocks = true;

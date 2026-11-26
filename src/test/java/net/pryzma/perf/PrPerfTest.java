@@ -142,7 +142,7 @@ class PrPerfTest {
     @Test
     void distantHorizonsBridgeThreadBudgetSafelyExecutes() {
         // Must execute cleanly without unhandled exceptions regardless of whether DH is present or absent
-        net.pryzma.lod.DistantHorizonsBridge.applyThreadBudget();
-        net.pryzma.lod.DistantHorizonsBridge.clearThreadBudget();
+        net.pryzma.farlands.DistantHorizonsBridge.applyThreadBudget();
+        net.pryzma.farlands.DistantHorizonsBridge.clearThreadBudget();
     }
 }

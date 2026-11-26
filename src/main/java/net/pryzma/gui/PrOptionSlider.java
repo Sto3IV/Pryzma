@@ -111,7 +111,7 @@ final class PrOptionSlider extends AbstractSliderButton implements PrOptionContr
         if (option == PrOptions.CLOUD_HEIGHT && PrOptions.isCloudsOff()) {
             return "pr.options.cloudHeight.locked";
         }
-        if (option == PrOptions.FARLANDS_DISTANCE && net.pryzma.lod.DistantHorizonsBridge.isDhActive()) {
+        if (option == PrOptions.FARLANDS_DISTANCE && net.pryzma.farlands.DistantHorizonsBridge.isDhActive()) {
             return "pr.options.farlands.locked_dh";
         }
         return option.key();

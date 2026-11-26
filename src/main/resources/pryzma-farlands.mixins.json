@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.pryzma.farlands.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BaseHeightMixin",
+    "EffectiveDensityMixin",
+    "MaterialRuleContextMixin",
+    "NoiseColumnInvoker",
+    "NbtFilesMixin",
+    "ServerChunkCacheMixin",
+    "WorldFilesMixin"
+  ],
+  "client": [
+    "client.CameraMixin",
+    "client.LevelRendererMixin",
+    "client.RenderSectionMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

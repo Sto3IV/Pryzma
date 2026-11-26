@@ -18,7 +18,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.pryzma.PryzmaConfig;
-import net.pryzma.lod.PryzmaLod;
 import net.pryzma.perf.PrChunkWorkers;
 import net.pryzma.perf.PrServerPriority;
 import net.pryzma.render.PrBetterGrass;
@@ -198,28 +197,17 @@ public final class PrOptions {
     public static final PrOption.Cycle SHOW_CAPES = bool("pr.options.SHOW_CAPES",
             () -> PryzmaConfig.prShowCapes, v -> PryzmaConfig.prShowCapes = v);
     public static final PrOption.Cycle FOG_FANCY = cycle("pr.options.FOG_FANCY",
-            () -> {
-                if (PryzmaConfig.prFarlandsDistance > 0) {
-                    return off();
-                }
-                return switch (PryzmaConfig.prFogType) {
-                    case 1 -> fast();
-                    case 2 -> fancy();
-                    default -> off();
-                };
+            () -> switch (PryzmaConfig.prFogType) {
+                case 1 -> fast();
+                case 2 -> fancy();
+                default -> off();
             },
             dir -> {
-                if (PryzmaConfig.prFarlandsDistance > 0) {
-                    return;
-                }
                 PryzmaConfig.prFogType = (PryzmaConfig.prFogType % 3) + 1;
             });
     public static final PrOption.Cycle FOG_START = cycle("pr.options.FOG_START",
             () -> Float.toString(PryzmaConfig.prFogStart),
             dir -> {
-                if (PryzmaConfig.prFarlandsDistance > 0) {
-                    return;
-                }
                 PryzmaConfig.prFogStart += 0.2F;
                 if (PryzmaConfig.prFogStart > 0.81F) {
                     PryzmaConfig.prFogStart = 0.2F;
@@ -504,22 +492,72 @@ public final class PrOptions {
                 }
             },
             v -> v == 0 ? off() : v + "m");
-    /** Farlands LOD radius: Off, 32..1024 chunks. The LOD starts or stops on the next tick. */
+    /** Farlands LOD radius: Off, 16..1024 chunks. */
     public static final PrOption.Slider FARLANDS_DISTANCE = steppedSlider("pr.options.FARLANDS_DISTANCE",
             PryzmaConfig.FARLANDS_DISTANCE_VALUES,
-            () -> net.pryzma.lod.DistantHorizonsBridge.isDhActive() ? 0 : PryzmaConfig.prFarlandsDistance,
+            () -> net.pryzma.farlands.DistantHorizonsBridge.isDhActive() ? 0 : PryzmaConfig.prFarlandsDistance,
             v -> {
-                if (net.pryzma.lod.DistantHorizonsBridge.isDhActive()) {
+                if (net.pryzma.farlands.DistantHorizonsBridge.isDhActive()) {
                     PryzmaConfig.prFarlandsDistance = 0;
                 } else {
                     PryzmaConfig.prFarlandsDistance = v;
-                    net.pryzma.lod.DistantHorizonsBridge.onFarlandsChanged(v > 0);
+                    net.pryzma.farlands.DistantHorizonsBridge.onFarlandsChanged(v > 0);
                 }
-                PryzmaLod.onSettingsChanged();
+                PryzmaConfig.syncFarlandsSettings();
             },
-            v -> net.pryzma.lod.DistantHorizonsBridge.isDhActive()
+            v -> net.pryzma.farlands.DistantHorizonsBridge.isDhActive()
                     ? I18n.get("pr.options.farlands.dh_active")
                     : (v == 0 ? off() : I18n.get("options.chunks", v)));
+
+    /** Farlands Quality: Low, Medium, High, Ultra. */
+    public static final PrOption.Cycle FARLANDS_QUALITY = cycle("pr.options.FARLANDS_QUALITY",
+            () -> switch (PryzmaConfig.prFarlandsQuality) {
+                case 0 -> I18n.get("pr.options.farlandsQuality.low");
+                case 1 -> I18n.get("pr.options.farlandsQuality.medium");
+                case 3 -> I18n.get("pr.options.farlandsQuality.ultra");
+                default -> I18n.get("pr.options.farlandsQuality.high");
+            },
+            dir -> {
+                PryzmaConfig.prFarlandsQuality = (PryzmaConfig.prFarlandsQuality + 1) % 4;
+                PryzmaConfig.syncFarlandsSettings();
+            });
+
+    /** Farlands Worker Threads: 1 .. maxThreads. */
+    public static final PrOption.Cycle FARLANDS_THREADS = cycle("pr.options.FARLANDS_THREADS",
+            () -> Integer.toString(PryzmaConfig.prFarlandsThreads),
+            dir -> {
+                int max = net.pryzma.farlands.FarlandsSettings.maxThreads();
+                int next = PryzmaConfig.prFarlandsThreads + dir;
+                if (next > max) next = 1;
+                if (next < 1) next = max;
+                PryzmaConfig.prFarlandsThreads = next;
+                PryzmaConfig.syncFarlandsSettings();
+            });
+
+    /** Farlands Terrain Generation: ON / OFF. */
+    public static final PrOption.Cycle FARLANDS_GENERATE = bool("pr.options.FARLANDS_GENERATE",
+            () -> PryzmaConfig.prFarlandsGenerate,
+            v -> {
+                PryzmaConfig.prFarlandsGenerate = v;
+                PryzmaConfig.syncFarlandsSettings();
+            });
+
+    /** Farlands Distant Vegetation: ON / OFF. */
+    public static final PrOption.Cycle FARLANDS_VEGETATION = bool("pr.options.FARLANDS_VEGETATION",
+            () -> PryzmaConfig.prFarlandsVegetation,
+            v -> {
+                PryzmaConfig.prFarlandsVegetation = v;
+                PryzmaConfig.syncFarlandsSettings();
+            });
+
+    /** Farlands LOD Textures: ON / OFF. */
+    public static final PrOption.Cycle FARLANDS_TEXTURES = bool("pr.options.FARLANDS_TEXTURES",
+            () -> PryzmaConfig.prFarlandsTextures,
+            v -> {
+                PryzmaConfig.prFarlandsTextures = v;
+                PryzmaConfig.syncFarlandsSettings();
+            });
+
     /** Farlands Fog: Fast (dense edge fog), Fancy (smooth gradient across LOD), OFF. */
     public static final PrOption.Cycle FARLANDS_FOG = cycle("pr.options.FARLANDS_FOG",
             () -> switch (PryzmaConfig.prFarlandsFog) {
@@ -527,14 +565,18 @@ public final class PrOptions {
                 case 2 -> fancy();
                 default -> off();
             },
-            dir -> PryzmaConfig.prFarlandsFog = (PryzmaConfig.prFarlandsFog % 3) + 1);
-    /** Farlands Data Source: Disk Only (saved chunks / pregen), Surface Gen (on-the-fly surface generation). */
-    public static final PrOption.Cycle FARLANDS_SOURCE = cycle("pr.options.FARLANDS_SOURCE",
-            () -> switch (PryzmaConfig.prFarlandsSource) {
-                case 1 -> I18n.get("pr.options.farlandsSource.generate");
-                default -> I18n.get("pr.options.farlandsSource.disk");
-            },
-            dir -> PryzmaConfig.prFarlandsSource = (PryzmaConfig.prFarlandsSource + 1) % 2);
+            dir -> {
+                PryzmaConfig.prFarlandsFog = (PryzmaConfig.prFarlandsFog % 3) + 1;
+                PryzmaConfig.syncFarlandsSettings();
+            });
+
+    /** Farlands Scale Modded Fog: ON / OFF. */
+    public static final PrOption.Cycle FARLANDS_SCALE_MOD_FOG = bool("pr.options.FARLANDS_SCALE_MOD_FOG",
+            () -> PryzmaConfig.prFarlandsScaleModFog,
+            v -> {
+                PryzmaConfig.prFarlandsScaleModFog = v;
+                PryzmaConfig.syncFarlandsSettings();
+            });
 
     // ------------------------------------------------------------------ other
 

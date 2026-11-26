@@ -5,6 +5,9 @@
     },
     {
       "type": "pryzma:cit"
+    },
+    {
+      "type": "pryzma:tiled_water"
     }
   ]
 }

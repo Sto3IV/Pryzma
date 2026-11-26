@@ -14,7 +14,7 @@ import net.pryzma.Pryzma;
 import net.pryzma.PryzmaConfig;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.light.PrDynamicLights;
-import net.pryzma.lod.PryzmaLod;
+import net.pryzma.farlands.client.FarlandsClient;
 import net.pryzma.mixin.TextureAtlasAccessor;
 import net.pryzma.perf.PrDebugTracker;
 import net.pryzma.render.PrAnimations;
@@ -56,7 +56,7 @@ public final class PrDebugOverlay {
             int total = states != null ? states.size() : 0;
             lines.set(i, lines.get(i) + animations(PryzmaConfig.prSmartAnimations, net.pryzma.render.PrAnimations.countRunning(states), total));
         }
-        insertAfterCounts(lines, PryzmaLod.debugLine());
+        insertAfterCounts(lines, FarlandsClient.peek() != null ? FarlandsClient.peek().debugLine() : null);
     }
 
     /** Places {@code line} under the particle line (else the entity line, else at the end); nothing when it is null. */

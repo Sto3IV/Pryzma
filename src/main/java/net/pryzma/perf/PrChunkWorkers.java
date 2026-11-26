@@ -81,7 +81,7 @@ public final class PrChunkWorkers {
             pool = created;
             Pryzma.LOGGER.info("Chunk workers: {} threads at priority {} ({} cores)",
                     threads, WORKER_PRIORITY, Runtime.getRuntime().availableProcessors());
-            net.pryzma.lod.DistantHorizonsBridge.applyThreadBudget();
+            net.pryzma.farlands.DistantHorizonsBridge.applyThreadBudget();
         }
         return pool;
     }
@@ -102,7 +102,7 @@ public final class PrChunkWorkers {
             current.setMaximumPoolSize(threads);
         }
         Pryzma.LOGGER.info("Chunk workers: {} threads", threads);
-        net.pryzma.lod.DistantHorizonsBridge.applyThreadBudget();
+        net.pryzma.farlands.DistantHorizonsBridge.applyThreadBudget();
     }
 
     private static final class Workers implements ThreadFactory {

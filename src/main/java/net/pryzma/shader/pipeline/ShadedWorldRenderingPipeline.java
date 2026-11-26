@@ -11,7 +11,6 @@ import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL13C;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
-import net.pryzma.lod.LodShaderSupport;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.features.FeatureFlags;
 import net.pryzma.shader.gl.GLDebug;
@@ -207,8 +206,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 	private GlFramebuffer defaultFBShadow;
 	/** The Farlands LOD's part of this pipeline; null while the Farlands option is off (the pipeline is then untouched). */
 	@Nullable
-	private final LodShaderSupport farlands;
-
+	
 	public ShadedWorldRenderingPipeline(ProgramSet programSet) {
 		ShaderPrinter.resetPrintState();
 
@@ -525,8 +523,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 		defaultFB = flippedAfterPrepare.contains(defaultTex) ? renderTargets.createFramebufferWritingToAlt(new int[] { defaultTex }) : renderTargets.createFramebufferWritingToMain(new int[] { defaultTex });
 		defaultFBAlt = flippedAfterTranslucent.contains(defaultTex) ? renderTargets.createFramebufferWritingToAlt(new int[] { defaultTex }) : renderTargets.createFramebufferWritingToMain(new int[] { defaultTex });
 
-		this.farlands = LodShaderSupport.createFor(this);
-	}
+			}
 
 	private ComputeProgram[] createShadowComputes(ComputeSource[] compute, ProgramSet programSet) {
 		ComputeProgram[] programs = new ComputeProgram[compute.length];
@@ -819,6 +816,16 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 			}
 		}
 		this.phase = phase;
+		if (!net.pryzma.shader.shadows.ShadowRenderingState.areShadowsCurrentlyBeingRendered()) {
+			net.pryzma.farlands.client.FarlandsClient client = net.pryzma.farlands.client.FarlandsClient.peek();
+			if (client != null) {
+				if (phase == WorldRenderingPhase.TERRAIN_SOLID) {
+					client.irisPhase(1);
+				} else if (phase == WorldRenderingPhase.TERRAIN_TRANSLUCENT) {
+					client.irisPhase(2);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -977,9 +984,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 			clearPass.execute(fogColor);
 		}
 
-		if (farlands != null) {
-			farlands.beginFrame();
-		}
+
 
 		GLDebug.popGroup();
 
@@ -1211,9 +1216,7 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 	public void destroy() {
 		destroyed = true;
 
-		if (farlands != null) {
-			farlands.destroy();
-		}
+
 
 		destroyShaders();
 
@@ -1342,14 +1345,13 @@ public class ShadedWorldRenderingPipeline implements WorldRenderingPipeline, Sha
 
 	/** The Farlands LOD's part of this pipeline, null while the option is off. */
 	@Nullable
-	public LodShaderSupport getFarlands() {
-		return farlands;
+	public Object getFarlands() {
+		return null;
 	}
 
 	/** {@code dhDepthTex0} ({@code noWater} false) or {@code dhDepthTex1}: the Farlands LOD's depths, 0 without Farlands. */
 	public int farlandsDepthTexture(boolean noWater) {
-		LodShaderSupport support = farlands;
-		return support == null ? 0 : support.depthTexture(noWater);
+		return noWater ? net.pryzma.farlands.client.iris.IrisState.depthTexNoTranslucent : net.pryzma.farlands.client.iris.IrisState.depthTex;
 	}
 
 	public ImmutableSet<Integer> getFlippedBeforeShadow() {

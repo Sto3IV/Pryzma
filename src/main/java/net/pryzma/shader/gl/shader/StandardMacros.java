@@ -3,7 +3,6 @@ package net.pryzma.shader.gl.shader;
 import com.google.common.collect.ImmutableList;
 import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.renderpearl.backend.opengl.GlUtil;
-import net.pryzma.lod.LodShaderSupport;
 import net.pryzma.shader.PryzmaShaders;
 import net.pryzma.shader.helpers.StringPair;
 import net.pryzma.shader.pathways.HandRenderer;
@@ -59,7 +58,7 @@ public class StandardMacros {
 		define(standardDefines, "IRIS_TAG_SUPPORT", "2");
 
 		// The Farlands LOD renders through the Distant Horizons contract (dh_* programs, dhDepthTex, dh* uniforms).
-		if (LodShaderSupport.isEnabled()) {
+		if (net.pryzma.farlands.client.iris.IrisState.enabled) {
 			define(standardDefines, "DISTANT_HORIZONS");
 		}
 

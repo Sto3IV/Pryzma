@@ -25,8 +25,6 @@ import net.minecraft.util.Util;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
-import net.pryzma.lod.LodMath;
-import net.pryzma.lod.PryzmaLod;
 
 /**
  * Native, tick-budgeted world pregeneration task for Pryzma.
@@ -84,7 +82,7 @@ public final class PrPregenTask {
         this.radius = radius;
         this.mode = mode;
 
-        this.spiral = LodMath.spiral(radius);
+        this.spiral = spiral(radius);
         this.totalCount = this.spiral.length / 2;
     }
 
@@ -200,7 +198,7 @@ public final class PrPregenTask {
             ChunkPos pos = new ChunkPos(cx, cz);
             if (isChunkFullyGenerated(pos)) {
                 skippedCount.incrementAndGet();
-                PryzmaLod.unmarkMissing(cx, cz);
+                // saved chunks handled by Farlands
                 onProgressUpdate(false);
                 continue;
             }
@@ -246,8 +244,7 @@ public final class PrPregenTask {
             okCount.incrementAndGet();
             ChunkAccess chunkAccess = result.orElse(null);
             if (chunkAccess != null) {
-                PryzmaLod.injectChunk(chunkAccess, serverLevel, serverLevel.dimensionType().hasSkyLight(), serverLevel.getLightEngine());
-                PryzmaLod.unmarkMissing(chunkAccess.getPos().x(), chunkAccess.getPos().z());
+                // saved chunks handled by Farlands
             }
         } else {
             errorCount.incrementAndGet();
@@ -363,4 +360,37 @@ public final class PrPregenTask {
         long mins = minutes % 60;
         return Component.translatable("pryzma.command.time.hours_minutes_seconds", hours, String.format(Locale.ROOT, "%02d", mins), String.format(Locale.ROOT, "%02d", secs));
     }
+
+    private static final it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<int[]> SPIRAL_CACHE = new it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<>();
+
+    private static synchronized int[] spiral(int radius) {
+        if (radius < 0) {
+            throw new IllegalArgumentException("radius=" + radius);
+        }
+        int[] cached = SPIRAL_CACHE.get(radius);
+        if (cached != null) {
+            return cached;
+        }
+        int side = 2 * radius + 1;
+        long[] packed = new long[side * side];
+        int count = 0;
+        long limit = (long) radius * radius;
+        for (int dz = -radius; dz <= radius; dz++) {
+            for (int dx = -radius; dx <= radius; dx++) {
+                long distance = (long) dx * dx + (long) dz * dz;
+                if (distance <= limit) {
+                    packed[count++] = distance << 32 | (long) (dx + radius) << 16 | (long) (dz + radius);
+                }
+            }
+        }
+        java.util.Arrays.sort(packed, 0, count);
+        int[] out = new int[count * 2];
+        for (int i = 0; i < count; i++) {
+            out[2 * i] = (int) (packed[i] >>> 16 & 0xFFFF) - radius;
+            out[2 * i + 1] = (int) (packed[i] & 0xFFFF) - radius;
+        }
+        SPIRAL_CACHE.put(radius, out);
+        return out;
+    }
+
 }

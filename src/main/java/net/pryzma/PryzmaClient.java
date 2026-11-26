@@ -36,7 +36,7 @@ import net.pryzma.shader.platform.ShaderForgeHelpers;
 import net.pryzma.sky.PrSkyBlend;
 import net.pryzma.item.PrCitModels;
 import net.pryzma.item.PrCitSpriteSource;
-import net.pryzma.lod.PryzmaLod;
+import net.pryzma.farlands.neoforge.FarlandsEvents;
 import net.pryzma.mixin.OptionsSubScreenAccessor;
 import net.pryzma.perf.PrDebugTracker;
 import net.pryzma.perf.PrServerPriority;
@@ -93,7 +93,8 @@ public final class PryzmaClient {
                 PrEntityInfos.recordSpawn(event.getEntity(), event.getLevel());
             }
         });
-        PryzmaLod.register(modBus, gameBus);
+        FarlandsEvents.registerClient(modBus, gameBus);
+        FarlandsEvents.registerCommon(modBus, gameBus);
         gameBus.addListener(RegisterCommandsEvent.class, PrCommands::onRegisterCommands);
         gameBus.addListener(ServerStoppingEvent.class, event -> PrPregenTask.stopAll());
     }

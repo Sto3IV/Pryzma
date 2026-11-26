@@ -2,7 +2,6 @@ package net.pryzma.shader.uniforms;
 
 import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.pryzma.lod.LodShaderSupport;
 import net.pryzma.shader.gl.state.FogMode;
 import net.pryzma.shader.gl.state.StateUpdateNotifiers;
 import net.pryzma.shader.gl.uniform.DynamicUniformHolder;
@@ -156,12 +155,12 @@ public final class CommonUniforms {
 			.uniform1f(PER_TICK, "rainStrength", CommonUniforms::getRainStrength)
 			.uniform1f(PER_TICK, "wetness", new SmoothedFloat(directives.getWetnessHalfLife(), directives.getDrynessHalfLife(), CommonUniforms::getRainStrength, updateNotifier))
 			.uniform3d(PER_FRAME, "skyColor", CommonUniforms::getSkyColor);
-		if (LodShaderSupport.isEnabled()) {
+		if (net.pryzma.farlands.client.iris.IrisState.enabled) {
 			// The Farlands LOD fills the Distant Horizons contract: its pass, in blocks.
 			uniforms
-				.uniform1f(PER_FRAME, "dhFarPlane", LodShaderSupport::farPlane)
-				.uniform1f(PER_FRAME, "dhNearPlane", LodShaderSupport::nearPlane)
-				.uniform1i(PER_FRAME, "dhRenderDistance", LodShaderSupport::renderDistance);
+				.uniform1f(PER_FRAME, "dhFarPlane", () -> net.pryzma.farlands.client.iris.IrisState.far)
+				.uniform1f(PER_FRAME, "dhNearPlane", () -> net.pryzma.farlands.client.iris.IrisState.near)
+				.uniform1i(PER_FRAME, "dhRenderDistance", () -> net.pryzma.farlands.client.iris.IrisState.renderBlocks);
 		} else {
 			// Distant Horizons values as PryzmaShaders reports them while DH is absent.
 			uniforms
