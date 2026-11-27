@@ -17,6 +17,10 @@ public class TextureManipulationUtil {
 		int previousTextureId = GL11C.glGetInteger(GL11C.GL_TEXTURE_BINDING_2D);
 		int[] previousViewport = new int[4];
 		GL11C.glGetIntegerv(GL11C.GL_VIEWPORT, previousViewport);
+		boolean scissor = GL11C.glIsEnabled(GL11C.GL_SCISSOR_TEST);
+		if (scissor) {
+			GL11C.glDisable(GL11C.GL_SCISSOR_TEST);
+		}
 
 		GL30C.glBindFramebuffer(GL30C.GL_FRAMEBUFFER, colorFillFBO);
 		GL11C.glClearColor(
@@ -39,5 +43,8 @@ public class TextureManipulationUtil {
 		GL11C.glClearColor(previousClearColor[0], previousClearColor[1], previousClearColor[2], previousClearColor[3]);
 		GL11C.glBindTexture(GL11C.GL_TEXTURE_2D, previousTextureId);
 		GL11C.glViewport(previousViewport[0], previousViewport[1], previousViewport[2], previousViewport[3]);
+		if (scissor) {
+			GL11C.glEnable(GL11C.GL_SCISSOR_TEST);
+		}
 	}
 }
