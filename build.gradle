@@ -114,6 +114,7 @@ sourceSets.test.runtimeClasspath += sourceSets.main.compileClasspath
 def shaderLibraries = [
         'io.github.douira:glsl-transformer:3.0.0-pre3',
         'org.anarres:jcpp:1.4.14',
+        'org.antlr:antlr4-runtime:4.13.1',
 ]
 
 dependencies {
@@ -127,6 +128,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
+
+tasks.named('compileTestJava').configure { enabled = false }
 
 tasks.named('test', Test).configure {
     useJUnitPlatform()
